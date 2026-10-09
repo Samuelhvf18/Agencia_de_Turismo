@@ -45,9 +45,8 @@ return [
     |
     */
 
-    'username' => 'email',
-
-    'email' => 'email',
+    'username' => 'login',
+    'email' => 'cor',
 
     /*
     |--------------------------------------------------------------------------
@@ -167,14 +166,14 @@ return [
         Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
-        Features::twoFactorAuthentication([
+        /*Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,
             // 'window' => 0,
-        ]),
-        Features::passkeys([
+        ]),*/
+        /*Features::passkeys([
             'confirmPassword' => true,
-        ]),
+        ]),*/
     ],
 
 ];

@@ -1,69 +1,75 @@
 <?php
-
 namespace App\Models;
-
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 class User extends Authenticatable
 {
-    use HasApiTokens;
-
-    /** @use HasFactory<UserFactory> */
-    use HasFactory;
-
-    use HasProfilePhoto;
-    use Notifiable;
-    use TwoFactorAuthenticatable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    use HasApiTokens, HasFactory, Notifiable;
+    protected $table = 'usuarios';
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int';
+    const CREATED_AT = 'cre_en';
+    const UPDATED_AT = 'mod_en';
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'rol_id',
+        'pai_id',
+        'nom',
+        'pat',
+        'mat',
+        'usr',
+        'cor',
+        'clv',
+        'tel',
+        'tip_doc',
+        'num_doc',
+        'ci_cmp',
+        'ci_dep_id',
+        'fot_prf',
+        'tok_rec',
     ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_recovery_codes',
-        'two_factor_secret',
+        'clv',
+        'tok_rec',
     ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
-    protected $appends = [
-        'profile_photo_url',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'clv' => 'hashed',
+            'cor_vrf_en' => 'datetime',
+            'cre_en' => 'datetime',
+            'mod_en' => 'datetime',
+            'eli_en' => 'datetime',
         ];
     }
+    public function getAuthIdentifierName()
+    {
+        return 'id';
+    }
+    public function getAuthPasswordName()
+    {
+        return 'clv';
+    }
+    public function getAuthPassword()
+    {
+        return $this->clv;
+    }
+    public function getEmailForPasswordReset()
+    {
+        return $this->cor;
+    }
+    public function routeNotificationForMail($notification = null)
+    {
+        return $this->cor;
+    }
+    public function rol()
+    {
+        return $this->belongsTo(Role::class, 'rol_id');
+    }
+    public function getRememberTokenName(): ?string
+    {
+        return null;
+        }
 }
