@@ -361,7 +361,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 .lm-foot{padding:16px 24px;border-top:1px solid #ececef;display:flex;justify-content:flex-end}
 .lm-ok{padding:12px 22px;border-radius:12px;border:none;background:var(--principal);color:#fff;font-weight:700;font-size:14px;cursor:pointer;transition:background .2s}
 .lm-ok:hover{background:var(--hover)}
-@media(max-width:640px){.lmodal{width:100%;max-height:92vh;margin:auto 0 0;border-radius:var(--r) var(--r) 0 0}.lm-head,.lm-body{padding-left:18px;padding-right:18px}.lm-foot{padding:14px 18px}.lm-ok{width:100%}}
+@media(max-width:640px){.lmodal{width:100%;max-width:100%;max-height:92vh;margin:auto 0 0;border-radius:var(--r) var(--r) 0 0}.lm-head,.lm-body{padding-left:18px;padding-right:18px}.lm-foot{padding:14px 18px}.lm-ok{width:100%}}
 </style>
 </head>
 <body>
