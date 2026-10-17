@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CatalogoController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [CatalogoController::class, 'index'])->name('home');
+Route::get('/tours/{tour:rta_amg}', [CatalogoController::class, 'show'])->name('tours.show');
 
 Route::get('/chatbot', function () {
     return view('chatbot.index');

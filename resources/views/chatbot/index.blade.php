@@ -20,11 +20,6 @@
                 <p class="text-xs text-slate-500">Agencia Pipocas • Sagárnaga, La Paz</p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
-                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> En línea (n8n + Gemini)
-            </span>
-        </div>
     </header>
 
     <!-- Chat Container -->

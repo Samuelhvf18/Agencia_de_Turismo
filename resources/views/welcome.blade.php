@@ -215,6 +215,7 @@ section.s{padding:clamp(64px,9vw,110px) 0}
 .cbody{padding:20px 22px 22px;display:flex;flex-direction:column;flex:1}
 .meta{display:flex;gap:16px;font-size:12.5px;color:var(--texto-2);font-weight:600;margin-bottom:10px;flex-wrap:wrap}
 .meta i{color:var(--complementario);margin-right:4px}
+.card h3 a{color:inherit;text-decoration:none}
 .card h3{font-family:'Fraunces',serif;font-size:21px;font-weight:600;color:var(--texto);line-height:1.2;margin-bottom:8px}
 .card p{font-size:14px;color:var(--texto-2);margin-bottom:18px}
 .diff{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:var(--calido);margin-bottom:18px}
@@ -502,57 +503,24 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       </div>
       <div class="filters reveal d1" id="filters">
         <button class="chip on" data-f="todos">Todos</button>
-        <button class="chip" data-f="biking"><i class="fa-solid fa-person-biking"></i> Biking</button>
-        <button class="chip" data-f="hiking"><i class="fa-solid fa-person-hiking"></i> Hiking</button>
-        <button class="chip" data-f="trekking"><i class="fa-solid fa-mountain-sun"></i> Trekking</button>
-        <button class="chip" data-f="climbing"><i class="fa-solid fa-mountain"></i> Climbing</button>
-        <button class="chip" data-f="city"><i class="fa-solid fa-landmark"></i> City Tour</button>
+        @foreach ($categorias as $cat)
+          <button class="chip" data-f="{{ $cat->rta_amg }}"><i class="{{ $cat->ico ?: 'fa-solid fa-route' }}"></i> {{ $cat->nom }}</button>
+        @endforeach
       </div>
     </div>
 
     <div class="cards" id="cards">
-      <article class="card reveal" data-cat="biking">
-        <div class="cimg"><img src="https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=800&auto=format&fit=crop" alt="Camino de la Muerte"><span class="tag t-bike"><i class="fa-solid fa-person-biking"></i> Biking</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">TUR-2026-LPZ01</span></div>
-        <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>7.5 h</span><span><i class="fa-solid fa-mountain"></i>4.700 m</span><span><i class="fa-solid fa-users"></i>Máx 12</span></div>
-          <h3>Descenso Camino de la Muerte</h3><p>De La Cumbre a Coroico en bicicleta de doble suspensión con guías expertos.</p>
-          <div class="diff"><span class="bars"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span>Difícil</div>
-          <div class="cfoot"><div class="price"><small>Desde</small><b>Bs. 350 <span>/ pers</span></b></div><a class="cbtn" href="#">Reservar <i class="fa-solid fa-arrow-right"></i></a></div></div>
+      @forelse ($tours as $tour)
+      <article class="card reveal {{ ['', 'd1', 'd2'][$loop->index % 3] }}" data-cat="{{ $tour->categoria->rta_amg }}">
+        <div class="cimg"><a href="{{ route('tours.show', $tour) }}"><img src="{{ $tour->img }}" alt="{{ $tour->img_alt }}" loading="lazy"></a><span class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">{{ $tour->cod }}</span></div>
+        <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>{{ $tour->dur_txt }} h</span>@if ($tour->alt_max_m)<span><i class="fa-solid fa-mountain"></i>{{ number_format($tour->alt_max_m, 0, ',', '.') }} m</span>@endif<span><i class="fa-solid fa-users"></i>Máx {{ $tour->cap_max }}</span></div>
+          <h3><a href="{{ route('tours.show', $tour) }}">{{ $tour->nom }}</a></h3><p>{{ $tour->des }}</p>
+          <div class="diff"><span class="bars">@for ($i = 1; $i <= 5; $i++)<i @class(['f' => $i <= $tour->dif_niv])></i>@endfor</span>{{ $tour->dif_txt }}</div>
+          <div class="cfoot"><div class="price"><small>Desde</small><b>Bs. {{ number_format($tour->pre_bas, 0, ',', '.') }} <span>/ pers</span></b></div><a class="cbtn" href="{{ route('tours.show', $tour) }}">Reservar <i class="fa-solid fa-arrow-right"></i></a></div></div>
       </article>
-      <article class="card reveal d1" data-cat="climbing">
-        <div class="cimg"><img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop" alt="Huayna Potosí"><span class="tag t-climb"><i class="fa-solid fa-mountain"></i> Climbing</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">TUR-2026-LPZ02</span></div>
-        <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>8 h</span><span><i class="fa-solid fa-mountain"></i>5.100 m</span><span><i class="fa-solid fa-users"></i>Máx 6</span></div>
-          <h3>Glaciar Huayna Potosí</h3><p>Iniciación al montañismo glaciar con crampones, piolet y guía de alta montaña.</p>
-          <div class="diff"><span class="bars"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span>Experto</div>
-          <div class="cfoot"><div class="price"><small>Desde</small><b>Bs. 480 <span>/ pers</span></b></div><a class="cbtn" href="#">Reservar <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      </article>
-      <article class="card reveal d2" data-cat="city">
-        <div class="cimg"><img src="https://images.unsplash.com/photo-1518638150340-f706e86654de?q=80&w=800&auto=format&fit=crop" alt="Valle de la Luna"><span class="tag t-city"><i class="fa-solid fa-landmark"></i> City Tour</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">TUR-2026-LPZ03</span></div>
-        <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>4 h</span><span><i class="fa-solid fa-mountain"></i>3.600 m</span><span><i class="fa-solid fa-users"></i>Máx 20</span></div>
-          <h3>Valle de la Luna &amp; Teleféricos</h3><p>Formaciones lunares y vista panorámica desde el teleférico urbano más alto del mundo.</p>
-          <div class="diff"><span class="bars"><i class="f"></i><i></i><i></i><i></i><i></i></span>Fácil</div>
-          <div class="cfoot"><div class="price"><small>Desde</small><b>Bs. 180 <span>/ pers</span></b></div><a class="cbtn" href="#">Reservar <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      </article>
-      <article class="card reveal" data-cat="trekking">
-        <div class="cimg"><img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop" alt="Condoriri"><span class="tag t-trek"><i class="fa-solid fa-mountain-sun"></i> Trekking</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">TUR-2026-LPZ04</span></div>
-        <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>6.5 h</span><span><i class="fa-solid fa-mountain"></i>4.500 m</span><span><i class="fa-solid fa-users"></i>Máx 10</span></div>
-          <h3>Laguna Chiar Khota &amp; Condoriri</h3><p>Caminata de altura entre lagunas turquesa y picos nevados de la Cordillera.</p>
-          <div class="diff"><span class="bars"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></span>Moderado</div>
-          <div class="cfoot"><div class="price"><small>Desde</small><b>Bs. 260 <span>/ pers</span></b></div><a class="cbtn" href="#">Reservar <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      </article>
-      <article class="card reveal d1" data-cat="hiking">
-        <div class="cimg"><img src="https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=800&auto=format&fit=crop" alt="El Choro"><span class="tag t-hike"><i class="fa-solid fa-person-hiking"></i> Hiking</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">TUR-2026-LPZ05</span></div>
-        <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>7 h</span><span><i class="fa-solid fa-mountain"></i>4.200 m</span><span><i class="fa-solid fa-users"></i>Máx 12</span></div>
-          <h3>Camino Prehispánico El Choro</h3><p>Empedrados incas originales de Apacheta a Challapampa con vista al valle subtropical.</p>
-          <div class="diff"><span class="bars"><i class="f"></i><i class="f"></i><i class="f"></i><i></i><i></i></span>Moderado</div>
-          <div class="cfoot"><div class="price"><small>Desde</small><b>Bs. 290 <span>/ pers</span></b></div><a class="cbtn" href="#">Reservar <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      </article>
-      <article class="card reveal d2" data-cat="city">
-        <div class="cimg"><img src="https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?q=80&w=800&auto=format&fit=crop" alt="Tiwanaku"><span class="tag t-city"><i class="fa-solid fa-landmark"></i> City Tour</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">TUR-2026-LPZ06</span></div>
-        <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>6 h</span><span><i class="fa-solid fa-mountain"></i>3.850 m</span><span><i class="fa-solid fa-users"></i>Máx 20</span></div>
-          <h3>Tiwanaku &amp; Puma Punku</h3><p>La cuna de la civilización andina con guía arqueológico y la Puerta del Sol.</p>
-          <div class="diff"><span class="bars"><i class="f"></i><i></i><i></i><i></i><i></i></span>Fácil</div>
-          <div class="cfoot"><div class="price"><small>Desde</small><b>Bs. 220 <span>/ pers</span></b></div><a class="cbtn" href="#">Reservar <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      </article>
+      @empty
+      <p class="sub">Pronto publicaremos nuevos tours.</p>
+      @endforelse
     </div>
   </div>
 </section>
