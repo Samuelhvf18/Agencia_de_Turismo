@@ -337,27 +337,35 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 .totop.show{opacity:1;transform:none;pointer-events:auto}
 .cookie.show ~ .totop{bottom:130px}
 @media(max-width:640px){.cookie.show ~ .totop{bottom:230px}}
+/* ---------- modales legales ---------- */
+.lmodal{border:none;padding:0;margin:auto;width:min(680px,calc(100% - 32px));max-height:min(86vh,820px);border-radius:var(--r);background:#fff;color:var(--texto);box-shadow:0 40px 80px -30px rgba(18,58,90,.55);overflow:hidden}
+.lmodal[open]{display:flex;flex-direction:column;animation:zoomIn .35s var(--ease)}
+.lmodal::backdrop{background:rgba(18,58,90,.55);backdrop-filter:blur(4px)}
+.lm-head{display:flex;gap:16px;align-items:center;padding:22px 24px;border-bottom:1px solid #ececef}
+.lm-head .li{height:48px;width:48px;flex-shrink:0;border-radius:14px;display:grid;place-items:center;font-size:19px}
+.lm-head h3{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(20px,3vw,24px);line-height:1.15}
+.lm-head small{display:block;margin-top:2px;font-size:12.5px;line-height:1.4;color:var(--texto-2)}
+.lm-x{margin-left:auto;align-self:flex-start;height:38px;width:38px;flex-shrink:0;border-radius:12px;border:1px solid #dcdce0;background:#fff;color:var(--texto);cursor:pointer;font-size:16px;transition:background .2s,color .2s}
+.lm-x:hover{background:var(--principal);border-color:var(--principal);color:#fff}
+.lm-body{padding:22px 24px;overflow-y:auto;font-size:14.5px;line-height:1.65}
+.lm-body p{margin-bottom:12px}
+.lm-body h5{font-size:15px;font-weight:800;color:var(--principal);margin:20px 0 8px}
+.lm-body ul,.lm-body ol{padding-left:20px;margin-bottom:12px}
+.lm-body li{margin-bottom:6px}
+.lm-body li::marker{color:var(--secundario)}
+.lm-laws li{margin-bottom:10px}
+.lm-table{width:100%;border-collapse:collapse;margin:6px 0 14px;font-size:14px}
+.lm-table th,.lm-table td{text-align:left;padding:10px 12px;border-bottom:1px solid #ececef}
+.lm-table th{background:var(--fondo);font-weight:700;font-size:13px}
+.lm-table td:last-child{white-space:nowrap}
+.lm-foot{padding:16px 24px;border-top:1px solid #ececef;display:flex;justify-content:flex-end}
+.lm-ok{padding:12px 22px;border-radius:12px;border:none;background:var(--principal);color:#fff;font-weight:700;font-size:14px;cursor:pointer;transition:background .2s}
+.lm-ok:hover{background:var(--hover)}
+@media(max-width:640px){.lmodal{width:100%;max-height:92vh;margin:auto 0 0;border-radius:var(--r) var(--r) 0 0}.lm-head,.lm-body{padding-left:18px;padding-right:18px}.lm-foot{padding:14px 18px}.lm-ok{width:100%}}
 </style>
 </head>
-<body x-data="{ modal: null }" @keydown.escape.window="modal = null">
-    <!-- Modals -->
-    <template x-for="item in [
-        {id: 'terminos', title: 'Términos y Condiciones', content: 'Al reservar con Pipocas, aceptas nuestras políticas de seguridad. Los tours de alto riesgo (Biking, Escalada) requieren firma de deslinde. Las salidas se confirman con 24h de anticipación y están sujetas a condiciones climáticas.'},
-        {id: 'privacidad', title: 'Política de Privacidad', content: 'Respetamos tu privacidad. Recopilamos datos personales, pasaporte y datos de salud solo para asegurar una experiencia segura y cumplir con registros legales turísticos.'},
-        {id: 'cookies', title: 'Política de Cookies', content: 'Utilizamos cookies para mantener tu sesión activa al reservar y analizar el tráfico del sitio. Puedes gestionar tus preferencias en el banner inferior.'},
-        {id: 'reembolso', title: 'Política de Reembolso', content: 'Cancelaciones realizadas con 48h de antelación tienen devolución del 80%. Menos de 24h no aplican a reembolso.'},
-        {id: 'consentimiento', title: 'Consentimiento Registrado', content: 'Al marcar las casillas, registramos tu consentimiento explícito sobre el uso de tus datos y aceptación de riesgos. Guardamos fecha, hora y tu IP como prueba legal.'},
-        {id: 'normativa', title: 'Normativa Boliviana', content: 'Este sistema cumple con el Decreto Supremo de Turismo vigente en Bolivia, incluyendo estándares de registro ante autoridades y emisión de facturación tributaria.'}
-    ]">
-        <div x-show="modal === item.id" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
-            <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" @click="modal = null"></div>
-            <div class="bg-white rounded-2xl p-8 max-w-lg w-full relative z-10 shadow-2xl">
-                <h3 class="text-2xl font-bold text-slate-900 mb-4" x-text="item.title"></h3>
-                <p class="text-slate-600 mb-6" x-text="item.content"></p>
-                <button @click="modal = null" class="w-full py-3 rounded-xl bg-slate-900 text-white font-bold hover:bg-amber-600 transition">Cerrar</button>
-            </div>
-        </div>
-    </template>
+<body>
+
 
 
 
@@ -607,12 +615,12 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <p class="sub reveal d1">Tus datos y tu compra están protegidos. Consulta nuestras políticas en cualquier momento.</p>
     </div>
     <div class="legal-grid">
-      <div class="lcard reveal"><span class="li" style="background:rgba(31,95,139,.1);color:var(--principal)"><i class="fa-solid fa-file-contract"></i></span><div><h4>Términos y Condiciones</h4><p>Reglas de reserva, salidas y responsabilidades.</p><a href="#" @click.prevent="modal = 'terminos'">Leer <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      <div class="lcard reveal d1"><span class="li" style="background:rgba(69,118,153,.12);color:var(--complementario)"><i class="fa-solid fa-user-shield"></i></span><div><h4>Política de Privacidad</h4><p>Solo pedimos los datos necesarios para tu tour.</p><a href="#" @click.prevent="modal = 'privacidad'">Leer <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      <div class="lcard reveal d2"><span class="li" style="background:rgba(244,201,93,.25);color:var(--calido)"><i class="fa-solid fa-cookie-bite"></i></span><div><h4>Política de Cookies</h4><p>Tú decides qué cookies no esenciales aceptar.</p><a href="#" @click.prevent="modal = 'cookies'">Leer <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      <div class="lcard reveal"><span class="li" style="background:rgba(201,111,74,.12);color:var(--secundario)"><i class="fa-solid fa-rotate-left"></i></span><div><h4>Política de Reembolso</h4><p>Cancelaciones y devoluciones claras.</p><a href="#" @click.prevent="modal = 'reembolso'">Leer <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      <div class="lcard reveal d1"><span class="li" style="background:rgba(23,72,112,.1);color:var(--hover)"><i class="fa-solid fa-square-check"></i></span><div><h4>Consentimiento registrado</h4><p>Dos casillas separadas y registro de cuándo aceptaste.</p><a href="#" @click.prevent="modal = 'consentimiento'">Saber más <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      <div class="lcard reveal d2"><span class="li" style="background:rgba(107,79,58,.12);color:var(--calido)"><i class="fa-solid fa-scale-balanced"></i></span><div><h4>Normativa boliviana</h4><p>Cumplimiento de la legislación local vigente.</p><a href="#" @click.prevent="modal = 'normativa'">Saber más <i class="fa-solid fa-arrow-right"></i></a></div></div>
+      <div class="lcard reveal"><span class="li" style="background:rgba(31,95,139,.1);color:var(--principal)"><i class="fa-solid fa-file-contract"></i></span><div><h4>Términos y Condiciones</h4><p>Reglas de reserva, salidas y responsabilidades.</p><a href="#m-terminos" data-modal="m-terminos">Leer <i class="fa-solid fa-arrow-right"></i></a></div></div>
+      <div class="lcard reveal d1"><span class="li" style="background:rgba(69,118,153,.12);color:var(--complementario)"><i class="fa-solid fa-user-shield"></i></span><div><h4>Política de Privacidad</h4><p>Solo pedimos los datos necesarios para tu tour.</p><a href="#m-privacidad" data-modal="m-privacidad">Leer <i class="fa-solid fa-arrow-right"></i></a></div></div>
+      <div class="lcard reveal d2"><span class="li" style="background:rgba(244,201,93,.25);color:var(--calido)"><i class="fa-solid fa-cookie-bite"></i></span><div><h4>Política de Cookies</h4><p>Tú decides qué cookies no esenciales aceptar.</p><a href="#m-cookies" data-modal="m-cookies">Leer <i class="fa-solid fa-arrow-right"></i></a></div></div>
+      <div class="lcard reveal"><span class="li" style="background:rgba(201,111,74,.12);color:var(--secundario)"><i class="fa-solid fa-rotate-left"></i></span><div><h4>Política de Reembolso</h4><p>Cancelaciones y devoluciones claras.</p><a href="#m-reembolso" data-modal="m-reembolso">Leer <i class="fa-solid fa-arrow-right"></i></a></div></div>
+      <div class="lcard reveal d1"><span class="li" style="background:rgba(23,72,112,.1);color:var(--hover)"><i class="fa-solid fa-square-check"></i></span><div><h4>Consentimiento registrado</h4><p>Dos casillas separadas y registro de cuándo aceptaste.</p><a href="#m-consentimiento" data-modal="m-consentimiento">Saber más <i class="fa-solid fa-arrow-right"></i></a></div></div>
+      <div class="lcard reveal d2"><span class="li" style="background:rgba(107,79,58,.12);color:var(--calido)"><i class="fa-solid fa-scale-balanced"></i></span><div><h4>Normativa boliviana</h4><p>Cumplimiento de la legislación local vigente.</p><a href="#m-normativa" data-modal="m-normativa">Saber más <i class="fa-solid fa-arrow-right"></i></a></div></div>
     </div>
   </div>
 </section>
@@ -653,9 +661,186 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 </footer>
 
 <!-- ================= COOKIES ================= -->
+<!-- ================= MODALES LEGALES ================= -->
+<dialog class="lmodal" id="m-terminos" aria-labelledby="m-terminos-t">
+  <div class="lm-head">
+    <span class="li" style="background:rgba(31,95,139,.1);color:var(--principal)"><i class="fa-solid fa-file-contract"></i></span>
+    <div><h3 id="m-terminos-t">Términos y Condiciones</h3><small>Última actualización: octubre de 2026</small></div>
+    <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="lm-body">
+    <p>Estos términos regulan la contratación de tours y servicios de <b>Pipocas, Agencia de Viajes y Turismo</b>, con oficina en Calle Sagárnaga #234, Zona Central, La Paz, Bolivia. Al confirmar una reserva declaras haberlos leído y aceptado.</p>
+    <h5>1. Reservas y cupos</h5>
+    <ul>
+      <li>La reserva queda confirmada cuando se registra el pago (total o el anticipo indicado en el tour) y recibes tu ticket con código QR por correo.</li>
+      <li>Cada salida tiene un cupo máximo y un mínimo de participantes. Si no se alcanza el mínimo, te ofreceremos otra fecha, otro tour o la devolución total.</li>
+      <li>Debes registrar a cada participante con nombre completo, documento de identidad o pasaporte, nacionalidad y un contacto de emergencia.</li>
+    </ul>
+    <h5>2. Precios y pagos</h5>
+    <ul>
+      <li>Los precios están expresados en bolivianos (Bs) e incluyen lo detallado en la ficha del tour. Lo no indicado (comidas extra, propinas, entradas a áreas protegidas cuando así se señale) corre por cuenta del turista.</li>
+      <li>Aceptamos pago con QR, tarjeta y transferencia. Emitimos factura conforme a la normativa del Servicio de Impuestos Nacionales (SIN).</li>
+    </ul>
+    <h5>3. Salidas</h5>
+    <ul>
+      <li>Preséntate en el punto de encuentro 15 minutos antes de la hora indicada. Pasado el tiempo de tolerancia, la salida parte y se considera no presentación.</li>
+      <li>Por seguridad, podemos modificar el itinerario, reprogramar o suspender una salida por clima, bloqueos, conflictos sociales o disposiciones de las autoridades. En esos casos aplica lo previsto en la Política de Reembolso.</li>
+    </ul>
+    <h5>4. Salud, seguridad y equipo</h5>
+    <ul>
+      <li>Los tours de aventura (biking, trekking, climbing) exigen completar y firmar digitalmente la ficha médica y el deslinde de responsabilidad antes de la salida.</li>
+      <li>La Paz está a más de 3.600 m s. n. m. Recomendamos al menos dos días de aclimatación antes de rutas de alta montaña. El guía puede impedir que continúe quien presente signos de mal de altura o ponga en riesgo al grupo.</li>
+      <li>El equipo alquilado debe devolverse en el estado en que se entregó. Los daños por mal uso o la pérdida se cobran según la tarifa vigente.</li>
+    </ul>
+    <h5>5. Responsabilidades</h5>
+    <p>Pipocas responde por la correcta prestación de los servicios contratados, con guías y vehículos habilitados. No respondemos por pérdidas de objetos personales no confiados a la agencia ni por daños derivados de no seguir las indicaciones del guía. Cualquier reclamo puede presentarse en nuestra oficina o ante las instancias de defensa del consumidor previstas por la Ley N.º 453.</p>
+  </div>
+  <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
+</dialog>
+
+<dialog class="lmodal" id="m-privacidad" aria-labelledby="m-privacidad-t">
+  <div class="lm-head">
+    <span class="li" style="background:rgba(69,118,153,.12);color:var(--complementario)"><i class="fa-solid fa-user-shield"></i></span>
+    <div><h3 id="m-privacidad-t">Política de Privacidad</h3><small>Última actualización: octubre de 2026</small></div>
+    <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="lm-body">
+    <p>En Pipocas aplicamos el principio de <b>mínimo dato</b>: solo pedimos lo necesario para organizar tu tour de forma segura y cumplir nuestras obligaciones legales.</p>
+    <h5>Qué datos recogemos</h5>
+    <ul>
+      <li><b>Identificación:</b> nombre, documento de identidad o pasaporte, nacionalidad y fecha de nacimiento.</li>
+      <li><b>Contacto:</b> correo, teléfono o WhatsApp y un contacto de emergencia.</li>
+      <li><b>Salud:</b> la ficha médica de los tours de aventura (alergias, condiciones previas, medicación). Es un dato sensible y solo lo ven el guía y el coordinador de tu salida.</li>
+      <li><b>Pago y facturación:</b> NIT o CI para la factura. Los datos de tarjeta los procesa directamente la pasarela de pago; nosotros no los almacenamos.</li>
+    </ul>
+    <h5>Para qué los usamos</h5>
+    <ul>
+      <li>Gestionar tu reserva, emitir tu ticket QR y tu factura.</li>
+      <li>Asignar guía, chofer y vehículo, y actuar ante una emergencia durante el tour.</li>
+      <li>Enviarte avisos sobre tu salida. Las novedades y promociones solo si lo autorizas aparte.</li>
+      <li>Elaborar estadísticas anónimas (rutas más solicitadas, nacionalidades) para mejorar el servicio.</li>
+    </ul>
+    <h5>Con quién los compartimos</h5>
+    <p>Solo con quienes intervienen en tu tour (guías, transportistas, administradores de áreas protegidas cuando exigen registro de visitantes), con la pasarela de pago y con autoridades que lo requieran por ley. No vendemos ni cedemos tus datos.</p>
+    <h5>Conservación y seguridad</h5>
+    <p>Guardamos los datos de la reserva mientras dure la relación y el tiempo exigido por la normativa tributaria. La ficha médica se elimina pasados 6 meses del tour. Usamos conexión cifrada, acceso por roles y una bitácora que registra quién consulta o modifica la información.</p>
+    <h5>Tus derechos</h5>
+    <p>Conforme al derecho a la privacidad e intimidad (art. 21 y 130 de la Constitución Política del Estado) y a la Ley N.º 164 y su reglamento (D.S. N.º 1793), puedes pedir acceso, corrección o eliminación de tus datos y retirar tu consentimiento escribiéndonos o visitando nuestra oficina.</p>
+  </div>
+  <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
+</dialog>
+
+<dialog class="lmodal" id="m-cookies" aria-labelledby="m-cookies-t">
+  <div class="lm-head">
+    <span class="li" style="background:rgba(244,201,93,.25);color:var(--calido)"><i class="fa-solid fa-cookie-bite"></i></span>
+    <div><h3 id="m-cookies-t">Política de Cookies</h3><small>Última actualización: octubre de 2026</small></div>
+    <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="lm-body">
+    <p>Las cookies son pequeños archivos que el sitio guarda en tu navegador. Las dividimos en dos grupos y <b>tú decides</b> sobre las que no son imprescindibles.</p>
+    <h5>Cookies esenciales (siempre activas)</h5>
+    <ul>
+      <li><b>Sesión:</b> mantienen tu inicio de sesión y tu carrito mientras reservas.</li>
+      <li><b>Seguridad:</b> el token CSRF que protege los formularios frente a envíos falsos.</li>
+      <li><b>Preferencias de cookies:</b> recuerdan lo que elegiste en el banner para no volver a preguntarte.</li>
+    </ul>
+    <h5>Cookies no esenciales (solo con tu permiso)</h5>
+    <ul>
+      <li><b>Analítica:</b> cuentan visitas y páginas vistas de forma agregada para saber qué tours interesan más.</li>
+      <li><b>Mapas y contenido de terceros:</b> algunos mapas o videos incrustados pueden instalar cookies propias del proveedor.</li>
+    </ul>
+    <h5>Cómo gestionarlas</h5>
+    <p>Al entrar verás un banner con tres opciones: <b>Aceptar</b> todas, <b>Rechazar</b> las no esenciales o <b>Configurar</b> cada categoría. Puedes cambiar tu decisión cuando quieras borrando las cookies del navegador o desde el enlace de cookies al pie del sitio. Rechazarlas no te impide reservar.</p>
+    <p>No usamos cookies para publicidad personalizada ni compartimos la información con redes publicitarias.</p>
+  </div>
+  <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
+</dialog>
+
+<dialog class="lmodal" id="m-reembolso" aria-labelledby="m-reembolso-t">
+  <div class="lm-head">
+    <span class="li" style="background:rgba(201,111,74,.12);color:var(--secundario)"><i class="fa-solid fa-rotate-left"></i></span>
+    <div><h3 id="m-reembolso-t">Política de Reembolso</h3><small>Última actualización: octubre de 2026</small></div>
+    <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="lm-body">
+    <p>Queremos que cancelar sea tan claro como reservar. El porcentaje devuelto depende de con cuánta anticipación nos avisas, contada desde la hora de salida del tour.</p>
+    <table class="lm-table">
+      <thead><tr><th>Aviso de cancelación</th><th>Devolución</th></tr></thead>
+      <tbody>
+        <tr><td>72 horas o más</td><td><b>100 %</b></td></tr>
+        <tr><td>Entre 48 y 72 horas</td><td><b>80 %</b></td></tr>
+        <tr><td>Entre 24 y 48 horas</td><td><b>50 %</b></td></tr>
+        <tr><td>Menos de 24 horas o no presentación</td><td>Sin devolución</td></tr>
+      </tbody>
+    </table>
+    <h5>Cancelación por parte de Pipocas</h5>
+    <p>Si suspendemos la salida por clima, seguridad, bloqueos o por no alcanzar el mínimo de participantes, eliges entre <b>reprogramar sin costo</b> o recibir la <b>devolución del 100 %</b>.</p>
+    <h5>Cambios de fecha</h5>
+    <p>Puedes cambiar la fecha una vez sin costo si avisas con al menos 48 horas, sujeto a cupo disponible.</p>
+    <h5>Cómo se devuelve</h5>
+    <ul>
+      <li>Solicítalo desde tu cuenta, por WhatsApp o en nuestra oficina, indicando el código de tu ticket.</li>
+      <li>Devolvemos por el mismo medio de pago en un plazo de hasta 10 días hábiles. Las comisiones bancarias o de la pasarela que no sean reembolsables pueden descontarse.</li>
+      <li>El alquiler de equipo se devuelve íntegro si el tour no se realizó. Los servicios ya consumidos (por ejemplo, entradas compradas a tu nombre) no son reembolsables.</li>
+    </ul>
+    <p>Esta política no limita los derechos que te reconoce la Ley N.º 453 de los Derechos de las Usuarias y los Usuarios y de las Consumidoras y los Consumidores.</p>
+  </div>
+  <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
+</dialog>
+
+<dialog class="lmodal" id="m-consentimiento" aria-labelledby="m-consentimiento-t">
+  <div class="lm-head">
+    <span class="li" style="background:rgba(23,72,112,.1);color:var(--hover)"><i class="fa-solid fa-square-check"></i></span>
+    <div><h3 id="m-consentimiento-t">Consentimiento registrado</h3><small>Cómo dejamos constancia de lo que aceptas</small></div>
+    <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="lm-body">
+    <p>Al registrarte o reservar no encontrarás casillas premarcadas ni un único “acepto todo”. Te pedimos <b>dos consentimientos separados</b>, cada uno con su propia casilla:</p>
+    <ol>
+      <li><b>Términos y Condiciones y Política de Reembolso.</b> Obligatoria para reservar, porque define las reglas del servicio que contratas.</li>
+      <li><b>Tratamiento de datos personales</b>, incluida la ficha médica en los tours de aventura. Explica qué datos usamos y para qué, según la Política de Privacidad.</li>
+    </ol>
+    <p>Recibir novedades y promociones es una tercera opción, siempre voluntaria; no marcarla no afecta tu reserva.</p>
+    <h5>Qué registramos</h5>
+    <ul>
+      <li>Qué documento aceptaste y en qué versión.</li>
+      <li>Fecha y hora exactas de la aceptación.</li>
+      <li>La dirección IP y el navegador desde el que lo hiciste.</li>
+      <li>La firma digital de la ficha médica, cuando corresponde.</li>
+    </ul>
+    <p>Este registro queda en la bitácora de auditoría del sistema y no puede editarse. Nos sirve para demostrar, ante ti o ante una autoridad, que la aceptación fue libre, informada y expresa, en línea con la Ley N.º 164 y el D.S. N.º 1793 sobre documentos y firmas digitales.</p>
+    <h5>Retirar tu consentimiento</h5>
+    <p>Puedes retirar el consentimiento de datos o de promociones cuando quieras. El retiro se registra igual que la aceptación y no afecta lo ya realizado; si anula un dato imprescindible para un tour pendiente, te ofreceremos las opciones de la Política de Reembolso.</p>
+  </div>
+  <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
+</dialog>
+
+<dialog class="lmodal" id="m-normativa" aria-labelledby="m-normativa-t">
+  <div class="lm-head">
+    <span class="li" style="background:rgba(107,79,58,.12);color:var(--calido)"><i class="fa-solid fa-scale-balanced"></i></span>
+    <div><h3 id="m-normativa-t">Normativa boliviana</h3><small>Marco legal que cumplimos</small></div>
+    <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="lm-body">
+    <p>Pipocas opera como agencia de viajes y turismo en La Paz, Bolivia, y ajusta sus servicios a la legislación nacional y municipal vigente:</p>
+    <ul class="lm-laws">
+      <li><b>Ley N.º 292, Ley General de Turismo “Bolivia te espera”.</b> Regula a los prestadores de servicios turísticos. Estamos inscritos en el registro de prestadores del Viceministerio de Turismo y trabajamos con guías habilitados.</li>
+      <li><b>Ley N.º 453, de los Derechos de las Usuarias y los Usuarios y de las Consumidoras y los Consumidores.</b> Garantiza información veraz sobre precios y condiciones, trato digno y el derecho a reclamar.</li>
+      <li><b>Constitución Política del Estado, art. 21 y 130.</b> Reconocen el derecho a la privacidad e intimidad y la acción de protección de privacidad sobre tus datos.</li>
+      <li><b>Ley N.º 164, General de Telecomunicaciones y TIC, y D.S. N.º 1793.</b> Dan validez a los documentos y firmas digitales, al comercio electrónico y a la protección de datos en servicios en línea.</li>
+      <li><b>Código Tributario (Ley N.º 2492) y normativa del SIN.</b> Emitimos factura por cada venta según el sistema de facturación vigente.</li>
+      <li><b>Ley N.º 045, contra el Racismo y toda forma de Discriminación.</b> Atendemos a todas las personas sin distinción de origen, nacionalidad, género o condición.</li>
+      <li><b>Normativa de áreas protegidas y del Gobierno Autónomo Municipal de La Paz.</b> Respetamos las reglas de visita del SERNAP y contamos con licencia de funcionamiento municipal.</li>
+    </ul>
+    <h5>Reclamos</h5>
+    <p>Si algo no salió como esperabas, escríbenos o visítanos en Calle Sagárnaga #234. Respondemos en un máximo de 5 días hábiles. Si no quedas conforme, puedes acudir al Viceministerio de Defensa de los Derechos del Usuario y del Consumidor.</p>
+  </div>
+  <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
+</dialog>
+
 <div class="cookie" id="cookie">
   <span class="ci"><i class="fa-solid fa-cookie-bite"></i></span>
-  <div class="ct"><b>Tu privacidad importa</b>Usamos cookies esenciales para que el sitio funcione. Las de analítica solo con tu permiso. <a href="#">Política de cookies</a></div>
+  <div class="ct"><b>Tu privacidad importa</b>Usamos cookies esenciales para que el sitio funcione. Las de analítica solo con tu permiso. <a href="#m-cookies" data-modal="m-cookies">Política de cookies</a></div>
   <div class="ca"><button data-c>Rechazar</button><button data-c>Configurar</button><button class="acc" data-c>Aceptar</button></div>
 </div>
 <button class="totop" id="totop" aria-label="Volver arriba"><i class="fa-solid fa-arrow-up"></i></button>
@@ -695,6 +880,14 @@ document.querySelectorAll('.fav').forEach(b=>b.onclick=()=>{b.classList.toggle('
 const ck=document.getElementById('cookie');
 setTimeout(()=>ck.classList.add('show'),1400);
 ck.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>ck.classList.remove('show'));
+// modales legales
+const openModal=id=>{const d=document.getElementById(id);if(!d||d.open)return;d.showModal();document.body.style.overflow='hidden';d.querySelector('.lm-body').scrollTop=0};
+document.querySelectorAll('[data-modal]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();openModal(a.dataset.modal)}));
+document.querySelectorAll('.lmodal').forEach(d=>{
+  d.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>d.close());
+  d.addEventListener('click',e=>{if(e.target===d)d.close()});
+  d.addEventListener('close',()=>{document.body.style.overflow=''});
+});
 </script>
 </body>
 </html>
