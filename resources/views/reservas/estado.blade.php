@@ -49,33 +49,55 @@
 
 @section('titulo', 'Reserva ' . $reserva['cod'])
 
-@section('contenido')
-<div class="mx-auto max-w-4xl space-y-6">
-    <a href="{{ url('/reservas/preview/consultar') }}" {{-- controlador: route('reservas.consultar') --}}
-       class="inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
-        <i class="fa-solid fa-arrow-left"></i> Consultar otra reserva
-    </a>
+@section('hero')
+    <x-reserva.hero :tour="$tour" etiqueta="Reserva" :titulo="$reserva['cod']"
+                    subtitulo="Registrada el {{ \Carbon\Carbon::parse($reserva['cre_en'])->locale('es')->translatedFormat('j \d\e F \d\e Y') }} a nombre de {{ $reserva['nom_ctc'] }}."
+                    :volver="['url' => url('/reservas/preview/consultar'), 'texto' => 'Consultar otra reserva']">
+        <span class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold shadow-lg {{ $estCls }}">
+            <i class="{{ $estIco }}"></i> {{ $estTxt }}
+        </span>
+    </x-reserva.hero>
+@endsection
 
-    {{-- Cabecera --}}
+@section('contenido')
+<div class="relative z-10 -mt-14 space-y-6">
+    {{-- Línea de tiempo del estado --}}
     <section class="rsv-tarjeta">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <p class="text-xs font-bold uppercase tracking-[0.2em] text-pipocas-texto-2">Reserva</p>
-                <h1 class="break-all font-mono text-2xl font-bold tracking-wider text-pipocas-principal sm:text-3xl">{{ $reserva['cod'] }}</h1>
-                <p class="mt-1 text-sm text-pipocas-texto-2">Registrada el {{ \Carbon\Carbon::parse($reserva['cre_en'])->locale('es')->translatedFormat('j \d\e F \d\e Y') }}</p>
-            </div>
-            <span class="inline-flex items-center gap-2 self-start rounded-full px-4 py-2 text-sm font-bold sm:self-auto {{ $estCls }}">
-                <i class="{{ $estIco }}"></i> {{ $estTxt }}
-            </span>
-        </div>
+        @php
+            $hitos = [
+                ['fa-solid fa-calendar-check', 'Reservada', true],
+                ['fa-solid fa-credit-card', 'Pagada', $reserva['est_pag'] === 'pagado'],
+                ['fa-solid fa-qrcode', 'Tickets emitidos', collect($participantes)->contains(fn ($p) => ! empty($p['boleto']))],
+                ['fa-solid fa-flag-checkered', 'Tour realizado', $reserva['est'] === 'completada'],
+            ];
+            $cancelada = $reserva['est'] === 'cancelada';
+        @endphp
+        <ol class="grid grid-cols-2 gap-y-6 sm:grid-cols-4">
+            @foreach ($hitos as $i => [$ico, $txt, $ok])
+                <li class="relative flex flex-col items-center text-center">
+                    @if ($i > 0)
+                        <span @class(['absolute right-1/2 top-5 hidden h-1 w-full -translate-y-1/2 sm:block', 'bg-pipocas-principal' => $ok && ! $cancelada, 'bg-gray-200' => ! $ok || $cancelada])></span>
+                    @endif
+                    <span @class([
+                        'relative grid h-10 w-10 place-items-center rounded-full ring-4 ring-white',
+                        'bg-red-100 text-red-600' => $cancelada && $i > 0,
+                        'bg-pipocas-principal text-white' => $ok && ! ($cancelada && $i > 0),
+                        'border-2 border-gray-200 bg-white text-gray-400' => ! $ok && ! $cancelada,
+                    ])><i class="{{ $cancelada && $i > 0 ? 'fa-solid fa-xmark' : $ico }}"></i></span>
+                    <span @class(['mt-2 text-sm', 'font-bold text-pipocas-texto' => $ok, 'text-pipocas-texto-2' => ! $ok])>{{ $txt }}</span>
+                </li>
+            @endforeach
+        </ol>
 
         @if ($reserva['est'] === 'pendiente')
-            <div class="mt-5 flex flex-col gap-3 rounded-2xl bg-pipocas-acento/15 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="mt-6 flex flex-col gap-3 rounded-2xl bg-pipocas-acento/20 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-sm text-pipocas-calido"><i class="fa-solid fa-circle-info mr-1"></i> Completa el pago para recibir los tickets con código QR.</p>
                 <a href="{{ $urlPago }}" class="rsv-btn shrink-0 px-5 py-2.5"><i class="fa-solid fa-credit-card"></i> Pagar ahora</a>
             </div>
-        @elseif ($reserva['est'] === 'cancelada')
-            <p class="mt-5 rounded-2xl bg-red-50 p-4 text-sm text-red-700"><i class="fa-solid fa-circle-info mr-1"></i> Esta reserva fue cancelada y los cupos se liberaron.</p>
+        @elseif ($cancelada)
+            <p class="mt-6 rounded-2xl bg-red-50 p-4 text-sm text-red-700"><i class="fa-solid fa-circle-info mr-1"></i> Esta reserva fue cancelada y los cupos se liberaron.</p>
+        @elseif ($reserva['est'] === 'confirmada')
+            <p class="mt-6 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-800"><i class="fa-solid fa-circle-check mr-1"></i> ¡Todo listo! Presenta el QR de cada participante al guía antes de abordar.</p>
         @endif
     </section>
 

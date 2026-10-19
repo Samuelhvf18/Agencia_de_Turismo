@@ -43,7 +43,7 @@
         ['id' => 7, 'cod' => 'TJ', 'nom' => 'Tarija'], ['id' => 8, 'cod' => 'BE', 'nom' => 'Beni'],
         ['id' => 9, 'cod' => 'PD', 'nom' => 'Pando'],
     ];
-    $tiposDoc ??= ['CI' => 'Cédula de identidad', 'Pasaporte' => 'Pasaporte', 'DNI' => 'DNI / Documento extranjero'];
+    $tiposDoc ??= ['CI' => 'CI (Bolivia)', 'Pasaporte' => 'Pasaporte', 'DNI' => 'DNI extranjero'];
     $accionForm ??= url('/reservas/preview/equipo'); // controlador: route('reservas.participantes.store')
     $urlAnterior ??= url('/reservas/preview/salida'); // controlador: route('reservas.salida', $tour)
 
@@ -56,6 +56,11 @@
 
 @section('titulo', 'Participantes · ' . $tour->nom)
 
+@section('hero')
+    <x-reserva.hero :tour="$tour" etiqueta="Paso 2" titulo="¿Quiénes viajan?"
+                    subtitulo="Necesitamos los datos de cada participante para emitir su ticket con código QR y su seguro de viaje." />
+@endsection
+
 @section('stepper')
     <x-reserva.stepper :actual="2" :enlaces="[$urlAnterior]" />
 @endsection
@@ -66,11 +71,7 @@
       class="grid gap-6 lg:grid-cols-[1fr_340px] lg:items-start lg:gap-8">
     @csrf
 
-    <div class="space-y-6">
-        <div>
-            <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">¿Quiénes viajan?</h1>
-            <p class="mt-2 text-pipocas-texto-2">Necesitamos los datos de cada participante para emitir su ticket con código QR y su seguro.</p>
-        </div>
+    <div class="min-w-0 space-y-6">
 
         @guest
             <div class="flex flex-col gap-3 rounded-2xl border border-pipocas-acento/60 bg-pipocas-acento/15 p-4 sm:flex-row sm:items-center">
@@ -87,8 +88,13 @@
 
         {{-- Contacto --}}
         <section class="rsv-tarjeta">
-            <h2 class="rsv-titulo mb-1">Datos de contacto</h2>
-            <p class="mb-5 text-sm text-pipocas-texto-2">A este correo enviaremos la confirmación, el comprobante y los tickets.</p>
+            <header class="mb-6 flex items-center gap-4">
+                <span class="rsv-icono"><i class="fa-regular fa-address-card"></i></span>
+                <div>
+                    <h2 class="rsv-titulo">Datos de contacto</h2>
+                    <p class="text-sm text-pipocas-texto-2">Aquí enviaremos la confirmación, el comprobante y los tickets.</p>
+                </div>
+            </header>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
@@ -114,21 +120,34 @@
 
         {{-- Participantes (bloques repetibles) --}}
         <section class="space-y-4">
-            <div class="flex items-end justify-between gap-3">
-                <div>
-                    <h2 class="rsv-titulo">Participantes</h2>
-                    <p class="text-sm text-pipocas-texto-2"><span x-text="lista.length"></span> de <span x-text="max"></span> cupos disponibles en esta salida</p>
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-4">
+                    <span class="rsv-icono"><i class="fa-solid fa-users"></i></span>
+                    <div>
+                        <h2 class="rsv-titulo">Participantes</h2>
+                        <p class="text-sm text-pipocas-texto-2"><b x-text="lista.length"></b> de <span x-text="max"></span> cupos disponibles</p>
+                    </div>
                 </div>
+                <span class="rsv-chip hidden bg-white text-pipocas-texto-2 shadow-sm sm:inline-flex">
+                    <i class="fa-solid fa-circle-check text-emerald-500"></i> <span x-text="completos() + '/' + lista.length + ' completos'"></span>
+                </span>
             </div>
             @error('participantes') <p class="rsv-error">{{ $message }}</p> @enderror
 
             <template x-for="(p, i) in lista" :key="p._k">
-                <article class="rsv-tarjeta" :class="pri === i && 'ring-2 ring-pipocas-principal/40'">
-                    <header class="mb-5 flex flex-wrap items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                            <span class="grid h-9 w-9 place-items-center rounded-full bg-pipocas-principal font-bold text-white" x-text="i + 1"></span>
-                            <h3 class="font-bold" x-text="p.nom_cpl || 'Participante ' + (i + 1)"></h3>
-                            <span x-show="pri === i" class="rounded-full bg-pipocas-secundario/15 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-secundario">Contacto principal</span>
+                <article class="rsv-tarjeta relative overflow-hidden border-l-4 transition" x-transition
+                         :class="pri === i ? 'border-pipocas-secundario' : 'border-pipocas-complementario/40'">
+                    <header class="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-base font-bold text-white"
+                                  :class="pri === i ? 'bg-gradient-to-br from-pipocas-secundario to-pipocas-calido' : 'bg-gradient-to-br from-pipocas-complementario to-pipocas-principal'"
+                                  x-text="iniciales(p.nom_cpl) || (i + 1)"></span>
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-pipocas-texto-2" x-text="'Participante ' + (i + 1)"></p>
+                                <h3 class="truncate font-titulo text-lg font-semibold" x-text="p.nom_cpl || 'Sin nombre aún'"></h3>
+                            </div>
+                            <span x-show="pri === i" class="rsv-chip bg-pipocas-secundario/15 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-secundario"><i class="fa-solid fa-star"></i> Principal</span>
+                            <span x-show="completo(p)" x-cloak class="rsv-chip bg-emerald-50 text-emerald-700"><i class="fa-solid fa-check"></i> Completo</span>
                         </div>
                         <button type="button" x-show="lista.length > 1" @click="quitar(i)"
                                 class="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-semibold text-red-600 transition hover:bg-red-50">
@@ -213,8 +232,14 @@
         </div>
     </div>
 
-    <aside class="lg:sticky lg:top-6">
-        <x-reserva.resumen-tour :tour="$tour" :salida="$salida" :cnt="$cnt_ptc" cnt-expr="lista.length" />
+    <aside class="space-y-4 lg:sticky lg:top-24">
+        <x-reserva.resumen-tour :tour="$tour" :salida="$salida" :cnt="$cnt_ptc" cnt-expr="lista.length">
+            <button type="submit" class="rsv-btn hidden w-full lg:flex">Continuar al equipo <i class="fa-solid fa-arrow-right"></i></button>
+        </x-reserva.resumen-tour>
+        <div class="flex gap-3 rounded-3xl border border-pipocas-principal/10 bg-white/70 p-5 text-sm">
+            <i class="fa-solid fa-user-shield mt-0.5 text-lg text-pipocas-complementario"></i>
+            <p class="text-pipocas-texto-2"><b class="text-pipocas-texto">Tus datos están protegidos.</b> Solo se usan para el seguro, el control de acceso y la emisión de tickets.</p>
+        </div>
     </aside>
 </form>
 @endsection
@@ -235,6 +260,9 @@
                 this.lista.splice(i, 1);
                 if (this.pri === i) this.pri = 0; else if (this.pri > i) this.pri--;
             },
+            iniciales(n) { return (n || '').trim().split(/\s+/).slice(0, 2).map(x => x[0] || '').join('').toUpperCase(); },
+            completo(p) { return !!(p.nom_cpl && p.num_doc && p.eda && p.pai_id); },
+            completos() { return this.lista.filter(p => this.completo(p)).length; },
             err(i, campo) { return (this.errores[`participantes.${i}.${campo}`] || [])[0] || ''; },
         };
     }

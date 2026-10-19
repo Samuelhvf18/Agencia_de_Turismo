@@ -30,9 +30,22 @@
     // Salidas agrupadas por fecha para la vista
     $porFecha = collect($salidas)->groupBy(fn ($s) => $s['fec_sal']);
     $maxCupo = (int) collect($salidas)->map(fn ($s) => $s['cap_max'] - $s['cup_ocu'])->max();
+    $urlTour = ! empty($tour->rta_amg) ? url('/tours/' . $tour->rta_amg) : url('/'); // controlador: route('tours.show', $tour)
 @endphp
 
 @section('titulo', 'Elige tu salida · ' . $tour->nom)
+
+@section('hero')
+    <x-reserva.hero :tour="$tour" etiqueta="Reserva" titulo="¿Cuándo quieres ir?"
+                    subtitulo="Elige una de las salidas programadas. Los cupos se actualizan en tiempo real y aún no se cobra nada."
+                    :volver="['url' => $urlTour, 'texto' => 'Volver al tour']">
+        <ul class="flex flex-wrap gap-2 text-sm">
+            <li class="rsv-chip bg-white/15 py-1.5 text-white backdrop-blur"><i class="fa-regular fa-clock text-pipocas-acento"></i> {{ $tour->dur_txt }} h</li>
+            <li class="rsv-chip bg-white/15 py-1.5 text-white backdrop-blur"><i class="fa-solid fa-signal text-pipocas-acento"></i> {{ $tour->dif_txt }}</li>
+            <li class="rsv-chip bg-pipocas-acento py-1.5 font-bold text-pipocas-calido">Desde Bs. {{ number_format($tour->pre_bas, 0, ',', '.') }}</li>
+        </ul>
+    </x-reserva.hero>
+@endsection
 
 @section('stepper')
     <x-reserva.stepper :actual="1" />
@@ -40,35 +53,57 @@
 
 @section('contenido')
 <form method="POST" action="{{ $accionForm }}"
-      x-data="{ sal: {{ (int) old('sal_tur_id', 0) }}, cnt: {{ (int) old('cnt_ptc', 1) }}, disp: 0 }"
+      x-data="{ sal: {{ (int) old('sal_tur_id', 0) }}, cnt: {{ (int) old('cnt_ptc', 1) }}, disp: 0, dia: '' }"
       class="grid gap-6 lg:grid-cols-[1fr_340px] lg:items-start lg:gap-8">
     @csrf
 
-    <div class="space-y-6">
-        <div>
-            <a href="{{ Route::has('tours.show') && isset($tour->id) ? route('tours.show', $tour) : url('/') }}"
-               class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
-                <i class="fa-solid fa-arrow-left"></i> Volver al tour
-            </a>
-            <h1 class="font-titulo text-3xl font-semibold leading-tight text-pipocas-texto sm:text-4xl">¿Cuándo quieres ir?</h1>
-            <p class="mt-2 text-pipocas-texto-2">Elige una de las salidas programadas para <b class="text-pipocas-texto">{{ $tour->nom }}</b>. Los cupos se actualizan en tiempo real.</p>
-        </div>
-
+    <div class="min-w-0 space-y-6">
         @error('sal_tur_id')
             <p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700"><i class="fa-solid fa-circle-exclamation mr-1"></i> {{ $message }}</p>
         @enderror
 
+        {{-- Tira de fechas (filtro rápido) --}}
+        @if ($porFecha->count() > 1)
+            <div>
+                <div class="mb-3 flex items-center justify-between">
+                    <h2 class="flex items-center gap-2 font-bold"><i class="fa-regular fa-calendar text-pipocas-secundario"></i> Próximas fechas</h2>
+                    <button type="button" x-show="dia" x-cloak @click="dia = ''" class="text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover">Ver todas</button>
+                </div>
+                <div class="rsv-sin-barra -mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-3 pt-1 sm:mx-0 sm:px-1">
+                    @foreach ($porFecha as $fecha => $lista)
+                        @php
+                            $f = \Carbon\Carbon::parse($fecha)->locale('es');
+                            $libresDia = $lista->sum(fn ($s) => max(0, $s['cap_max'] - $s['cup_ocu']));
+                        @endphp
+                        <button type="button" @click="dia = dia === '{{ $fecha }}' ? '' : '{{ $fecha }}'"
+                                class="w-20 shrink-0 snap-start rounded-2xl border-2 px-2 py-3 text-center transition hover:-translate-y-0.5"
+                                :class="dia === '{{ $fecha }}' ? 'border-pipocas-principal bg-pipocas-principal text-white shadow-lg shadow-pipocas-principal/25' : 'border-transparent bg-white shadow-tarjeta'">
+                            <span class="block text-[11px] font-bold uppercase opacity-70">{{ $f->translatedFormat('D') }}</span>
+                            <span class="block font-titulo text-2xl font-semibold leading-tight">{{ $f->format('j') }}</span>
+                            <span class="block text-[11px] font-semibold uppercase opacity-70">{{ $f->translatedFormat('M') }}</span>
+                            <span @class(['mx-auto mt-1.5 block h-1.5 w-1.5 rounded-full', 'bg-gray-300' => $libresDia === 0, 'bg-pipocas-secundario' => $libresDia > 0 && $libresDia <= 3, 'bg-emerald-500' => $libresDia > 3])></span>
+                        </button>
+                    @endforeach
+                </div>
+                <p class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-pipocas-texto-2">
+                    <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Disponible</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-pipocas-secundario"></span> Últimos cupos</span>
+                    <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-gray-300"></span> Agotado</span>
+                </p>
+            </div>
+        @endif
+
         @forelse ($porFecha as $fecha => $lista)
             @php $f = \Carbon\Carbon::parse($fecha)->locale('es'); @endphp
-            <section class="rsv-tarjeta">
-                <header class="mb-4 flex items-center gap-4">
-                    <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-pipocas-principal/10 text-center leading-none text-pipocas-principal">
-                        <span class="text-[11px] font-bold uppercase">{{ $f->translatedFormat('M') }}</span>
+            <section class="rsv-tarjeta" x-show="!dia || dia === '{{ $fecha }}'" x-transition.opacity>
+                <header class="mb-5 flex items-center gap-4">
+                    <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pipocas-principal to-pipocas-complementario text-center leading-none text-white shadow-md shadow-pipocas-principal/20">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-pipocas-acento">{{ $f->translatedFormat('M') }}</span>
                         <span class="font-titulo text-2xl font-semibold">{{ $f->format('j') }}</span>
                     </div>
                     <div>
-                        <h2 class="font-bold">{{ ucfirst($f->translatedFormat('l j \d\e F')) }}</h2>
-                        <p class="text-sm text-pipocas-texto-2">{{ $f->diffForHumans(['parts' => 1, 'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW]) }} · {{ $lista->count() }} {{ $lista->count() == 1 ? 'horario' : 'horarios' }}</p>
+                        <h2 class="font-titulo text-xl font-semibold">{{ ucfirst($f->translatedFormat('l j \d\e F')) }}</h2>
+                        <p class="text-sm text-pipocas-texto-2">{{ ucfirst($f->diffForHumans(['parts' => 1, 'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW])) }} · {{ $lista->count() }} {{ $lista->count() == 1 ? 'horario' : 'horarios' }}</p>
                     </div>
                 </header>
 
@@ -79,14 +114,16 @@
                             $pct = $s['cap_max'] ? round($s['cup_ocu'] * 100 / $s['cap_max']) : 100;
                             $agotada = $libres === 0;
                             $pocos = ! $agotada && $libres <= 3;
+                            $hora = (int) substr($s['hra_sal'], 0, 2);
+                            $turno = $hora < 12 ? ['Mañana', 'fa-solid fa-sun'] : ($hora < 18 ? ['Tarde', 'fa-solid fa-cloud-sun'] : ['Noche', 'fa-solid fa-moon']);
                         @endphp
                         <label @class([
-                            'relative block rounded-2xl border-2 p-4 transition',
-                            'cursor-not-allowed border-gray-200 bg-gray-50 opacity-70' => $agotada,
-                            'cursor-pointer border-gray-200 hover:border-pipocas-complementario' => ! $agotada,
+                            'group relative block overflow-hidden rounded-2xl border-2 p-4 transition',
+                            'cursor-not-allowed border-dashed border-gray-200 bg-gray-50' => $agotada,
+                            'cursor-pointer border-gray-200 bg-white hover:-translate-y-0.5 hover:border-pipocas-complementario hover:shadow-lg' => ! $agotada,
                         ])
                             @unless ($agotada)
-                                :class="sal === {{ $s['id'] }} && '!border-pipocas-principal bg-pipocas-principal/5 ring-4 ring-pipocas-principal/10'"
+                                :class="sal === {{ $s['id'] }} && '!border-pipocas-principal bg-pipocas-principal/[0.04] shadow-lg ring-4 ring-pipocas-principal/10'"
                             @endunless>
                             <input type="radio" name="sal_tur_id" value="{{ $s['id'] }}" class="sr-only"
                                    x-model.number="sal" @change="disp = {{ $libres }}; cnt = Math.min(cnt, {{ $libres }})"
@@ -94,34 +131,42 @@
 
                             <div class="flex items-start justify-between gap-3">
                                 <div>
-                                    <p class="font-titulo text-2xl font-semibold text-pipocas-texto">{{ substr($s['hra_sal'], 0, 5) }}</p>
-                                    <p class="text-xs text-pipocas-texto-2">Salida desde La Paz</p>
+                                    <p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider {{ $agotada ? 'text-gray-400' : 'text-pipocas-secundario' }}">
+                                        <i class="{{ $turno[1] }}"></i> {{ $turno[0] }}
+                                    </p>
+                                    <p @class(['font-titulo text-3xl font-semibold', 'text-gray-400 line-through decoration-1' => $agotada, 'text-pipocas-texto' => ! $agotada])>{{ substr($s['hra_sal'], 0, 5) }}</p>
                                 </div>
                                 @if ($agotada)
-                                    <span class="rounded-full bg-gray-200 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-gray-600">Agotado</span>
+                                    <span class="rsv-chip bg-gray-200 font-extrabold uppercase tracking-wide text-gray-600"><i class="fa-solid fa-lock"></i> Agotado</span>
                                 @elseif ($pocos)
-                                    <span class="rounded-full bg-pipocas-acento/30 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-calido">¡Últimos {{ $libres }}!</span>
+                                    <span class="rsv-chip bg-pipocas-acento font-extrabold uppercase tracking-wide text-pipocas-calido"><i class="fa-solid fa-fire"></i> ¡Últimos {{ $libres }}!</span>
                                 @else
-                                    <span class="grid h-6 w-6 place-items-center rounded-full border-2 border-gray-300 text-[10px] text-white"
+                                    <span class="grid h-7 w-7 place-items-center rounded-full border-2 border-gray-300 text-xs text-white transition"
                                           :class="sal === {{ $s['id'] }} && '!border-pipocas-principal bg-pipocas-principal'">
                                         <i class="fa-solid fa-check" x-show="sal === {{ $s['id'] }}" x-cloak></i>
                                     </span>
                                 @endif
                             </div>
 
+                            <ul class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-pipocas-texto-2">
+                                <li><i class="fa-solid fa-location-dot mr-1 text-pipocas-complementario"></i> Salida desde La Paz</li>
+                                @if (! empty($s['gui_nom']))<li><i class="fa-solid fa-user-tie mr-1 text-pipocas-complementario"></i> {{ $s['gui_nom'] }}</li>@endif
+                            </ul>
+
                             <div class="mt-4">
                                 <div class="mb-1.5 flex justify-between text-xs">
                                     <span class="font-semibold {{ $agotada ? 'text-gray-500' : 'text-pipocas-texto' }}">
-                                        {{ $agotada ? 'Sin cupos' : $libres . ' ' . ($libres == 1 ? 'cupo disponible' : 'cupos disponibles') }}
+                                        <i class="fa-solid fa-user-group mr-1 opacity-60"></i>
+                                        {{ $agotada ? 'Sin cupos' : $libres . ' ' . ($libres == 1 ? 'cupo libre' : 'cupos libres') }}
                                     </span>
-                                    <span class="text-pipocas-texto-2">{{ $s['cup_ocu'] }}/{{ $s['cap_max'] }}</span>
+                                    <span class="text-pipocas-texto-2">{{ $s['cup_ocu'] }}/{{ $s['cap_max'] }} reservados</span>
                                 </div>
                                 <div class="h-2 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Ocupación">
                                     <div @class([
                                         'h-full rounded-full',
                                         'bg-gray-400' => $agotada,
-                                        'bg-pipocas-secundario' => $pocos,
-                                        'bg-pipocas-complementario' => ! $agotada && ! $pocos,
+                                        'bg-gradient-to-r from-pipocas-acento to-pipocas-secundario' => $pocos,
+                                        'bg-gradient-to-r from-pipocas-complementario to-pipocas-principal' => ! $agotada && ! $pocos,
                                     ]) style="width: {{ $pct }}%"></div>
                                 </div>
                             </div>
@@ -130,29 +175,33 @@
                 </div>
             </section>
         @empty
-            <div class="rsv-tarjeta text-center">
-                <i class="fa-regular fa-calendar-xmark text-4xl text-pipocas-secundario"></i>
-                <h2 class="rsv-titulo mt-3">No hay salidas programadas</h2>
-                <p class="mt-1 text-pipocas-texto-2">Vuelve pronto o escríbenos para armar una salida privada.</p>
+            <div class="rsv-tarjeta py-12 text-center">
+                <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-pipocas-secundario/10 text-3xl text-pipocas-secundario"><i class="fa-regular fa-calendar-xmark"></i></span>
+                <h2 class="rsv-titulo mt-4">No hay salidas programadas</h2>
+                <p class="mx-auto mt-1 max-w-sm text-pipocas-texto-2">Vuelve pronto o escríbenos para armar una salida privada para tu grupo.</p>
+                <a href="{{ url('/chatbot') }}" class="rsv-btn-sec mt-5"><i class="fa-regular fa-comments"></i> Hablar con un asesor</a>
             </div>
         @endforelse
 
         {{-- Cantidad de personas --}}
         <section class="rsv-tarjeta">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 class="rsv-titulo">¿Cuántas personas?</h2>
-                    <p class="text-sm text-pipocas-texto-2" x-show="!sal">Primero elige un horario.</p>
-                    <p class="text-sm text-pipocas-texto-2" x-show="sal" x-cloak>Máximo <span x-text="disp"></span> en esta salida.</p>
+            <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="rsv-icono"><i class="fa-solid fa-users"></i></span>
+                    <div>
+                        <h2 class="rsv-titulo">¿Cuántas personas?</h2>
+                        <p class="text-sm text-pipocas-texto-2" x-show="!sal">Primero elige un horario.</p>
+                        <p class="text-sm text-pipocas-texto-2" x-show="sal" x-cloak>Máximo <b x-text="disp"></b> en esta salida.</p>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 self-start sm:self-auto">
-                    <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-pipocas-principal transition hover:bg-pipocas-fondo disabled:opacity-40"
+                <div class="flex items-center gap-2 self-start rounded-2xl bg-pipocas-fondo p-1.5 sm:self-auto">
+                    <button type="button" class="grid h-11 w-11 place-items-center rounded-xl bg-white text-pipocas-principal shadow-sm transition hover:bg-pipocas-principal hover:text-white disabled:pointer-events-none disabled:opacity-40"
                             @click="cnt = Math.max(1, cnt - 1)" :disabled="cnt <= 1" aria-label="Quitar una persona">
                         <i class="fa-solid fa-minus"></i>
                     </button>
                     <input type="number" name="cnt_ptc" min="1" max="{{ $maxCupo }}" x-model.number="cnt" :max="disp || {{ $maxCupo }}"
-                           class="rsv-campo w-16 text-center text-lg font-bold" aria-label="Cantidad de participantes">
-                    <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-pipocas-principal transition hover:bg-pipocas-fondo disabled:opacity-40"
+                           class="w-14 border-0 bg-transparent text-center font-titulo text-2xl font-semibold focus:ring-0" aria-label="Cantidad de participantes">
+                    <button type="button" class="grid h-11 w-11 place-items-center rounded-xl bg-white text-pipocas-principal shadow-sm transition hover:bg-pipocas-principal hover:text-white disabled:pointer-events-none disabled:opacity-40"
                             @click="cnt = Math.min(disp || {{ $maxCupo }}, cnt + 1)" :disabled="sal && cnt >= disp" aria-label="Agregar una persona">
                         <i class="fa-solid fa-plus"></i>
                     </button>
@@ -163,13 +212,15 @@
     </div>
 
     {{-- Resumen: abajo en móvil, columna sticky en escritorio --}}
-    <aside class="lg:sticky lg:top-6">
+    <aside class="space-y-4 lg:sticky lg:top-24">
         <x-reserva.resumen-tour :tour="$tour" cnt-expr="cnt">
             <button type="submit" class="rsv-btn w-full" :disabled="!sal">
                 Continuar con los participantes <i class="fa-solid fa-arrow-right"></i>
             </button>
-            <p class="text-center text-xs text-pipocas-texto-2"><i class="fa-solid fa-shield-halved mr-1 text-pipocas-complementario"></i> Aún no se cobra nada</p>
+            <p class="text-center text-xs text-pipocas-texto-2" x-show="!sal">Elige un horario para continuar</p>
         </x-reserva.resumen-tour>
+
+        <x-reserva.incluye />
     </aside>
 </form>
 @endsection

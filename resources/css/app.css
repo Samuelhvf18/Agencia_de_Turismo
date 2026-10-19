@@ -32,4 +32,45 @@
     .rsv-check {
         @apply h-5 w-5 rounded border-gray-300 text-pipocas-principal focus:ring-pipocas-principal;
     }
+    .rsv-chip {
+        @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    }
+    .rsv-icono {
+        @apply grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pipocas-principal to-pipocas-complementario text-white shadow-md shadow-pipocas-principal/20;
+    }
+    .rsv-pastilla {
+        @apply cursor-pointer select-none rounded-xl border-2 border-gray-200 bg-white px-3 py-2 text-center text-sm font-semibold text-pipocas-texto transition hover:border-pipocas-complementario;
+    }
+    .rsv-pastilla-activa {
+        @apply border-pipocas-principal bg-pipocas-principal text-white hover:border-pipocas-principal;
+    }
 }
+
+/* Ticket con borde perforado (resumen, confirmación) */
+.rsv-ticket-corte {
+    position: relative;
+    border-top: 2px dashed rgb(229 231 235);
+}
+.rsv-ticket-corte::before,
+.rsv-ticket-corte::after {
+    content: "";
+    position: absolute;
+    top: -14px;
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    background: #F0F0F1;
+}
+.rsv-ticket-corte::before { left: -13px; }
+.rsv-ticket-corte::after { right: -13px; }
+
+/* Textura topográfica sutil para cabeceras */
+.rsv-topo {
+    background-image: radial-gradient(circle at 20% 20%, rgba(244, 201, 93, .18) 0, transparent 40%),
+        radial-gradient(circle at 85% 70%, rgba(201, 111, 74, .22) 0, transparent 45%),
+        repeating-radial-gradient(circle at 70% 30%, rgba(255, 255, 255, .05) 0 2px, transparent 2px 22px);
+}
+
+/* Tiras horizontales (fechas, pestañas) sin barra de desplazamiento visible */
+.rsv-sin-barra { scrollbar-width: none; }
+.rsv-sin-barra::-webkit-scrollbar { display: none; }

@@ -29,28 +29,40 @@
 
 @section('titulo', 'Ficha médica')
 
+@section('hero')
+    <x-reserva.hero :tour="$tour" etiqueta="Paso 4" titulo="Ficha médica y consentimiento"
+                    subtitulo="Cada participante completa y firma su ficha. Esta información es confidencial y solo la ve el guía de la salida." />
+@endsection
+
 @section('stepper')
     <x-reserva.stepper :actual="4" :enlaces="[url('/reservas/preview/salida'), url('/reservas/preview/participantes'), $urlAnterior]" />
 @endsection
 
 @section('contenido')
-<form method="POST" action="{{ $accionForm }}" class="mx-auto max-w-3xl space-y-6">
+<form method="POST" action="{{ $accionForm }}" class="grid gap-6 lg:grid-cols-[1fr_300px] lg:items-start lg:gap-8">
     @csrf
 
-    <div>
-        <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">Ficha médica y consentimiento</h1>
-        <p class="mt-2 text-pipocas-texto-2">Cada participante debe completar y firmar su ficha. Esta información solo la ve el guía responsable de la salida.</p>
-    </div>
-
-    @if (! empty($tour->req_fis))
-        <div class="flex gap-3 rounded-2xl border border-pipocas-acento/60 bg-pipocas-acento/15 p-4 text-sm">
-            <i class="fa-solid fa-heart-pulse mt-0.5 text-lg text-pipocas-secundario"></i>
-            <div>
-                <p class="font-bold text-pipocas-calido">Requisitos físicos de {{ $tour->nom }}</p>
-                <p class="text-pipocas-texto-2">{{ $tour->req_fis }}</p>
+    <aside class="space-y-4 lg:sticky lg:top-24 lg:order-last">
+        @if (! empty($tour->req_fis))
+            <div class="rounded-3xl bg-gradient-to-br from-pipocas-acento/40 to-pipocas-acento/10 p-5 text-sm ring-1 ring-pipocas-acento/50">
+                <p class="flex items-center gap-2 font-bold text-pipocas-calido"><i class="fa-solid fa-heart-pulse text-lg text-pipocas-secundario"></i> Requisitos físicos</p>
+                <p class="mt-2 text-pipocas-calido/90">{{ $tour->req_fis }}</p>
+                @if (! empty($tour->alt_max_m))
+                    <p class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1 text-xs font-bold text-pipocas-calido"><i class="fa-solid fa-mountain"></i> Hasta {{ number_format($tour->alt_max_m, 0, ',', '.') }} m s. n. m.</p>
+                @endif
             </div>
+        @endif
+        <div class="hidden rounded-3xl border border-pipocas-principal/10 bg-white/70 p-5 text-sm lg:block">
+            <p class="mb-3 font-bold">Consejos para la altura</p>
+            <ul class="space-y-2.5 text-pipocas-texto-2">
+                <li class="flex gap-2.5"><i class="fa-solid fa-glass-water mt-0.5 w-4 text-pipocas-complementario"></i> Hidrátate bien el día anterior.</li>
+                <li class="flex gap-2.5"><i class="fa-solid fa-mug-hot mt-0.5 w-4 text-pipocas-complementario"></i> Un mate de coca ayuda a aclimatarte.</li>
+                <li class="flex gap-2.5"><i class="fa-solid fa-bed mt-0.5 w-4 text-pipocas-complementario"></i> Descansa y evita el alcohol.</li>
+            </ul>
         </div>
-    @endif
+    </aside>
+
+    <div class="min-w-0 space-y-6">
 
     @foreach ($participantes as $n => $p)
         @php
@@ -58,19 +70,29 @@
             $f = $fichas[$id] ?? [];
         @endphp
         <section class="rsv-tarjeta">
-            <header class="mb-5 flex items-center gap-3">
-                <span class="grid h-9 w-9 place-items-center rounded-full bg-pipocas-principal font-bold text-white">{{ $n + 1 }}</span>
-                <div>
-                    <h2 class="font-bold">{{ $p['nom_cpl'] }}</h2>
-                    @if (! empty($p['eda']))<p class="text-xs text-pipocas-texto-2">{{ $p['eda'] }} años</p>@endif
+            <header class="mb-6 flex items-center gap-4 border-b border-gray-100 pb-5">
+                <span class="rsv-icono text-sm font-bold">{{ collect(explode(' ', $p['nom_cpl']))->take(2)->map(fn ($x) => mb_substr($x, 0, 1))->join('') }}</span>
+                <div class="min-w-0 flex-1">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-pipocas-texto-2">Ficha {{ $n + 1 }} de {{ count($participantes) }}</p>
+                    <h2 class="truncate font-titulo text-xl font-semibold">{{ $p['nom_cpl'] }}</h2>
                 </div>
+                @if (! empty($p['eda']))<span class="rsv-chip bg-pipocas-fondo text-pipocas-texto-2">{{ $p['eda'] }} años</span>@endif
             </header>
 
             <div class="grid gap-4 sm:grid-cols-2">
-                <div class="sm:col-span-2">
-                    <label for="con_med_{{ $id }}" class="rsv-etiqueta">Condiciones médicas, alergias o medicación</label>
-                    <textarea id="con_med_{{ $id }}" name="fichas[{{ $id }}][con_med]" rows="3" class="rsv-campo"
-                              placeholder="Ej. asma leve, alergia a la penicilina. Escribe «Ninguna» si no aplica.">{{ old("fichas.$id.con_med", $f['con_med'] ?? '') }}</textarea>
+                <div class="sm:col-span-2" x-data="{ txt: @js(old("fichas.$id.con_med", $f['con_med'] ?? '')), add(v) { this.txt = (v === 'Ninguna' || !this.txt || this.txt === 'Ninguna') ? v : (this.txt.includes(v) ? this.txt : this.txt + ', ' + v) } }">
+                    <label for="con_med_{{ $id }}" class="rsv-etiqueta"><i class="fa-solid fa-notes-medical mr-1 text-pipocas-secundario"></i> Condiciones médicas, alergias o medicación</label>
+                    <div class="mb-2 flex flex-wrap gap-2">
+                        @foreach (['Ninguna', 'Asma', 'Hipertensión', 'Diabetes', 'Alergias', 'Problemas cardíacos', 'Embarazo'] as $chip)
+                            <button type="button" @click="add(@js($chip))"
+                                    class="rsv-chip border transition"
+                                    :class="txt.includes(@js($chip)) ? 'border-pipocas-principal bg-pipocas-principal text-white' : 'border-gray-200 bg-white text-pipocas-texto-2 hover:border-pipocas-complementario'">
+                                {{ $chip }}
+                            </button>
+                        @endforeach
+                    </div>
+                    <textarea id="con_med_{{ $id }}" name="fichas[{{ $id }}][con_med]" rows="3" class="rsv-campo" x-model="txt"
+                              placeholder="Detalla aquí cualquier condición, alergia o medicación. Escribe «Ninguna» si no aplica."></textarea>
                     @error("fichas.$id.con_med") <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -87,7 +109,8 @@
                 </div>
             </div>
 
-            <div class="mt-5 space-y-3 rounded-2xl bg-pipocas-fondo p-4 text-sm">
+            <div class="mt-6 space-y-3 rounded-2xl border border-pipocas-principal/10 bg-pipocas-fondo/70 p-4 text-sm">
+                <p class="flex items-center gap-2 font-bold text-pipocas-principal"><i class="fa-solid fa-file-shield"></i> Consentimiento</p>
                 <label class="flex cursor-pointer items-start gap-3">
                     <input type="checkbox" name="fichas[{{ $id }}][acp_ver]" value="1" class="rsv-check mt-0.5" @checked(old("fichas.$id.acp_ver"))>
                     <span>Declaro que la información médica es verdadera y que estoy en condiciones de realizar esta actividad a la altura indicada.</span>
@@ -103,7 +126,7 @@
             {{-- Firma digital --}}
             <div class="mt-5" x-data="firmaPad(@js(old("fichas.$id.fir_b64", '')))">
                 <div class="mb-1.5 flex items-center justify-between">
-                    <span class="rsv-etiqueta mb-0">Firma de {{ $p['nom_cpl'] }}</span>
+                    <span class="rsv-etiqueta mb-0 flex items-center gap-2"><i class="fa-solid fa-signature text-pipocas-secundario"></i> Firma digital <span x-show="firmado" x-cloak class="rsv-chip bg-emerald-50 text-emerald-700"><i class="fa-solid fa-check"></i> Firmado</span></span>
                     <button type="button" @click="limpiar()" x-show="firmado" x-cloak
                             class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-semibold text-pipocas-secundario transition hover:bg-pipocas-secundario/10">
                         <i class="fa-solid fa-eraser"></i> Limpiar
@@ -127,6 +150,7 @@
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <a href="{{ $urlAnterior }}" class="rsv-btn-sec"><i class="fa-solid fa-arrow-left"></i> Equipo</a>
         <button type="submit" class="rsv-btn">Revisar mi reserva <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
     </div>
 </form>
 @endsection

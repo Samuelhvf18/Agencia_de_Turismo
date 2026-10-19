@@ -57,77 +57,110 @@
 
 @section('titulo', 'Alquiler de equipo · ' . $tour->nom)
 
+@section('hero')
+    <x-reserva.hero :tour="$tour" etiqueta="Paso 3 · Opcional" titulo="¿Necesitan equipo?"
+                    subtitulo="Alquila lo que te falte y lo recibes al iniciar el tour. Si ya tienes tu equipo, continúa sin elegir nada." />
+@endsection
+
 @section('stepper')
     <x-reserva.stepper :actual="3" :enlaces="[url('/reservas/preview/salida'), $urlAnterior]" />
 @endsection
 
 @section('contenido')
 <form method="POST" action="{{ $accionForm }}"
-      x-data="equipoForm(@js($sel), @js($items))"
+      x-data="equipoForm(@js($sel), @js($items), {{ (int) ($participantes[0]['id'] ?? 0) }})"
       class="grid gap-6 lg:grid-cols-[1fr_340px] lg:items-start lg:gap-8">
     @csrf
 
-    <div class="space-y-6">
-        <div>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-pipocas-complementario/10 px-3 py-1 text-xs font-bold text-pipocas-complementario">
-                <i class="fa-solid fa-circle-info"></i> Paso opcional
-            </span>
-            <h1 class="mt-3 font-titulo text-3xl font-semibold leading-tight sm:text-4xl">¿Necesitan equipo?</h1>
-            <p class="mt-2 text-pipocas-texto-2">Alquila lo que te falte y lo recibes al iniciar el tour. Si ya tienes tu equipo, continúa sin elegir nada.</p>
-        </div>
-
+    <div class="min-w-0 space-y-6">
         @error('alquileres') <p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{{ $message }}</p> @enderror
 
+        {{-- Pestañas por participante --}}
+        <div class="rsv-sin-barra -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0" role="tablist">
+            @foreach ($participantes as $n => $p)
+                <button type="button" role="tab" @click="tab = {{ $p['id'] }}" :aria-selected="tab === {{ $p['id'] }}"
+                        class="flex shrink-0 items-center gap-2.5 rounded-2xl border-2 px-4 py-2.5 text-left text-sm transition"
+                        :class="tab === {{ $p['id'] }} ? 'border-pipocas-principal bg-pipocas-principal text-white shadow-lg shadow-pipocas-principal/20' : 'border-transparent bg-white text-pipocas-texto shadow-sm hover:border-pipocas-complementario/40'">
+                    <span class="grid h-8 w-8 place-items-center rounded-xl text-xs font-bold"
+                          :class="tab === {{ $p['id'] }} ? 'bg-white/20' : 'bg-pipocas-fondo text-pipocas-principal'">
+                        {{ collect(explode(' ', $p['nom_cpl']))->take(2)->map(fn ($x) => mb_substr($x, 0, 1))->join('') }}
+                    </span>
+                    <span class="leading-tight">
+                        <span class="block font-semibold">{{ \Illuminate\Support\Str::before($p['nom_cpl'] . ' ', ' ') }}</span>
+                        <span class="block text-xs opacity-75" x-text="cuenta({{ $p['id'] }}) ? cuenta({{ $p['id'] }}) + ' artículo(s) · Bs. ' + fmt(subtotalDe({{ $p['id'] }})) : 'Sin equipo'"></span>
+                    </span>
+                </button>
+            @endforeach
+        </div>
+
         @foreach ($participantes as $n => $p)
-            <section class="rsv-tarjeta">
-                <header class="mb-4 flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <span class="grid h-9 w-9 place-items-center rounded-full bg-pipocas-principal font-bold text-white">{{ $n + 1 }}</span>
-                        <h2 class="font-bold">{{ $p['nom_cpl'] }}</h2>
+            <section class="rsv-tarjeta" x-show="tab === {{ $p['id'] }}" @if ($n > 0) x-cloak @endif role="tabpanel">
+                <header class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-4">
+                        <span class="rsv-icono"><i class="fa-solid fa-person-hiking"></i></span>
+                        <div>
+                            <p class="text-[11px] font-bold uppercase tracking-wider text-pipocas-texto-2">Equipo para</p>
+                            <h2 class="font-titulo text-xl font-semibold">{{ $p['nom_cpl'] }}</h2>
+                        </div>
                     </div>
-                    <span class="text-sm font-semibold text-pipocas-principal" x-text="'Bs. ' + fmt(subtotalDe({{ $p['id'] }}))"></span>
+                    <span class="rsv-chip bg-pipocas-fondo text-sm text-pipocas-principal" x-text="'Subtotal Bs. ' + fmt(subtotalDe({{ $p['id'] }}))"></span>
                 </header>
 
-                <ul class="divide-y divide-gray-100">
+                <div class="grid gap-4 sm:grid-cols-2">
                     @foreach ($equipos as $e)
                         @php
                             $clave = $p['id'] . '-' . $e['tip_eqp_id'];
                             $campo = "alquileres.{$p['id']}.{$e['tip_eqp_id']}";
+                            $nombre = "alquileres[{$p['id']}][{$e['tip_eqp_id']}]";
                             $sinStock = collect($e['items'])->sum('cnt_dis') === 0;
                         @endphp
-                        <li class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-3 py-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
-                            <span class="grid h-11 w-11 place-items-center rounded-xl bg-pipocas-fondo text-pipocas-secundario">
-                                <i class="{{ $e['ico'] ?? 'fa-solid fa-toolbox' }}"></i>
-                            </span>
-                            <div class="min-w-0">
-                                <p class="flex flex-wrap items-center gap-2 font-semibold">
-                                    {{ $e['nom'] }}
-                                    @if ($e['eqp_cri'])
-                                        <span class="rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario" title="Equipo de seguridad recomendado">Recomendado</span>
-                                    @endif
-                                </p>
-                                <p class="text-sm text-pipocas-texto-2">{{ $e['des'] }} · <b class="text-pipocas-texto">Bs. {{ number_format($e['pre'], 2, ',', '.') }}</b></p>
+                        <fieldset class="flex flex-col rounded-2xl border-2 p-4 transition"
+                                  :class="sel['{{ $clave }}'] ? 'border-pipocas-principal bg-pipocas-principal/[0.03] shadow-md' : 'border-gray-200'">
+                            <legend class="sr-only">{{ $e['nom'] }} para {{ $p['nom_cpl'] }}</legend>
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-lg transition"
+                                      :class="sel['{{ $clave }}'] ? 'bg-pipocas-principal text-white' : 'bg-pipocas-secundario/10 text-pipocas-secundario'">
+                                    <i class="{{ $e['ico'] ?? 'fa-solid fa-toolbox' }}"></i>
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-bold leading-tight">{{ $e['nom'] }}</p>
+                                    <p class="mt-0.5 text-xs text-pipocas-texto-2">{{ $e['des'] }}</p>
+                                </div>
+                                <span class="shrink-0 text-right leading-tight">
+                                    <b class="block font-titulo text-lg text-pipocas-principal">Bs. {{ number_format($e['pre'], 0, ',', '.') }}</b>
+                                    <span class="text-[10px] text-pipocas-texto-2">por tour</span>
+                                </span>
                             </div>
-                            <div class="col-span-2 sm:col-span-1 sm:w-48">
-                                <label for="eq-{{ $clave }}" class="sr-only">Talla de {{ $e['nom'] }} para {{ $p['nom_cpl'] }}</label>
-                                <select id="eq-{{ $clave }}" name="alquileres[{{ $p['id'] }}][{{ $e['tip_eqp_id'] }}]"
-                                        x-model="sel['{{ $clave }}']" class="rsv-campo" @disabled($sinStock)>
-                                    <option value="">{{ $sinStock ? 'Sin stock' : 'No alquilar' }}</option>
+                            @if ($e['eqp_cri'])
+                                <p class="mt-3 flex items-center gap-1.5 text-xs font-semibold text-pipocas-secundario"><i class="fa-solid fa-shield-heart"></i> Recomendado por seguridad</p>
+                            @endif
+
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                @if ($sinStock)
+                                    <span class="rsv-chip bg-gray-100 text-gray-500"><i class="fa-solid fa-box-open"></i> Sin stock por ahora</span>
+                                @else
+                                    <label class="rsv-pastilla" :class="!sel['{{ $clave }}'] && 'rsv-pastilla-activa'">
+                                        <input type="radio" name="{{ $nombre }}" value="" x-model="sel['{{ $clave }}']" class="sr-only"> No
+                                    </label>
                                     @foreach ($e['items'] as $it)
-                                        <option value="{{ $it['id'] }}" :disabled="libres({{ $it['id'] }}, '{{ $clave }}') <= 0">
-                                            Talla {{ $it['tal'] }}
-                                        </option>
+                                        <label class="rsv-pastilla min-w-[3rem]"
+                                               :class="{ 'rsv-pastilla-activa': sel['{{ $clave }}'] == {{ $it['id'] }}, '!cursor-not-allowed !border-dashed opacity-40 line-through': libres({{ $it['id'] }}, '{{ $clave }}') <= 0 }"
+                                               title="{{ $it['cnt_dis'] }} disponibles">
+                                            <input type="radio" name="{{ $nombre }}" value="{{ $it['id'] }}" x-model="sel['{{ $clave }}']" class="sr-only"
+                                                   :disabled="libres({{ $it['id'] }}, '{{ $clave }}') <= 0">
+                                            {{ $it['tal'] }}
+                                        </label>
                                     @endforeach
-                                </select>
-                                <p class="mt-1 text-xs" x-show="sel['{{ $clave }}']" x-cloak>
-                                    <span :class="libres(sel['{{ $clave }}'], '{{ $clave }}') <= 1 ? 'text-pipocas-secundario font-semibold' : 'text-pipocas-texto-2'"
-                                          x-text="'Quedan ' + (libres(sel['{{ $clave }}'], '{{ $clave }}') - 1) + ' en esta talla'"></span>
-                                </p>
-                                @error($campo) <p class="rsv-error">{{ $message }}</p> @enderror
+                                @endif
                             </div>
-                        </li>
+                            <p class="mt-2 text-xs" x-show="sel['{{ $clave }}']" x-cloak>
+                                <span :class="libres(sel['{{ $clave }}'], '{{ $clave }}') <= 1 ? 'font-semibold text-pipocas-secundario' : 'text-pipocas-texto-2'"
+                                      x-text="'Quedan ' + (libres(sel['{{ $clave }}'], '{{ $clave }}') - 1) + ' en esta talla'"></span>
+                            </p>
+                            @error($campo) <p class="rsv-error">{{ $message }}</p> @enderror
+                        </fieldset>
                     @endforeach
-                </ul>
+                </div>
             </section>
         @endforeach
 
@@ -140,8 +173,12 @@
         </div>
     </div>
 
-    <aside class="space-y-4 lg:sticky lg:top-6">
+    <aside class="space-y-4 lg:sticky lg:top-24">
         <x-reserva.resumen-tour :tour="$tour" :salida="$salida" :cnt="count($participantes)" extra-expr="total()" />
+        <div class="flex gap-3 rounded-3xl border border-pipocas-principal/10 bg-white/70 p-5 text-sm">
+            <i class="fa-solid fa-box-open mt-0.5 text-lg text-pipocas-secundario"></i>
+            <p class="text-pipocas-texto-2"><b class="text-pipocas-texto">Entrega y devolución.</b> El guía entrega el equipo al inicio del tour y lo recoge al finalizar.</p>
+        </div>
     </aside>
 </form>
 @endsection
@@ -149,8 +186,9 @@
 @push('scripts')
 <script>
     // Alquiler de equipo: precio y stock en vivo (el stock real lo valida el controlador)
-    function equipoForm(sel, items) {
+    function equipoForm(sel, items, primero) {
         return {
+            tab: primero,
             sel: sel,
             items: items,
             usados(id, excepto) {
@@ -164,6 +202,9 @@
                 return Object.entries(this.sel)
                     .filter(([k, v]) => v && k.startsWith(ptc + '-'))
                     .reduce((s, [, v]) => s + (this.items[v]?.pre || 0), 0);
+            },
+            cuenta(ptc) {
+                return Object.entries(this.sel).filter(([k, v]) => v && k.startsWith(ptc + "-")).length;
             },
             total() {
                 return Object.values(this.sel).reduce((s, v) => s + (v ? (this.items[v]?.pre || 0) : 0), 0);
