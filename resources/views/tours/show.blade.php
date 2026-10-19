@@ -144,7 +144,8 @@ a{color:inherit;text-decoration:none}
       <li><i class="fa-solid fa-van-shuttle"></i> Transporte desde La Paz</li>
       <li><i class="fa-solid fa-qrcode"></i> Ticket con código QR</li>
     </ul>
-    <a class="btn" href="{{ Route::has('login') ? route('login') : '#' }}"><i class="fa-solid fa-calendar-check"></i> Reservar este tour</a>
+    {{-- Original: <a class="btn" href="{{ Route::has('login') ? route('login') : '#' }}"> --}}
+    <a class="btn" href="{{ url('/reservas/preview/salida') }}"><i class="fa-solid fa-calendar-check"></i> Reservar este tour</a>
   </aside>
 </main>
 

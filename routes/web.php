@@ -27,3 +27,13 @@ Route::middleware([
         return view('admin.dashboard');
     })->name('dashboard');
 });
+
+// PREVIEW FRONTEND — reemplazar por rutas del controlador
+// Vistas del Motor de Reservas (Módulo 05) con datos de ejemplo. Aceptan GET y POST
+// para poder recorrer el flujo enviando los formularios sin backend.
+Route::prefix('reservas/preview')->name('reservas.preview.')->group(function () {
+    foreach (['salida', 'participantes', 'equipo', 'ficha', 'resumen', 'confirmada', 'consultar', 'estado'] as $vista) {
+        Route::match(['get', 'post'], $vista, fn () => view("reservas.$vista"))->name($vista);
+    }
+});
+// FIN PREVIEW FRONTEND

@@ -5,3 +5,31 @@
 [x-cloak] {
     display: none;
 }
+
+/* Piezas reutilizables del motor de reservas (layouts/reserva.blade.php) */
+@layer components {
+    .rsv-tarjeta {
+        @apply rounded-3xl bg-white p-5 shadow-tarjeta sm:p-7;
+    }
+    .rsv-titulo {
+        @apply font-titulo text-xl font-semibold text-pipocas-principal sm:text-2xl;
+    }
+    .rsv-etiqueta {
+        @apply mb-1.5 block text-sm font-semibold text-pipocas-texto;
+    }
+    .rsv-campo {
+        @apply block w-full rounded-xl border-gray-300 bg-white text-sm text-pipocas-texto shadow-sm placeholder:text-gray-400 focus:border-pipocas-principal focus:ring-pipocas-principal;
+    }
+    .rsv-error {
+        @apply mt-1 text-xs font-medium text-red-600;
+    }
+    .rsv-btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-pipocas-principal px-6 py-3.5 text-sm font-bold text-white transition hover:bg-pipocas-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-pipocas-acento focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .rsv-btn-sec {
+        @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-pipocas-principal/30 bg-white px-6 py-3.5 text-sm font-bold text-pipocas-principal transition hover:border-pipocas-principal hover:bg-pipocas-fondo;
+    }
+    .rsv-check {
+        @apply h-5 w-5 rounded border-gray-300 text-pipocas-principal focus:ring-pipocas-principal;
+    }
+}
