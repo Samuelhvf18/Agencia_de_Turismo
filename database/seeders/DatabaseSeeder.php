@@ -19,5 +19,11 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Módulo 07 — Investigación Operativa II (Colas + Cadenas de Markov).
+        // Catálogo de estados Markov, matriz de transición inicial y parámetros
+        // iniciales M/M/c/K por tour. Requiere que exista al menos la tabla `tours`;
+        // los parámetros se saltan si no hay tours cargados.
+        $this->call(IoColasMarkovSeeder::class);
     }
 }
