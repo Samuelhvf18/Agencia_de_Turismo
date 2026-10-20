@@ -45,6 +45,7 @@ Route::middleware([
         Route::view('/personal', 'admin.panels.personal')->name('personal');
         Route::view('/reservas', 'admin.panels.reservas')->name('reservas');
         Route::view('/finanzas', 'admin.panels.finanzas')->name('finanzas');
+        Route::view('/analitica', 'admin.panels.analitica')->name('analitica');
 
         // Módulo 07 — Investigación Operativa II: paneles de teoría de colas y cadenas de Markov
         Route::get('/io/colas', [AnalisisColasController::class, 'index'])->name('io.colas');

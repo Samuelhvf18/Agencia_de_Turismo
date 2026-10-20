@@ -72,3 +72,13 @@ test('la bitácora registra los cambios sin copiar la contraseña', function () 
         ->and($cambio->val_ant)->toHaveKey('tel')
         ->and($cambio->val_nvo['tel'])->toBe('70000000');
 });
+
+test('todas las pantallas del panel cargan para el administrador', function (string $ruta) {
+    $this->actingAs(User::factory()->rol(User::ROL_ADMIN)->create())
+        ->get(route($ruta))
+        ->assertOk();
+})->with([
+    'admin.dashboard', 'admin.operaciones', 'admin.inventario', 'admin.transporte', 'admin.personal',
+    'admin.tours', 'admin.reservas', 'admin.finanzas', 'admin.analitica', 'admin.auditoria',
+    'admin.io.colas', 'admin.io.ciclo-vida',
+]);

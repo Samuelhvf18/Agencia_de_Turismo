@@ -1,252 +1,146 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Panel de Administración y Operaciones | Pipocas La Paz</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body class="bg-slate-100 text-slate-800 antialiased font-sans flex h-screen overflow-hidden" x-data="{ tab: 'resumen' }">
-    
-    <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col justify-between border-r border-slate-800">
-        <div>
-            <div class="h-20 flex items-center px-6 gap-3 border-b border-slate-800">
-                <div class="h-10 w-10 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950 font-bold">
-                    <i class="fa-solid fa-mountain-sun"></i>
-                </div>
-                <div>
-                    <span class="text-white font-black tracking-tight text-lg">Pipocas Admin</span>
-                    <p class="text-[10px] text-amber-400 font-medium">Sagárnaga, La Paz</p>
-                </div>
-            </div>
-            
-            <nav class="p-4 space-y-1.5 text-sm font-medium">
-                <button @click="tab = 'resumen'" :class="tab === 'resumen' ? 'bg-amber-500 text-slate-950 font-bold' : 'hover:bg-slate-800 text-slate-300'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition">
-                    <i class="fa-solid fa-chart-pie w-5"></i> Resumen & Dashboard
-                </button>
-                <button @click="tab = 'operaciones'" :class="tab === 'operaciones' ? 'bg-amber-500 text-slate-950 font-bold' : 'hover:bg-slate-800 text-slate-300'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition">
-                    <i class="fa-solid fa-users-gear w-5"></i> Operaciones & Salidas
-                </button>
-                <button @click="tab = 'inventario'" :class="tab === 'inventario' ? 'bg-amber-500 text-slate-950 font-bold' : 'hover:bg-slate-800 text-slate-300'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition">
-                    <i class="fa-solid fa-boxes-stacked w-5"></i> Inventario & EOQ
-                </button>
-                <button @click="tab = 'auditoria'" :class="tab === 'auditoria' ? 'bg-amber-500 text-slate-950 font-bold' : 'hover:bg-slate-800 text-slate-300'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition">
-                    <i class="fa-solid fa-shield-halved w-5"></i> Bitácora de Auditoría
-                </button>
-            </nav>
+@extends('layouts.admin')
+
+@section('header-title', 'Panel de Control')
+
+@section('content')
+<div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#1F5F8B]">
+            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Ingresos Totales (Hoy)</p>
+            <h3 class="text-3xl font-extrabold mt-2" style="color: #1F5F8B;">$ 4,850.00</h3>
+            <span class="text-xs mt-2 inline-block font-medium text-emerald-600">↑ +12% vs ayer</span>
         </div>
-        
-        <div class="p-4 border-t border-slate-800">
-            <a href="/" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-rose-400 text-sm font-semibold transition">
-                <i class="fa-solid fa-arrow-right-from-bracket w-5"></i> Volver al Portal
-            </a>
+        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#C96F4A]">
+            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Reservas del Día</p>
+            <h3 class="text-3xl font-extrabold mt-2" style="color: #C96F4A;">38</h3>
+            <span class="text-xs mt-2 inline-block font-medium" style="color: #6B6F72;">8 pendientes de pago</span>
         </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        
-        <!-- Topbar -->
-        <header class="h-20 bg-white border-b border-slate-200 px-6 flex items-center justify-between shadow-sm">
-            <h2 class="text-xl font-extrabold text-slate-900" x-text="tab === 'resumen' ? 'Dashboard Estadístico y Predictivo' : (tab === 'operaciones' ? 'Gestión de Operaciones, Guías y Flota' : (tab === 'inventario' ? 'Control de Inventario y Modelo EOQ' : 'Bitácora de Auditoría de Acciones'))"></h2>
-            
-            <div class="flex items-center gap-4">
-                <span class="text-sm font-semibold text-slate-700">Administrador (Sagárnaga)</span>
-                <div class="h-10 w-10 rounded-xl bg-amber-600 text-white font-bold flex items-center justify-center shadow">AD</div>
-            </div>
-        </header>
-
-        <!-- Content Body -->
-        <main class="flex-1 overflow-y-auto p-6 lg:p-8">
-            
-            <!-- Tab 1: Resumen -->
-            <div x-show="tab === 'resumen'" class="space-y-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Reservas del Mes</p>
-                        <p class="text-3xl font-black text-slate-900 mt-2">142</p>
-                        <span class="text-xs text-emerald-600 font-semibold mt-1 block"><i class="fa-solid fa-arrow-up"></i> +18% vs mes anterior</span>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tours Más Solicitados</p>
-                        <p class="text-xl font-black text-slate-900 mt-2">Biking Camino Muerte</p>
-                        <span class="text-xs text-amber-600 font-semibold mt-1 block">64 reservas este mes</span>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ingresos Totales (Bs)</p>
-                        <p class="text-3xl font-black text-slate-900 mt-2">Bs. 48,600</p>
-                        <span class="text-xs text-emerald-600 font-semibold mt-1 block">Facturación automática activa</span>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Nacionalidad Líder</p>
-                        <p class="text-2xl font-black text-slate-900 mt-2">🇩🇪 🇫🇷 🇺🇸</p>
-                        <span class="text-xs text-slate-500 font-semibold mt-1 block">Alemania, Francia, EE.UU.</span>
-                    </div>
-                </div>
-
-                <!-- Proyección de Demanda -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-900 mb-4">Proyección de Demanda por Tour (Próximos Meses)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
-                                <tr>
-                                    <th class="p-3 rounded-l-xl">Tour / Ruta</th>
-                                    <th class="p-3">Mes</th>
-                                    <th class="p-3">Demanda Proyectada</th>
-                                    <th class="p-3 rounded-r-xl">Versión del Modelo</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium">
-                                <tr>
-                                    <td class="p-3">Biking Camino de la Muerte (TUR-2026-LPZ01)</td>
-                                    <td class="p-3">Mayo 2026</td>
-                                    <td class="p-3 text-amber-600 font-bold">85 reservas</td>
-                                    <td class="p-3 text-slate-400 text-xs">ARIMA-v2.1</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3">Glaciar Huayna Potosí (TUR-2026-LPZ02)</td>
-                                    <td class="p-3">Mayo 2026</td>
-                                    <td class="p-3 text-amber-600 font-bold">42 reservas</td>
-                                    <td class="p-3 text-slate-400 text-xs">ARIMA-v2.1</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 2: Operaciones -->
-            <div x-show="tab === 'operaciones'" class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-bold text-slate-900">Programación de Salidas & Asignación Óptima (Investigación Operativa II)</h3>
-                        <button onclick="Swal.fire('Optimización Ejecutada', 'El modelo asignó guías equilibrando horas semanales y vehículos maximizando ocupación.', 'success')" class="px-4 py-2 rounded-xl bg-amber-600 text-white font-semibold text-sm hover:bg-amber-700 transition shadow">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Ejecutar Modelo de Asignación
-                        </button>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
-                                <tr>
-                                    <th class="p-3 rounded-l-xl">Salida #</th>
-                                    <th class="p-3">Tour</th>
-                                    <th class="p-3">Fecha / Hora</th>
-                                    <th class="p-3">Guía Asignado</th>
-                                    <th class="p-3">Vehículo (Flota)</th>
-                                    <th class="p-3">Ocupación</th>
-                                    <th class="p-3 rounded-r-xl">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium">
-                                <tr>
-                                    <td class="p-3 font-mono font-bold">SAL-501</td>
-                                    <td class="p-3">Biking Camino de la Muerte</td>
-                                    <td class="p-3">05/04/2026 • 07:30</td>
-                                    <td class="p-3 text-emerald-600">Juan Pérez (Exp: 6 años)</td>
-                                    <td class="p-3">Minibus 15 (28-LPZ)</td>
-                                    <td class="p-3">12/12 (100%)</td>
-                                    <td class="p-3"><span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">Programada</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-mono font-bold">SAL-502</td>
-                                    <td class="p-3">Huayna Potosí Glacier</td>
-                                    <td class="p-3">05/04/2026 • 05:00</td>
-                                    <td class="p-3 text-emerald-600">Carlos Quispe (Exp: 9 años)</td>
-                                    <td class="p-3">Van 4x4 (09-LPZ)</td>
-                                    <td class="p-3">6/8 (75%)</td>
-                                    <td class="p-3"><span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">Programada</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 3: Inventario y EOQ -->
-            <div x-show="tab === 'inventario'" class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-900 mb-4">Gestión de Inventario Crítico & Modelo EOQ (Cantidad Económica de Pedido)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
-                                <tr>
-                                    <th class="p-3 rounded-l-xl">Tipo de Equipo</th>
-                                    <th class="p-3">Stock Actual</th>
-                                    <th class="p-3">Costo Orden (S)</th>
-                                    <th class="p-3">Costo Mantener (H)</th>
-                                    <th class="p-3">EOQ Calculado</th>
-                                    <th class="p-3 rounded-r-xl">Punto Reorden</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium">
-                                <tr>
-                                    <td class="p-3 font-bold">Bicicletas Doble Suspensión</td>
-                                    <td class="p-3 text-emerald-600 font-bold">24 unidades</td>
-                                    <td class="p-3">Bs. 250</td>
-                                    <td class="p-3">Bs. 80 / año</td>
-                                    <td class="p-3 text-amber-600 font-black">18 unidades</td>
-                                    <td class="p-3">8 unidades</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-bold">Cascos Certificados EN 1078</td>
-                                    <td class="p-3 text-emerald-600 font-bold">35 unidades</td>
-                                    <td class="p-3">Bs. 120</td>
-                                    <td class="p-3">Bs. 25 / año</td>
-                                    <td class="p-3 text-amber-600 font-black">22 unidades</td>
-                                    <td class="p-3">10 unidades</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 4: Bitácora de Auditoría -->
-            <div x-show="tab === 'auditoria'" class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-900 mb-4">Bitácora de Auditoría de Acciones del Sistema (Observers Laravel)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
-                                <tr>
-                                    <th class="p-3 rounded-l-xl">Fecha / Hora</th>
-                                    <th class="p-3">Usuario</th>
-                                    <th class="p-3">Tabla Afectada</th>
-                                    <th class="p-3">Acción</th>
-                                    <th class="p-3">Dirección IP</th>
-                                    <th class="p-3 rounded-r-xl">Detalle JSON</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium font-mono text-xs">
-                                <tr>
-                                    <td class="p-3">05/04/2026 10:42:15</td>
-                                    <td class="p-3">Samuel Villca (Admin)</td>
-                                    <td class="p-3 text-amber-600">tours</td>
-                                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">CREATE</span></td>
-                                    <td class="p-3">192.168.1.45</td>
-                                    <td class="p-3 text-slate-500">{"cod": "TUR-2026-LPZ01", "nom": "Biking..."}</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3">05/04/2026 09:15:22</td>
-                                    <td class="p-3">Andres Cordero (Operaciones)</td>
-                                    <td class="p-3 text-amber-600">reservas</td>
-                                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">UPDATE</span></td>
-                                    <td class="p-3">192.168.1.12</td>
-                                    <td class="p-3 text-slate-500">{"est": "pendiente" -> "confirmada"}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </main>
+        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#F4C95D]">
+            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Ocupación General</p>
+            <h3 class="text-3xl font-extrabold mt-2 text-[#947412]">84.5%</h3>
+            <span class="text-xs mt-2 inline-block font-medium text-[#6B6F72]">Flota casi al límite</span>
+        </div>
     </div>
-</body>
-</html>
+
+    <!-- Panel de Alertas Interactivas con SweetAlert2 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+            <h4 class="text-base font-bold mb-4" style="color: #343A40;">🔔 Panel de Alertas del Sistema</h4>
+            <div class="space-y-3">
+                <div onclick="mostrarAlertaFichaMedica('Juan Pérez', '1042')" class="p-3 bg-[#F4C95D]/10 border border-[#F4C95D]/40 rounded-xl text-sm text-[#6B4F3A] cursor-pointer hover:bg-[#F4C95D]/20 transition flex justify-between items-center">
+                    <span>⚠️ Alerta: Ficha médica de riesgo pendiente de validación para <strong>Juan Pérez</strong> (Reserva #1042).</span>
+                    <span class="text-xs font-bold underline" style="color: #1F5F8B;">Ver detalle</span>
+                </div>
+                <div onclick="mostrarAlertaPago('3091', '150.00')" class="p-3 bg-[#C96F4A]/10 border border-[#C96F4A]/40 rounded-xl text-sm text-[#6B4F3A] cursor-pointer hover:bg-[#C96F4A]/20 transition flex justify-between items-center">
+                    <span>⚡ Pago parcial detectado en factura #3091 por un valor de $150.00.</span>
+                    <span class="text-xs font-bold underline" style="color: #1F5F8B;">Ver detalle</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+            <div>
+                <h4 class="text-base font-bold mb-2" style="color: #343A40;">⚡ Acciones Directas</h4>
+                <p class="text-xs mb-4" style="color: #6B6F72;">Emitir comprobantes o verificar códigos QR rápidamente.</p>
+            </div>
+            <div class="space-y-2">
+                <button onclick="validarBoletoQR('BOL-9982')" style="background-color: #1F5F8B;" class="w-full py-2.5 hover:bg-[#174870] text-white rounded-xl font-medium text-sm transition shadow">Validar Boleto QR</button>
+                <button onclick="nuevaFacturaModal()" style="background-color: #C96F4A;" class="w-full py-2.5 hover:bg-[#b55e3b] text-white rounded-xl font-medium text-sm transition shadow">Nueva Factura</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function mostrarAlertaFichaMedica(pasajero, reserva) {
+    Swal.fire({
+        title: 'Ficha Médica de Riesgo',
+        html: `<p class="text-sm">El pasajero <strong>${pasajero}</strong> registró hipertensión leve en su ficha médica para la reserva <strong>#${reserva}</strong>.</p>`,
+        icon: 'warning',
+        iconColor: '#C96F4A',
+        showCancelButton: true,
+        confirmButtonText: 'Aprobar Pasajero',
+        cancelButtonText: 'Cerrar',
+        confirmButtonColor: '#1F5F8B',
+        cancelButtonColor: '#6B6F72',
+        background: '#FFFFFF',
+        color: '#343A40'
+    });
+}
+
+function mostrarAlertaPago(factura, monto) {
+    Swal.fire({
+        title: 'Pago Parcial Detectado',
+        text: `La factura #${factura} registra un abono pendiente de $${monto}.`,
+        icon: 'info',
+        iconColor: '#1F5F8B',
+        confirmButtonText: 'Ir a Finanzas',
+        confirmButtonColor: '#C96F4A',
+        background: '#FFFFFF',
+        color: '#343A40'
+    });
+}
+
+function validarBoletoQR(codigo) {
+    Swal.fire({
+        title: 'Validación de QR',
+        text: `Verificando boleto ${codigo}...`,
+        timer: 1200,
+        showConfirmButton: false,
+        background: '#FFFFFF',
+        color: '#343A40',
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    }).then(() => {
+        Swal.fire({
+            title: '¡Boleto Válido!',
+            text: 'El código QR pertenece a la Reserva #RES-5091 (Confirmada).',
+            icon: 'success',
+            iconColor: '#1F5F8B',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#1F5F8B',
+            background: '#FFFFFF',
+            color: '#343A40'
+        });
+    });
+}
+
+function nuevaFacturaModal() {
+    Swal.fire({
+        title: 'Emitir Nueva Factura',
+        html:
+            '<input id="swal-input1" class="swal2-input" placeholder="Nombre o Razón Social">' +
+            '<input id="swal-input2" class="swal2-input" placeholder="NIT / CI">' +
+            '<input id="swal-input3" class="swal2-input" placeholder="Monto Total ($)">',
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Generar Comprobante',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#C96F4A',
+        cancelButtonColor: '#6B6F72',
+        background: '#FFFFFF',
+        color: '#343A40',
+        preConfirm: () => {
+            return [
+                document.getElementById('swal-input1').value,
+                document.getElementById('swal-input2').value,
+                document.getElementById('swal-input3').value
+            ]
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Factura Generada',
+                text: 'El comprobante ha sido registrado con éxito.',
+                icon: 'success',
+                iconColor: '#1F5F8B',
+                confirmButtonColor: '#1F5F8B'
+            });
+        }
+    });
+}
+</script>
+@endpush
+@endsection
