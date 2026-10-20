@@ -1,0 +1,463 @@
+{
+  "name": "Pipocas · Chatbot turístico con IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pipocas-chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f9e34350-e283-5d0f-a578-7ca609126389",
+      "name": "Webhook chatbot",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "035e6416-bcd2-5ac1-a2dc-a8fbfb614b92"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "4ce2d395-4bc6-5e39-8de5-a839a3e4d87d",
+              "leftValue": "={{ $json.headers['x-pipocas-token'] }}",
+              "rightValue": "={{ $env.PIPOCAS_N8N_TOKEN }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55f64f6a-9609-5ad4-9e71-e4968083a9b7",
+      "name": "¿Token válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.mensaje }}",
+        "options": {
+          "systemMessage": "=Eres el asistente turístico de Pipocas, agencia de viajes en la calle Sagárnaga, La Paz (Bolivia). Responde SIEMPRE en el idioma indicado en 'idioma' ({{ $json.body.idioma }}): 'es' = español, 'en' = inglés. Sé breve y amable. Usa las herramientas: 'buscar_tours' para recomendar tours ACTIVOS según tiempo (horas_max), condición física (dificultad: facil, moderado, dificil, experto) y presupuesto en bolivianos; 'preguntas_frecuentes' para altura, qué llevar, pagos, cancelación, horarios y ficha médica; 'consultar_reserva' solo si el cliente da el código RES-XXXXXX y el correo (solo lectura, nunca modifiques reservas ni inventes datos). Si el cliente pide hablar con una persona, está molesto o la consulta excede tus herramientas, llama a 'derivar_a_humano'. Incluye el enlace (url) de cada tour recomendado. No prometas precios ni cupos que no vengan de las herramientas.",
+          "maxIterations": 6
+        }
+      },
+      "id": "3b7c7346-9b22-546f-832d-51f4b108dcaf",
+      "name": "Agente turístico",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "model": "claude-sonnet-5-5",
+        "options": {
+          "maxTokensToSample": 800,
+          "temperature": 0.3
+        }
+      },
+      "id": "9b47b07f-ec78-53a7-a77a-db55e07092c2",
+      "name": "Claude",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        380,
+        460
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "",
+          "name": "Anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook chatbot').item.json.body.conversacion_id }}",
+        "contextWindowLength": 10
+      },
+      "id": "d0e38d08-bc14-58e6-9fe5-dd88db16471e",
+      "name": "Memoria de la conversación",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        520,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca tours activos. Parámetros opcionales: horas_max (número), dificultad (facil|moderado|dificil|experto), presupuesto (Bs), categoria.",
+        "method": "GET",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/chatbot/tours",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-Pipocas-Token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "horas_max",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "dificultad",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "presupuesto",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "categoria",
+              "valueProvider": "modelOptional"
+            }
+          ]
+        }
+      },
+      "id": "53d75858-b8d9-5fdd-b1e2-35d8d9725142",
+      "name": "buscar_tours",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Respuestas oficiales: tema (altura|que_llevar|pagos|cancelacion|horarios|ficha_medica) e idioma (es|en).",
+        "method": "GET",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/chatbot/faq",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-Pipocas-Token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "tema",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "idioma",
+              "valueProvider": "modelOptional"
+            }
+          ]
+        }
+      },
+      "id": "6b4c6f28-1108-57f5-871d-79473602be04",
+      "name": "preguntas_frecuentes",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Estado de una reserva en solo lectura. Requiere codigo (RES-XXXXXX) y correo del contacto.",
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/chatbot/reserva",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-Pipocas-Token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "codigo",
+              "valueProvider": "modelRequired"
+            },
+            {
+              "name": "correo",
+              "valueProvider": "modelRequired"
+            }
+          ]
+        }
+      },
+      "id": "639196be-2790-57c6-8a6b-9e5ed52937ec",
+      "name": "consultar_reserva",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        940,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Deriva la conversación a un asesor humano de Pipocas. Indica el motivo.",
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/chatbot/derivar",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-Pipocas-Token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "conversacion_id",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Webhook chatbot').item.json.body.conversacion_id }}"
+            },
+            {
+              "name": "motivo",
+              "valueProvider": "modelOptional"
+            }
+          ]
+        }
+      },
+      "id": "70a736eb-669b-5c0d-876c-3c1b1f052949",
+      "name": "derivar_a_humano",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1080,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const salida = $input.first().json.output || '';\nconst usados = JSON.stringify($input.first().json.intermediateSteps || []);\nreturn [{ json: {\n  respuesta: salida,\n  intencion: usados.includes('consultar_reserva') ? 'consulta_reserva' : usados.includes('buscar_tours') ? 'recomendacion' : usados.includes('preguntas_frecuentes') ? 'faq' : 'conversacion',\n  derivar: usados.includes('derivar_a_humano'),\n} }];"
+      },
+      "id": "22bb9ac7-0d3d-5f56-aba0-c678bac12754",
+      "name": "Formato de respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "1c17ae2f-92da-5b88-a732-4c30930a27d9",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error: 'token' } }}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "883663da-e896-5b41-95d2-4c09b425595c",
+      "name": "Responder 401",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        620
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook chatbot": {
+      "main": [
+        [
+          {
+            "node": "¿Token válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Token válido?": {
+      "main": [
+        [
+          {
+            "node": "Agente turístico",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 401",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente turístico": {
+      "main": [
+        [
+          {
+            "node": "Formato de respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formato de respuesta": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente turístico",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria de la conversación": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente turístico",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_tours": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente turístico",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "preguntas_frecuentes": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente turístico",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_reserva": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente turístico",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "derivar_a_humano": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente turístico",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/La_Paz"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

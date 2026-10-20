@@ -62,6 +62,10 @@
                         Finanzas & Facturación
                     </a>
 
+                    <a href="{{ route('admin.chatbot') }}" class="block px-3.5 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('admin.chatbot*') ? 'bg-[#C96F4A] text-white shadow' : 'text-white/90 hover:bg-[#174870]' }}">
+                        Chatbot (atención humana)
+                    </a>
+
                     <a href="{{ route('admin.analitica') }}" class="block px-3.5 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('admin.analitica') ? 'bg-[#C96F4A] text-white shadow' : 'text-white/90 hover:bg-[#174870]' }}">
                         Analítica & Reportes
                     </a>

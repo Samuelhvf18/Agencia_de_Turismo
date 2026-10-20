@@ -62,3 +62,18 @@ Cuerpo que recibe n8n:
 Tipos: `reserva_confirmada`, `pago_recibido`, `comprobante_emitido`, `recordatorio_salida`, `salida_reprogramada`, `salida_cancelada`, `alerta_reposicion`, `alerta_seguridad` y `derivacion_chatbot`.
 
 Sin `N8N_WEBHOOK_NOTIFICACIONES`, Laravel envía el correo directamente (`AvisoMail`). Los boletos y el comprobante en PDF siempre los adjunta Laravel (`EnviarBoletosReserva`).
+
+## Chatbot (`chatbot.json`)
+
+`ChatbotService` guarda cada mensaje en `conversaciones_chatbot` y `mensajes_chatbot` y lo envía a `N8N_WEBHOOK_CHATBOT` con `{conversacion_id, mensaje, idioma, historial, usuario}`. El flujo valida el token y pasa el mensaje a un agente de IA (nodo AI Agent con el modelo de Anthropic `claude-sonnet-5-5` y memoria por conversación) que usa cuatro herramientas de Laravel:
+
+| Herramienta | Endpoint | Uso |
+|---|---|---|
+| `buscar_tours` | `GET /api/n8n/chatbot/tours` | Tours activos por horas, dificultad, presupuesto y categoría (RF-29) |
+| `preguntas_frecuentes` | `GET /api/n8n/chatbot/faq` | Respuestas oficiales (RF-30) |
+| `consultar_reserva` | `POST /api/n8n/chatbot/reserva` | Estado de una reserva en solo lectura, con código y correo |
+| `derivar_a_humano` | `POST /api/n8n/chatbot/derivar` | Marca `der_hum` y avisa a operaciones (RF-31) |
+
+La respuesta debe ser `{"respuesta": "...", "intencion": "...", "derivar": false}`. El agente responde en el idioma del cliente (`idioma`: `es` o `en`).
+
+Configura en n8n la credencial **Anthropic** (API key) y las variables `PIPOCAS_URL` y `PIPOCAS_N8N_TOKEN`. Si n8n no está configurado, tarda más de 20 segundos o falla, Laravel responde con el asistente local por reglas (`AsistenteLocal`), que usa las mismas herramientas (RNF-20). Las conversaciones derivadas se atienden en *Admin → Chatbot (atención humana)*.

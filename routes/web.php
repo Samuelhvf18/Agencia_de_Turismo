@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AnalisisColasController;
 use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\Admin\CatalogoAdminController;
+use App\Http\Controllers\Admin\ChatbotAdminController;
 use App\Http\Controllers\Admin\CicloVidaClienteController;
 use App\Http\Controllers\Admin\FinanzasController;
 use App\Http\Controllers\Admin\FlotaController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Admin\PersonalController;
 use App\Http\Controllers\Admin\SalidasController;
 use App\Http\Controllers\Admin\ReservasAdminController;
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\Pagos\PagoController;
 use App\Http\Controllers\Reservas\ConsultaReservaController;
@@ -69,8 +71,10 @@ Route::get('/pasarela/{ref}', [PagoController::class, 'pasarela'])->name('pasare
 Route::post('/pasarela/{ref}', [PagoController::class, 'resolver'])->name('pasarela.resolver');
 Route::post('/webhooks/pasarela', [PagoController::class, 'webhook'])->name('webhooks.pasarela');
 
-// Asistente turístico: es público (turistas e invitados, RF-28). Hoy es maqueta; la fase 6 lo conecta a n8n.
-Route::view('/chatbot', 'chatbot.index')->name('chatbot');
+// Asistente turístico: público (turistas e invitados, RF-28); IA en n8n con respaldo local.
+Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
+Route::post('/chatbot/mensajes', [ChatbotController::class, 'enviar'])->middleware('throttle:20,1')->name('chatbot.enviar');
+Route::get('/chatbot/mensajes', [ChatbotController::class, 'mensajes'])->middleware('throttle:60,1')->name('chatbot.mensajes');
 
 /*
 |--------------------------------------------------------------------------
@@ -129,6 +133,12 @@ Route::middleware([
         Route::post('/reservas/{reserva}/cancelar', [ReservasAdminController::class, 'cancelar'])->name('reservas.cancelar');
 
         Route::get('/finanzas', [FinanzasController::class, 'index'])->name('finanzas');
+
+        // Chatbot: atención humana de conversaciones derivadas (RF-31)
+        Route::get('/chatbot', [ChatbotAdminController::class, 'index'])->name('chatbot');
+        Route::get('/chatbot/{conversacion}', [ChatbotAdminController::class, 'show'])->name('chatbot.show');
+        Route::post('/chatbot/{conversacion}/responder', [ChatbotAdminController::class, 'responder'])->name('chatbot.responder');
+        Route::post('/chatbot/{conversacion}/cerrar', [ChatbotAdminController::class, 'cerrar'])->name('chatbot.cerrar');
         Route::post('/finanzas/reservas/{reserva}/efectivo', [FinanzasController::class, 'efectivo'])->name('finanzas.efectivo');
         Route::get('/finanzas/comprobantes/{comprobante}.pdf', [FinanzasController::class, 'comprobantePdf'])->name('finanzas.comprobante');
         Route::post('/finanzas/comprobantes/{comprobante}/anular', [FinanzasController::class, 'anular'])
