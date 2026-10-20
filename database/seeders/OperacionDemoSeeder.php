@@ -10,6 +10,7 @@ use App\Models\SalidaTour;
 use App\Models\TipoEquipo;
 use App\Models\Tour;
 use App\Models\Vehiculo;
+use App\Services\Operaciones\AsignacionService;
 use Illuminate\Database\Seeder;
 
 /**
@@ -65,24 +66,31 @@ class OperacionDemoSeeder extends Seeder
         $guia = PerfilGuia::first();
         $chofer = PerfilChofer::first();
         $vehiculos = Vehiculo::where('est', Vehiculo::EST_ACTIVO)->orderBy('id')->get();
+        $asignacion = app(AsignacionService::class);
 
         foreach (Tour::with('categoria')->where('act', true)->get() as $n => $tour) {
             foreach ($porCategoria[$tour->categoria->rta_amg] ?? [] as $nom) {
                 EquipoPorTour::firstOrCreate(['tur_id' => $tour->id, 'tip_eqp_id' => $ids[$nom]], ['act' => true]);
             }
 
-            // Una salida cada 3 días durante el próximo mes, desfasada por tour.
+            // Una salida cada 3 días durante el próximo mes, desfasada por tour. Guía, chofer
+            // y vehículo solo se asignan si no chocan con otra salida (mismas reglas que el panel).
             for ($d = 1 + ($n % 3); $d <= 30; $d += 3) {
-                SalidaTour::firstOrCreate(
-                    ['tur_id' => $tour->id, 'fec_sal' => today()->addDays($d)->toDateString(), 'hra_sal' => '08:00:00'],
-                    [
-                        'cap_max' => $tour->cap_max,
-                        'est' => SalidaTour::EST_PROGRAMADA,
-                        'prf_gui_id' => $guia?->id,
-                        'prf_cho_id' => $chofer?->id,
-                        'veh_id' => $vehiculos->isNotEmpty() ? $vehiculos[$n % $vehiculos->count()]->id : null,
-                    ]
-                );
+                $fecha = today()->addDays($d)->toDateString();
+                if (SalidaTour::where(['tur_id' => $tour->id, 'fec_sal' => $fecha, 'hra_sal' => '08:00:00'])->exists()) {
+                    continue;
+                }
+                $aptos = $vehiculos->where('cap_asi', '>=', $tour->cap_max)->values();
+                $datos = [
+                    'tur_id' => $tour->id, 'fec_sal' => $fecha, 'hra_sal' => '08:00:00', 'cap_max' => $tour->cap_max,
+                    'prf_gui_id' => $guia?->id,
+                    'prf_cho_id' => $chofer?->id,
+                    'veh_id' => $aptos->isNotEmpty() ? $aptos[$n % $aptos->count()]->id : null,
+                ];
+                foreach (array_keys($asignacion->validar($datos)) as $campo) {
+                    $datos[$campo] = null;
+                }
+                SalidaTour::create($datos + ['est' => SalidaTour::EST_PROGRAMADA]);
             }
         }
     }

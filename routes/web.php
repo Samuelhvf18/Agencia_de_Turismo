@@ -3,8 +3,13 @@
 use App\Http\Controllers\Admin\AnalisisColasController;
 use App\Http\Controllers\Admin\CicloVidaClienteController;
 use App\Http\Controllers\Admin\FinanzasController;
+use App\Http\Controllers\Admin\FlotaController;
+use App\Http\Controllers\Admin\InventarioController;
+use App\Http\Controllers\Admin\PersonalController;
+use App\Http\Controllers\Admin\SalidasController;
 use App\Http\Controllers\Admin\ReservasAdminController;
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\Pagos\PagoController;
 use App\Http\Controllers\Reservas\ConsultaReservaController;
 use App\Http\Controllers\Reservas\ReservaController;
@@ -82,11 +87,28 @@ Route::middleware([
     Route::prefix('admin')->name('admin.')->middleware('rol:'.User::ROL_ADMIN.','.User::ROL_OPERACIONES)->group(function () {
         Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
 
-        Route::view('/operaciones', 'admin.panels.operaciones')->name('operaciones');
-        Route::view('/inventario', 'admin.panels.inventario')->name('inventario');
-        Route::view('/transporte', 'admin.panels.transporte')->name('transporte');
+        // Operaciones y salidas (M04)
+        Route::get('/operaciones', [SalidasController::class, 'index'])->name('operaciones');
+        Route::post('/salidas', [SalidasController::class, 'store'])->name('salidas.store');
+        Route::get('/salidas/{salida}', [SalidasController::class, 'edit'])->name('salidas.edit');
+        Route::put('/salidas/{salida}', [SalidasController::class, 'update'])->name('salidas.update');
+        Route::post('/salidas/{salida}/reprogramar', [SalidasController::class, 'reprogramar'])->name('salidas.reprogramar');
+        Route::post('/salidas/{salida}/cancelar', [SalidasController::class, 'cancelar'])->name('salidas.cancelar');
+
+        // Personal y recursos (M03)
+        Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario');
+        Route::post('/inventario/tipos/{tipo?}', [InventarioController::class, 'guardarTipo'])->name('inventario.tipo');
+        Route::post('/inventario/tipos/{tipo}/items', [InventarioController::class, 'guardarItem'])->name('inventario.item');
+        Route::post('/inventario/tours/{tour}', [InventarioController::class, 'equipoTour'])->name('inventario.tour');
+        Route::get('/transporte', [FlotaController::class, 'index'])->name('transporte');
+        Route::post('/transporte', [FlotaController::class, 'store'])->name('transporte.store');
+        Route::put('/transporte/{vehiculo}', [FlotaController::class, 'update'])->name('transporte.update');
         Route::view('/tours', 'admin.panels.tours')->name('tours');
-        Route::view('/personal', 'admin.panels.personal')->name('personal');
+        Route::get('/personal', [PersonalController::class, 'index'])->name('personal');
+        Route::post('/personal/{tipo}', [PersonalController::class, 'store'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.store');
+        Route::get('/personal/{tipo}/{id}', [PersonalController::class, 'edit'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.edit');
+        Route::put('/personal/{tipo}/{id}', [PersonalController::class, 'update'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.update');
+        Route::post('/personal/{tipo}/{id}/estado', [PersonalController::class, 'estado'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.estado');
         Route::get('/reservas', [ReservasAdminController::class, 'index'])->name('reservas');
         Route::get('/reservas/{reserva}', [ReservasAdminController::class, 'show'])->name('reservas.show');
         Route::post('/reservas/{reserva}/cancelar', [ReservasAdminController::class, 'cancelar'])->name('reservas.cancelar');
@@ -108,7 +130,13 @@ Route::middleware([
 
     // Operación en campo: guías y choferes (y supervisión de operaciones/admin).
     Route::middleware('rol:'.User::ROL_GUIA.','.User::ROL_CHOFER.','.User::ROL_OPERACIONES.','.User::ROL_ADMIN)->group(function () {
-        Route::view('/guias/checkin', 'guias.checkin')->name('guias.checkin');
+        Route::get('/guias/checkin', [CheckinController::class, 'index'])->name('guias.checkin');
+        Route::get('/guias/salidas/{salida}', [CheckinController::class, 'show'])->name('guias.salida');
+        Route::get('/guias/salidas/{salida}/manifiesto', [CheckinController::class, 'manifiestoJson'])->name('guias.manifiesto');
+        Route::post('/guias/salidas/{salida}/validar', [CheckinController::class, 'validar'])->middleware('throttle:120,1')->name('guias.validar');
+        Route::post('/guias/salidas/{salida}/sincronizar', [CheckinController::class, 'sincronizar'])->name('guias.sincronizar');
+        Route::post('/guias/salidas/{salida}/iniciar', [CheckinController::class, 'iniciar'])->name('guias.iniciar');
+        Route::post('/guias/salidas/{salida}/finalizar', [CheckinController::class, 'finalizar'])->name('guias.finalizar');
     });
 });
 

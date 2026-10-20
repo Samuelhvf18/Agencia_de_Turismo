@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <style>[x-cloak] { display: none !important; }</style>
     @stack('styles')
 </head>
 <body style="background-color: #F0F0F1; color: #343A40;" class="font-sans antialiased">

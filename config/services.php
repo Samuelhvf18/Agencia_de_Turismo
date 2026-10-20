@@ -41,4 +41,11 @@ return [
         'webhook_http' => (bool) env('PASARELA_WEBHOOK_HTTP', false),
     ],
 
+    // n8n: webhooks de notificaciones y chatbot; el token protege los endpoints que n8n llama.
+    'n8n' => [
+        'webhook_notificaciones' => env('N8N_WEBHOOK_NOTIFICACIONES'),
+        'webhook_chatbot' => env('N8N_WEBHOOK_CHATBOT'),
+        'token' => env('N8N_TOKEN'),
+    ],
+
 ];
