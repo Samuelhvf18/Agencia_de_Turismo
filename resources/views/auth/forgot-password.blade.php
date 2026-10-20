@@ -5,14 +5,14 @@
         </x-slot>
 
         <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+            Olvidaste tu contraseña? No hay problema. Escribe tu correo electrónico y te enviaremos un enlace para restablecerla.
         </div>
 
-        @session('status')
-            <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
-                {{ $value }}
+        @if (session('status'))
+            <div class="mb-4 font-medium text-sm text-green-600">
+                {{ session('status') }}
             </div>
-        @endsession
+        @endif
 
         <x-validation-errors class="mb-4" />
 
@@ -20,13 +20,23 @@
             @csrf
 
             <div class="block">
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+                <x-label for="cor" value="Correo electrónico" />
+
+                <x-input
+                    id="cor"
+                    class="block mt-1 w-full"
+                    type="email"
+                    name="cor"
+                    :value="old('cor')"
+                    required
+                    autofocus
+                    autocomplete="email"
+                />
             </div>
 
             <div class="flex items-center justify-end mt-4">
                 <x-button>
-                    {{ __('Email Password Reset Link') }}
+                    Enviar enlace de recuperación
                 </x-button>
             </div>
         </form>

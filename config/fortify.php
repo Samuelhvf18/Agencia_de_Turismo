@@ -45,9 +45,9 @@ return [
     |
     */
 
-    'username' => 'email',
-
-    'email' => 'email',
+    // El formulario envía el correo en el campo `login`; se busca en users.cor.
+    'username' => 'login',
+    'email' => 'cor',
 
     /*
     |--------------------------------------------------------------------------
@@ -117,7 +117,6 @@ return [
     'limiters' => [
         'login' => 'login',
         'two-factor' => 'two-factor',
-        'passkeys' => 'passkeys',
     ],
 
     /*
@@ -167,14 +166,7 @@ return [
         Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-            // 'window' => 0,
-        ]),
-        Features::passkeys([
-            'confirmPassword' => true,
-        ]),
+        // Sin 2FA ni passkeys: la tabla users del diccionario v4 no tiene sus columnas.
     ],
 
 ];

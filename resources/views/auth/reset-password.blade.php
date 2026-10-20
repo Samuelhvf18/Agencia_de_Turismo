@@ -10,11 +10,19 @@
             @csrf
 
             <input type="hidden" name="token" value="{{ $request->route('token') }}">
-
-            <div class="block">
-                <x-label for="email" value="{{ __('Email') }}" />
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            </div>
+        
+        <div class="block">
+            <x-label for="cor" value="Correo electrónico" />
+            <x-input
+            id="cor"
+            class="block mt-1 w-full"
+            type="email"
+            name="cor"
+            :value="old('cor', $request->query('email'))"
+            required
+            autofocus
+            autocomplete="email"/>
+        </div>
 
             <div class="mt-4">
                 <x-label for="password" value="{{ __('Password') }}" />
