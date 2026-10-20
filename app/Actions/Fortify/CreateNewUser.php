@@ -2,8 +2,10 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\MarkovEstadoCliente;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\Io\MarkovService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -61,7 +63,7 @@ class CreateNewUser implements CreatesNewUsers
             $input['nom'], $input['pat'], $input['mat'] ?? '',
         ])));
 
-        return User::create([
+        $usuario = User::create([
             'rol_id' => $rolTurista->id,
             'nom' => $nombreCompleto,
             'cor' => $input['cor'],
@@ -73,5 +75,12 @@ class CreateNewUser implements CreatesNewUsers
             'ci_dep_id' => ($input['tip_doc'] ?? null) === 'CI' ? ($input['ci_dep_id'] ?? null) : null,
             'clv' => $input['password'],
         ]);
+
+        // IO II · Markov: todo turista nuevo entra a la cadena como prospecto.
+        if (MarkovEstadoCliente::where('cod', 'prospecto')->exists()) {
+            app(MarkovService::class)->registrarCambio($usuario->id, 'prospecto', 'Registro de cuenta');
+        }
+
+        return $usuario;
     }
 }

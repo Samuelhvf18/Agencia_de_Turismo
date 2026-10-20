@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // Pasarela de pago simulada (Módulo 06). El webhook valida la firma HMAC con este secreto.
+    'pasarela' => [
+        'secreto' => env('PASARELA_SECRETO'),
+        'webhook_http' => (bool) env('PASARELA_WEBHOOK_HTTP', false),
+    ],
+
 ];

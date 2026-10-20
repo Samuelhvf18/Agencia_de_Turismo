@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // El webhook de la pasarela se autentica con firma HMAC, no con token CSRF.
+        $middleware->validateCsrfTokens(except: ['webhooks/*']);
+
         $middleware->alias([
             'rol' => \App\Http\Middleware\VerificarRol::class,
         ]);

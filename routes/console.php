@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 // Módulo 07 — Investigación Operativa II
 Schedule::command('io:metricas-colas')->dailyAt('23:55');
 Schedule::command('io:recalibrar-markov --sincronizar')->monthlyOn(1, '02:00');
+
+// Módulo 05 — reservas pendientes sin pago tras 24 h liberan sus cupos.
+Schedule::command('reservas:expirar')->hourly();

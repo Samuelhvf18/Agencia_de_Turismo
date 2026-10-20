@@ -145,7 +145,7 @@ a{color:inherit;text-decoration:none}
       <li><i class="fa-solid fa-qrcode"></i> Ticket con código QR</li>
     </ul>
     {{-- Original: <a class="btn" href="{{ Route::has('login') ? route('login') : '#' }}"> --}}
-    <a class="btn" href="{{ url('/reservas/preview/salida') }}"><i class="fa-solid fa-calendar-check"></i> Reservar este tour</a>
+    <a class="btn" href="{{ route('reservas.salida', $tour) }}"><i class="fa-solid fa-calendar-check"></i> Reservar este tour</a>
   </aside>
 </main>
 

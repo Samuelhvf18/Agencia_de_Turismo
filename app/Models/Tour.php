@@ -28,6 +28,19 @@ class Tour extends Model
         ];
     }
 
+    /** Altitud (m s. n. m.) desde la cual un tour se considera de alto riesgo. */
+    public const ALTITUD_ALTO_RIESGO = 4500;
+
+    /**
+     * Tours de alto riesgo: dificultad difícil/experto o altitud máxima ≥ 4500 m.
+     * En ellos la ficha médica firmada es obligatoria y sin ella no se emite el boleto.
+     */
+    public function esAltoRiesgo(): bool
+    {
+        return in_array($this->niv_dif, ['dificil', 'experto'], true)
+            || (int) $this->alt_max_m >= self::ALTITUD_ALTO_RIESGO;
+    }
+
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaTour::class, 'cat_id');

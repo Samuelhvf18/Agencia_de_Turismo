@@ -18,6 +18,12 @@ class Boleto extends Model
 
     protected $fillable = ['cod', 'ptc_rsv_id', 'est', 'emt_en', 'vld_en', 'vld_por'];
 
+    /** En las URL públicas se usa el código, no el id. */
+    public function getRouteKeyName(): string
+    {
+        return 'cod';
+    }
+
     protected function casts(): array
     {
         return ['emt_en' => 'datetime', 'vld_en' => 'datetime'];

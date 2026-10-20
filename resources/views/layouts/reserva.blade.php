@@ -36,7 +36,7 @@
             </a>
 
             <nav class="flex items-center gap-1 text-sm font-semibold sm:gap-2">
-                <a href="{{ url('/reservas/preview/consultar') }}" {{-- controlador: route('reservas.consultar') --}}
+                <a href="{{ route('reservas.consultar') }}"
                    class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-pipocas-principal transition hover:bg-pipocas-fondo hover:text-pipocas-hover">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <span class="hidden sm:inline">Consultar reserva</span>

@@ -58,7 +58,7 @@
 @section('titulo', 'Alquiler de equipo · ' . $tour->nom)
 
 @section('stepper')
-    <x-reserva.stepper :actual="3" :enlaces="[url('/reservas/preview/salida'), $urlAnterior]" />
+    <x-reserva.stepper :actual="3" :enlaces="[$urlSalida ?? url('/reservas/preview/salida'), $urlAnterior]" />
 @endsection
 
 @section('contenido')

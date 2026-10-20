@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             UsuariosDemoSeeder::class,
             CatalogoLandingSeeder::class,
+            OperacionDemoSeeder::class,
 
             // Módulo 07 — Investigación Operativa II (Colas + Cadenas de Markov).
             // Catálogo de estados Markov, matriz de transición inicial y parámetros

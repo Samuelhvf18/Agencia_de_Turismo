@@ -23,6 +23,7 @@
         ['id' => 102, 'nom_cpl' => 'Lucas Martin', 'eda' => 34],
     ];
     $fichas ??= [];
+    $altoRiesgo ??= false;
     $accionForm ??= url('/reservas/preview/resumen'); // controlador: route('reservas.ficha.store')
     $urlAnterior ??= url('/reservas/preview/equipo'); // controlador: route('reservas.equipo')
 @endphp
@@ -30,7 +31,7 @@
 @section('titulo', 'Ficha médica')
 
 @section('stepper')
-    <x-reserva.stepper :actual="4" :enlaces="[url('/reservas/preview/salida'), url('/reservas/preview/participantes'), $urlAnterior]" />
+    <x-reserva.stepper :actual="4" :enlaces="[$urlSalida ?? url('/reservas/preview/salida'), $urlParticipantes ?? url('/reservas/preview/participantes'), $urlAnterior]" />
 @endsection
 
 @section('contenido')
@@ -41,6 +42,20 @@
         <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">Ficha médica y consentimiento</h1>
         <p class="mt-2 text-pipocas-texto-2">Cada participante debe completar y firmar su ficha. Esta información solo la ve el guía responsable de la salida.</p>
     </div>
+
+    @if ($altoRiesgo)
+        <div class="flex gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm">
+            <i class="fa-solid fa-triangle-exclamation mt-0.5 text-lg text-red-600"></i>
+            <div>
+                <p class="font-bold text-red-700">Tour de alto riesgo: la ficha firmada es obligatoria</p>
+                <p class="text-red-700/80">Sin la ficha médica firmada de cada participante no se puede emitir su boleto.</p>
+            </div>
+        </div>
+    @else
+        <p class="rounded-2xl bg-pipocas-fondo p-4 text-sm text-pipocas-texto-2"><i class="fa-solid fa-circle-info mr-1 text-pipocas-complementario"></i> En este tour la ficha es opcional, pero te recomendamos completarla. Si alguien firma, debe aceptar ambas declaraciones.</p>
+    @endif
+
+    @error('fichas') <p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{{ $message }}</p> @enderror
 
     @if (! empty($tour->req_fis))
         <div class="flex gap-3 rounded-2xl border border-pipocas-acento/60 bg-pipocas-acento/15 p-4 text-sm">
@@ -101,6 +116,9 @@
             </div>
 
             {{-- Firma digital --}}
+            @if (! empty($f['rta_fir']))
+                <p class="mt-5 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"><i class="fa-solid fa-file-signature"></i> Ya firmaste esta ficha. Vuelve a firmar solo si quieres reemplazarla.</p>
+            @endif
             <div class="mt-5" x-data="firmaPad(@js(old("fichas.$id.fir_b64", '')))">
                 <div class="mb-1.5 flex items-center justify-between">
                     <span class="rsv-etiqueta mb-0">Firma de {{ $p['nom_cpl'] }}</span>

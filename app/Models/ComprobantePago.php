@@ -17,6 +17,12 @@ class ComprobantePago extends Model
     public $timestamps = false;
     protected $fillable = ['cod', 'rsv_id', 'fec_emi', 'sub', 'imp', 'mto_tot', 'est'];
 
+    /** En las URL públicas se usa el código, no el id. */
+    public function getRouteKeyName(): string
+    {
+        return 'cod';
+    }
+
     protected function casts(): array
     {
         return ['fec_emi' => 'date', 'sub' => 'decimal:2', 'imp' => 'decimal:2', 'mto_tot' => 'decimal:2'];

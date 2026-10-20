@@ -29,6 +29,13 @@
          'boleto' => $reserva['est'] === 'confirmada' ? ['cod' => 'BOL-2B81D04E', 'est' => 'emitido'] : null],
     ];
     $urlPago ??= '#'; // controlador: route('pagos.create', $reserva)
+    $urlConsultar ??= url('/reservas/preview/consultar');
+    $urlCancelar ??= null;
+    $urlComprobante ??= null;
+    $urlBoletos ??= null;
+    $historialPagos ??= collect();
+    $metodos ??= [];
+    $saldo ??= 0;
 
     // Colores y textos de los estados (reservas.est y reservas.est_pag)
     $estados = [
@@ -40,6 +47,7 @@
     $pagos = [
         'pendiente'   => ['Pago pendiente', 'text-pipocas-calido'],
         'pagado'      => ['Pagado', 'text-emerald-700'],
+        'parcial'     => ['Pago parcial', 'text-pipocas-calido'],
         'reembolsado' => ['Reembolsado', 'text-pipocas-texto-2'],
     ];
     [$estTxt, $estCls, $estIco] = $estados[$reserva['est']] ?? [ucfirst($reserva['est']), 'bg-gray-100 text-gray-700', 'fa-solid fa-circle-info'];
@@ -51,7 +59,11 @@
 
 @section('contenido')
 <div class="mx-auto max-w-4xl space-y-6">
-    <a href="{{ url('/reservas/preview/consultar') }}" {{-- controlador: route('reservas.consultar') --}}
+    @if (session('estado'))
+        <p class="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"><i class="fa-solid fa-circle-check mr-1"></i> {{ session('estado') }}</p>
+    @endif
+
+    <a href="{{ $urlConsultar }}"
        class="inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
         <i class="fa-solid fa-arrow-left"></i> Consultar otra reserva
     </a>
@@ -69,9 +81,15 @@
             </span>
         </div>
 
-        @if ($reserva['est'] === 'pendiente')
+        @if ($reserva['est'] === 'pendiente' && $urlPago)
             <div class="mt-5 flex flex-col gap-3 rounded-2xl bg-pipocas-acento/15 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p class="text-sm text-pipocas-calido"><i class="fa-solid fa-circle-info mr-1"></i> Completa el pago para recibir los tickets con código QR.</p>
+                <p class="text-sm text-pipocas-calido"><i class="fa-solid fa-circle-info mr-1"></i>
+                    @if ($reserva['est_pag'] === 'parcial')
+                        Tienes un saldo de <b>Bs. {{ number_format($saldo, 2, ',', '.') }}</b>. Complétalo para recibir los tickets con código QR.
+                    @else
+                        Completa el pago para recibir los tickets con código QR.
+                    @endif
+                </p>
                 <a href="{{ $urlPago }}" class="rsv-btn shrink-0 px-5 py-2.5"><i class="fa-solid fa-credit-card"></i> Pagar ahora</a>
             </div>
         @elseif ($reserva['est'] === 'cancelada')
@@ -109,6 +127,25 @@
                     <dd class="font-titulo text-2xl font-semibold text-pipocas-principal">Bs. {{ number_format($reserva['pre_tot'], 2, ',', '.') }}</dd>
                 </div>
             </dl>
+            @if ($historialPagos->isNotEmpty())
+                <div class="mt-5 border-t border-gray-100 pt-4 text-sm">
+                    <p class="mb-2 text-pipocas-texto-2">Historial de pagos</p>
+                    <ul class="space-y-2">
+                        @foreach ($historialPagos as $pago)
+                            <li class="flex items-center justify-between gap-2">
+                                <span>
+                                    <span class="font-semibold">{{ $metodos[$pago->mtd] ?? $pago->mtd }}</span>
+                                    <span class="block text-xs text-pipocas-texto-2">{{ $pago->pag_en->format('d/m/Y H:i') }} · {{ ucfirst($pago->est) }}</span>
+                                </span>
+                                <span @class(['font-semibold', 'text-emerald-700' => $pago->est === 'completado', 'text-red-600 line-through' => $pago->est === 'fallido'])>Bs. {{ number_format($pago->mto, 2, ',', '.') }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            @if ($urlComprobante)
+                <a href="{{ $urlComprobante }}" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover"><i class="fa-solid fa-file-invoice"></i> Descargar comprobante</a>
+            @endif
             <div class="mt-5 border-t border-gray-100 pt-4 text-sm">
                 <p class="text-pipocas-texto-2">Contacto</p>
                 <p class="font-semibold">{{ $reserva['nom_ctc'] }}</p>
@@ -119,7 +156,12 @@
 
     {{-- Participantes y tickets --}}
     <section class="rsv-tarjeta">
-        <h2 class="rsv-titulo mb-1">Participantes y tickets</h2>
+        <div class="mb-1 flex flex-wrap items-center justify-between gap-2">
+            <h2 class="rsv-titulo">Participantes y tickets</h2>
+            @if ($urlBoletos)
+                <a href="{{ $urlBoletos }}" class="rsv-btn-sec px-4 py-2 text-sm"><i class="fa-solid fa-download"></i> Descargar todos (PDF)</a>
+            @endif
+        </div>
         <p class="mb-5 text-sm text-pipocas-texto-2">Cada participante presenta su código QR al guía antes de abordar.</p>
 
         <ul class="grid gap-4 sm:grid-cols-2">
@@ -131,7 +173,9 @@
                         'border-2 border-pipocas-principal/20 bg-pipocas-fondo text-pipocas-principal' => $p['boleto'],
                         'border-2 border-dashed border-gray-300 text-gray-400' => ! $p['boleto'],
                     ])>
-                        @if ($p['boleto'])
+                        @if ($p['boleto'] && ! empty($p['boleto']['qr']))
+                            <img src="{{ $p['boleto']['qr'] }}" alt="Código QR del boleto {{ $p['boleto']['cod'] }}" class="h-full w-full rounded-xl bg-white p-1">
+                        @elseif ($p['boleto'])
                             <div>
                                 <i class="fa-solid fa-qrcode text-5xl"></i>
                                 <p class="mt-1 text-[9px] font-bold uppercase tracking-wide">QR</p>
@@ -139,7 +183,7 @@
                         @else
                             <div class="px-2 text-[11px] leading-tight">
                                 <i class="fa-solid fa-lock mb-1 text-lg"></i>
-                                <p>{{ $reserva['est'] === 'cancelada' ? 'Sin ticket' : 'Disponible al pagar' }}</p>
+                                <p>{{ $reserva['est'] === 'cancelada' ? 'Sin ticket' : (($reserva['est_pag'] ?? '') === 'pagado' && empty($p['ficha_ok']) ? 'Falta la ficha médica' : 'Disponible al pagar') }}</p>
                             </div>
                         @endif
                     </div>
@@ -151,7 +195,7 @@
                         @endif
                         @if ($p['boleto'])
                             <p class="mt-2 break-all font-mono text-xs text-pipocas-texto-2">{{ $p['boleto']['cod'] }}</p>
-                            <a href="#" {{-- controlador: route('boletos.descargar', $p['boleto']['cod']) --}}
+                            <a href="{{ $p['boleto']['url'] ?? '#' }}"
                                class="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover">
                                 <i class="fa-solid fa-download"></i> Descargar ticket
                             </a>
@@ -161,5 +205,25 @@
             @endforeach
         </ul>
     </section>
+
+    @if ($urlCancelar)
+        <section class="rsv-tarjeta" x-data="{ abierto: false }">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="rsv-titulo">¿No podrás asistir?</h2>
+                    <p class="text-sm text-pipocas-texto-2">Puedes cancelar hasta el día anterior a la salida. Lo pagado se registra como reembolso.</p>
+                </div>
+                <button type="button" class="rsv-btn-sec shrink-0 text-red-600" @click="abierto = true"><i class="fa-solid fa-ban"></i> Cancelar reserva</button>
+            </div>
+            <form method="POST" action="{{ $urlCancelar }}" x-show="abierto" x-cloak class="mt-4 rounded-2xl bg-red-50 p-4 text-sm">
+                @csrf
+                <p class="font-semibold text-red-700">¿Seguro? Se liberarán los cupos y se anularán los tickets.</p>
+                <div class="mt-3 flex gap-3">
+                    <button type="submit" class="rsv-btn bg-red-600 px-4 py-2 hover:bg-red-700">Sí, cancelar</button>
+                    <button type="button" class="rsv-btn-sec px-4 py-2" @click="abierto = false">No</button>
+                </div>
+            </form>
+        </section>
+    @endif
 </div>
 @endsection

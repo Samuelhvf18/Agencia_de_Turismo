@@ -272,7 +272,7 @@ class MarkovService
         $hoy = now()->startOfDay();
         $turistas = DB::table('users')
             ->leftJoin('roles', 'roles.id', '=', 'users.rol_id')
-            ->where(fn ($q) => $q->where('roles.nom', 'turista')->orWhere('users.rol', 'turista'))
+            ->where('roles.nom', 'turista')
             ->get(['users.id', 'users.created_at']);
 
         $cambios = 0;

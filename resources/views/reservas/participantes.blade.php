@@ -29,7 +29,7 @@
     ];
     $participantes ??= [
         ['nom_cpl' => '', 'tip_doc' => 'CI', 'num_doc' => '', 'ci_cmp' => '', 'ci_dep_id' => 1, 'eda' => '', 'pai_id' => 1, 'es_ctc_pri' => true],
-        ['nom_cpl' => '', 'tip_doc' => 'Pasaporte', 'num_doc' => '', 'ci_cmp' => '', 'ci_dep_id' => null, 'eda' => '', 'pai_id' => 2, 'es_ctc_pri' => false],
+        ['nom_cpl' => '', 'tip_doc' => 'PASAPORTE', 'num_doc' => '', 'ci_cmp' => '', 'ci_dep_id' => null, 'eda' => '', 'pai_id' => 2, 'es_ctc_pri' => false],
     ];
     $paises ??= [
         ['id' => 1, 'nom' => 'Bolivia'], ['id' => 2, 'nom' => 'Argentina'], ['id' => 3, 'nom' => 'Brasil'],
@@ -43,7 +43,7 @@
         ['id' => 7, 'cod' => 'TJ', 'nom' => 'Tarija'], ['id' => 8, 'cod' => 'BE', 'nom' => 'Beni'],
         ['id' => 9, 'cod' => 'PD', 'nom' => 'Pando'],
     ];
-    $tiposDoc ??= ['CI' => 'Cédula de identidad', 'Pasaporte' => 'Pasaporte', 'DNI' => 'DNI / Documento extranjero'];
+    $tiposDoc ??= ['CI' => 'Cédula de identidad (Bolivia)', 'PASAPORTE' => 'Pasaporte / documento extranjero'];
     $accionForm ??= url('/reservas/preview/equipo'); // controlador: route('reservas.participantes.store')
     $urlAnterior ??= url('/reservas/preview/salida'); // controlador: route('reservas.salida', $tour)
 

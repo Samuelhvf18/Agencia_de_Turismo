@@ -30,6 +30,12 @@ class Reserva extends Model
         'cnt_ptc', 'est', 'pre_tot', 'est_pag',
     ];
 
+    /** En las URL públicas se usa el código, no el id. */
+    public function getRouteKeyName(): string
+    {
+        return 'cod';
+    }
+
     protected function casts(): array
     {
         return ['cnt_ptc' => 'integer', 'pre_tot' => 'decimal:2'];

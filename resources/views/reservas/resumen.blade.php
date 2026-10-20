@@ -33,7 +33,7 @@
     $subtotalEquipo = (float) collect($participantes)->flatMap(fn ($p) => $p['alquileres'] ?? [])->sum('pre');
     $total = $subtotalTour + $subtotalEquipo; // => reservas.pre_tot
     $bs = fn ($n) => 'Bs. ' . number_format($n, 2, ',', '.');
-    $editar = [
+    $editar ??= [
         'salida' => url('/reservas/preview/salida'),
         'participantes' => url('/reservas/preview/participantes'),
         'equipo' => url('/reservas/preview/equipo'),

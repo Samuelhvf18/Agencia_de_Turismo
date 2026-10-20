@@ -16,6 +16,7 @@
     $tour ??= (object) ['nom' => 'Valle de la Luna'];
     $salida ??= ['fec_sal' => now()->addDays(2)->toDateString(), 'hra_sal' => '08:00:00'];
     $urlPago ??= '#'; // controlador: route('pagos.create', $reserva)
+    $urlEstado ??= url('/reservas/preview/estado');
 
     $f = \Carbon\Carbon::parse($salida['fec_sal'])->locale('es');
     $limitePago = \Carbon\Carbon::parse($reserva['cre_en'])->addHours(24)->locale('es');
@@ -81,7 +82,7 @@
             </li>
         </ol>
         <div class="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-5 sm:flex-row">
-            <a href="{{ url('/reservas/preview/estado') }}" {{-- controlador: route('reservas.estado', $reserva['cod']) --}} class="rsv-btn-sec flex-1"><i class="fa-solid fa-magnifying-glass"></i> Ver estado de la reserva</a>
+            <a href="{{ $urlEstado }}" class="rsv-btn-sec flex-1"><i class="fa-solid fa-magnifying-glass"></i> Ver estado de la reserva</a>
             <a href="{{ Route::has('home') ? route('home') : url('/') }}" class="rsv-btn-sec flex-1"><i class="fa-solid fa-compass"></i> Explorar más tours</a>
         </div>
     </section>
