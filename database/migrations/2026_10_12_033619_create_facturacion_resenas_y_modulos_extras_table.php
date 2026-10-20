@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -13,18 +14,20 @@ return new class extends Migration
             $table->string('cod', 20)->unique();
             $table->foreignId('rsv_id')->unique()->constrained('reservas')->restrictOnDelete();
             $table->date('fec_emi')->default(DB::raw('CURRENT_DATE'));
+            $table->decimal('sub', 10, 2);
+            $table->decimal('imp', 10, 2)->default(0);
             $table->decimal('mto_tot', 10, 2);
-            $table->string('est', 15)->default('emitido');
+            $table->string('est', 15)->default('pendiente');
         });
 
         Schema::create('pagos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cmp_pag_id')->constrained('comprobantes_pago')->cascadeOnDelete();
+            $table->foreignId('cmp_pag_id')->constrained('comprobantes_pago')->restrictOnDelete();
             $table->string('mtd', 15);
             $table->decimal('mto', 10, 2);
             $table->string('ref_trx', 100)->nullable();
             $table->timestamp('pag_en')->useCurrent();
-            $table->string('est', 15)->default('completado');
+            $table->string('est', 15)->default('pendiente');
         });
 
         Schema::create('resenas', function (Blueprint $table) {
@@ -42,6 +45,7 @@ return new class extends Migration
             $table->foreignId('usr_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('id_ses', 100);
             $table->string('can', 20)->default('web');
+            $table->boolean('der_hum')->default(false);
             $table->timestamp('ini_en')->useCurrent();
             $table->timestamp('fin_en')->nullable();
         });

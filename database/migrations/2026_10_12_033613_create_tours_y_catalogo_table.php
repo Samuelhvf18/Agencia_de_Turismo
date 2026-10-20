@@ -54,6 +54,7 @@ return new class extends Migration
             $table->decimal('lon', 10, 7);
             $table->smallInteger('alt_m')->nullable();
             $table->string('tip_pun', 15)->default('checkpoint');
+            $table->unique(['tur_id', 'ord_sec']);
         });
     }
 

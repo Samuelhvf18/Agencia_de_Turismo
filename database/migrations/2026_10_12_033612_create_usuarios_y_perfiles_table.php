@@ -10,20 +10,18 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('rol_id')->nullable()->constrained('roles')->restrictOnDelete();
+            $table->foreignId('rol_id')->constrained('roles')->restrictOnDelete();
             $table->foreignId('pai_id')->nullable()->constrained('paises')->nullOnDelete();
             $table->string('nom', 150);
             $table->string('cor', 150)->unique();
             $table->timestamp('cor_vrf_en')->nullable();
             $table->string('clv');
-            $table->string('rol', 30)->default('turista');
             $table->string('tel', 20)->nullable();
             $table->string('tip_doc', 20)->nullable();
             $table->string('num_doc', 15)->nullable();
             $table->string('ci_cmp', 5)->default('');
             $table->foreignId('ci_dep_id')->nullable()->constrained('departamentos_bolivia');
             $table->string('fot_prf', 255)->nullable();
-            $table->string('tok_rec', 100)->nullable();
             $table->boolean('act')->default(true);
             $table->rememberToken();
             $table->timestamps();

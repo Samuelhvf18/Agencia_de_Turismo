@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('tip', 15);
             $table->smallInteger('cap_asi');
             $table->string('tip_cmb', 20)->nullable();
-            $table->string('est', 15)->default('act');
+            $table->string('est', 15)->default('activo');
         });
     }
 
