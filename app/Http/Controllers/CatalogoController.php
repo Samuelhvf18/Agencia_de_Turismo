@@ -38,6 +38,10 @@ class CatalogoController extends Controller
             ->orderBy('ord_sec')
             ->get(['nom', 'lat', 'lon', 'alt_m', 'tip_pun']);
 
-        return view('tours.show', compact('tour', 'puntos'));
+        // Reseñas verificadas y promedio desde vista_calificacion_promedio_tour (RF-32).
+        $calificacion = DB::table('vista_calificacion_promedio_tour')->where('tur_id', $tour->id)->first();
+        $resenas = $tour->resenas()->whereNotNull('rsv_id')->orderByDesc('cre_en')->limit(6)->get();
+
+        return view('tours.show', compact('tour', 'puntos', 'calificacion', 'resenas'));
     }
 }

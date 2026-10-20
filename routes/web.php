@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\Admin\CatalogoAdminController;
 use App\Http\Controllers\Admin\ChatbotAdminController;
 use App\Http\Controllers\Admin\CicloVidaClienteController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinanzasController;
 use App\Http\Controllers\Admin\FlotaController;
 use App\Http\Controllers\Admin\InventarioController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\Pagos\PagoController;
 use App\Http\Controllers\Reservas\ConsultaReservaController;
+use App\Http\Controllers\Reservas\ResenaController;
 use App\Http\Controllers\Reservas\ReservaController;
 use App\Models\User;
 use App\Services\Io\IoDemoData;
@@ -57,6 +59,7 @@ Route::prefix('reservas')->name('reservas.')->group(function () {
     Route::get('/{reserva}/confirmada', [ReservaController::class, 'confirmada'])->name('confirmada');
     Route::get('/{reserva}', [ConsultaReservaController::class, 'estado'])->name('estado');
     Route::post('/{reserva}/cancelar', [ConsultaReservaController::class, 'cancelar'])->name('cancelar');
+    Route::post('/{reserva}/resena', [ResenaController::class, 'store'])->middleware('throttle:10,1')->name('resena');
     Route::get('/{reserva}/boletos.pdf', [ConsultaReservaController::class, 'boletosPdf'])->name('boletos');
     Route::get('/{reserva}/comprobante.pdf', [ConsultaReservaController::class, 'comprobantePdf'])->name('comprobante');
 });
@@ -92,7 +95,7 @@ Route::middleware([
 
     // Panel administrativo: administrador y personal de operaciones.
     Route::prefix('admin')->name('admin.')->middleware('rol:'.User::ROL_ADMIN.','.User::ROL_OPERACIONES)->group(function () {
-        Route::view('/dashboard', 'admin.dashboard')->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
         // Operaciones y salidas (M04)
         Route::get('/operaciones', [SalidasController::class, 'index'])->name('operaciones');
@@ -143,7 +146,7 @@ Route::middleware([
         Route::get('/finanzas/comprobantes/{comprobante}.pdf', [FinanzasController::class, 'comprobantePdf'])->name('finanzas.comprobante');
         Route::post('/finanzas/comprobantes/{comprobante}/anular', [FinanzasController::class, 'anular'])
             ->middleware('rol:'.User::ROL_ADMIN)->name('finanzas.anular');
-        Route::view('/analitica', 'admin.panels.analitica')->name('analitica');
+        Route::get('/analitica', [DashboardController::class, 'analitica'])->name('analitica');
 
         // Módulo 07 — Investigación Operativa II: paneles de teoría de colas y cadenas de Markov
         Route::get('/io/colas', [AnalisisColasController::class, 'index'])->name('io.colas');

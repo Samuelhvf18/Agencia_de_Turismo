@@ -31,6 +31,8 @@
     $urlPago ??= '#'; // controlador: route('pagos.create', $reserva)
     $urlConsultar ??= url('/reservas/preview/consultar');
     $urlCancelar ??= null;
+    $urlResena ??= null;
+    $resena ??= null;
     $urlComprobante ??= null;
     $urlBoletos ??= null;
     $historialPagos ??= collect();
@@ -205,6 +207,34 @@
             @endforeach
         </ul>
     </section>
+
+    {{-- Reseña verificada (RF-32): solo para reservas completadas --}}
+    @if ($resena)
+        <section class="rsv-tarjeta">
+            <h2 class="rsv-titulo mb-2">Tu reseña</h2>
+            <p class="text-lg text-pipocas-acento">@for ($i = 1; $i <= 5; $i++)<i class="fa-{{ $i <= $resena->cal ? 'solid' : 'regular' }} fa-star"></i>@endfor</p>
+            @if ($resena->com)<p class="mt-2 text-sm text-pipocas-texto-2">«{{ $resena->com }}»</p>@endif
+        </section>
+    @elseif ($urlResena)
+        <section class="rsv-tarjeta" x-data="{ cal: {{ (int) old('cal', 0) }} }">
+            <h2 class="rsv-titulo mb-1">¿Qué tal estuvo el tour?</h2>
+            <p class="mb-4 text-sm text-pipocas-texto-2">Tu reseña aparecerá como verificada en la página del tour.</p>
+            <form method="POST" action="{{ $urlResena }}" class="space-y-3">
+                @csrf
+                <div class="flex gap-1 text-3xl" role="radiogroup" aria-label="Calificación">
+                    @for ($i = 1; $i <= 5; $i++)
+                        <label class="cursor-pointer text-pipocas-acento">
+                            <input type="radio" name="cal" value="{{ $i }}" class="sr-only" x-model.number="cal">
+                            <i class="fa-star" :class="cal >= {{ $i }} ? 'fa-solid' : 'fa-regular'" aria-label="{{ $i }} estrella(s)"></i>
+                        </label>
+                    @endfor
+                </div>
+                @error('cal') <p class="rsv-error">{{ $message }}</p> @enderror
+                <textarea name="com" rows="3" maxlength="1000" class="rsv-campo" placeholder="Cuéntanos tu experiencia (opcional)">{{ old('com') }}</textarea>
+                <button class="rsv-btn px-5 py-2.5" :disabled="!cal"><i class="fa-solid fa-paper-plane"></i> Publicar reseña</button>
+            </form>
+        </section>
+    @endif
 
     @if ($urlCancelar)
         <section class="rsv-tarjeta" x-data="{ abierto: false }">

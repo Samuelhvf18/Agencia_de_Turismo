@@ -1,146 +1,80 @@
 @extends('layouts.admin')
 
-@section('header-title', 'Panel de Control')
+@section('header-title', 'Panel de control')
 
 @section('content')
+@php $bs = fn ($n) => 'Bs. ' . number_format((float) $n, 2, ',', '.'); @endphp
 <div class="space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#1F5F8B]">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Ingresos Totales (Hoy)</p>
-            <h3 class="text-3xl font-extrabold mt-2" style="color: #1F5F8B;">$ 4,850.00</h3>
-            <span class="text-xs mt-2 inline-block font-medium text-emerald-600">↑ +12% vs ayer</span>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[#1F5F8B]">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#6B6F72]">Ingresos de hoy</p>
+            <h3 class="text-2xl font-extrabold mt-2 text-[#1F5F8B]">{{ $bs($ingresosHoy) }}</h3>
+            <span class="text-xs text-[#6B6F72]">Mes: {{ $bs($ingresosMes) }}</span>
         </div>
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#C96F4A]">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Reservas del Día</p>
-            <h3 class="text-3xl font-extrabold mt-2" style="color: #C96F4A;">38</h3>
-            <span class="text-xs mt-2 inline-block font-medium" style="color: #6B6F72;">8 pendientes de pago</span>
+        <div class="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[#C96F4A]">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#6B6F72]">Reservas de hoy</p>
+            <h3 class="text-2xl font-extrabold mt-2 text-[#C96F4A]">{{ $reservasHoy }}</h3>
+            <span class="text-xs text-[#6B6F72]">{{ $pendientesPago }} pendientes de pago</span>
         </div>
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#F4C95D]">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Ocupación General</p>
-            <h3 class="text-3xl font-extrabold mt-2 text-[#947412]">84.5%</h3>
-            <span class="text-xs mt-2 inline-block font-medium text-[#6B6F72]">Flota casi al límite</span>
+        <div class="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[#F4C95D]">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#6B6F72]">Ocupación próximos 7 días</p>
+            <h3 class="text-2xl font-extrabold mt-2 text-[#947412]">{{ number_format($ocupacion, 1, ',', '.') }} %</h3>
+            <span class="text-xs text-[#6B6F72]">cupos vendidos / cupos programados</span>
+        </div>
+        <div class="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[#457699]">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[#6B6F72]">Salidas de hoy</p>
+            <h3 class="text-2xl font-extrabold mt-2 text-[#457699]">{{ $salidasHoy->count() }}</h3>
+            <span class="text-xs text-[#6B6F72]">{{ (int) $salidasHoy->sum('pax') }} pasajeros confirmados</span>
         </div>
     </div>
 
-    <!-- Panel de Alertas Interactivas con SweetAlert2 -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-            <h4 class="text-base font-bold mb-4" style="color: #343A40;">🔔 Panel de Alertas del Sistema</h4>
+            <h4 class="text-base font-bold mb-4 text-[#343A40]">Ingresos y reservas (últimos 30 días)</h4>
+            <div class="h-64"><canvas id="ventas" aria-label="Ingresos y reservas por día"></canvas></div>
+        </div>
+        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
+            <h4 class="text-base font-bold mb-4 text-[#343A40]">Alertas del sistema</h4>
             <div class="space-y-3">
-                <div onclick="mostrarAlertaFichaMedica('Juan Pérez', '1042')" class="p-3 bg-[#F4C95D]/10 border border-[#F4C95D]/40 rounded-xl text-sm text-[#6B4F3A] cursor-pointer hover:bg-[#F4C95D]/20 transition flex justify-between items-center">
-                    <span>⚠️ Alerta: Ficha médica de riesgo pendiente de validación para <strong>Juan Pérez</strong> (Reserva #1042).</span>
-                    <span class="text-xs font-bold underline" style="color: #1F5F8B;">Ver detalle</span>
-                </div>
-                <div onclick="mostrarAlertaPago('3091', '150.00')" class="p-3 bg-[#C96F4A]/10 border border-[#C96F4A]/40 rounded-xl text-sm text-[#6B4F3A] cursor-pointer hover:bg-[#C96F4A]/20 transition flex justify-between items-center">
-                    <span>⚡ Pago parcial detectado en factura #3091 por un valor de $150.00.</span>
-                    <span class="text-xs font-bold underline" style="color: #1F5F8B;">Ver detalle</span>
-                </div>
+                @forelse ($alertas as $a)
+                    <a href="{{ $a['url'] }}" class="flex items-start gap-3 rounded-xl border border-[#F4C95D]/40 bg-[#F4C95D]/10 p-3 text-sm text-[#6B4F3A] hover:bg-[#F4C95D]/20">
+                        <i class="fa-solid {{ $a['icono'] }} mt-0.5"></i><span>{{ $a['texto'] }}</span>
+                    </a>
+                @empty
+                    <p class="text-sm text-[#6B6F72]">Todo en orden. No hay alertas pendientes.</p>
+                @endforelse
             </div>
         </div>
+    </div>
 
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
-            <div>
-                <h4 class="text-base font-bold mb-2" style="color: #343A40;">⚡ Acciones Directas</h4>
-                <p class="text-xs mb-4" style="color: #6B6F72;">Emitir comprobantes o verificar códigos QR rápidamente.</p>
-            </div>
-            <div class="space-y-2">
-                <button onclick="validarBoletoQR('BOL-9982')" style="background-color: #1F5F8B;" class="w-full py-2.5 hover:bg-[#174870] text-white rounded-xl font-medium text-sm transition shadow">Validar Boleto QR</button>
-                <button onclick="nuevaFacturaModal()" style="background-color: #C96F4A;" class="w-full py-2.5 hover:bg-[#b55e3b] text-white rounded-xl font-medium text-sm transition shadow">Nueva Factura</button>
-            </div>
-        </div>
+    <div class="bg-white border border-gray-200 rounded-2xl overflow-x-auto shadow-sm">
+        <div class="flex items-center justify-between p-4"><h4 class="font-bold text-[#343A40]">Salidas de hoy</h4><a href="{{ route('admin.operaciones') }}" class="text-xs font-bold text-[#1F5F8B]">Ver operaciones</a></div>
+        <table class="w-full min-w-[560px] text-left text-sm">
+            <thead class="bg-gray-50 border-y border-gray-200 text-xs text-[#6B6F72] uppercase"><tr><th class="p-3">Hora</th><th class="p-3">Tour</th><th class="p-3">Guía</th><th class="p-3">Pasajeros</th><th class="p-3">Estado</th></tr></thead>
+            <tbody class="divide-y divide-gray-100">
+                @forelse ($salidasHoy as $s)
+                    <tr><td class="p-3">{{ substr($s->hra_sal, 0, 5) }}</td><td class="p-3">{{ $s->tour->nom }}</td><td class="p-3">{{ $s->guia?->usuario?->nom ?? 'Sin asignar' }}</td><td class="p-3">{{ (int) $s->pax }} / {{ $s->cap_max }}</td><td class="p-3">{{ str_replace('_', ' ', $s->est) }}</td></tr>
+                @empty
+                    <tr><td colspan="5" class="p-6 text-center text-[#6B6F72]">No hay salidas hoy.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 </div>
 
 @push('scripts')
 <script>
-function mostrarAlertaFichaMedica(pasajero, reserva) {
-    Swal.fire({
-        title: 'Ficha Médica de Riesgo',
-        html: `<p class="text-sm">El pasajero <strong>${pasajero}</strong> registró hipertensión leve en su ficha médica para la reserva <strong>#${reserva}</strong>.</p>`,
-        icon: 'warning',
-        iconColor: '#C96F4A',
-        showCancelButton: true,
-        confirmButtonText: 'Aprobar Pasajero',
-        cancelButtonText: 'Cerrar',
-        confirmButtonColor: '#1F5F8B',
-        cancelButtonColor: '#6B6F72',
-        background: '#FFFFFF',
-        color: '#343A40'
+    const ventas = @json($ventas30);
+    new Chart(document.getElementById('ventas'), {
+        data: {
+            labels: ventas.map(v => v.dia),
+            datasets: [
+                { type: 'bar', label: 'Ingresos (Bs.)', data: ventas.map(v => v.ingresos), backgroundColor: 'rgba(31,95,139,.7)', yAxisID: 'y' },
+                { type: 'line', label: 'Reservas', data: ventas.map(v => v.reservas), borderColor: '#C96F4A', backgroundColor: '#C96F4A', tension: .3, yAxisID: 'y1' },
+            ],
+        },
+        options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Bs.' } }, y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { precision: 0 } } } },
     });
-}
-
-function mostrarAlertaPago(factura, monto) {
-    Swal.fire({
-        title: 'Pago Parcial Detectado',
-        text: `La factura #${factura} registra un abono pendiente de $${monto}.`,
-        icon: 'info',
-        iconColor: '#1F5F8B',
-        confirmButtonText: 'Ir a Finanzas',
-        confirmButtonColor: '#C96F4A',
-        background: '#FFFFFF',
-        color: '#343A40'
-    });
-}
-
-function validarBoletoQR(codigo) {
-    Swal.fire({
-        title: 'Validación de QR',
-        text: `Verificando boleto ${codigo}...`,
-        timer: 1200,
-        showConfirmButton: false,
-        background: '#FFFFFF',
-        color: '#343A40',
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    }).then(() => {
-        Swal.fire({
-            title: '¡Boleto Válido!',
-            text: 'El código QR pertenece a la Reserva #RES-5091 (Confirmada).',
-            icon: 'success',
-            iconColor: '#1F5F8B',
-            confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#1F5F8B',
-            background: '#FFFFFF',
-            color: '#343A40'
-        });
-    });
-}
-
-function nuevaFacturaModal() {
-    Swal.fire({
-        title: 'Emitir Nueva Factura',
-        html:
-            '<input id="swal-input1" class="swal2-input" placeholder="Nombre o Razón Social">' +
-            '<input id="swal-input2" class="swal2-input" placeholder="NIT / CI">' +
-            '<input id="swal-input3" class="swal2-input" placeholder="Monto Total ($)">',
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: 'Generar Comprobante',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#C96F4A',
-        cancelButtonColor: '#6B6F72',
-        background: '#FFFFFF',
-        color: '#343A40',
-        preConfirm: () => {
-            return [
-                document.getElementById('swal-input1').value,
-                document.getElementById('swal-input2').value,
-                document.getElementById('swal-input3').value
-            ]
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Factura Generada',
-                text: 'El comprobante ha sido registrado con éxito.',
-                icon: 'success',
-                iconColor: '#1F5F8B',
-                confirmButtonColor: '#1F5F8B'
-            });
-        }
-    });
-}
 </script>
 @endpush
 @endsection

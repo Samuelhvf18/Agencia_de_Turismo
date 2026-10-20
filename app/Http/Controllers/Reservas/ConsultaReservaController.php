@@ -93,6 +93,8 @@ class ConsultaReservaController extends Controller
             'urlComprobante' => $reserva->comprobante ? route('reservas.comprobante', $reserva) : null,
             'urlBoletos' => $reserva->boletos()->where('boletos.est', '<>', Boleto::EST_CANCELADO)->exists() ? route('reservas.boletos', $reserva) : null,
             'urlCancelar' => $this->cancelable($reserva) ? route('reservas.cancelar', $reserva) : null,
+            'resena' => $reserva->resena,
+            'urlResena' => $reserva->est === Reserva::EST_COMPLETADA && ! $reserva->resena ? route('reservas.resena', $reserva) : null,
             'urlConsultar' => route('reservas.consultar'),
         ]);
     }

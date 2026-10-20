@@ -142,6 +142,26 @@ a{color:inherit;text-decoration:none}
     </div>
     @endif
 
+    <div class="panel">
+      <h2>Reseñas verificadas</h2>
+      @if ($calificacion && $calificacion->cantidad_resenas > 0)
+        <p style="font-size:15px"><b style="font-size:26px;color:var(--principal)">{{ number_format($calificacion->calificacion_promedio, 1, ',', '.') }}</b> / 5
+          <span style="color:var(--acento)">@for ($i = 1; $i <= 5; $i++)<i class="fa-{{ $i <= round($calificacion->calificacion_promedio) ? 'solid' : 'regular' }} fa-star"></i>@endfor</span>
+          · {{ $calificacion->cantidad_resenas }} {{ $calificacion->cantidad_resenas == 1 ? 'reseña' : 'reseñas' }}</p>
+        <ul class="pois" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+          @foreach ($resenas as $r)
+            <li style="display:block">
+              <span style="color:var(--acento)">@for ($i = 1; $i <= 5; $i++)<i class="fa-{{ $i <= $r->cal ? 'solid' : 'regular' }} fa-star" style="width:auto;height:auto;background:none;color:inherit;display:inline"></i>@endfor</span>
+              @if ($r->com)<p style="margin-top:6px">«{{ $r->com }}»</p>@endif
+              <small>{{ $r->mdt['autor'] ?? 'Viajero' }} · <i class="fa-solid fa-circle-check" style="width:auto;height:auto;background:none;color:#2E7D32;display:inline"></i> Reserva verificada · {{ $r->cre_en?->format('m/Y') }}</small>
+            </li>
+          @endforeach
+        </ul>
+      @else
+        <p style="color:var(--texto-2);font-size:14px">Este tour todavía no tiene reseñas. Solo pueden opinar quienes ya lo realizaron con Pipocas.</p>
+      @endif
+    </div>
+
     @if ($tour->galeria->count() > 1)
     <div class="panel">
       <h2>Galería</h2>

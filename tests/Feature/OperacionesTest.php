@@ -165,8 +165,8 @@ test('reprogramar avisa a cada reserva y cancelar la salida cancela sus reservas
 });
 
 test('el guía hace el check-in por QR, inicia y finaliza el recorrido', function () {
-    $salida = SalidaTour::where('tur_id', $this->tour->id)->first();
-    $salida->update(['prf_gui_id' => $this->guia->id]);
+    $salida = SalidaTour::where('tur_id', $this->tour->id)->orderBy('fec_sal')->orderBy('id')->first();
+    $salida->update(['prf_gui_id' => $this->guia->id, 'veh_id' => Vehiculo::where('cap_asi', '>=', $salida->cap_max)->orderBy('id')->value('id')]);
     $reserva = reservaPagada($salida, 2);
     $otra = reservaPagada(SalidaTour::where('tur_id', $this->tour->id)->where('id', '<>', $salida->id)->first(), 1);
     $boletos = $reserva->boletos()->pluck('boletos.cod');
