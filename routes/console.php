@@ -18,3 +18,6 @@ Artisan::command('inspire', function () {
 
 // Módulo 05 — reservas pendientes sin pago tras 24 h liberan sus cupos.
 Schedule::command('reservas:expirar')->hourly();
+
+// Módulo 10 — recordatorio el día anterior a la salida (n8n también puede dispararlo; no se duplica).
+Schedule::command('reservas:recordatorios')->dailyAt('18:00');

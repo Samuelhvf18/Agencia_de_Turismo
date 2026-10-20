@@ -43,3 +43,22 @@ Cada disparador llama a `POST {PIPOCAS_URL}/api/n8n/tareas/{tarea}` con la cabec
 Las propuestas de asignación **nunca se aplican solas** (RF-24): quedan pendientes en *Admin → Investigación Operativa → Asignación óptima*.
 
 Sin n8n, las mismas tareas se pueden programar con el cron de Laravel descomentando las líneas de `routes/console.php`. La expiración de reservas impagas (`reservas:expirar`) siempre corre en el cron de Laravel.
+
+## Notificaciones (`notificaciones.json`)
+
+Laravel registra cada aviso en `registros_notificacion` y `NotificacionJob` lo envía por `POST` a `N8N_WEBHOOK_NOTIFICACIONES` con la cabecera `X-Pipocas-Token`. El flujo valida el token y, según `canal`, envía un correo (credencial SMTP de n8n y variable `PIPOCAS_MAIL_FROM`) o un WhatsApp (API de WhatsApp Cloud con `WHATSAPP_PHONE_ID` y `WHATSAPP_TOKEN`). Responde 200 y Laravel marca el registro como `enviado`; ante un error lo marca `fallido` y se puede reintentar desde *Auditoría → Notificaciones*.
+
+Cuerpo que recibe n8n:
+
+```json
+{
+  "id": 15, "tipo": "recordatorio_salida", "asunto": "Tu tour es mañana", "canal": "email",
+  "datos": {"destino": "cliente@correo.com", "nombre": "Ana Quispe", "mensaje": "..."},
+  "reserva": {"cod": "RES-7K3QXM", "contacto": "Ana Quispe", "correo": "...", "telefono": "...",
+              "tour": "...", "fecha": "2026-10-25", "hora": "08:00", "total": 260, "estado": "confirmada", "url": "..."}
+}
+```
+
+Tipos: `reserva_confirmada`, `pago_recibido`, `comprobante_emitido`, `recordatorio_salida`, `salida_reprogramada`, `salida_cancelada`, `alerta_reposicion`, `alerta_seguridad` y `derivacion_chatbot`.
+
+Sin `N8N_WEBHOOK_NOTIFICACIONES`, Laravel envía el correo directamente (`AvisoMail`). Los boletos y el comprobante en PDF siempre los adjunta Laravel (`EnviarBoletosReserva`).

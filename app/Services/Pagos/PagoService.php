@@ -7,6 +7,7 @@ use App\Models\ComprobantePago;
 use App\Models\Pago;
 use App\Models\Reserva;
 use App\Services\CodeGeneratorService;
+use App\Services\Notificaciones\NotificacionService;
 use App\Services\Reservas\BoletoService;
 use App\Services\Reservas\ReservaService;
 use Illuminate\Support\Facades\DB;
@@ -142,6 +143,14 @@ class PagoService
         if ($confirmada) {
             // Boletos (PDF con QR) y comprobante por correo; queda en registros_notificacion.
             EnviarBoletosReserva::dispatch($pago->comprobante->rsv_id)->afterCommit();
+        } elseif ($pago?->est === Pago::EST_COMPLETADO) {
+            $reserva = $pago->comprobante->reserva;
+            app(NotificacionService::class)->aReserva($reserva, 'pago_recibido', [
+                'mensaje' => sprintf('Recibimos tu pago de Bs. %s. Saldo pendiente: Bs. %s. Los tickets se emiten al completar el pago.',
+                    number_format((float) $pago->mto, 2, ',', '.'), number_format($this->saldo($reserva), 2, ',', '.')),
+                'monto' => (float) $pago->mto,
+                'saldo' => $this->saldo($reserva),
+            ]);
         }
 
         return $pago;

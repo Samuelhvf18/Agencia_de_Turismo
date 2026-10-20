@@ -1,5 +1,6 @@
 <?php
 namespace App\Actions\Fortify;
+use App\Listeners\AlertasSeguridad;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -27,5 +28,7 @@ class UpdateUserPassword implements UpdatesUserPasswords{
         $user->forceFill([
             'clv' => $input['password'],
         ])->save();
+
+        app(AlertasSeguridad::class)->contrasenaCambiada($user);
     }
 }

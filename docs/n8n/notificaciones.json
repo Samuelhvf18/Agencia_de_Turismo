@@ -1,0 +1,284 @@
+{
+  "name": "Pipocas · Notificaciones (correo y WhatsApp)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pipocas-notificaciones",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "2dccfefb-091a-5099-997f-f2be13c0e970",
+      "name": "Webhook notificaciones",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        200
+      ],
+      "webhookId": "6c2f08a0-8f2b-52c3-afd4-616ad65d49ae"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "06f3b591-285b-59dc-a804-15ad41d0af99",
+              "leftValue": "={{ $json.headers['x-pipocas-token'] }}",
+              "rightValue": "={{ $env.PIPOCAS_N8N_TOKEN }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "88d32fd4-d19e-58a7-a9a1-d34ad504b5c2",
+      "name": "¿Token válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.canal }}",
+                    "rightValue": "email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.canal }}",
+                    "rightValue": "whatsapp",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "whatsapp"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "1c3a4451-a962-5be9-94e6-718c17d46ea2",
+      "name": "Canal",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        440,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.PIPOCAS_MAIL_FROM }}",
+        "toEmail": "={{ $json.body.datos.destino }}",
+        "subject": "={{ $json.body.asunto }} · Pipocas",
+        "emailFormat": "html",
+        "html": "=<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto\">\n<div style=\"background:#1F5F8B;color:#fff;padding:18px 22px;border-radius:14px 14px 0 0\"><b style=\"font-size:20px\">Pipocas</b><br>{{ $json.body.asunto }}</div>\n<div style=\"background:#fff;padding:22px;border:1px solid #eee;border-radius:0 0 14px 14px;font-size:14px;line-height:1.5\">\n<p>Hola {{ ($json.body.datos.nombre || 'viajero').split(' ')[0] }},</p>\n<p>{{ $json.body.datos.mensaje || '' }}</p>\n{{ $json.body.reserva ? '<p><b>Reserva:</b> ' + $json.body.reserva.cod + '<br><b>Tour:</b> ' + $json.body.reserva.tour + '<br><b>Fecha:</b> ' + $json.body.reserva.fecha + ' ' + $json.body.reserva.hora + '</p><p><a href=\"' + $json.body.reserva.url + '\">Ver mi reserva</a></p>' : '' }}\n<p style=\"color:#6B6F72;font-size:12px\">Mensaje automático de Pipocas Agencia de Viajes y Turismo.</p>\n</div></div>",
+        "options": {}
+      },
+      "id": "e4ea2d8a-19c3-5a12-99e3-017b94945a19",
+      "name": "Enviar correo",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        680,
+        0
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "",
+          "name": "SMTP Pipocas"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v20.0/{{ $env.WHATSAPP_PHONE_ID }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.WHATSAPP_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: ($json.body.reserva?.telefono || '').replace(/\\D/g, ''), type: 'text', text: { body: $json.body.asunto + ': ' + ($json.body.datos.mensaje || '') } }) }}",
+        "options": {}
+      },
+      "id": "233bc3f0-0946-5dc4-89f2-c210e7a7ecb8",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        680,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, id: $('Webhook notificaciones').item.json.body.id } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "8ce8c5b6-2342-557f-a018-54d6d256ffe1",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, error: 'token' } }}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "d6828ce9-a6d5-5a5e-8648-951db1dd21f8",
+      "name": "Responder 401",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        340
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook notificaciones": {
+      "main": [
+        [
+          {
+            "node": "¿Token válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Token válido?": {
+      "main": [
+        [
+          {
+            "node": "Canal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 401",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Canal": {
+      "main": [
+        [
+          {
+            "node": "Enviar correo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar correo": {
+      "main": [
+        [
+          {
+            "node": "Responder OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Responder OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/La_Paz"
+  },
+  "active": false,
+  "pinData": {},
+  "tags": []
+}

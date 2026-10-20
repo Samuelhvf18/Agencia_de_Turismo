@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Boleto;
+use App\Models\FichaMedica;
 use App\Models\Reserva;
 use App\Models\SalidaTour;
 use App\Models\User;
+use App\Observers\AuditObserver;
 use App\Services\Operaciones\SalidaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -105,6 +107,10 @@ class CheckinController extends Controller
 
     private function manifiesto(SalidaTour $salida): array
     {
+        // RNF-05: el guía ve condiciones médicas; esa lectura queda en la bitácora.
+        FichaMedica::whereHas('participante.reserva', fn ($q) => $q->where('sal_tur_id', $salida->id)->where('est', Reserva::EST_CONFIRMADA))
+            ->get()->each(fn ($f) => AuditObserver::lectura($f));
+
         return Reserva::with('participantes.boleto', 'participantes.fichaMedica', 'participantes.alquileres.item.tipo')
             ->where('sal_tur_id', $salida->id)
             ->where('est', Reserva::EST_CONFIRMADA)

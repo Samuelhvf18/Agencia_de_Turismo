@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AnalisisColasController;
+use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\Admin\CatalogoAdminController;
 use App\Http\Controllers\Admin\CicloVidaClienteController;
 use App\Http\Controllers\Admin\FinanzasController;
@@ -147,7 +148,14 @@ Route::middleware([
         Route::post('/io/eoq/alertas', [IoGestionController::class, 'alertasEoq'])->name('io.eoq.alertas');
 
         // Bitácora de auditoría: solo administrador.
-        Route::view('/auditoria', 'admin.panels.auditoria')->middleware('rol:'.User::ROL_ADMIN)->name('auditoria');
+        Route::middleware('rol:'.User::ROL_ADMIN)->group(function () {
+            Route::get('/auditoria', [AuditoriaController::class, 'index'])->name('auditoria');
+            Route::get('/auditoria/registros/{registro}', [AuditoriaController::class, 'show'])->name('auditoria.show');
+            Route::get('/auditoria/notificaciones', [AuditoriaController::class, 'notificaciones'])->name('auditoria.notificaciones');
+            Route::post('/auditoria/notificaciones/{registro}/reintentar', [AuditoriaController::class, 'reintentar'])->name('auditoria.reintentar');
+            Route::get('/auditoria/usuarios', [AuditoriaController::class, 'usuarios'])->name('auditoria.usuarios');
+            Route::put('/auditoria/usuarios/{usuario}', [AuditoriaController::class, 'actualizarUsuario'])->name('auditoria.usuarios.update');
+        });
     });
 
     // Operación en campo: guías y choferes (y supervisión de operaciones/admin).
