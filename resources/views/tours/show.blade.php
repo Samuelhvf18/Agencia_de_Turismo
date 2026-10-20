@@ -12,7 +12,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
-@if ($puntos->count())
+@php $hayRuta = $puntos->count() || ! empty($tour->trz_geo); @endphp
+@if ($hayRuta)
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 @endif
 <style>
@@ -65,6 +66,12 @@ a{color:inherit;text-decoration:none}
 .gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px}
 #map{height:320px;border-radius:16px;z-index:0}
+.perfil{position:relative;height:220px;margin-top:18px}
+.pois{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:16px;list-style:none}
+.pois li{display:flex;gap:10px;align-items:center;background:var(--fondo);border-radius:12px;padding:10px 12px;font-size:14px}
+.pois i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;flex-shrink:0}
+.pois small{display:block;color:var(--texto-2);font-size:12px}
+.poi-inicio{background:#2E7D32}.poi-checkpoint{background:var(--complementario)}.poi-mirador{background:var(--secundario)}.poi-fin{background:var(--principal)}
 
 /* reserva */
 .book{position:sticky;top:20px}
@@ -118,10 +125,20 @@ a{color:inherit;text-decoration:none}
       @if ($tour->req_fis)<p style="margin-top:10px">{{ $tour->req_fis }}</p>@endif
     </div>
 
-    @if ($puntos->count())
+    @if ($hayRuta)
     <div class="panel">
       <h2>Recorrido</h2>
       <div id="map" aria-label="Mapa del recorrido"></div>
+      <h2 style="margin-top:22px">Perfil de elevación</h2>
+      <div class="perfil"><canvas id="perfil" aria-label="Perfil de elevación del recorrido"></canvas></div>
+      @if ($puntos->count())
+      <ul class="pois">
+        @foreach ($puntos as $p)
+          <li><i class="poi-{{ $p->tip_pun }} fa-solid {{ ['inicio' => 'fa-flag', 'checkpoint' => 'fa-location-dot', 'mirador' => 'fa-binoculars', 'fin' => 'fa-flag-checkered'][$p->tip_pun] ?? 'fa-location-dot' }}"></i>
+            <span>{{ $p->nom }}<small>{{ ucfirst($p->tip_pun) }}@if ($p->alt_m) · {{ number_format($p->alt_m, 0, ',', '.') }} m @endif</small></span></li>
+        @endforeach
+      </ul>
+      @endif
     </div>
     @endif
 
@@ -149,16 +166,60 @@ a{color:inherit;text-decoration:none}
   </aside>
 </main>
 
-@if ($puntos->count())
+@if ($hayRuta)
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
+// Trazado: GeoJSON de tours.trz_geo si existe; si no, la polilínea de puntos_ruta.
 const puntos = @json($puntos);
+const trazado = @json($tour->trz_geo);
 const map = L.map('map', { scrollWheelZoom: false });
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
-const coords = puntos.map(p => [+p.lat, +p.lon]);
-puntos.forEach(p => L.marker([+p.lat, +p.lon]).addTo(map).bindPopup((p.nom || '') + (p.alt_m ? ` · ${p.alt_m} m` : '')));
-if (coords.length > 1) L.polyline(coords, { color: '#C96F4A', weight: 4 }).addTo(map);
-map.fitBounds(L.latLngBounds(coords).pad(0.2));
+
+const colores = { inicio: '#2E7D32', checkpoint: '#457699', mirador: '#C96F4A', fin: '#1F5F8B' };
+puntos.forEach(p => L.circleMarker([+p.lat, +p.lon], { radius: 8, color: '#fff', weight: 2, fillColor: colores[p.tip_pun] || '#457699', fillOpacity: 1 })
+  .addTo(map).bindPopup('<b>' + (p.nom || '') + '</b>' + (p.alt_m ? ' · ' + p.alt_m + ' m' : '')));
+
+let capa;
+if (trazado) {
+  capa = L.geoJSON(trazado, { style: { color: '#C96F4A', weight: 4 } }).addTo(map);
+} else if (puntos.length > 1) {
+  capa = L.polyline(puntos.map(p => [+p.lat, +p.lon]), { color: '#C96F4A', weight: 4 }).addTo(map);
+}
+const limites = capa ? capa.getBounds() : L.latLngBounds(puntos.map(p => [+p.lat, +p.lon]));
+map.fitBounds(limites.pad(0.2));
+
+// Perfil de elevación (RF-02): distancia acumulada (haversine) contra altitud.
+const lineas = [];
+const recoger = g => {
+  if (!g) return;
+  if (g.type === 'FeatureCollection') g.features.forEach(f => recoger(f.geometry));
+  else if (g.type === 'Feature') recoger(g.geometry);
+  else if (g.type === 'LineString') lineas.push(...g.coordinates);
+  else if (g.type === 'MultiLineString') g.coordinates.forEach(l => lineas.push(...l));
+};
+recoger(trazado);
+let serie = lineas.filter(c => c.length > 2).map(c => ({ lat: c[1], lon: c[0], alt: c[2] }));
+if (serie.length < 2) serie = puntos.filter(p => p.alt_m !== null).map(p => ({ lat: +p.lat, lon: +p.lon, alt: +p.alt_m, nom: p.nom }));
+
+const rad = x => x * Math.PI / 180;
+const km = (a, b) => { const R = 6371, dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); };
+let acumulado = 0;
+const datos = serie.map((p, i) => { if (i) acumulado += km(serie[i - 1], p); return { x: +acumulado.toFixed(2), y: p.alt }; });
+
+if (datos.length > 1) {
+  new Chart(document.getElementById('perfil'), {
+    type: 'line',
+    data: { datasets: [{ label: 'Altitud (m s. n. m.)', data: datos, parsing: false, fill: true, tension: 0.3, pointRadius: 0,
+      borderColor: '#1F5F8B', backgroundColor: 'rgba(31,95,139,.15)' }] },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false },
+        tooltip: { callbacks: { title: i => i[0].parsed.x.toFixed(1) + ' km', label: i => i.parsed.y + ' m' } } },
+      scales: { x: { type: 'linear', title: { display: true, text: 'Distancia (km)' } }, y: { title: { display: true, text: 'Altitud (m)' } } } },
+  });
+} else {
+  document.querySelector('.perfil').outerHTML = '<p style="color:var(--texto-2);font-size:14px">Este recorrido todavía no tiene altitudes registradas.</p>';
+}
 </script>
 @endif
 </body>

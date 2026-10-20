@@ -197,6 +197,13 @@ section.s{padding:clamp(64px,9vw,110px) 0}
 .chip{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid #d8d8dc;background:#fff;color:var(--texto-2);font-weight:700;font-size:13.5px;cursor:pointer;transition:all .25s}
 .chip:hover{border-color:var(--principal);color:var(--principal)}
 .chip.on{background:var(--principal);border-color:var(--principal);color:#fff;box-shadow:0 10px 20px -10px rgba(31,95,139,.8)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.filtros2{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:-8px 0 26px}
+.fsel{appearance:none;padding:10px 38px 10px 16px;border-radius:999px;border:1px solid #d8d8dc;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6F72' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;color:var(--texto);font-weight:700;font-size:13.5px;cursor:pointer}
+.fsel:focus{outline:2px solid var(--principal);outline-offset:2px}
+.fcount{font-size:13px;color:var(--texto-2);font-weight:600}
+.flimpiar{border:none;background:none;color:var(--secundario);font-weight:700;font-size:13px;cursor:pointer;text-decoration:underline}
+.vacio{grid-column:1/-1;text-align:center;padding:40px 10px;color:var(--texto-2)}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
 @media(max-width:1024px){.cards{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.cards{grid-template-columns:1fr}.head-row .filters{width:100%}}
@@ -437,9 +444,9 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <a href="#catalogo" class="btn btn-gold"><i class="fa-solid fa-compass"></i> Explorar tours <i class="fa-solid fa-arrow-right arrow"></i></a>
         <a href="#verificar" class="btn btn-glass"><i class="fa-solid fa-qrcode"></i> Mi reserva</a>
       </div>
-      <form class="search reveal d4" onsubmit="event.preventDefault();location.hash='catalogo'">
-        <div class="f"><i class="fa-solid fa-person-hiking"></i><div style="flex:1;min-width:0"><label>Actividad</label>
-          <select><option>Todas</option><option>Biking</option><option>Hiking</option><option>Trekking</option><option>Climbing</option><option>City Tour</option></select></div></div>
+      <form class="search reveal d4" id="hero-search">
+        <div class="f"><i class="fa-solid fa-person-hiking"></i><div style="flex:1;min-width:0"><label for="hero-cat">Actividad</label>
+          <select id="hero-cat"><option value="todos">Todas</option>@foreach ($categorias as $cat)<option value="{{ $cat->rta_amg }}">{{ $cat->nom }}</option>@endforeach</select></div></div>
         <div class="f"><i class="fa-regular fa-calendar"></i><div style="flex:1;min-width:0"><label>Fecha</label><input type="date"></div></div>
         <button class="btn btn-blue" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></button>
       </form>
@@ -517,9 +524,30 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       </div>
     </div>
 
+    <div class="filtros2 reveal d2" role="group" aria-label="Filtrar por dificultad y altitud">
+      <label class="sr-only" for="f-dif">Dificultad</label>
+      <select id="f-dif" class="fsel">
+        <option value="">Toda dificultad</option>
+        <option value="facil">Fácil</option>
+        <option value="moderado">Moderado</option>
+        <option value="dificil">Difícil</option>
+        <option value="experto">Experto</option>
+      </select>
+      <label class="sr-only" for="f-alt">Altitud máxima</label>
+      <select id="f-alt" class="fsel">
+        <option value="">Cualquier altitud</option>
+        <option value="0-3000">Hasta 3.000 m</option>
+        <option value="3000-4000">3.000 – 4.000 m</option>
+        <option value="4000-5000">4.000 – 5.000 m</option>
+        <option value="5000-9000">Más de 5.000 m</option>
+      </select>
+      <span class="fcount" id="f-count" aria-live="polite"></span>
+      <button type="button" class="flimpiar" id="f-limpiar" hidden>Quitar filtros</button>
+    </div>
+
     <div class="cards" id="cards">
       @forelse ($tours as $tour)
-      <article class="card reveal {{ ['', 'd1', 'd2'][$loop->index % 3] }}" data-cat="{{ $tour->categoria->rta_amg }}">
+      <article class="card reveal {{ ['', 'd1', 'd2'][$loop->index % 3] }}" data-cat="{{ $tour->categoria->rta_amg }}" data-dif="{{ $tour->niv_dif }}" data-alt="{{ (int) $tour->alt_max_m }}">
         <div class="cimg"><a href="{{ route('tours.show', $tour) }}"><img src="{{ $tour->img }}" alt="{{ $tour->img_alt }}" loading="lazy"></a><span class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">{{ $tour->cod }}</span></div>
         <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>{{ $tour->dur_txt }} h</span>@if ($tour->alt_max_m)<span><i class="fa-solid fa-mountain"></i>{{ number_format($tour->alt_max_m, 0, ',', '.') }} m</span>@endif<span><i class="fa-solid fa-users"></i>Máx {{ $tour->cap_max }}</span></div>
           <h3><a href="{{ route('tours.show', $tour) }}">{{ $tour->nom }}</a></h3><p>{{ $tour->des }}</p>
@@ -529,6 +557,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       @empty
       <p class="sub">Pronto publicaremos nuevos tours.</p>
       @endforelse
+      <p class="vacio" id="f-vacio" hidden><i class="fa-solid fa-mountain-sun"></i> Ningún tour coincide con esos filtros. Prueba con otra combinación.</p>
     </div>
   </div>
 </section>
@@ -866,11 +895,23 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return
   e.target.querySelectorAll('[data-count]').forEach(countUp);io.unobserve(e.target)}),{threshold:.15});
 document.querySelectorAll('.reveal,#mapbox').forEach(el=>io.observe(el));
 
-// filtros del catálogo
+// filtros combinados del catálogo (RF-01): categoría + dificultad + altitud, sin recargar
 const chips=document.querySelectorAll('.chip'),cards=document.querySelectorAll('.card');
-const filter=f=>{chips.forEach(c=>c.classList.toggle('on',c.dataset.f===f));
-  cards.forEach(c=>{const show=f==='todos'||c.dataset.cat===f;c.classList.toggle('hide',!show);if(show){c.classList.remove('in');void c.offsetWidth;c.classList.add('in')}})};
+const fDif=document.getElementById('f-dif'),fAlt=document.getElementById('f-alt'),fCount=document.getElementById('f-count'),
+  fVacio=document.getElementById('f-vacio'),fLimpiar=document.getElementById('f-limpiar');
+let fCat='todos';
+const aplicar=()=>{const dif=fDif.value,[aMin,aMax]=(fAlt.value||'0-99999').split('-').map(Number);let n=0;
+  cards.forEach(c=>{const alt=+c.dataset.alt;
+    const show=(fCat==='todos'||c.dataset.cat===fCat)&&(!dif||c.dataset.dif===dif)&&(!fAlt.value||(alt>aMin&&alt<=aMax)||(aMin===0&&alt<=aMax));
+    c.classList.toggle('hide',!show);if(show){n++;c.classList.remove('in');void c.offsetWidth;c.classList.add('in')}});
+  fCount.textContent=n+(n===1?' tour':' tours');fVacio.hidden=n>0;fLimpiar.hidden=fCat==='todos'&&!dif&&!fAlt.value};
+const filter=f=>{fCat=f;chips.forEach(c=>c.classList.toggle('on',c.dataset.f===f));aplicar()};
 chips.forEach(c=>c.onclick=()=>filter(c.dataset.f));
+fDif.onchange=aplicar;fAlt.onchange=aplicar;
+fLimpiar.onclick=()=>{fDif.value='';fAlt.value='';filter('todos')};
+document.getElementById('hero-search').addEventListener('submit',e=>{e.preventDefault();filter(document.getElementById('hero-cat').value);
+  document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})});
+aplicar();
 document.querySelectorAll('[data-go]').forEach(t=>t.onclick=()=>{filter(t.dataset.go);document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})});
 
 // favoritos

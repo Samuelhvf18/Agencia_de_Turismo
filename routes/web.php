@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AnalisisColasController;
+use App\Http\Controllers\Admin\CatalogoAdminController;
 use App\Http\Controllers\Admin\CicloVidaClienteController;
 use App\Http\Controllers\Admin\FinanzasController;
 use App\Http\Controllers\Admin\FlotaController;
@@ -104,7 +105,19 @@ Route::middleware([
         Route::get('/transporte', [FlotaController::class, 'index'])->name('transporte');
         Route::post('/transporte', [FlotaController::class, 'store'])->name('transporte.store');
         Route::put('/transporte/{vehiculo}', [FlotaController::class, 'update'])->name('transporte.update');
-        Route::view('/tours', 'admin.panels.tours')->name('tours');
+        // Catálogo (M02): tours, categorías, galería y trazado
+        Route::get('/tours', [CatalogoAdminController::class, 'index'])->name('tours');
+        Route::get('/catalogo/tours/nuevo', [CatalogoAdminController::class, 'create'])->name('catalogo.create');
+        Route::post('/catalogo/tours', [CatalogoAdminController::class, 'store'])->name('catalogo.store');
+        Route::get('/catalogo/tours/{tour}', [CatalogoAdminController::class, 'edit'])->name('catalogo.edit');
+        Route::put('/catalogo/tours/{tour}', [CatalogoAdminController::class, 'update'])->name('catalogo.update');
+        Route::delete('/catalogo/tours/{tour}', [CatalogoAdminController::class, 'destroy'])->name('catalogo.destroy');
+        Route::post('/catalogo/tours/{tour}/fotos', [CatalogoAdminController::class, 'subirFotos'])->name('catalogo.fotos');
+        Route::post('/catalogo/tours/{tour}/fotos/orden', [CatalogoAdminController::class, 'ordenarFotos'])->name('catalogo.fotos.orden');
+        Route::delete('/catalogo/tours/{tour}/fotos/{foto}', [CatalogoAdminController::class, 'eliminarFoto'])->name('catalogo.fotos.eliminar');
+        Route::post('/catalogo/tours/{tour}/ruta', [CatalogoAdminController::class, 'guardarRuta'])->name('catalogo.ruta');
+        Route::post('/catalogo/categorias/{categoria?}', [CatalogoAdminController::class, 'guardarCategoria'])->name('catalogo.categoria');
+        Route::delete('/catalogo/categorias/{categoria}', [CatalogoAdminController::class, 'eliminarCategoria'])->name('catalogo.categoria.eliminar');
         Route::get('/personal', [PersonalController::class, 'index'])->name('personal');
         Route::post('/personal/{tipo}', [PersonalController::class, 'store'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.store');
         Route::get('/personal/{tipo}/{id}', [PersonalController::class, 'edit'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.edit');

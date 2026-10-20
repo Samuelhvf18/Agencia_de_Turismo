@@ -16,7 +16,7 @@ class Tour extends Model
     protected $fillable = [
         'cat_id', 'cod', 'rta_amg', 'nom', 'des', 'niv_dif',
         'alt_min_m', 'alt_max_m', 'dur_hrs', 'req_fis',
-        'pre_bas', 'cap_max', 'trz_geo', 'act'
+        'pre_bas', 'cap_max', 'trz_geo', 'act', 'eli_en',
     ];
 
     protected function casts(): array

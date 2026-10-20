@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             UsuariosDemoSeeder::class,
             CatalogoLandingSeeder::class,
+            RutasCatalogoSeeder::class,
             OperacionDemoSeeder::class,
 
             // Módulo 07 — Investigación Operativa II (Colas + Cadenas de Markov).
