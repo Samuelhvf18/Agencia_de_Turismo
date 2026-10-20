@@ -1,0 +1,486 @@
+{
+  "name": "Pipocas · Planificador IO II y tareas programadas",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "55 23 * * *"
+            }
+          ]
+        }
+      },
+      "id": "977098ed-1900-5b4a-b687-01bf4e0f9215",
+      "name": "Diario 23:55",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/tareas/metricas-colas",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Pipocas-Token",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": false,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "5ac45e0c-03a4-5df9-ae30-205464904886",
+      "name": "Métricas de colas M/M/c/K",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 1 * *"
+            }
+          ]
+        }
+      },
+      "id": "2cc4f974-4982-572c-81c3-f05b2c45590f",
+      "name": "Mensual día 1 02:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/tareas/recalibrar-markov",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Pipocas-Token",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"sincronizar\": 1}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "b04f9f5a-f8e8-57f3-9690-fe533c3ec3e3",
+      "name": "Recalibrar cadena de Markov",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        180
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "690cb474-1fe9-5271-a2ca-f1749ca7b888",
+      "name": "Diario 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/tareas/propuestas-guias",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Pipocas-Token",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"dias\": 14}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "583223a8-4143-5a71-bc47-6a6b249c666b",
+      "name": "Propuestas de guías (húngaro)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        360
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "10 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "10cec890-7c41-5470-af02-43a2a89841cc",
+      "name": "Diario 06:10",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/tareas/propuestas-vehiculos",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Pipocas-Token",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"dias\": 14}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "2f02fe72-225d-53c9-9c7f-9829ac113719",
+      "name": "Propuestas de vehículos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        540
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "935c44b9-0a94-5088-9a67-29f5ecba649b",
+      "name": "Diario 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/tareas/alertas-eoq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Pipocas-Token",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": false,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "4cf8a698-ae76-5d0f-a359-9fe1feb8c803",
+      "name": "Alertas de reposición EOQ",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        720
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 1 * *"
+            }
+          ]
+        }
+      },
+      "id": "38bacb13-9b7a-5a77-a475-1b97f5e9f468",
+      "name": "Mensual día 1 03:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/tareas/proyectar-demanda",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Pipocas-Token",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"meses\": 3}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "ef639bd1-d134-588e-a073-e184a808c6ab",
+      "name": "Proyección de demanda",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        900
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18 * * *"
+            }
+          ]
+        }
+      },
+      "id": "eeaaf901-aa31-5332-b21d-f39079c65416",
+      "name": "Diario 18:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PIPOCAS_URL }}/api/n8n/tareas/recordatorios",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Pipocas-Token",
+              "value": "={{ $env.PIPOCAS_N8N_TOKEN }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": false,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "494e90fd-357d-5596-824f-a4cc073b49e2",
+      "name": "Recordatorios de salida",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        1080
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    }
+  ],
+  "connections": {
+    "Diario 23:55": {
+      "main": [
+        [
+          {
+            "node": "Métricas de colas M/M/c/K",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensual día 1 02:00": {
+      "main": [
+        [
+          {
+            "node": "Recalibrar cadena de Markov",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Diario 06:00": {
+      "main": [
+        [
+          {
+            "node": "Propuestas de guías (húngaro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Diario 06:10": {
+      "main": [
+        [
+          {
+            "node": "Propuestas de vehículos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Diario 07:00": {
+      "main": [
+        [
+          {
+            "node": "Alertas de reposición EOQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensual día 1 03:00": {
+      "main": [
+        [
+          {
+            "node": "Proyección de demanda",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Diario 18:00": {
+      "main": [
+        [
+          {
+            "node": "Recordatorios de salida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/La_Paz"
+  },
+  "active": false,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'rol' => \App\Http\Middleware\VerificarRol::class,
+            'n8n' => \App\Http\Middleware\TokenN8n::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

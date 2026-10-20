@@ -37,6 +37,11 @@
             ['url' => $rutaColas, 'icono' => 'fa-people-line', 'texto' => 'Análisis de colas', 'activo' => request()->is('admin/io/colas*', 'admin/io/preview/colas*')],
             ['url' => $rutaCiclo, 'icono' => 'fa-arrows-spin', 'texto' => 'Ciclo de vida del cliente', 'activo' => request()->is('admin/io/ciclo-vida*', 'admin/io/preview/ciclo-vida*')],
         ];
+        if ($base === 'admin/io') {
+            $enlaces[] = ['url' => route('admin.io.parametros'), 'icono' => 'fa-sliders', 'texto' => 'Parámetros de colas', 'activo' => request()->routeIs('admin.io.parametros*')];
+            $enlaces[] = ['url' => route('admin.io.propuestas'), 'icono' => 'fa-diagram-project', 'texto' => 'Asignación óptima', 'activo' => request()->routeIs('admin.io.propuestas*')];
+            $enlaces[] = ['url' => route('admin.io.eoq'), 'icono' => 'fa-boxes-stacked', 'texto' => 'Inventario EOQ', 'activo' => request()->routeIs('admin.io.eoq*')];
+        }
     @endphp
 
     {{-- Fondo del menú en móvil --}}
@@ -104,6 +109,13 @@
                         <i class="fa-solid fa-flask mt-0.5"></i>
                         <p><strong>Datos de demostración.</strong> {{ $avisoDemo ?? 'Los valores provienen de los parámetros iniciales del seeder; se reemplazan por los datos reales al registrar llegadas y cambios de estado.' }}</p>
                     </div>
+                @endif
+
+                @if (session('estado'))
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"><i class="fa-solid fa-circle-check mr-1"></i> {{ session('estado') }}</div>
+                @endif
+                @if ($errors->any())
+                    <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ $errors->first() }}</div>
                 @endif
 
                 @yield('contenido')

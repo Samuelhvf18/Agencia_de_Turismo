@@ -8,9 +8,13 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Módulo 07 — Investigación Operativa II
-Schedule::command('io:metricas-colas')->dailyAt('23:55');
-Schedule::command('io:recalibrar-markov --sincronizar')->monthlyOn(1, '02:00');
+// Módulo 07 — Investigación Operativa II: los cálculos los programa n8n (decisión del equipo)
+// llamando a POST /api/n8n/tareas/{tarea}; ver docs/n8n/planificador-io.json. Para correrlos
+// sin n8n basta descomentar estas líneas y usar `php artisan schedule:work`.
+// Schedule::command('io:metricas-colas')->dailyAt('23:55');
+// Schedule::command('io:recalibrar-markov --sincronizar')->monthlyOn(1, '02:00');
+// Schedule::command('io:propuestas --tipo=guia --dias=14')->dailyAt('06:00');
+// Schedule::command('io:alertas-eoq')->dailyAt('07:00');
 
 // Módulo 05 — reservas pendientes sin pago tras 24 h liberan sus cupos.
 Schedule::command('reservas:expirar')->hourly();

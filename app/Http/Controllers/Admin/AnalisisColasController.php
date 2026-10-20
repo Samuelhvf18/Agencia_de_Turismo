@@ -35,7 +35,7 @@ class AnalisisColasController extends Controller
             // Sin parámetros cargados todavía: se muestra la maqueta para no dejar el panel vacío.
             return view('admin.io.colas', array_merge(app(IoDemoData::class)->colas($datos['tour'] ?? null, $datos['c'] ?? null, $datos['k'] ?? null, $datos['lambda'] ?? null),
                 ['formAction' => route('admin.io.colas'),
-                   'avisoDemo' => 'Todavía no hay parámetros de colas registrados. Ejecute php artisan db:seed --class=IoColasMarkovSeeder para cargarlos por tour.']));
+                   'avisoDemo' => 'Todavía no hay parámetros de colas registrados. Cárguelos por tour en «Parámetros de colas» (RF-40); mientras tanto se muestran datos de demostración.']));
         }
 
         $hoy = now();

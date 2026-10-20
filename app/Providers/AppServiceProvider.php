@@ -40,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         Models\ProyeccionDemanda::class,
         Models\ColaParametroTour::class,
         Models\MarkovTransicion::class,
+        Models\PropuestaAsignacion::class,
     ];
 
     /**

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CicloVidaClienteController;
 use App\Http\Controllers\Admin\FinanzasController;
 use App\Http\Controllers\Admin\FlotaController;
 use App\Http\Controllers\Admin\InventarioController;
+use App\Http\Controllers\Admin\IoGestionController;
 use App\Http\Controllers\Admin\PersonalController;
 use App\Http\Controllers\Admin\SalidasController;
 use App\Http\Controllers\Admin\ReservasAdminController;
@@ -123,6 +124,14 @@ Route::middleware([
         // Módulo 07 — Investigación Operativa II: paneles de teoría de colas y cadenas de Markov
         Route::get('/io/colas', [AnalisisColasController::class, 'index'])->name('io.colas');
         Route::get('/io/ciclo-vida', [CicloVidaClienteController::class, 'index'])->name('io.ciclo-vida');
+        Route::get('/io/parametros', [IoGestionController::class, 'parametros'])->name('io.parametros');
+        Route::post('/io/parametros/{tour}', [IoGestionController::class, 'guardarParametros'])->name('io.parametros.store');
+        Route::get('/io/propuestas', [IoGestionController::class, 'propuestas'])->name('io.propuestas');
+        Route::post('/io/propuestas', [IoGestionController::class, 'generarPropuestas'])->name('io.propuestas.generar');
+        Route::post('/io/propuestas/{propuesta}/aplicar', [IoGestionController::class, 'aplicarPropuesta'])->name('io.propuestas.aplicar');
+        Route::post('/io/propuestas/{propuesta}/rechazar', [IoGestionController::class, 'rechazarPropuesta'])->name('io.propuestas.rechazar');
+        Route::get('/io/eoq', [IoGestionController::class, 'eoq'])->name('io.eoq');
+        Route::post('/io/eoq/alertas', [IoGestionController::class, 'alertasEoq'])->name('io.eoq.alertas');
 
         // Bitácora de auditoría: solo administrador.
         Route::view('/auditoria', 'admin.panels.auditoria')->middleware('rol:'.User::ROL_ADMIN)->name('auditoria');
