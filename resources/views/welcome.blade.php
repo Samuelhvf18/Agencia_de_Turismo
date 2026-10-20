@@ -384,21 +384,26 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <span><b>Agencia de Turismo<i>.</i></b><small>Todo es con todos similado</small></span>
     </a>
     <nav class="links">
-      <a href="#categorias">Experiencias</a>
-      <a href="#catalogo">Tours</a>
-      <a href="#como">Cómo reservar</a>
-      <a href="#verificar">Mi reserva</a>
-      <a href="{{ url('/chatbot') }}"><i class="fa-solid fa-robot"></i> Guia Digital</a>
+      <a href="#categorias">{{ __('Experiencias') }}</a>
+      <a href="#catalogo">{{ __('Tours') }}</a>
+      <a href="#como">{{ __('Cómo reservar') }}</a>
+      <a href="{{ route('reservas.consultar') }}">{{ __('Mi reserva') }}</a>
+      <a href="{{ url('/chatbot') }}"><i class="fa-solid fa-robot"></i> {{ __('Guía digital') }}</a>
     </nav>
     <div class="nav-cta">
+      <span class="lang-switch" style="display:inline-flex;gap:6px;font-weight:700;font-size:13px">
+        <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" @if (app()->getLocale() === 'es') style="text-decoration:underline" @endif>ES</a>
+        <span aria-hidden="true">|</span>
+        <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" @if (app()->getLocale() === 'en') style="text-decoration:underline" @endif>EN</a>
+      </span>
       @auth
-        <a href="{{ url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> Panel</a>
+        <a href="{{ url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ __('Panel') }}</a>
       @else
         @if (Route::has('login'))
-          <a href="{{ route('login') }}" class="login">Iniciar sesión</a>
+          <a href="{{ route('login') }}" class="login">{{ __('Iniciar sesión') }}</a>
         @endif
         @if (Route::has('register'))
-          <a href="{{ route('register') }}" class="btn btn-gold">Registrarse</a>
+          <a href="{{ route('register') }}" class="btn btn-gold">{{ __('Registrarse') }}</a>
         @endif
       @endauth
       <button class="burger" id="openMenu" aria-label="Abrir menú"><i class="fa-solid fa-bars-staggered"></i></button>
@@ -412,18 +417,18 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <button id="closeMenu" aria-label="Cerrar menú"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <nav>
-    <a href="#categorias">Experiencias <i class="fa-solid fa-arrow-right"></i></a>
+    <a href="#categorias">{{ __('Experiencias') }} <i class="fa-solid fa-arrow-right"></i></a>
     <a href="#catalogo">Tours <i class="fa-solid fa-arrow-right"></i></a>
-    <a href="#como">Cómo reservar <i class="fa-solid fa-arrow-right"></i></a>
-    <a href="#verificar">Mi reserva <i class="fa-solid fa-arrow-right"></i></a>
-    <a href="{{ url('/chatbot') }}">Guia Digital: <i class="fa-solid fa-robot"></i></a>
+    <a href="#como">{{ __('Cómo reservar') }} <i class="fa-solid fa-arrow-right"></i></a>
+    <a href="{{ route('reservas.consultar') }}">{{ __('Mi reserva') }} <i class="fa-solid fa-arrow-right"></i></a>
+    <a href="{{ url('/chatbot') }}">{{ __('Guía digital') }} <i class="fa-solid fa-robot"></i></a>
   </nav>
   <div class="mm-btns">
     @auth
-      <a href="{{ url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> Ir a mi panel</a>
+      <a href="{{ url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ __('Ir a mi panel') }}</a>
     @else
       @if (Route::has('login'))
-        <a href="{{ route('login') }}" class="btn btn-glass">Iniciar sesión</a>
+        <a href="{{ route('login') }}" class="btn btn-glass">{{ __('Iniciar sesión') }}</a>
       @endif
       @if (Route::has('register'))
         <a href="{{ route('register') }}" class="btn btn-gold">Registrarse</a>
@@ -441,12 +446,12 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <h1 class="reveal d1">Conecta<br>con la aventura <em>en el corazón de Bolivia</em></h1>
       <p class="lead reveal d2">Rutas georreferenciadas de Biking, Hiking, Trekking y Climbing. Reserva en línea, paga con QR y sal con equipo certificado y guías expertos.</p>
       <div class="hero-ctas reveal d3">
-        <a href="#catalogo" class="btn btn-gold"><i class="fa-solid fa-compass"></i> Explorar tours <i class="fa-solid fa-arrow-right arrow"></i></a>
+        <a href="#catalogo" class="btn btn-gold"><i class="fa-solid fa-compass"></i> {{ __('Explorar tours') }} <i class="fa-solid fa-arrow-right arrow"></i></a>
         <a href="#verificar" class="btn btn-glass"><i class="fa-solid fa-qrcode"></i> Mi reserva</a>
       </div>
       <form class="search reveal d4" id="hero-search">
-        <div class="f"><i class="fa-solid fa-person-hiking"></i><div style="flex:1;min-width:0"><label for="hero-cat">Actividad</label>
-          <select id="hero-cat"><option value="todos">Todas</option>@foreach ($categorias as $cat)<option value="{{ $cat->rta_amg }}">{{ $cat->nom }}</option>@endforeach</select></div></div>
+        <div class="f"><i class="fa-solid fa-person-hiking"></i><div style="flex:1;min-width:0"><label for="hero-cat">{{ __('Actividad') }}</label>
+          <select id="hero-cat"><option value="todos">{{ __('Todas') }}</option>@foreach ($categorias as $cat)<option value="{{ $cat->rta_amg }}">{{ $cat->nom }}</option>@endforeach</select></div></div>
         <div class="f"><i class="fa-regular fa-calendar"></i><div style="flex:1;min-width:0"><label>Fecha</label><input type="date"></div></div>
         <button class="btn btn-blue" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></button>
       </form>
@@ -483,9 +488,9 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 <div class="wrap" style="margin-top:80px">
   <div class="stats reveal">
     <div class="stat"><div class="ic" style="background:rgba(31,95,139,.1);color:var(--principal)"><i class="fa-solid fa-route"></i></div><div class="n" data-count="15" data-suf="+">0</div><div class="l">Rutas georreferenciadas</div></div>
-    <div class="stat"><div class="ic" style="background:rgba(201,111,74,.12);color:var(--secundario)"><i class="fa-solid fa-mountain"></i></div><div class="n" data-count="5100" data-suf=" m">0</div><div class="l">Altitud máxima</div></div>
-    <div class="stat"><div class="ic" style="background:rgba(244,201,93,.25);color:var(--calido)"><i class="fa-solid fa-helmet-safety"></i></div><div class="n" data-count="100" data-suf="%">0</div><div class="l">Equipo certificado</div></div>
-    <div class="stat"><div class="ic" style="background:rgba(69,118,153,.12);color:var(--complementario)"><i class="fa-solid fa-robot"></i></div><div class="n">24/7</div><div class="l">Asistencia con IA</div></div>
+    <div class="stat"><div class="ic" style="background:rgba(201,111,74,.12);color:var(--secundario)"><i class="fa-solid fa-mountain"></i></div><div class="n" data-count="5100" data-suf=" m">0</div><div class="l">{{ __('Altitud máxima') }}</div></div>
+    <div class="stat"><div class="ic" style="background:rgba(244,201,93,.25);color:var(--calido)"><i class="fa-solid fa-helmet-safety"></i></div><div class="n" data-count="100" data-suf="%">0</div><div class="l">{{ __('Equipo certificado') }}</div></div>
+    <div class="stat"><div class="ic" style="background:rgba(69,118,153,.12);color:var(--complementario)"><i class="fa-solid fa-robot"></i></div><div class="n">24/7</div><div class="l">{{ __('Asistencia con IA') }}</div></div>
   </div>
 </div>
 
@@ -494,10 +499,10 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="wrap">
     <div class="head-row">
       <div class="reveal">
-        <span class="eyebrow">Experiencias</span>
-        <h2 class="h2">Elige cómo quieres<br><em>vivir la montaña</em></h2>
+        <span class="eyebrow">{{ __('Experiencias') }}</span>
+        <h2 class="h2">{{ __('Elige cómo quieres') }}<br><em>{{ __('vivir la montaña') }}</em></h2>
       </div>
-      <p class="sub reveal d1">Desde paseos culturales hasta glaciares a más de 5.000 metros. Cada ruta está trazada en mapa y revisada por nuestros guías.</p>
+      <p class="sub reveal d1">{{ __('Desde paseos culturales hasta glaciares a más de 5.000 metros. Cada ruta está trazada en mapa y revisada por nuestros guías.') }}</p>
     </div>
     <div class="bento">
       <a class="tile big reveal zoom" data-go="climbing"><img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop" alt=""><span class="count">3 rutas</span><div class="tin"><div><h3>Climbing</h3><p>Glaciares y cumbres de la Cordillera Real</p></div><span class="go"><i class="fa-solid fa-arrow-right"></i></span></div></a>
@@ -513,11 +518,11 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="wrap">
     <div class="head-row">
       <div class="reveal">
-        <span class="eyebrow">Catálogo oficial</span>
-        <h2 class="h2">Tours <em>destacados</em></h2>
+        <span class="eyebrow">{{ __('Catálogo oficial') }}</span>
+        <h2 class="h2">{{ __('Tours') }} <em>{{ __('destacados') }}</em></h2>
       </div>
       <div class="filters reveal d1" id="filters">
-        <button class="chip on" data-f="todos">Todos</button>
+        <button class="chip on" data-f="todos">{{ __('Todos') }}</button>
         @foreach ($categorias as $cat)
           <button class="chip" data-f="{{ $cat->rta_amg }}"><i class="{{ $cat->ico ?: 'fa-solid fa-route' }}"></i> {{ $cat->nom }}</button>
         @endforeach
@@ -527,22 +532,22 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <div class="filtros2 reveal d2" role="group" aria-label="Filtrar por dificultad y altitud">
       <label class="sr-only" for="f-dif">Dificultad</label>
       <select id="f-dif" class="fsel">
-        <option value="">Toda dificultad</option>
-        <option value="facil">Fácil</option>
-        <option value="moderado">Moderado</option>
-        <option value="dificil">Difícil</option>
-        <option value="experto">Experto</option>
+        <option value="">{{ __('Toda dificultad') }}</option>
+        <option value="facil">{{ __('Fácil') }}</option>
+        <option value="moderado">{{ __('Moderado') }}</option>
+        <option value="dificil">{{ __('Difícil') }}</option>
+        <option value="experto">{{ __('Experto') }}</option>
       </select>
       <label class="sr-only" for="f-alt">Altitud máxima</label>
       <select id="f-alt" class="fsel">
-        <option value="">Cualquier altitud</option>
-        <option value="0-3000">Hasta 3.000 m</option>
+        <option value="">{{ __('Cualquier altitud') }}</option>
+        <option value="0-3000">{{ __('Hasta 3.000 m') }}</option>
         <option value="3000-4000">3.000 – 4.000 m</option>
         <option value="4000-5000">4.000 – 5.000 m</option>
-        <option value="5000-9000">Más de 5.000 m</option>
+        <option value="5000-9000">{{ __('Más de 5.000 m') }}</option>
       </select>
       <span class="fcount" id="f-count" aria-live="polite"></span>
-      <button type="button" class="flimpiar" id="f-limpiar" hidden>Quitar filtros</button>
+      <button type="button" class="flimpiar" id="f-limpiar" hidden>{{ __('Quitar filtros') }}</button>
     </div>
 
     <div class="cards" id="cards">
@@ -552,12 +557,12 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>{{ $tour->dur_txt }} h</span>@if ($tour->alt_max_m)<span><i class="fa-solid fa-mountain"></i>{{ number_format($tour->alt_max_m, 0, ',', '.') }} m</span>@endif<span><i class="fa-solid fa-users"></i>Máx {{ $tour->cap_max }}</span></div>
           <h3><a href="{{ route('tours.show', $tour) }}">{{ $tour->nom }}</a></h3><p>{{ $tour->des }}</p>
           <div class="diff"><span class="bars">@for ($i = 1; $i <= 5; $i++)<i @class(['f' => $i <= $tour->dif_niv])></i>@endfor</span>{{ $tour->dif_txt }}</div>
-          <div class="cfoot"><div class="price"><small>Desde</small><b>Bs. {{ number_format($tour->pre_bas, 0, ',', '.') }} <span>/ pers</span></b></div><a class="cbtn" href="{{ route('tours.show', $tour) }}">Reservar <i class="fa-solid fa-arrow-right"></i></a></div></div>
+          <div class="cfoot"><div class="price"><small>{{ __('Desde') }}</small><b>Bs. {{ number_format($tour->pre_bas, 0, ',', '.') }} <span>/ {{ __('pers') }}</span></b></div><a class="cbtn" href="{{ route('tours.show', $tour) }}">{{ __('Reservar') }} <i class="fa-solid fa-arrow-right"></i></a></div></div>
       </article>
       @empty
-      <p class="sub">Pronto publicaremos nuevos tours.</p>
+      <p class="sub">{{ __('Pronto publicaremos nuevos tours.') }}</p>
       @endforelse
-      <p class="vacio" id="f-vacio" hidden><i class="fa-solid fa-mountain-sun"></i> Ningún tour coincide con esos filtros. Prueba con otra combinación.</p>
+      <p class="vacio" id="f-vacio" hidden><i class="fa-solid fa-mountain-sun"></i> {{ __('Ningún tour coincide con esos filtros. Prueba con otra combinación.') }}</p>
     </div>
   </div>
 </section>

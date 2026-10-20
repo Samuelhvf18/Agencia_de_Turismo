@@ -91,14 +91,18 @@ a{color:inherit;text-decoration:none}
 <header class="top">
   <div class="wrap">
     <a href="{{ route('home') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span> Pipocas</a>
-    <a href="{{ route('home') }}#catalogo" class="back"><i class="fa-solid fa-arrow-left"></i> Volver al catálogo</a>
+    <span style="display:flex;gap:18px;align-items:center"><span class="lang-switch" style="display:inline-flex;gap:6px;font-weight:700;font-size:13px">
+        <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" @if (app()->getLocale() === 'es') style="text-decoration:underline" @endif>ES</a>
+        <span aria-hidden="true">|</span>
+        <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" @if (app()->getLocale() === 'en') style="text-decoration:underline" @endif>EN</a>
+      </span><a href="{{ route('home') }}#catalogo" class="back"><i class="fa-solid fa-arrow-left"></i> {{ __('Volver al catálogo') }}</a></span>
   </div>
 </header>
 
 <section class="hero">
   @if ($tour->img)<img src="{{ $tour->img }}" alt="{{ $tour->img_alt }}">@endif
   <div class="wrap">
-    <nav class="crumbs" aria-label="Ruta de navegación"><a href="{{ route('home') }}">Inicio</a> / <a href="{{ route('home') }}#catalogo">Tours</a> / {{ $tour->nom }}</nav>
+    <nav class="crumbs" aria-label="Ruta de navegación"><a href="{{ route('home') }}">{{ __('Inicio') }}</a> / <a href="{{ route('home') }}#catalogo">{{ __('Tours') }}</a> / {{ $tour->nom }}</nav>
     <span class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</span><span class="code">{{ $tour->cod }}</span>
     <h1>{{ $tour->nom }}</h1>
   </div>
@@ -107,10 +111,10 @@ a{color:inherit;text-decoration:none}
 <main class="wrap grid">
   <div>
     <div class="facts">
-      <div class="fact"><i class="fa-regular fa-clock"></i><b>{{ $tour->dur_txt }} h</b><small>Duración</small></div>
-      <div class="fact"><i class="fa-solid fa-mountain"></i><b>{{ $tour->alt_max_m ? number_format($tour->alt_max_m, 0, ',', '.') . ' m' : '—' }}</b><small>Altitud máx.</small></div>
-      <div class="fact"><i class="fa-solid fa-users"></i><b>{{ $tour->cap_max }}</b><small>Cupo máximo</small></div>
-      <div class="fact"><i class="fa-solid fa-signal"></i><b>{{ $tour->dif_txt }}</b><small>Dificultad</small></div>
+      <div class="fact"><i class="fa-regular fa-clock"></i><b>{{ $tour->dur_txt }} h</b><small>{{ __('Duración') }}</small></div>
+      <div class="fact"><i class="fa-solid fa-mountain"></i><b>{{ $tour->alt_max_m ? number_format($tour->alt_max_m, 0, ',', '.') . ' m' : '—' }}</b><small>{{ __('Altitud máx.') }}</small></div>
+      <div class="fact"><i class="fa-solid fa-users"></i><b>{{ $tour->cap_max }}</b><small>{{ __('Cupo máximo') }}</small></div>
+      <div class="fact"><i class="fa-solid fa-signal"></i><b>{{ $tour->dif_txt }}</b><small>{{ __('Dificultad') }}</small></div>
     </div>
 
     <div class="panel">
@@ -119,7 +123,7 @@ a{color:inherit;text-decoration:none}
     </div>
 
     <div class="panel">
-      <h2>Dificultad y requisitos</h2>
+      <h2>{{ __('Dificultad y requisitos') }}</h2>
       <p><span class="bars">@for ($i = 1; $i <= 5; $i++)<i @class(['f' => $i <= $tour->dif_niv])></i>@endfor</span><b>{{ $tour->dif_txt }}</b>
         @if ($tour->alt_min_m && $tour->alt_max_m) · De {{ number_format($tour->alt_min_m, 0, ',', '.') }} a {{ number_format($tour->alt_max_m, 0, ',', '.') }} m s. n. m.@endif</p>
       @if ($tour->req_fis)<p style="margin-top:10px">{{ $tour->req_fis }}</p>@endif
@@ -127,9 +131,9 @@ a{color:inherit;text-decoration:none}
 
     @if ($hayRuta)
     <div class="panel">
-      <h2>Recorrido</h2>
+      <h2>{{ __('Recorrido') }}</h2>
       <div id="map" aria-label="Mapa del recorrido"></div>
-      <h2 style="margin-top:22px">Perfil de elevación</h2>
+      <h2 style="margin-top:22px">{{ __('Perfil de elevación') }}</h2>
       <div class="perfil"><canvas id="perfil" aria-label="Perfil de elevación del recorrido"></canvas></div>
       @if ($puntos->count())
       <ul class="pois">
@@ -143,7 +147,7 @@ a{color:inherit;text-decoration:none}
     @endif
 
     <div class="panel">
-      <h2>Reseñas verificadas</h2>
+      <h2>{{ __('Reseñas verificadas') }}</h2>
       @if ($calificacion && $calificacion->cantidad_resenas > 0)
         <p style="font-size:15px"><b style="font-size:26px;color:var(--principal)">{{ number_format($calificacion->calificacion_promedio, 1, ',', '.') }}</b> / 5
           <span style="color:var(--acento)">@for ($i = 1; $i <= 5; $i++)<i class="fa-{{ $i <= round($calificacion->calificacion_promedio) ? 'solid' : 'regular' }} fa-star"></i>@endfor</span>
@@ -153,18 +157,18 @@ a{color:inherit;text-decoration:none}
             <li style="display:block">
               <span style="color:var(--acento)">@for ($i = 1; $i <= 5; $i++)<i class="fa-{{ $i <= $r->cal ? 'solid' : 'regular' }} fa-star" style="width:auto;height:auto;background:none;color:inherit;display:inline"></i>@endfor</span>
               @if ($r->com)<p style="margin-top:6px">«{{ $r->com }}»</p>@endif
-              <small>{{ $r->mdt['autor'] ?? 'Viajero' }} · <i class="fa-solid fa-circle-check" style="width:auto;height:auto;background:none;color:#2E7D32;display:inline"></i> Reserva verificada · {{ $r->cre_en?->format('m/Y') }}</small>
+              <small>{{ $r->mdt['autor'] ?? 'Viajero' }} · <i class="fa-solid fa-circle-check" style="width:auto;height:auto;background:none;color:#2E7D32;display:inline"></i> {{ __('Reserva verificada') }} · {{ $r->cre_en?->format('m/Y') }}</small>
             </li>
           @endforeach
         </ul>
       @else
-        <p style="color:var(--texto-2);font-size:14px">Este tour todavía no tiene reseñas. Solo pueden opinar quienes ya lo realizaron con Pipocas.</p>
+        <p style="color:var(--texto-2);font-size:14px">{{ __('Este tour todavía no tiene reseñas. Solo pueden opinar quienes ya lo realizaron con Pipocas.') }}</p>
       @endif
     </div>
 
     @if ($tour->galeria->count() > 1)
     <div class="panel">
-      <h2>Galería</h2>
+      <h2>{{ __('Galería') }}</h2>
       <div class="gal">
         @foreach ($tour->galeria as $foto)
           <img src="{{ $foto['url'] }}" alt="{{ $foto['alt'] }}" loading="lazy">
@@ -175,14 +179,14 @@ a{color:inherit;text-decoration:none}
   </div>
 
   <aside class="panel book">
-    <div class="price"><small>Desde</small><b>Bs. {{ number_format($tour->pre_bas, 0, ',', '.') }} <span>/ persona</span></b></div>
+    <div class="price"><small>{{ __('Desde') }}</small><b>Bs. {{ number_format($tour->pre_bas, 0, ',', '.') }} <span>/ {{ __('persona') }}</span></b></div>
     <ul>
-      <li><i class="fa-solid fa-user-tie"></i> Guía certificado</li>
-      <li><i class="fa-solid fa-van-shuttle"></i> Transporte desde La Paz</li>
-      <li><i class="fa-solid fa-qrcode"></i> Ticket con código QR</li>
+      <li><i class="fa-solid fa-user-tie"></i> {{ __('Guía certificado') }}</li>
+      <li><i class="fa-solid fa-van-shuttle"></i> {{ __('Transporte desde La Paz') }}</li>
+      <li><i class="fa-solid fa-qrcode"></i> {{ __('Ticket con código QR') }}</li>
     </ul>
     {{-- Original: <a class="btn" href="{{ Route::has('login') ? route('login') : '#' }}"> --}}
-    <a class="btn" href="{{ route('reservas.salida', $tour) }}"><i class="fa-solid fa-calendar-check"></i> Reservar este tour</a>
+    <a class="btn" href="{{ route('reservas.salida', $tour) }}"><i class="fa-solid fa-calendar-check"></i> {{ __('Reservar este tour') }}</a>
   </aside>
 </main>
 

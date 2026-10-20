@@ -21,3 +21,6 @@ Schedule::command('reservas:expirar')->hourly();
 
 // Módulo 10 — recordatorio el día anterior a la salida (n8n también puede dispararlo; no se duplica).
 Schedule::command('reservas:recordatorios')->dailyAt('18:00');
+
+// RNF-12 — respaldo diario de la base de datos (30 días de retención).
+Schedule::command('respaldo:bd')->dailyAt('02:30');

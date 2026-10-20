@@ -7,11 +7,12 @@
 --}}
 @props([
     'actual' => 1,
-    'pasos' => ['Salida', 'Participantes', 'Equipo', 'Ficha médica', 'Resumen'],
+    'pasos' => null,
     'enlaces' => [],
 ])
 
 @php
+    $pasos ??= [__('Salida'), __('Participantes'), __('Equipo'), __('Ficha médica'), __('Resumen')];
     $total = count($pasos);
     $actual = max(1, min((int) $actual, $total + 1)); // $total + 1 = todo completado
 @endphp
@@ -22,13 +23,13 @@
         <div class="flex items-baseline justify-between text-sm">
             <span class="font-bold text-pipocas-principal">
                 @if ($actual > $total)
-                    Reserva completada
+                    {{ __('Reserva completada') }}
                 @else
-                    Paso {{ $actual }} de {{ $total }} · {{ $pasos[$actual - 1] }}
+                    {{ __('Paso :n de :t', ['n' => $actual, 't' => $total]) }} · {{ $pasos[$actual - 1] }}
                 @endif
             </span>
             @if ($actual < $total)
-                <span class="text-xs text-pipocas-texto-2">Sigue: {{ $pasos[$actual] }}</span>
+                <span class="text-xs text-pipocas-texto-2">{{ __('Sigue:') }} {{ $pasos[$actual] }}</span>
             @endif
         </div>
         <div class="mt-2 flex gap-1.5" aria-hidden="true">

@@ -36,10 +36,13 @@
             </a>
 
             <nav class="flex items-center gap-1 text-sm font-semibold sm:gap-2">
+                <span class="flex gap-1 px-2 text-xs font-bold text-pipocas-texto-2">
+                    <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" @class(['underline text-pipocas-principal' => app()->getLocale() === 'es'])>ES</a>|<a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" @class(['underline text-pipocas-principal' => app()->getLocale() === 'en'])>EN</a>
+                </span>
                 <a href="{{ route('reservas.consultar') }}"
                    class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-pipocas-principal transition hover:bg-pipocas-fondo hover:text-pipocas-hover">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <span class="hidden sm:inline">Consultar reserva</span>
+                    <span class="hidden sm:inline">{{ __('Consultar reserva') }}</span>
                 </a>
                 @auth
                     <span class="hidden items-center gap-2 rounded-xl bg-pipocas-fondo px-3 py-2 text-pipocas-texto md:inline-flex">
@@ -50,7 +53,7 @@
                         <a href="{{ route('login') }}"
                            class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-pipocas-texto-2 transition hover:bg-pipocas-fondo hover:text-pipocas-principal">
                             <i class="fa-regular fa-user"></i>
-                            <span class="hidden sm:inline">Iniciar sesión</span>
+                            <span class="hidden sm:inline">{{ __('Iniciar sesión') }}</span>
                         </a>
                     @endif
                 @endauth
@@ -74,10 +77,10 @@
     {{-- Footer --}}
     <footer class="border-t border-gray-200 bg-white">
         <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-pipocas-texto-2 sm:flex-row sm:px-6 lg:px-8">
-            <p>&copy; {{ date('Y') }} Pipocas · Agencia de Viajes y Turismo · La Paz, Bolivia</p>
+            <p>&copy; {{ date('Y') }} Pipocas · {{ __('Agencia de Viajes y Turismo · La Paz, Bolivia') }}</p>
             <p class="flex items-center gap-4">
-                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-lock text-pipocas-complementario"></i> Pago seguro</span>
-                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-qrcode text-pipocas-secundario"></i> Ticket QR</span>
+                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-lock text-pipocas-complementario"></i> {{ __('Pago seguro') }}</span>
+                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-qrcode text-pipocas-secundario"></i> {{ __('Ticket QR') }}</span>
             </p>
         </div>
     </footer>

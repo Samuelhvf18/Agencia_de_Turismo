@@ -54,6 +54,9 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // RNF-01: redirigir todo a HTTPS (por defecto, solo en producción).
+    'force_https' => (bool) env('FORCE_HTTPS', env('APP_ENV') === 'production'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
