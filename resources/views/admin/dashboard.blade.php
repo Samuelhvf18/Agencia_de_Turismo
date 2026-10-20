@@ -1,146 +1,213 @@
 @extends('layouts.admin')
 
-@section('header-title', 'Panel de Control')
+@section('header-title', 'Panel General de Resumen')
 
 @section('content')
-<div class="space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#1F5F8B]">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Ingresos Totales (Hoy)</p>
-            <h3 class="text-3xl font-extrabold mt-2" style="color: #1F5F8B;">$ 4,850.00</h3>
-            <span class="text-xs mt-2 inline-block font-medium text-emerald-600">↑ +12% vs ayer</span>
-        </div>
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#C96F4A]">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Reservas del Día</p>
-            <h3 class="text-3xl font-extrabold mt-2" style="color: #C96F4A;">38</h3>
-            <span class="text-xs mt-2 inline-block font-medium" style="color: #6B6F72;">8 pendientes de pago</span>
-        </div>
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm border-l-4 border-l-[#F4C95D]">
-            <p class="text-xs font-semibold uppercase tracking-wider" style="color: #6B6F72;">Ocupación General</p>
-            <h3 class="text-3xl font-extrabold mt-2 text-[#947412]">84.5%</h3>
-            <span class="text-xs mt-2 inline-block font-medium text-[#6B6F72]">Flota casi al límite</span>
-        </div>
-    </div>
+<div class="space-y-7">
 
-    <!-- Panel de Alertas Interactivas con SweetAlert2 -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-white border border-gray-200 p-6 rounded-2xl shadow-sm">
-            <h4 class="text-base font-bold mb-4" style="color: #343A40;">🔔 Panel de Alertas del Sistema</h4>
-            <div class="space-y-3">
-                <div onclick="mostrarAlertaFichaMedica('Juan Pérez', '1042')" class="p-3 bg-[#F4C95D]/10 border border-[#F4C95D]/40 rounded-xl text-sm text-[#6B4F3A] cursor-pointer hover:bg-[#F4C95D]/20 transition flex justify-between items-center">
-                    <span>⚠️ Alerta: Ficha médica de riesgo pendiente de validación para <strong>Juan Pérez</strong> (Reserva #1042).</span>
-                    <span class="text-xs font-bold underline" style="color: #1F5F8B;">Ver detalle</span>
-                </div>
-                <div onclick="mostrarAlertaPago('3091', '150.00')" class="p-3 bg-[#C96F4A]/10 border border-[#C96F4A]/40 rounded-xl text-sm text-[#6B4F3A] cursor-pointer hover:bg-[#C96F4A]/20 transition flex justify-between items-center">
-                    <span>⚡ Pago parcial detectado en factura #3091 por un valor de $150.00.</span>
-                    <span class="text-xs font-bold underline" style="color: #1F5F8B;">Ver detalle</span>
-                </div>
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1F5F8B] via-[#245F85] to-[#174870] p-6 sm:p-8 text-white shadow-lg">
+        <div class="absolute -right-12 -top-20 h-64 w-64 rounded-full border-[35px] border-white/[0.05]"></div>
+        <div class="absolute right-20 -bottom-24 h-48 w-48 rounded-full bg-[#457699]/40 blur-2xl"></div>
+
+        <div class="relative z-10 max-w-2xl">
+            <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.15em] text-[#F4C95D]">
+                <i class="fa-solid fa-mountain-sun"></i>
+                Centro de operaciones
             </div>
+
+            <h3 class="mt-4 font-display text-3xl sm:text-4xl leading-tight">
+                Tu agencia, <span class="italic text-[#F4C95D]">bajo control.</span>
+            </h3>
+
+            <p class="mt-3 max-w-xl text-sm leading-6 text-white/75">
+                Supervisa la flota, las salidas y el equipamiento de Pipocas desde un solo lugar.
+            </p>
         </div>
 
-        <div class="bg-white border border-gray-200 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+        <div class="relative z-10 mt-6 flex items-center gap-2 text-xs text-white/65">
+            <i class="fa-solid fa-location-dot text-[#F4C95D]"></i>
+            <span>La Paz, Bolivia</span>
+            <span class="text-white/30">•</span>
+            <span>Panel administrativo</span>
+        </div>
+    </section>
+
+    <section>
+        <div class="mb-4 flex items-center justify-between gap-3">
             <div>
-                <h4 class="text-base font-bold mb-2" style="color: #343A40;">⚡ Acciones Directas</h4>
-                <p class="text-xs mb-4" style="color: #6B6F72;">Emitir comprobantes o verificar códigos QR rápidamente.</p>
+                <p class="text-[10px] font-extrabold uppercase tracking-[.17em] text-[#457699]">
+                    Resumen operativo
+                </p>
+                <h3 class="mt-1 font-display text-xl text-[#343A40]">
+                    Estado de la agencia
+                </h3>
             </div>
-            <div class="space-y-2">
-                <button onclick="validarBoletoQR('BOL-9982')" style="background-color: #1F5F8B;" class="w-full py-2.5 hover:bg-[#174870] text-white rounded-xl font-medium text-sm transition shadow">Validar Boleto QR</button>
-                <button onclick="nuevaFacturaModal()" style="background-color: #C96F4A;" class="w-full py-2.5 hover:bg-[#b55e3b] text-white rounded-xl font-medium text-sm transition shadow">Nueva Factura</button>
+            <span class="hidden sm:inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[10px] font-bold text-[#6B6F72] border border-[#1F5F8B]/10">
+                <i class="fa-solid fa-chart-simple text-[#C96F4A]"></i>
+                Indicadores generales
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
+
+            <article class="admin-card relative overflow-hidden p-5 sm:p-6">
+                <div class="absolute -right-5 -top-5 h-24 w-24 rounded-full bg-[#1F5F8B]/[0.05]"></div>
+
+                <div class="relative flex items-start justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] font-extrabold uppercase tracking-wider text-[#6B6F72]">
+                            Flota disponible
+                        </p>
+                        <div class="mt-3 flex items-baseline gap-2">
+                            <span class="text-3xl font-extrabold tracking-tight text-[#1F5F8B]">
+                                {{ $vehiculosDisponibles ?? 0 }}
+                            </span>
+                            <span class="text-[10px] font-semibold text-[#6B6F72]">disponibles</span>
+                        </div>
+                    </div>
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1F5F8B]/10 text-[#1F5F8B]">
+                        <i class="fa-solid fa-van-shuttle text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="mt-5 border-t border-[#1F5F8B]/10 pt-3">
+                    <p class="text-[10px] text-[#6B6F72]">
+                        <span class="font-bold text-[#C96F4A]">{{ $vehiculosMantenimiento ?? 0 }}</span>
+                        en mantenimiento
+                    </p>
+                    <p class="mt-1 text-[10px] text-[#6B6F72]/80">
+                        De un total de {{ $totalVehiculos ?? 0 }} unidades
+                    </p>
+                </div>
+            </article>
+
+            <article class="admin-card relative overflow-hidden p-5 sm:p-6">
+                <div class="absolute -right-5 -top-5 h-24 w-24 rounded-full bg-[#C96F4A]/[0.07]"></div>
+
+                <div class="relative flex items-start justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] font-extrabold uppercase tracking-wider text-[#6B6F72]">
+                            Salidas programadas
+                        </p>
+                        <div class="mt-3 flex items-baseline gap-2">
+                            <span class="text-3xl font-extrabold tracking-tight text-[#C96F4A]">
+                                {{ $salidasProgramadas ?? 0 }}
+                            </span>
+                            <span class="text-[10px] font-semibold text-[#6B6F72]">viajes</span>
+                        </div>
+                    </div>
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#C96F4A]/10 text-[#C96F4A]">
+                        <i class="fa-solid fa-route text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="mt-5 border-t border-[#1F5F8B]/10 pt-3">
+                    <p class="text-[10px] text-[#6B6F72]">
+                        Operaciones activas registradas
+                    </p>
+                </div>
+            </article>
+
+            <article class="admin-card relative overflow-hidden p-5 sm:p-6">
+                <div class="absolute -right-5 -top-5 h-24 w-24 rounded-full bg-[#F4C95D]/[0.15]"></div>
+
+                <div class="relative flex items-start justify-between gap-3">
+                    <div>
+                        <p class="text-[10px] font-extrabold uppercase tracking-wider text-[#6B6F72]">
+                            Equipos disponibles
+                        </p>
+                        <div class="mt-3 flex items-baseline gap-2">
+                            <span class="text-3xl font-extrabold tracking-tight text-[#1F5F8B]">
+                                {{ $equiposDisponibles ?? 0 }}
+                            </span>
+                            <span class="text-[10px] font-semibold text-[#6B6F72]">
+                                / {{ $equiposTotal ?? 0 }} total
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F4C95D]/25 text-[#6B4F3A]">
+                        <i class="fa-solid fa-toolbox text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="mt-5 border-t border-[#1F5F8B]/10 pt-3">
+                    <p class="text-[10px] text-[#6B6F72]">
+                        Inventario y accesorios
+                    </p>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+        <div class="admin-card min-w-0 p-5 sm:p-6 2xl:col-span-2">
+            <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1F5F8B]/10 text-[#1F5F8B]">
+                            <i class="fa-solid fa-route"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-extrabold text-[#343A40]">
+                                Monitoreo de operaciones
+                            </h3>
+                            <p class="mt-1 text-[10px] text-[#6B6F72]">
+                                Salidas y vehículos registrados
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <span class="rounded-full bg-[#F4C95D]/20 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-[#6B4F3A]">
+                    Últimas salidas
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[450px] text-left text-xs">
+                    <thead>
+                        <tr>
+                            <th class="border-b border-[#1F5F8B]/10 pb-3 pr-4">Tour</th>
+                            <th class="border-b border-[#1F5F8B]/10 pb-3 pr-4">Fecha</th>
+                            <th class="border-b border-[#1F5F8B]/10 pb-3">Vehículo</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @forelse($salidas ?? [] as $salida)
+                            <tr>
+                                <td class="py-4 pr-4 font-bold text-[#343A40]">
+                                    {{ $salida->tour->nom ?? 'Tour General' }}
+                                </td>
+                                <td class="py-4 pr-4 whitespace-nowrap text-[#6B6F72]">
+                                    {{ \Carbon\Carbon::parse($salida->fec_sal)->format('d/m/Y') }}
+                                </td>
+                                <td class="py-4">
+                                    <span class="inline-flex items-center gap-2 rounded-lg bg-[#1F5F8B]/[0.07] px-2.5 py-1.5 font-mono font-bold text-[#1F5F8B]">
+                                        <i class="fa-solid fa-van-shuttle text-[10px]"></i>
+                                        {{ $salida->vehiculo->pla ?? 'Sin asignar' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="py-10 text-center">
+                                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1F5F8B]/[0.07] text-[#457699]">
+                                        <i class="fa-regular fa-calendar-xmark text-lg"></i>
+                                    </div>
+                                    <p class="mt-3 text-xs font-bold text-[#343A40]">
+                                        No hay salidas registradas
+                                    </p>
+                                    <p class="mt-1 text-[10px] text-[#6B6F72]">
+                                        Las operaciones aparecerán aquí cuando existan registros.
+                                    </p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
+    </section>
 </div>
-
-@push('scripts')
-<script>
-function mostrarAlertaFichaMedica(pasajero, reserva) {
-    Swal.fire({
-        title: 'Ficha Médica de Riesgo',
-        html: `<p class="text-sm">El pasajero <strong>${pasajero}</strong> registró hipertensión leve en su ficha médica para la reserva <strong>#${reserva}</strong>.</p>`,
-        icon: 'warning',
-        iconColor: '#C96F4A',
-        showCancelButton: true,
-        confirmButtonText: 'Aprobar Pasajero',
-        cancelButtonText: 'Cerrar',
-        confirmButtonColor: '#1F5F8B',
-        cancelButtonColor: '#6B6F72',
-        background: '#FFFFFF',
-        color: '#343A40'
-    });
-}
-
-function mostrarAlertaPago(factura, monto) {
-    Swal.fire({
-        title: 'Pago Parcial Detectado',
-        text: `La factura #${factura} registra un abono pendiente de $${monto}.`,
-        icon: 'info',
-        iconColor: '#1F5F8B',
-        confirmButtonText: 'Ir a Finanzas',
-        confirmButtonColor: '#C96F4A',
-        background: '#FFFFFF',
-        color: '#343A40'
-    });
-}
-
-function validarBoletoQR(codigo) {
-    Swal.fire({
-        title: 'Validación de QR',
-        text: `Verificando boleto ${codigo}...`,
-        timer: 1200,
-        showConfirmButton: false,
-        background: '#FFFFFF',
-        color: '#343A40',
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    }).then(() => {
-        Swal.fire({
-            title: '¡Boleto Válido!',
-            text: 'El código QR pertenece a la Reserva #RES-5091 (Confirmada).',
-            icon: 'success',
-            iconColor: '#1F5F8B',
-            confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#1F5F8B',
-            background: '#FFFFFF',
-            color: '#343A40'
-        });
-    });
-}
-
-function nuevaFacturaModal() {
-    Swal.fire({
-        title: 'Emitir Nueva Factura',
-        html:
-            '<input id="swal-input1" class="swal2-input" placeholder="Nombre o Razón Social">' +
-            '<input id="swal-input2" class="swal2-input" placeholder="NIT / CI">' +
-            '<input id="swal-input3" class="swal2-input" placeholder="Monto Total ($)">',
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: 'Generar Comprobante',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#C96F4A',
-        cancelButtonColor: '#6B6F72',
-        background: '#FFFFFF',
-        color: '#343A40',
-        preConfirm: () => {
-            return [
-                document.getElementById('swal-input1').value,
-                document.getElementById('swal-input2').value,
-                document.getElementById('swal-input3').value
-            ]
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({
-                title: 'Factura Generada',
-                text: 'El comprobante ha sido registrado con éxito.',
-                icon: 'success',
-                iconColor: '#1F5F8B',
-                confirmButtonColor: '#1F5F8B'
-            });
-        }
-    });
-}
-</script>
-@endpush
 @endsection
