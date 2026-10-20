@@ -50,3 +50,19 @@ test('RNF-12: el comando de respaldo informa el error si pg_dump no está dispon
 test('RNF-02: un turista no accede a ninguna pantalla administrativa', function (string $ruta) {
     $this->actingAs(User::factory()->rol(User::ROL_TURISTA)->create())->get(route($ruta))->assertForbidden();
 })->with(['admin.dashboard', 'admin.reservas', 'admin.finanzas', 'admin.analitica', 'admin.io.propuestas', 'admin.io.eoq', 'admin.chatbot', 'admin.tours']);
+
+test('RF-39: los formularios validan formato de nombres, montos, placas y fechas', function () {
+    $this->actingAs(User::factory()->rol(User::ROL_OPERACIONES)->create());
+
+    $this->post(route('admin.catalogo.store'), [
+        'cat_id' => \App\Models\CategoriaTour::first()->id, 'nom' => '<script>x</script>', 'niv_dif' => 'facil',
+        'dur_hrs' => 4, 'pre_bas' => '10.999', 'cap_max' => 10,
+    ])->assertSessionHasErrors(['nom', 'pre_bas']);
+
+    $this->post(route('admin.transporte.store'), ['pla' => 'ABC-1234', 'tip' => 'van', 'cap_asi' => 12])->assertSessionHasErrors('pla');
+    $this->post(route('admin.transporte.store'), ['pla' => '1234abc', 'tip' => 'van', 'cap_asi' => 12, 'tip_cmb' => 'diesel'])->assertSessionHasNoErrors();
+    expect(\App\Models\Vehiculo::where('pla', '1234ABC')->value('est'))->toBe('activo');
+
+    $this->post(route('admin.salidas.store'), ['tur_id' => Tour::first()->id, 'fec_sal' => '2020-01-01', 'hra_sal' => '25:00', 'cap_max' => 10])
+        ->assertSessionHasErrors(['fec_sal', 'hra_sal']);
+});

@@ -84,6 +84,7 @@ a{color:inherit;text-decoration:none}
 .btn:hover{background:var(--hover)}
 
 @media(max-width:900px){.grid{grid-template-columns:1fr}.book{position:static}.facts{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:420px){.grid>div,.fact{min-width:0}.facts{gap:8px}.fact{padding:12px 10px;overflow-wrap:anywhere}.fact b{font-size:16px}}
 </style>
 </head>
 <body>

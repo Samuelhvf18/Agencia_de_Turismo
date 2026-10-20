@@ -25,6 +25,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style>[x-cloak]{display:none!important} main .rsv-tarjeta{min-width:0;overflow-x:auto} main > *{min-width:0}</style>
 </head>
 <body class="min-h-screen bg-pipocas-fondo font-cuerpo text-pipocas-texto antialiased" x-data="{ menu: false }">
 

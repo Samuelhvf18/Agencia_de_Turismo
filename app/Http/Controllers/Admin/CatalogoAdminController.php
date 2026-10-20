@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\TourRequest;
 use App\Models\CategoriaTour;
 use App\Models\FotoTour;
 use App\Models\PuntoRuta;
@@ -39,9 +40,9 @@ class CatalogoAdminController extends Controller
         return view('admin.catalogo.form', ['tour' => new Tour(['act' => true, 'niv_dif' => 'moderado']), 'categorias' => CategoriaTour::orderBy('nom')->get()]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(TourRequest $request): RedirectResponse
     {
-        $datos = $this->validarTour($request);
+        $datos = $request->validated();
         $tour = Tour::create($datos + [
             'cod' => CodeGeneratorService::generate('TUR'),
             'rta_amg' => SlugService::unico($datos['nom'], 'tours'),
@@ -61,9 +62,9 @@ class CatalogoAdminController extends Controller
         ]);
     }
 
-    public function update(Request $request, Tour $tour): RedirectResponse
+    public function update(TourRequest $request, Tour $tour): RedirectResponse
     {
-        $datos = $this->validarTour($request, $tour);
+        $datos = $request->validated();
         // La ruta amigable se conserva para no romper enlaces; se regenera solo si se pide.
         if ($request->boolean('regenerar_ruta')) {
             $datos['rta_amg'] = SlugService::unico($datos['nom'], 'tours', $tour->id);
@@ -214,28 +215,5 @@ class CatalogoAdminController extends Controller
         });
 
         return back()->with('estado', count($datos['puntos']).' punto(s) de ruta guardados.');
-    }
-
-    private function validarTour(Request $request, ?Tour $tour = null): array
-    {
-        $datos = $request->validate([
-            'cat_id' => ['required', 'integer', 'exists:categorias_tour,id'],
-            'nom' => ['required', 'string', 'max:150'],
-            'des' => ['nullable', 'string', 'max:5000'],
-            'niv_dif' => ['required', 'in:facil,moderado,dificil,experto'],
-            'alt_min_m' => ['nullable', 'integer', 'between:0,7000'],
-            'alt_max_m' => ['nullable', 'integer', 'between:0,7000', 'gte:alt_min_m'],
-            'dur_hrs' => ['required', 'numeric', 'between:1,14'],
-            'req_fis' => ['nullable', 'string', 'max:1000'],
-            'pre_bas' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'cap_max' => ['required', 'integer', 'min:1', 'max:60'],
-            'act' => ['nullable', 'boolean'],
-        ], [
-            'dur_hrs.between' => 'Los tours son de un solo día: entre 1 y 14 horas.',
-            'alt_max_m.gte' => 'La altitud máxima no puede ser menor que la mínima.',
-        ]);
-        $datos['act'] = $request->boolean('act');
-
-        return $datos;
     }
 }

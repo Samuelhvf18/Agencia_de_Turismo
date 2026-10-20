@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SalidaRequest;
 use App\Models\PerfilChofer;
 use App\Models\PerfilGuia;
 use App\Models\Reserva;
@@ -45,9 +46,9 @@ class SalidasController extends Controller
         ] + $this->opciones());
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SalidaRequest $request): RedirectResponse
     {
-        $datos = $this->validar($request, nueva: true);
+        $datos = $request->datos();
         $salida = $this->salidas->programar($datos);
 
         return back()->with('estado', "Salida de {$salida->tour->nom} programada para el {$salida->fec_sal->format('d/m/Y')}.");
@@ -60,9 +61,9 @@ class SalidasController extends Controller
         return view('admin.salidas.edit', ['salida' => $salida] + $this->opciones());
     }
 
-    public function update(Request $request, SalidaTour $salida): RedirectResponse
+    public function update(SalidaRequest $request, SalidaTour $salida): RedirectResponse
     {
-        $this->salidas->asignar($salida, $this->validar($request, nueva: false));
+        $this->salidas->asignar($salida, $request->datos());
 
         return back()->with('estado', 'Asignación actualizada.');
     }
@@ -85,32 +86,6 @@ class SalidasController extends Controller
         $this->salidas->cancelar($salida, $datos['motivo']);
 
         return redirect()->route('admin.operaciones')->with('estado', 'Salida cancelada; se cancelaron sus reservas y se avisó a los clientes.');
-    }
-
-    private function validar(Request $request, bool $nueva): array
-    {
-        $reglas = [
-            'cap_max' => ['required', 'integer', 'min:1', 'max:60'],
-            'prf_gui_id' => ['nullable', 'integer', 'exists:perfiles_guia,id'],
-            'prf_cho_id' => ['nullable', 'integer', 'exists:perfiles_chofer,id'],
-            'veh_id' => ['nullable', 'integer', 'exists:vehiculos,id'],
-        ];
-        if ($nueva) {
-            $reglas += [
-                'tur_id' => ['required', 'integer', 'exists:tours,id'],
-                'fec_sal' => ['required', 'date', 'after_or_equal:today'],
-                'hra_sal' => ['required', 'date_format:H:i'],
-            ];
-        }
-        $datos = $request->validate($reglas);
-        if ($nueva) {
-            $datos['hra_sal'] .= ':00';
-        }
-        foreach (['prf_gui_id', 'prf_cho_id', 'veh_id'] as $campo) {
-            $datos[$campo] = $datos[$campo] ?? null;
-        }
-
-        return $datos;
     }
 
     private function opciones(): array

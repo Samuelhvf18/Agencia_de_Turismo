@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\VehiculoRequest;
 use App\Models\SalidaTour;
 use App\Models\Vehiculo;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /** Flota de transporte (M03, RF-19): vehículos con estados activo, mantenimiento e inactivo. */
@@ -25,16 +24,16 @@ class FlotaController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(VehiculoRequest $request): RedirectResponse
     {
-        Vehiculo::create($this->validar($request) + ['est' => Vehiculo::EST_ACTIVO]);
+        Vehiculo::create($request->safe()->except('est') + ['est' => Vehiculo::EST_ACTIVO]);
 
         return back()->with('estado', 'Vehículo registrado.');
     }
 
-    public function update(Request $request, Vehiculo $vehiculo): RedirectResponse
+    public function update(VehiculoRequest $request, Vehiculo $vehiculo): RedirectResponse
     {
-        $datos = $this->validar($request, $vehiculo);
+        $datos = $request->validated();
 
         if ($datos['est'] !== Vehiculo::EST_ACTIVO) {
             $futuras = $vehiculo->salidas()->where('est', SalidaTour::EST_PROGRAMADA)->whereDate('fec_sal', '>=', today())->count();
@@ -46,20 +45,5 @@ class FlotaController extends Controller
         $vehiculo->update($datos);
 
         return back()->with('estado', "Vehículo {$vehiculo->pla} actualizado.");
-    }
-
-    private function validar(Request $request, ?Vehiculo $vehiculo = null): array
-    {
-        $request->merge(['pla' => strtoupper(trim((string) $request->input('pla')))]);
-
-        return $request->validate([
-            'pla' => ['required', 'string', 'max:15', 'regex:/^[0-9]{3,4}-?[A-Z]{3}$/', Rule::unique('vehiculos', 'pla')->ignore($vehiculo?->id)],
-            'mar' => ['nullable', 'string', 'max:50'],
-            'mdl' => ['nullable', 'string', 'max:50'],
-            'tip' => ['required', 'in:minibus,van,otro'],
-            'cap_asi' => ['required', 'integer', 'min:1', 'max:60'],
-            'tip_cmb' => ['nullable', 'in:gasolina,diesel,gnv,electrico'],
-            'est' => [$vehiculo ? 'required' : 'nullable', 'in:activo,mantenimiento,inactivo'],
-        ], ['pla.regex' => 'La placa debe tener el formato boliviano 1234-ABC.']);
     }
 }
