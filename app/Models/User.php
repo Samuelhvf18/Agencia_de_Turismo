@@ -89,6 +89,12 @@ class User extends Authenticatable
         return Attribute::get(fn () => $this->cor);
     }
 
+    /** Hash de la contraseña; Jetstream lo lee como `password` al confirmar acciones. */
+    protected function password(): Attribute
+    {
+        return Attribute::get(fn () => $this->clv);
+    }
+
     protected function profilePhotoUrl(): Attribute
     {
         return Attribute::get(fn () => $this->fot_prf

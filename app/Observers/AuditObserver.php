@@ -26,7 +26,10 @@ class AuditObserver
     public function updated(Model $model): void
     {
         $cambios = $model->getChanges();
-        $anteriores = array_intersect_key($model->getOriginal(), $cambios);
+        $anteriores = [];
+        foreach (array_keys($cambios) as $campo) {
+            $anteriores[$campo] = $model->getOriginal($campo);
+        }
 
         $this->registrar('UPDATE', $model, $anteriores, $cambios);
     }
@@ -44,9 +47,17 @@ class AuditObserver
 
     protected function registrar(string $accion, Model $model, ?array $anterior, ?array $nuevo): void
     {
+        $usuarioId = Auth::id();
+        // Un usuario que borra su propia cuenta ya no existe: la FK exige dejarlo en nulo.
+        if ($accion === 'DELETE' && $model->getTable() === 'users' && $usuarioId === $model->getKey()) {
+            $usuarioId = null;
+        }
+
         try {
-            DB::table('bitacora_auditoria')->insert([
-                'usr_id' => Auth::id(),
+            // Transacción anidada (SAVEPOINT): si la inserción falla no aborta la
+            // transacción de negocio en curso en PostgreSQL.
+            DB::transaction(fn () => DB::table('bitacora_auditoria')->insert([
+                'usr_id' => $usuarioId,
                 'nom_tbl' => $model->getTable(),
                 'id_reg' => (int) ($model->getKey() ?? 0),
                 'acc' => $accion,
@@ -55,7 +66,7 @@ class AuditObserver
                 'dir_ip' => Request::ip(),
                 'age_usr' => Request::header('User-Agent'),
                 'cre_en' => now(),
-            ]);
+            ]));
         } catch (\Throwable $e) {
             // La auditoría no debe tumbar la operación de negocio, pero el fallo queda en el log.
             Log::error('No se pudo registrar la auditoría', [

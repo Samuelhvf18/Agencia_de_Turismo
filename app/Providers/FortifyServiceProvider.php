@@ -51,6 +51,9 @@ class FortifyServiceProvider extends ServiceProvider
             return $user && Hash::check((string) $request->input('password'), $user->clv) ? $user : null;
         });
 
+        // Confirmar la contraseña antes de acciones sensibles (perfil, tokens, borrar cuenta).
+        Fortify::confirmPasswordsUsing(fn (User $user, ?string $password) => Hash::check((string) $password, $user->clv));
+
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
