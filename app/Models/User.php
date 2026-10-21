@@ -10,7 +10,6 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
-use App\Traits\Auditable;
 
 
 class User extends Authenticatable
@@ -20,7 +19,7 @@ class User extends Authenticatable
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
-    use SoftDeletes; // Habilita el manejo automático de eli_en
+    use SoftDeletes; 
 
     protected $table = 'users';
 
@@ -30,6 +29,7 @@ class User extends Authenticatable
     const DELETED_AT = 'eli_en';
     protected $fillable = [
         'rol_id',
+        'rol',
         'pai_id',
         'nom',
         'cor',
@@ -78,6 +78,11 @@ class User extends Authenticatable
     }
 
     // --- Relaciones ---
+
+    public function rolRelacion()
+    {
+        return $this->belongsTo(Rol::class, 'rol_id');
+    }
 
     public function rol()
     {

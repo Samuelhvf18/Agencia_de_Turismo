@@ -27,6 +27,11 @@ class Reserva extends Model
         'est_pag',
     ];
 
+    protected $casts = [
+        'cnt_ptc' => 'integer',
+        'pre_tot' => 'decimal:2',
+    ];
+
     public function salidaTour()
     {
         return $this->belongsTo(SalidaTour::class, 'sal_tur_id');
@@ -35,5 +40,15 @@ class Reserva extends Model
     public function participantes()
     {
         return $this->hasMany(ParticipanteReserva::class, 'rsv_id');
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'usr_id');
+    }
+
+    public function comprobantePago()
+    {
+        return $this->hasOne(ComprobantePago::class, 'rsv_id');
     }
 }

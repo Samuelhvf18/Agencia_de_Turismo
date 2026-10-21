@@ -16,7 +16,6 @@ class OperacionController extends Controller
     public function index()
     {
         $salidas = SalidaTour::with(['tour', 'vehiculo'])->orderBy('id', 'desc')->get();
-        
         $vehiculos = Vehiculo::where('est', '!=', 'inact')->get();
 
         return view('admin.panels.operaciones', compact('salidas', 'vehiculos'));
@@ -49,21 +48,31 @@ class OperacionController extends Controller
         }
 
         $nombreTour = trim($request->nombre_tour);
+        $defaultCatId = DB::table('categorias_tour')->value('id');
 
         $tour = Tour::firstOrCreate(
             ['nom' => $nombreTour],
             [
-                'cod'     => 'TOUR-' . strtoupper(Str::random(5)),
-                'des'     => 'Ruta registrada desde operaciones',
-                'dur_dias'=> 1,
-                'pre_bas' => 0
+                'cat_id'   => $defaultCatId,
+                'cod'      => 'TOUR-' . strtoupper(Str::random(5)),
+                'des'      => 'Ruta registrada desde operaciones',
+                'dur_hrs'  => 8.0,
+                'niv_dif'  => 'moderado',
+                'pre_bas'  => 250.00,
+                'cap_max'  => 15,
+                'act'      => true,
             ]
         );
 
-        DB::table('salidas_tour')->insert([
+        $vehiculo = Vehiculo::find($request->veh_id);
+        $capacidad = $vehiculo ? $vehiculo->cap_asi : 15;
+
+        SalidaTour::create([
             'tur_id'  => $tour->id,
             'veh_id'  => $request->veh_id,
             'fec_sal' => $request->fec_sal,
+            'hra_sal' => $request->input('hra_sal', '08:00:00'),
+            'cap_max' => $capacidad,
             'est'     => $request->est,
         ]);
 
@@ -100,13 +109,12 @@ class OperacionController extends Controller
             ])->withInput();
         }
 
-        DB::table('salidas_tour')
-            ->where('id', $id)
-            ->update([
-                'veh_id'  => $request->veh_id,
-                'fec_sal' => $request->fec_sal,
-                'est'     => $request->est,
-            ]);
+        $salida = SalidaTour::findOrFail($id);
+        $salida->update([
+            'veh_id'  => $request->veh_id,
+            'fec_sal' => $request->fec_sal,
+            'est'     => $request->est,
+        ]);
 
         if ($request->est === 'en_ruta') {
             Vehiculo::where('id', $request->veh_id)->update(['est' => 'en_ruta']);
@@ -115,5 +123,13 @@ class OperacionController extends Controller
         }
 
         return redirect()->back()->with('success', 'Salida actualizada correctamente.');
+    }
+
+    public function destroy($id)
+    {
+        $salida = SalidaTour::findOrFail($id);
+        $salida->delete();
+
+        return redirect()->back()->with('success', 'Salida eliminada correctamente.');
     }
 }
