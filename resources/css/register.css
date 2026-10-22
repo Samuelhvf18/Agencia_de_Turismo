@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        .pipocas-register {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            --azul: #1F5F8B;
+            --azul-profundo: #174870;
+            --azul-claro: #457699;
+            --terracota: #C96F4A;
+            --dorado: #F4C95D;
+            --fondo: #F0F0F1;
+            --texto: #343A40;
+            --secundario: #6B6F72;
+        }
+
+        .pipocas-register .font-editorial {
+            font-family: 'Fraunces', Georgia, serif;
+        }
+
+        .pipocas-register .register-image {
+            transition: transform 1.2s cubic-bezier(.2,.7,.2,1);
+        }
+
+        .pipocas-register .register-image:hover {
+            transform: scale(1.035);
+        }
+
+        .pipocas-register .register-card {
+            animation: pipocas-register-appear .7s cubic-bezier(.2,.7,.2,1) both;
+        }
+
+        .pipocas-register .register-float {
+            animation: pipocas-register-float 7s ease-in-out infinite;
+        }
+
+        .pipocas-register .register-float-delay {
+            animation-delay: -3s;
+        }
+
+        .pipocas-register .register-input {
+            transition: border-color .25s ease, background .25s ease,
+                        box-shadow .25s ease, transform .25s ease;
+        }
+
+        .pipocas-register .register-input:focus-within {
+            transform: translateY(-1px);
+            box-shadow: 0 0 0 4px rgb(31 95 139 / 9%);
+        }
+
+        .pipocas-register .register-submit {
+            background-size: 200% 100%;
+            transition: background-position .35s ease, transform .25s ease,
+                        box-shadow .25s ease;
+        }
+
+        .pipocas-register .register-submit:hover {
+            background-position: 100% 0;
+            transform: translateY(-2px);
+        }
+
+        @keyframes pipocas-register-appear {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pipocas-register-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-9px); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pipocas-register *,
+            .pipocas-register *::before,
+            .pipocas-register *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+        }

@@ -30,7 +30,6 @@ return [
     */
 
     'middleware' => ['web'],
-
     'auth_session' => AuthenticateSession::class,
 
     /*
@@ -58,7 +57,7 @@ return [
     */
 
     'features' => [
-        // Features::termsAndPrivacyPolicy(),
+        Features::termsAndPrivacyPolicy(),
         // Features::profilePhotos(),
         Features::api(),
         // Features::teams(['invitations' => true]),
