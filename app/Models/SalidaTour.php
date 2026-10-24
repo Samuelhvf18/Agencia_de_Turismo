@@ -47,9 +47,6 @@ class SalidaTour extends Model
         return $this->hasMany(Reserva::class, 'sal_tur_id');
     }
 
-    /**
-     * Calcula los cupos disponibles en tiempo real.
-     */
     public function getCuposDisponiblesAttribute(): int
     {
         $ocupados = (int) $this->reservas()

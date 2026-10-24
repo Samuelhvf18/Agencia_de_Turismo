@@ -71,14 +71,10 @@ class OperacionController extends Controller
             'tur_id'  => $tour->id,
             'veh_id'  => $request->veh_id,
             'fec_sal' => $request->fec_sal,
-            'hra_sal' => $request->input('hra_sal', '08:00:00'),
+            'hra_sal' => '08:00:00',
             'cap_max' => $capacidad,
             'est'     => $request->est,
         ]);
-
-        if ($request->est === 'en_ruta') {
-            Vehiculo::where('id', $request->veh_id)->update(['est' => 'en_ruta']);
-        }
 
         return redirect()->back()->with('success', 'Salida programada correctamente.');
     }
@@ -116,20 +112,7 @@ class OperacionController extends Controller
             'est'     => $request->est,
         ]);
 
-        if ($request->est === 'en_ruta') {
-            Vehiculo::where('id', $request->veh_id)->update(['est' => 'en_ruta']);
-        } elseif ($request->est === 'finalizada' || $request->est === 'programada') {
-            Vehiculo::where('id', $request->veh_id)->update(['est' => 'act']);
-        }
-
         return redirect()->back()->with('success', 'Salida actualizada correctamente.');
     }
 
-    public function destroy($id)
-    {
-        $salida = SalidaTour::findOrFail($id);
-        $salida->delete();
-
-        return redirect()->back()->with('success', 'Salida eliminada correctamente.');
-    }
 }

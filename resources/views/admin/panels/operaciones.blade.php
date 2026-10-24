@@ -73,7 +73,6 @@
         </table>
     </div>
 
-    <!-- Modal -->
     <div id="salidaModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">
@@ -87,7 +86,7 @@
 
                 <div>
                     <label class="block font-semibold text-gray-600 mb-1">Ruta / Tour</label>
-                    <input type="text" name="nombre_tour" id="inputNombreTour" required placeholder="Ej: Tour Salar de Uyuni 3D/2N" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
+                    <input type="text" name="nombre_tour" id="inputNombreTour" required placeholder="Ej: Tour Salar de Uyuni" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                 </div>
 
                 <div>
@@ -164,6 +163,16 @@
 
         toggleModalSalida(false);
     }
+
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: '¡Operación exitosa!',
+            text: "{{ session('success') }}",
+            confirmButtonColor: '#1F5F8B',
+            timer: 3000
+        });
+    @endif
 
 
     @if($errors->any())

@@ -5,16 +5,15 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <button onclick="openModal()" class="px-4 py-2 bg-[#1F5F8B] text-white rounded-xl text-sm font-semibold hover:bg-[#184B6E] transition">
+        <button onclick="openModal()" class="px-4 py-2 bg-[#1F5F8B] text-white rounded-xl text-sm font-semibold hover:bg-[#184B6E] transition shadow-sm">
             + Nuevo Usuario
         </button>
     </div>
 
-    <!-- Tabla de Usuarios -->
-    <div class="bg-white border rounded-2xl overflow-hidden shadow-sm">
+    <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
-                <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
+                <thead class="bg-gray-50 border-b border-gray-100 text-xs text-gray-500 uppercase">
                     <tr>
                         <th class="p-4">Usuario / Correo</th>
                         <th class="p-4">Rol</th>
@@ -25,7 +24,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($users as $usr)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4">
                             <div class="font-bold text-gray-800">{{ $usr->nom }}</div>
                             <div class="text-xs text-gray-500">{{ $usr->cor }}</div>
@@ -49,9 +48,9 @@
                         </td>
                         <td class="p-4 text-right space-x-2">
                             <button onclick='openModal(@json($usr))' class="text-xs font-bold text-[#1F5F8B] hover:underline">Editar</button>
-                            @if(Auth::id() !== $usr->id)
-                                <button onclick="eliminarUsuario({{ $usr->id }}, '{{ addslashes($usr->nom) }}')" class="text-xs font-bold text-red-600 hover:underline">Eliminar</button>
-                            @endif
+                            <!--@if(Auth::id() !== $usr->id)
+                                <button onclick="eliminarUsuario({{ $usr->id }}, '{{ addslashes($usr->nom) }}')" class="text-xs font-bold text-red-600 hover:underline">Desactivar</button>
+                            @endif-->
                         </td>
                     </tr>
                     @empty
@@ -67,11 +66,11 @@
 </div>
 
 <!-- Modal Crear / Editar -->
-<div id="modalUsuario" class="fixed inset-0 z-50 bg-gray-900/50 hidden items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4">
-        <div class="flex justify-between items-center border-b pb-3">
+<div id="modalUsuario" class="fixed inset-0 z-50 bg-gray-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4 border border-gray-100">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-3">
             <h3 id="modalTitle" class="text-base font-bold text-gray-800">Usuario</h3>
-            <button type="button" onclick="closeModal()" class="text-gray-400 font-bold">✕</button>
+            <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-600 font-bold">&times;</button>
         </div>
 
         <form id="formUsuario" onsubmit="guardarUsuario(event)" class="space-y-3">
@@ -79,17 +78,17 @@
             
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Nombre Completo *</label>
-                <input type="text" id="nom" required class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                <input type="text" id="nom" required class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Correo *</label>
-                    <input type="email" id="cor" required class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                    <input type="email" id="cor" required class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Rol *</label>
-                    <select id="rol_id" required class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                    <select id="rol_id" required class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                         <option value="">Seleccionar...</option>
                         @foreach($roles as $r)
                             <option value="{{ $r->id }}">{{ ucfirst($r->nom) }}</option>
@@ -101,35 +100,35 @@
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Contraseña <span id="pwdHint" class="text-gray-400"></span></label>
-                    <input type="password" id="clv" class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                    <input type="password" id="clv" class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Teléfono</label>
-                    <input type="text" id="tel" class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                    <input type="text" id="tel" class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                 </div>
             </div>
 
             <div class="grid grid-cols-3 gap-2">
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Tipo Doc.</label>
-                    <select id="tip_doc" onchange="toggleCIFields()" class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                    <select id="tip_doc" onchange="toggleCIFields()" class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                         <option value="CI">CI</option>
                         <option value="Pasaporte">Pasaporte</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Nº Doc.</label>
-                    <input type="text" id="num_doc" class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                    <input type="text" id="num_doc" class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Comp.</label>
-                    <input type="text" id="ci_cmp" class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                    <input type="text" id="ci_cmp" class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                 </div>
             </div>
 
             <div id="divDepto">
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Extensión (Departamento)</label>
-                <select id="ci_dep_id" class="w-full border-gray-300 rounded-xl text-xs p-2.5">
+                <select id="ci_dep_id" class="w-full border border-gray-300 rounded-xl text-xs p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                     <option value="">Seleccionar...</option>
                     @foreach($departamentos as $d)
                         <option value="{{ $d->id }}">{{ $d->nom }} ({{$d->cod }})</option>
@@ -137,9 +136,9 @@
                 </select>
             </div>
 
-            <div class="flex justify-end space-x-2 pt-4 border-t">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-xl text-xs font-semibold">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-[#1F5F8B] text-white rounded-xl text-xs font-semibold">Guardar</button>
+            <div class="flex justify-end space-x-2 pt-4 border-t border-gray-100">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-xl text-xs font-semibold hover:bg-gray-50 text-gray-700 transition">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-[#1F5F8B] hover:bg-[#184B6E] text-white rounded-xl text-xs font-semibold transition">Guardar</button>
             </div>
         </form>
     </div>
@@ -148,6 +147,18 @@
 @push('scripts')
 <script>
 const CSRF = '{{ csrf_token() }}';
+
+const swalTailwindConfig = {
+    buttonsStyling: false,
+    customClass: {
+        popup: 'rounded-2xl p-6 shadow-xl border border-gray-100',
+        title: 'text-base font-bold text-gray-800',
+        confirmButton: 'px-4 py-2 bg-[#1F5F8B] hover:bg-[#184B6E] text-white text-xs font-semibold rounded-xl transition mx-1',
+        cancelButton: 'px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition mx-1',
+        denyButton: 'px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl transition mx-1',
+        validationMessage: 'bg-red-50 text-red-600 text-xs p-2 rounded-lg mt-2 border border-red-200'
+    }
+};
 
 function toggleCIFields() {
     document.getElementById('divDepto').classList.toggle('hidden', document.getElementById('tip_doc').value !== 'CI');
@@ -203,24 +214,66 @@ function guardarUsuario(e) {
     .then(res => res.json())
     .then(res => {
         if (res.message) {
-            Swal.fire('OK', res.message, 'success').then(() => location.reload());
+            Swal.fire({
+                ...swalTailwindConfig,
+                icon: 'success',
+                title: '¡Éxito!',
+                text: res.message
+            }).then(() => location.reload());
         } else {
-            Swal.fire('Error', 'Revise los campos requeridos', 'error');
+            Swal.fire({
+                ...swalTailwindConfig,
+                icon: 'error',
+                title: 'Error de Validación',
+                text: 'Revise los campos requeridos.'
+            });
         }
     })
-    .catch(() => Swal.fire('Error', 'No se pudo guardar', 'error'));
+    .catch(() => Swal.fire({
+        ...swalTailwindConfig,
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo guardar la información.'
+    }));
 }
 
 function eliminarUsuario(id, nombre) {
-    if (!confirm(`¿Eliminar a ${nombre}?`)) return;
-
-    fetch(`/admin/usuarios/${id}`, {
-        method: 'DELETE',
-        headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
-    })
-    .then(res => res.json())
-    .then(res => {
-        Swal.fire('Resultado', res.message, res.success ? 'success' : 'warning').then(() => location.reload());
+    Swal.fire({
+        ...swalTailwindConfig,
+        title: '¿Eliminar usuario?',
+        text: `¿Estás seguro de que deseas eliminar a ${nombre}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        customClass: {
+            ...swalTailwindConfig.customClass,
+            confirmButton: swalTailwindConfig.customClass.denyButton
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/usuarios/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(res => {
+                Swal.fire({
+                    ...swalTailwindConfig,
+                    icon: res.success ? 'success' : 'warning',
+                    title: res.success ? '¡Eliminado!' : 'Atención',
+                    text: res.message
+                }).then(() => location.reload());
+            })
+            .catch(() => {
+                Swal.fire({
+                    ...swalTailwindConfig,
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo eliminar el usuario.'
+                });
+            });
+        }
     });
 }
 </script>

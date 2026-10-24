@@ -18,15 +18,6 @@ class VehiculoController extends Controller
 
     public function store(Request $request)
     {
-        $capacidadPorTipo = [
-            'Automóvil' => 3,
-            'Vagoneta 4x4' => 5,
-            'Minibús' => 13,
-            'Bus' => 22,
-        ];
-
-        $tipo = $request->input('tip');
-        $capacidad = $capacidadPorTipo[$tipo] ?? 10;
 
         $request->validate([
             'pla' => 'required|string|max:15|unique:vehiculos,pla',
@@ -39,13 +30,13 @@ class VehiculoController extends Controller
         ]);
 
         Vehiculo::create([
-            'pla'     => strtoupper(trim($request->pla)),
-            'mar'     => $request->mar,
-            'mdl'     => $request->mdl,
-            'tip'     => $tipo,
-            'cap_asi' => $capacidad,
+            'pla' => strtoupper(trim($request->pla)),
+            'mar' => $request->mar,
+            'mdl' => $request->mdl,
+            'tip' => $request->tip,
+            'cap_asi' => $request->cap_asi,
             'tip_cmb' => $request->tip_cmb,
-            'est'     => 'act',
+            'est' => 'act',
         ]);
 
         return redirect()->back()->with('success', 'Vehículo registrado correctamente.');

@@ -39,9 +39,8 @@
                         <td class="p-4">
                             <span class="px-3 py-1 rounded-full font-bold text-[10px] 
                                 {{ $veh->est == 'act' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : '' }}
-                                {{ $veh->est == 'en_ruta' ? 'bg-blue-50 text-blue-700 border border-blue-200' : '' }}
                                 {{ $veh->est == 'inact' ? 'bg-rose-50 text-rose-700 border border-rose-200' : '' }}">
-                                {{ $veh->est == 'act' ? 'DISPONIBLE' : ($veh->est == 'en_ruta' ? 'EN RUTA' : 'MANTENIMIENTO') }}
+                                {{ $veh->est == 'act' ? 'DISPONIBLE'  : 'MANTENIMIENTO' }}
                             </span>
                         </td>
                         <td class="p-4 text-center">
@@ -61,7 +60,6 @@
         </table>
     </div>
 
-    <!-- Modal Vehículo -->
     <div id="vehiculoModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">

@@ -181,22 +181,6 @@
         toggleModal(false);
     }
 
-    function validarStockRealtime() {
-        const tot = parseInt(document.getElementById('inputTot').value) || 0;
-        const dis = parseInt(document.getElementById('inputDis').value) || 0;
-        const errorMsg = document.getElementById('errorStock');
-        const btn = document.getElementById('btnGuardar');
-
-        if (dis > tot) {
-            errorMsg.classList.remove('hidden');
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-            errorMsg.classList.add('hidden');
-            btn.disabled = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-    }
 
     function validarStock() {
         const tot = parseInt(document.getElementById('inputTot').value) || 0;
@@ -220,15 +204,6 @@
             text: "{{ session('success') }}",
             confirmButtonColor: '#1F5F8B',
             timer: 3000
-        });
-    @endif
-
-    @if($errors->any())
-        Swal.fire({
-            icon: 'error',
-            title: 'Validación de Inventario',
-            text: "{{ $errors->first() }}",
-            confirmButtonColor: '#C96F4A'
         });
     @endif
 </script>
