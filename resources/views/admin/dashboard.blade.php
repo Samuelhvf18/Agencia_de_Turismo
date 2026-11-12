@@ -114,7 +114,7 @@
                 <div class="relative flex items-start justify-between gap-3">
                     <div>
                         <p class="text-[10px] font-extrabold uppercase tracking-wider text-[#6B6F72]">
-                            Equipos disponibles
+                            Total de Equipos Disponibles
                         </p>
                         <div class="mt-3 flex items-baseline gap-2">
                             <span class="text-3xl font-extrabold tracking-tight text-[#1F5F8B]">

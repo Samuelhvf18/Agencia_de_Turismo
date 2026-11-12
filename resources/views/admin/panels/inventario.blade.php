@@ -132,11 +132,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block font-semibold text-gray-600 mb-1">Stock Total</label>
-                        <input type="number" id="inputTot" name="cnt_tot" min="0" required oninput="validarStockRealtime()" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
+                        <input type="number" id="inputTot" name="cnt_tot" min="0"  class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                     </div>
                     <div>
                         <label class="block font-semibold text-gray-600 mb-1">Stock Disponible</label>
-                        <input type="number" id="inputDis" name="cnt_dis" min="0" required oninput="validarStockRealtime()" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
+                        <input type="number" id="inputDis" name="cnt_dis" min="0"  class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
                     </div>
                 </div>
                 
