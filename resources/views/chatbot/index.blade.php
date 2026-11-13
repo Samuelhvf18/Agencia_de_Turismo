@@ -72,11 +72,9 @@
         }
     </style>
 </head>
-
 <body class="antialiased font-sans min-h-screen flex flex-col"
       x-data="chatPipocas()"
       x-init="iniciar()">
-    <!-- Encabezado -->
     <header class="bg-white border-b border-slate-200 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
@@ -101,9 +99,7 @@
             </div>
         </div>
     </header>
-    <!-- Contenido principal -->
     <main class="flex-1 w-full max-w-6xl mx-auto p-3 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <!-- Panel de preguntas frecuentes -->
         <aside class="lg:col-span-4 space-y-4">
             <section class="rounded-2xl p-5 sm:p-6 text-white shadow-sm"
                      style="background: linear-gradient(135deg, #1F5F8B, #457699)">
@@ -122,7 +118,7 @@
                     <i class="fa-solid fa-circle-info"></i>
                     Asistente turístico con inteligencia artificial
                 </div>
-            </section>Asistente con IA · Los datos de tours se integrarán próximamente
+            </section>
             <section class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <h2 class="font-bold text-slate-800 mb-1">
                     <i class="fa-solid fa-bolt mr-2" style="color: var(--pipocas-terracota)"></i>
@@ -164,10 +160,8 @@
                 </div>
             </section>
         </aside>
-        <!-- Chat -->
         <section class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
                  style="min-height: 570px; max-height: 850px">
-            <!-- Cabecera del chat -->
             <div class="px-4 sm:px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                     <div class="w-11 h-11 rounded-full flex items-center justify-center text-white"
@@ -191,7 +185,6 @@
                     <span class="hidden sm:inline">Reiniciar</span>
                 </button>
             </div>
-            <!-- Mensajes -->
             <div x-ref="contenedorMensajes"
                  role="log"
                  aria-label="Conversación con el asistente"
@@ -216,7 +209,6 @@
                         </div>
                     </div>
                 </template>
-                <!-- Indicador de respuesta -->
                 <div x-show="escribiendo"
                      x-cloak
                      class="flex items-center gap-3">
@@ -231,8 +223,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Entrada -->
             <div class="border-t border-slate-200 p-3 sm:p-4 bg-white">
                 <form @submit.prevent="enviar()"
                       class="flex items-end gap-2 sm:gap-3">
@@ -254,9 +244,6 @@
                         <span class="hidden sm:inline">Enviar</span>
                     </button>
                 </form>
-                <p class="text-[11px] text-slate-400 mt-2 text-center">
-                    Asistente con IA · Los datos de tours se integrarán próximamente
-                </p>
             </div>
         </section>
     </main>
@@ -271,14 +258,16 @@
                 escribiendo: false,
                 preguntasRapidas: [
                     { texto: '¿Qué lugares visitar en La Paz?', icono: 'fa-solid fa-mountain-sun' },
+                    { texto: '¿Qué tours ofrece Pipocas?', icono: 'fa-solid fa-map' },
+                    { texto: '¿Qué categorías de tours tienen?', icono: 'fa-solid fa-list' },
+                    { texto: '¿Cuánto duran los tours?', icono: 'fa-solid fa-clock' },
+                    { texto: '¿Cómo funciona el proceso de reserva?', icono: 'fa-solid fa-circle-question' },
+                    { texto: '¿Qué puedo hacer si tengo poco tiempo?', icono: 'fa-solid fa-hourglass-half' },
+                    { texto: '¿Qué debo saber sobre la altura?', icono: 'fa-solid fa-heart-pulse' },
                     { texto: '¿Cuál es la mejor hora para explorar?', icono: 'fa-solid fa-clock' },
                     { texto: '¿Es mejor ir a pie o en movilidad?', icono: 'fa-solid fa-route' },
-                    { texto: '¿Cómo funciona Pipocas?', icono: 'fa-solid fa-circle-question' },
-                    { texto: '¿Qué ropa debo llevar?', icono: 'fa-solid fa-shirt' },
-                    { texto: '¿Cómo llego al Valle de la Luna?', icono: 'fa-solid fa-map-location-dot' },
-                    { texto: '¿Qué puedo hacer si tengo poco tiempo?', icono: 'fa-solid fa-hourglass-half' },
-                { texto: '¿Qué debo saber sobre la altura?', icono: 'fa-solid fa-heart-pulse' }
-            ],
+                    { texto: '¿Cómo funciona Pipocas?', icono: 'fa-solid fa-circle-question' }
+                ],
             iniciar() {
                 if (this.mensajes.length > 0) return;
                 this.mensajeBot(
@@ -324,11 +313,9 @@
                 texto: texto,
                 hora: this.horaActual()
             });
-
             this.nuevoMensaje = '';
             this.escribiendo = true;
             this.desplazarAbajo();
-
             try {
                 const respuesta = await fetch('/chatbot/mensaje', {
                     method: 'POST',
@@ -343,35 +330,27 @@
                         mensaje: texto
                     })
                 });
-
                 const datos = await respuesta.json().catch(() => ({}));
-
                 if (!respuesta.ok) {
                     throw new Error(
                         datos.error || 'No se pudo obtener una respuesta del asistente.'
                     );
                 }
-
                 if (!datos.respuesta) {
                     throw new Error('El asistente devolvió una respuesta vacía.');
                 }
-
                 this.mensajeBot(datos.respuesta);
-
             } catch (error) {
                 console.error('Error del chatbot:', error);
-
                 this.mensajeBot(
                     error.message ||
                     'No pude conectarme con el asistente. Inténtalo nuevamente.'
                 );
-
             } finally {
                 this.escribiendo = false;
                 this.desplazarAbajo();
             }
         },
-
         limpiarChat() {
             this.mensajes = [];
             this.nuevoMensaje = '';

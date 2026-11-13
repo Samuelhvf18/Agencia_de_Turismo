@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ReservaController;
 use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Controllers\Turista\TuristaController;
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas
@@ -54,14 +55,17 @@ Route::middleware([
     'verified',
 ])->group(function () {
 
-    Route::get('/dashboard', function () {
-        $user = request()->user();
-        if ((int) $user->rol_id === 1) {
-            return redirect()->route('admin.dashboard');
-            }
-            return redirect('/');
-            })->name('dashboard');
-            Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+Route::get('/dashboard', function () {
+    $user = request()->user();
+    $rolNombre = $user->rol()->value('nom');
+    return match ($rolNombre) {
+        'admin' => redirect()->route('admin.dashboard'),
+        'turista' => Route::has('turista.dashboard')? redirect()->route('turista.dashboard'): redirect('/'),
+        default => redirect('/'),
+    };
+})->name('dashboard');
+
+Route::get('/admin/dashboard', [DashboardController::class, 'index'])
             ->middleware(RoleMiddleware::class . ':admin')
             ->name('admin.dashboard');
 
@@ -102,5 +106,15 @@ Route::middleware([
         Route::view('/analitica', 'admin.panels.analitica')->name('analitica');
 
     });
-
+    Route::prefix('turista')->name('turista.')
+            ->middleware(RoleMiddleware::class . ':turista')
+            ->group(function () {
+        Route::get('/dashboard', [TuristaController::class, 'dashboard'])->name('dashboard');
+        Route::get('/tours', [TuristaController::class, 'tours'])->name('tours.index');
+        Route::get('/tours/{tour}', [TuristaController::class, 'showTour'])->name('tours.show');
+        Route::get('/reservas', [TuristaController::class, 'reservas'])->name('reservas.index');
+        Route::post('/reservas', [TuristaController::class, 'solicitarReserva'])->name('reservas.solicitar');
+        Route::get('/perfil', [TuristaController::class, 'perfil'])->name('perfil');
+        Route::put('/perfil', [TuristaController::class, 'actualizarPerfil'])->name('perfil.update');
+        });
 });

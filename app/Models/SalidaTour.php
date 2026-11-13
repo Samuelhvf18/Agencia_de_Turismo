@@ -31,4 +31,17 @@ class SalidaTour extends Model
     {
         return $this->hasMany(Reserva::class, 'sal_tur_id');
     }
+    public function getCuposDisponiblesAttribute()
+    {
+        $ocupados = $this->getAttribute('participantes_reservados');
+        if ($ocupados === null) {
+            $ocupados = $this->reservas()
+                ->where('est', '<>', 'cancelada')
+                ->sum('cnt_ptc');
+        }
+        return max(
+            (int) $this->cap_max - (int) $ocupados,
+            0
+        );
+    }
 }
