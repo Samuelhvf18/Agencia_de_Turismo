@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @stack('styles')
+    @livewireStyles
 </head>
 
 <body class="bg-gray-100 text-gray-900 font-sans antialiased min-h-screen">
@@ -100,7 +101,26 @@
             document.getElementById('sidebar').classList.toggle('-translate-x-full');
             document.getElementById('mobile-overlay').classList.toggle('hidden');
         }
+
+        window.addEventListener('swal:alert', event => {
+            const data = event.detail ? (event.detail[0] || event.detail) : {};
+            Swal.fire(
+                data.title || '',
+                data.text || '',
+                data.icon || 'info'
+            );
+        });
+
+        window.addEventListener('swal:toast', event => {
+            const data = event.detail ? (event.detail[0] || event.detail) : {};
+            Swal.fire(
+                data.title || '',
+                '',
+                data.icon || 'success'
+            );
+        });
     </script>
+    @livewireScripts
     @stack('scripts')
 </body>
 </html>
