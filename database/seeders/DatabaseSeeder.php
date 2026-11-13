@@ -5,18 +5,19 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('roles')->insert([
-            ['nom' => 'admin', 'des' => 'Administrador general del sistema'],
-            ['nom' => 'operaciones', 'des' => 'Personal de logistica y salidas'],
-            ['nom' => 'guia', 'des' => 'Guia turistico autorizado'],
-            ['nom' => 'chofer', 'des' => 'Chofer de la flota de vehiculos'],
-            ['nom' => 'turista', 'des' => 'Turista nacional o extranjero'],
-        ]);
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        Role::firstOrCreate(['name' => 'admin']);
+        Role::firstOrCreate(['name' => 'guia']);
+        Role::firstOrCreate(['name' => 'chofer']);
+        Role::firstOrCreate(['name' => 'turista']);
 
         DB::table('departamentos_bolivia')->insert([
             ['cod' => 'LP', 'nom' => 'La Paz'],
@@ -30,11 +31,9 @@ class DatabaseSeeder extends Seeder
             ['cod' => 'PD', 'nom' => 'Pando'],
         ]);
 
-        $rolAdminId = DB::table('roles')->where('nom', 'admin')->value('id');
         $deptoLaPazId = DB::table('departamentos_bolivia')->where('cod', 'LP')->value('id');
 
-        DB::table('users')->insert([
-            'rol_id'     => $rolAdminId,
+        $adminUser = User::create([
             'nom'        => 'Administrador Pipocas',
             'cor'        => 'admin@gmail.com',
             'clv'        => Hash::make('123qwe'),
@@ -48,6 +47,40 @@ class DatabaseSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        $adminUser->assignRole('admin');
+
+        $guia = User::create([
+            'nom'        => 'Guía Turístico',
+            'cor'        => 'guia@gmail.com',
+            'clv'        => Hash::make('123qwe'),
+            'rol'        => 'guia',
+            'tel'        => '76845010',
+            'tip_doc'    => 'CI',
+            'num_doc'    => '1260086',
+            'ci_cmp'     => '1A',
+            'ci_dep_id'  => $deptoLaPazId,
+            'act'        => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $guia->assignRole('guia');
+
+        $chofer = User::create([
+            'nom'        => 'Chofer Flota',
+            'cor'        => 'chofer@gmail.com',
+            'clv'        => Hash::make('123qwe'),
+            'rol'        => 'chofer',
+            'tel'        => '76845011',
+            'tip_doc'    => 'CI',
+            'num_doc'    => '1260087',
+            'ci_cmp'     => '1A',
+            'ci_dep_id'  => $deptoLaPazId,
+            'act'        => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $chofer->assignRole('chofer');
+
         $this->call([
             PaisesSeeder::class,
             ToursSystemSeeder::class,

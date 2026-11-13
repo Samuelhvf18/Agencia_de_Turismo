@@ -8,11 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->string('nom', 50)->unique();
-            $table->string('des', 255)->nullable();
-        });
 
         Schema::create('paises', function (Blueprint $table) {
             $table->id();
@@ -38,6 +33,5 @@ return new class extends Migration
         Schema::dropIfExists('departamentos_bolivia');
         Schema::dropIfExists('idiomas');
         Schema::dropIfExists('paises');
-        Schema::dropIfExists('roles');
     }
 };

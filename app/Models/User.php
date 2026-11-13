@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 
 class User extends Authenticatable
@@ -19,14 +20,15 @@ class User extends Authenticatable
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
-    use SoftDeletes; 
+    use SoftDeletes;
+    use HasRoles;
 
     protected $table = 'users';
 
-    // Mapeo de columnas de timestamps personalizadas
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
     const DELETED_AT = 'eli_en';
+    
     protected $fillable = [
         'rol_id',
         'rol',
@@ -72,12 +74,11 @@ class User extends Authenticatable
     {
         return 'cor';
     }
+    
     public function getEmailForPasswordReset(): string
     {
         return $this->cor;
     }
-
-    // --- Relaciones ---
 
     public function rolRelacion()
     {

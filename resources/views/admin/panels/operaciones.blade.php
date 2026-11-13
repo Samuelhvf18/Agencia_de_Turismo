@@ -21,6 +21,7 @@
                 <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-[#6B6F72] uppercase">
                     <th class="p-4">Tour / Ruta</th>
                     <th class="p-4">Fecha Salida</th>
+                    <th class="p-4">Guía Asignado</th>
                     <th class="p-4">Vehículo Asignado</th>
                     <th class="p-4">Capacidad</th>
                     <th class="p-4">Estado</th>
@@ -36,6 +37,9 @@
                         </td>
                         <td class="p-4 text-gray-600 font-medium">
                             {{ $salida->fec_sal ? \Carbon\Carbon::parse($salida->fec_sal)->format('d/m/Y') : '' }}
+                        </td>
+                        <td class="p-4 font-semibold text-gray-700">
+                            {{ $salida->guia->user->name ?? $salida->guia->user->nom ?? 'Sin guía' }}
                         </td>
                         <td class="p-4">
                             @if($salida->vehiculo)
@@ -64,7 +68,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="p-8 text-center text-gray-400 text-xs">
+                        <td colspan="7" class="p-8 text-center text-gray-400 text-xs">
                             No hay salidas registradas.
                         </td>
                     </tr>
@@ -87,6 +91,18 @@
                 <div>
                     <label class="block font-semibold text-gray-600 mb-1">Ruta / Tour</label>
                     <input type="text" name="nombre_tour" id="inputNombreTour" required placeholder="Ej: Tour Salar de Uyuni" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-600 mb-1">Guía Asignado</label>
+                    <select name="prf_gui_id" id="inputGuiaId" required class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
+                        <option value="">Seleccione un guía...</option>
+                        @foreach($guias ?? [] as $g)
+                            <option value="{{ $g->id }}">
+                                {{ $g->user->name ?? $g->user->nom ?? 'Guía #' . $g->id }} (Guía Autorizado)
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div>
@@ -147,22 +163,23 @@
     }
 
     function abrirModalEditarSalida(salida) {
-        const tourInput = document.getElementById('inputNombreTour');
+    const tourInput = document.getElementById('inputNombreTour');
 
-        document.getElementById('salidaModalTitulo').innerText = 'Editar Salida';
-        document.getElementById('salidaForm').action = "/admin/operaciones/" + salida.id;
-        document.getElementById('salidaMethodField').innerHTML = '@method("PUT")';
+    document.getElementById('salidaModalTitulo').innerText = 'Editar Salida';
+    document.getElementById('salidaForm').action = "/admin/operaciones/" + salida.id;
+    document.getElementById('salidaMethodField').innerHTML = '@method("PUT")';
 
-        tourInput.value = salida.tour ? salida.tour.nom : 'Tour General';
-        tourInput.readOnly = true;
-        tourInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+    tourInput.value = salida.tour ? salida.tour.nom : 'Tour General';
+    tourInput.readOnly = true;
+    tourInput.classList.add('bg-gray-100', 'cursor-not-allowed');
 
-        document.getElementById('inputVehId').value = salida.veh_id || '';
-        document.getElementById('inputFecSal').value = salida.fec_sal ? salida.fec_sal.substring(0, 10) : '';
-        document.getElementById('inputEst').value = salida.est || 'programada';
+    document.getElementById('inputGuiaId').value = salida.prf_gui_id || '';
+    document.getElementById('inputVehId').value = salida.veh_id || '';
+    document.getElementById('inputFecSal').value = salida.fec_sal ? salida.fec_sal.substring(0, 10) : '';
+    document.getElementById('inputEst').value = salida.est || 'programada';
 
-        toggleModalSalida(false);
-    }
+    toggleModalSalida(false);
+}
 
     @if(session('success'))
         Swal.fire({
@@ -173,7 +190,6 @@
             timer: 3000
         });
     @endif
-
 
     @if($errors->any())
         Swal.fire({

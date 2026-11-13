@@ -42,6 +42,11 @@ class SalidaTour extends Model
         return $this->belongsTo(Vehiculo::class, 'veh_id');
     }
 
+    public function guia()
+    {
+        return $this->belongsTo(PerfilGuia::class, 'prf_gui_id');
+    }
+
     public function reservas()
     {
         return $this->hasMany(Reserva::class, 'sal_tur_id');

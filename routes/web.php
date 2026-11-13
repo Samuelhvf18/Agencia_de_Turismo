@@ -52,11 +52,22 @@ Route::middleware([
     'verified',
 ])->group(function () {
 
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        if ($user->hasRole('guia')) {
+            return redirect()->route('guia.mis-tours');
+        }
+
+        if ($user->hasRole('chofer')) {
+            return redirect()->route('chofer.mis-viajes');
+        }
+
+        return app(DashboardController::class)->index();
+    })->name('dashboard');
+
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
-    // Módulos del Administrador
     Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::patch('/tours/{tour}/toggle', [TourController::class, 'toggleStatus'])->name('tours.toggle');
@@ -97,4 +108,22 @@ Route::middleware([
 
     });
 
+});
+
+/*
+|--------------------------------------------------------------------------
+| Rutas del Portal Operativo (Guías y Choferes)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', \Spatie\Permission\Middleware\RoleMiddleware::class.':guia'])->prefix('guia')->name('guia.')->group(function () {
+    Route::get('/tours', function () {
+        return view('guia.tours');
+    })->name('mis-tours');
+});
+
+Route::middleware(['auth', \Spatie\Permission\Middleware\RoleMiddleware::class.':chofer'])->prefix('chofer')->name('chofer.')->group(function () {
+    Route::get('/viajes', function () {
+        return view('chofer.viajes');
+    })->name('mis-viajes');
 });
