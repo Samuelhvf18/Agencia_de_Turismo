@@ -14,7 +14,6 @@ use Illuminate\Validation\ValidationException;
 
 class AuditoriaController extends Controller
 {
-
     public function index(Request $request)
     {
         $query = User::with(['rolRelacion', 'departamento']);
@@ -95,7 +94,6 @@ class AuditoriaController extends Controller
         }
     }
 
-
     public function updateUsuario(Request $request, $id)
     {
         try {
@@ -105,7 +103,6 @@ class AuditoriaController extends Controller
                 'nom'       => 'required|string|max:150',
                 'cor'       => 'required|email|max:150|unique:users,cor,' . $id,
                 'rol_id'    => 'required|exists:roles,id',
-                'clv'       => 'nullable|string|min:6',
                 'tel'       => 'nullable|string|max:20',
                 'tip_doc'   => 'nullable|string|max:20',
                 'num_doc'   => 'nullable|string|max:15',
@@ -117,7 +114,6 @@ class AuditoriaController extends Controller
                 'cor.required'    => 'El correo electrónico es obligatorio.',
                 'cor.email'       => 'Ingrese un correo electrónico válido.',
                 'cor.unique'      => 'Este correo ya pertenece a otro usuario.',
-                'clv.min'         => 'La nueva contraseña debe tener al menos 6 caracteres.',
                 'rol_id.required' => 'Debe seleccionar un rol para el usuario.',
             ]);
 
@@ -136,11 +132,7 @@ class AuditoriaController extends Controller
             ];
 
             if ($request->has('act')) {
-                $data['act'] = (bool) $request->act;
-            }
-
-            if (!empty($validated['clv'])) {
-                $data['clv'] = Hash::make($validated['clv']);
+                $data['act'] = filter_var($request->act, FILTER_VALIDATE_BOOLEAN);
             }
 
             $user->update($data);
@@ -165,9 +157,35 @@ class AuditoriaController extends Controller
         }
     }
 
-    /**
-     * Eliminación suave (Soft Delete) de usuario.
-     */
+    public function toggleActivo($id)
+    {
+        try {
+            if (Auth::id() == $id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No puedes desactivar tu propia cuenta de administrador.',
+                ], 422);
+            }
+
+            $user = User::findOrFail($id);
+            $user->update(['act' => !$user->act]);
+
+            $estadoTexto = $user->act ? 'activado' : 'desactivado';
+
+            return response()->json([
+                'success' => true,
+                'message' => "El usuario {$user->nom} ha sido {$estadoTexto} correctamente.",
+                'act'     => $user->act,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Error al alternar estado del usuario {$id}: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo cambiar el estado del usuario.',
+            ], 500);
+        }
+    }
+
     public function destroyUsuario($id)
     {
         try {

@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\VehiculoController;
 use App\Http\Controllers\Admin\InventarioController;
 use App\Http\Controllers\Admin\ReservaController;
 use App\Http\Controllers\Admin\AuditoriaController;
+use App\Http\Controllers\Admin\FinanzaController;
+use App\Http\Controllers\Admin\AnaliticaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,8 +88,12 @@ Route::middleware([
         Route::delete('/usuarios/{id}', [AuditoriaController::class, 'destroyUsuario'])->name('usuarios.destroy');
 
         Route::view('/personal', 'admin.panels.personal')->name('personal');
-        Route::view('/finanzas', 'admin.panels.finanzas')->name('finanzas');
-        Route::view('/analitica', 'admin.panels.analitica')->name('analitica');
+
+        Route::get('/finanzas', [FinanzaController::class, 'index'])->name('finanzas');
+        Route::get('/finanzas/exportar', [FinanzaController::class, 'exportarExcel'])->name('finanzas.exportar');
+
+        Route::get('/analitica', [AnaliticaController::class, 'index'])->name('analitica');
+        Route::get('/analitica/exportar', [AnaliticaController::class, 'exportarExcel'])->name('analitica.exportar');
 
     });
 

@@ -7,6 +7,8 @@
             ['route' => 'admin.transporte', 'icon' => 'fa-van-shuttle', 'label' => 'Flota de transporte', 'active' => request()->routeIs('admin.transporte')],
             ['route' => 'admin.tours.index', 'icon' => 'fa-mountain-sun', 'label' => 'Catálogo y rutas', 'active' => request()->routeIs('admin.tours.*')],
             ['route' => 'admin.reservas', 'icon' => 'fa-ticket', 'label' => 'Reservas y pasajeros', 'active' => request()->routeIs('admin.reservas')],
+            ['route' => 'admin.finanzas', 'icon' => 'fa-file-invoice-dollar', 'label' => 'Finanzas y cobros', 'active' => request()->routeIs('admin.finanzas*')],
+            ['route' => 'admin.analitica', 'icon' => 'fa-chart-line', 'label' => 'Analítica y reportes', 'active' => request()->routeIs('admin.analitica*')],
             ['route' => 'admin.seguridad', 'icon' => 'fa-shield-halved', 'label' => 'Configuración de usuarios', 'active' => request()->routeIs('admin.seguridad')],
         ];
     @endphp
