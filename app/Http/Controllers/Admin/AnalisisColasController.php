@@ -10,6 +10,7 @@ use App\Services\Io\ColasService;
 use App\Services\Io\IoDemoData;
 use App\Services\Io\PanelColasBuilder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Panel «Análisis de colas de reservas» (Módulo 07 — Teoría de colas M/M/c/K).
@@ -23,9 +24,13 @@ class AnalisisColasController extends Controller
         $datos = $request->validate([
             'tour' => ['nullable', 'integer'],
             'c' => ['nullable', 'integer', 'min:1', 'max:60'],
-            'k' => ['nullable', 'integer', 'min:1', 'max:60'],
+            'k' => ['nullable', 'integer', 'min:1', 'max:200'],
             'lambda' => ['nullable', 'numeric', 'min:0', 'max:500'],
         ]);
+
+        if (isset($datos['c'], $datos['k']) && $datos['c'] > $datos['k']) {
+            throw ValidationException::withMessages(['k' => 'La capacidad del modelo debe ser igual o mayor que el número de guías.']);
+        }
 
         $parametros = ColaParametroTour::with('tour')->where('act', true)->get()
             ->filter(fn ($p) => $p->tour !== null)
@@ -35,7 +40,7 @@ class AnalisisColasController extends Controller
             // Sin parámetros cargados todavía: se muestra la maqueta para no dejar el panel vacío.
             return view('admin.io.colas', array_merge(app(IoDemoData::class)->colas($datos['tour'] ?? null, $datos['c'] ?? null, $datos['k'] ?? null, $datos['lambda'] ?? null),
                 ['formAction' => route('admin.io.colas'),
-                   'avisoDemo' => 'Todavía no hay parámetros de colas registrados. Cárguelos por tour en «Parámetros de colas» (RF-40); mientras tanto se muestran datos de demostración.']));
+                    'avisoDemo' => 'Todavía no hay parámetros de colas registrados. Cárguelos por tour en «Parámetros de colas» (RF-40); mientras tanto se muestran datos de demostración.']));
         }
 
         $hoy = now();
@@ -52,8 +57,7 @@ class AnalisisColasController extends Controller
         $sel['cos_esp'] = (float) ($actual->cos_esp ?? 15);
         $sel['cos_srv'] = (float) ($actual->cos_srv ?? 25);
         if (isset($datos['lambda'])) {
-            $sel['lambda'] = (float) $datos['lambda'];
-            $sel['origen_lambda'] = 'valor simulado';
+            $sel['lambda_simulada'] = (float) $datos['lambda'];
         }
 
         $historial = ColaMetricaDiaria::where('tur_id', $actual->tur_id)

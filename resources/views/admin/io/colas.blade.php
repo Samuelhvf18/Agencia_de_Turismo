@@ -1,275 +1,341 @@
-{{--
-    Panel «Análisis de colas de reservas» — Módulo 07, Teoría de colas M/M/c/K.
-    Variables (las arma AnalisisColasController o IoDemoData en la vista previa):
-        $tours       lista de tours con sus métricas: id, nom, lambda, mu, c, k, rho, lq, wq_hrs, p_rec, estado
-        $sel         tour seleccionado: id, nom, dur_hrs, lambda, mu, c, k, cos_esp, cos_srv, origen_lambda
-        $m           métricas del tour seleccionado (ColasService::metricas)
-        $escenarios  filas c = 1..n con rho, lq, wq_hrs, p_rec, ct, optimo
-        $sim         métricas del escenario simulado (c y K elegidos) o null
-        $simC, $simK valores del simulador
-        $historial   lista de métricas diarias: fec, lmb_obs, rho, wq_hrs, p_rec
-        $formAction  URL a la que envía el formulario (GET)
---}}
 @extends('layouts.admin-io')
-
-@section('titulo', 'Análisis de colas de reservas')
-@section('subtitulo', 'Teoría de colas M/M/c/K aplicada al motor de reservas · c = guías, K = cupos por salida')
-
+@section('titulo', 'Demanda y capacidad')
+@section('subtitulo', 'Anticipa la presión sobre tus tours y compara cuántos guías podrías necesitar.')
 @php
-    $fmt = fn ($v, $d = 2) => number_format((float) $v, $d, ',', '.');
-    $pct = fn ($v, $d = 1) => number_format((float) $v * 100, $d, ',', '.') . ' %';
-    $badge = [
-        'saturado' => ['Saturado', 'bg-red-100 text-red-700', 'fa-circle-exclamation'],
-        'atencion' => ['En atención', 'bg-pipocas-acento/30 text-pipocas-calido', 'fa-triangle-exclamation'],
-        'estable'  => ['Estable', 'bg-emerald-100 text-emerald-700', 'fa-circle-check'],
+    $fmt = fn($v, $d = 1) => number_format((float) $v, $d, ',', '.');
+    $pct = fn($v, $d = 1) => number_format((float) $v * 100, $d, ',', '.') . ' %';
+    $tiempo = fn($h) => $h < 1 ? $fmt($h * 60, 0) . ' min' : $fmt($h) . ' h';
+    $estado = $m['estado'];
+    $etiquetas = [
+        'saturado' => 'Revisar capacidad',
+        'atencion' => 'Vigilar demanda',
+        'estable' => 'Sin saturación estimada',
     ];
-    $estadoSel = $m['estado'] ?? 'estable';
-    $rhoPct = min(100, round(($m['rho'] ?? 0) * 100));
+    $mejor = collect($escenarios)->firstWhere('optimo', true);
+    $sinLlegadas = $sel['lambda'] == 0;
 @endphp
-
 @section('acciones')
-    <form method="GET" action="{{ $formAction }}" class="flex flex-wrap items-center gap-2">
-        <label for="tour" class="sr-only">Tour</label>
-        <select id="tour" name="tour" onchange="this.form.submit()"
-                class="rounded-xl border-black/10 bg-white py-2 pl-3 pr-9 text-sm font-semibold text-pipocas-principal focus:border-pipocas-principal focus:ring-pipocas-principal">
+    <form method="GET" action="{{ $formAction }}" class="flex items-center gap-2"><label for="tour" class="sr-only">Tour
+            a analizar</label><select name="tour" id="tour" class="max-w-full rounded-xl border-slate-200 text-xs"
+            onchange="this.form.submit()">
             @foreach ($tours as $t)
                 <option value="{{ $t['id'] }}" @selected($t['id'] == $sel['id'])>{{ $t['nom'] }}</option>
             @endforeach
         </select>
-        <span class="inline-flex items-center gap-2 rounded-xl bg-pipocas-principal px-3 py-2 text-xs font-bold text-white">
-            <i class="fa-solid fa-square-root-variable"></i> M/M/{{ $sel['c'] }}/{{ $sel['k'] }}
-        </span>
+        <button class="rsv-btn-sec !p-2" aria-label="Consultar tour"><i aria-hidden="true" class="fa-solid fa-arrow-right"></i></button>
     </form>
 @endsection
-
 @section('contenido')
-
-    {{-- ===================== Resumen del tour seleccionado ===================== --}}
-    <section class="rsv-tarjeta">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-pipocas-texto-2">Tour seleccionado</p>
-                <h2 class="font-titulo text-2xl font-semibold text-pipocas-principal">{{ $sel['nom'] }}</h2>
-                <p class="mt-1 text-sm text-pipocas-texto-2">
-                    Duración {{ $fmt($sel['dur_hrs'], 1) }} h ·
-                    λ = {{ $fmt($sel['lambda']) }} reservas/día <span class="text-xs">({{ $sel['origen_lambda'] }})</span> ·
-                    μ = 24 / {{ $fmt($sel['dur_hrs'], 1) }} = {{ $fmt($sel['mu']) }} tours/guía/día ·
-                    c = {{ $sel['c'] }} guía(s) · K = {{ $sel['k'] }} cupos
-                </p>
-            </div>
-            <span class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-bold {{ $badge[$estadoSel][1] }}">
-                <i class="fa-solid {{ $badge[$estadoSel][2] }}"></i> {{ $badge[$estadoSel][0] }}
-            </span>
-        </div>
-
-        {{-- Utilización --}}
-        <div class="mt-6">
-            <div class="flex items-end justify-between text-sm">
-                <span class="font-semibold">Utilización de los guías (ρ = λ / c·μ)</span>
-                <span class="font-titulo text-2xl font-semibold text-pipocas-principal">{{ $pct($m['rho']) }}</span>
-            </div>
-            <div class="mt-2 h-3 overflow-hidden rounded-full bg-pipocas-fondo">
-                <div class="h-full rounded-full {{ $m['rho'] >= 1 ? 'bg-red-500' : ($m['rho'] >= 0.8 ? 'bg-pipocas-acento' : 'bg-pipocas-principal') }}" style="width: {{ $rhoPct }}%"></div>
-            </div>
-            <div class="mt-1 flex justify-between text-[11px] text-pipocas-texto-2"><span>0 %</span><span>80 % (atención)</span><span>100 %</span></div>
-        </div>
-
-        {{-- Métricas --}}
-        @php
-            $kpis = [
-                ['P₀', 'Sistema vacío', $pct($m['p0']), 'fa-circle'],
-                ['Lq', 'Clientes en cola', $fmt($m['lq']), 'fa-people-line'],
-                ['L', 'Clientes en el sistema', $fmt($m['l']), 'fa-users'],
-                ['Wq', 'Espera en cola', $fmt($m['wq_hrs']) . ' h', 'fa-hourglass-half'],
-                ['W', 'Tiempo en el sistema', $fmt($m['w_hrs']) . ' h', 'fa-clock'],
-                ['Pq', 'Probabilidad de esperar', $pct($m['pq']), 'fa-user-clock'],
-                ['P(rechazo)', 'Sistema lleno (K)', $pct($m['p_rec'], 2), 'fa-ban'],
-                ['λₑ', 'Llegadas efectivas', $fmt($m['lambda_e']) . '/día', 'fa-right-to-bracket'],
-            ];
-        @endphp
-        <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            @foreach ($kpis as [$simbolo, $txt, $val, $ico])
-                <div class="rounded-2xl border border-black/5 bg-pipocas-fondo/60 p-4">
-                    <div class="flex items-center justify-between text-pipocas-texto-2">
-                        <span class="text-xs font-bold">{{ $simbolo }}</span>
-                        <i class="fa-solid {{ $ico }} text-xs"></i>
-                    </div>
-                    <p class="mt-1 font-titulo text-2xl font-semibold text-pipocas-principal">{{ $val }}</p>
-                    <p class="text-xs text-pipocas-texto-2">{{ $txt }}</p>
-                </div>
-            @endforeach
+    <section class="admin-insight {{ $estado === 'saturado' && !$sinLlegadas ? '!bg-amber-50 !border-amber-200' : '' }}">
+        <span class="insight-icon"><i aria-hidden="true" class="fa-solid {{ $sinLlegadas ? 'fa-magnifying-glass-chart' : ($estado === 'estable' ? 'fa-circle-check' : 'fa-triangle-exclamation') }}"></i></span>
+        <div class="flex-1"><span class="admin-eyebrow">LECTURA RÁPIDA · {{ $sel['nom'] }}</span>
+            <h2>{{ $sinLlegadas ? 'Sin llegadas registradas en el período' : $etiquetas[$estado] }}</h2>
+            <p>
+                @if ($sinLlegadas)
+                    Con demanda observada de cero, el modelo no estima esperas. Esto no garantiza que tus próximas salidas
+                    estén cubiertas: prueba una demanda mayor en el simulador.
+                @elseif ($estado === 'saturado')
+                    El modelo estima presión elevada o más de 5 % de solicitudes sin atención. Compara más guías o una
+                    capacidad distinta y revisa la disponibilidad antes de asignar recursos.
+                @elseif ($estado === 'atencion')
+                    La demanda se acerca a la capacidad de atención. Comprueba horarios y prueba alternativas para
+                    prepararte ante un aumento de reservas.
+                @else
+                    El modelo no detecta saturación con estos valores. Revisa también la espera estimada: tener capacidad no
+                    garantiza un tiempo de atención aceptable para tus clientes.
+                @endif
+            </p>
+            <p class="mt-3 !text-[10px]">Estimación del modelo, no medición de personas esperando. Las reservas grupales y
+                la duración real pueden cambiar el resultado.</p>
         </div>
     </section>
-
-    <div class="grid gap-6 xl:grid-cols-5">
-        {{-- ===================== Distribución Pn ===================== --}}
-        <section class="rsv-tarjeta xl:col-span-3">
-            <h3 class="rsv-titulo">Distribución de clientes en el sistema</h3>
-            <p class="mt-1 text-sm text-pipocas-texto-2">Probabilidad de estado estable Pₙ de tener n reservas en el sistema (n = 0 … K). Las barras a partir de c corresponden a clientes en espera.</p>
-            <div class="mt-4 h-64"><canvas id="graficoPn" aria-label="Distribución de probabilidad Pn"></canvas></div>
-        </section>
-
-        {{-- ===================== Fórmulas ===================== --}}
-        <section class="rsv-tarjeta xl:col-span-2">
-            <h3 class="rsv-titulo">Cómo se calcula</h3>
-            <dl class="mt-4 space-y-3 text-sm">
-                <div><dt class="font-semibold">Probabilidades de estado</dt>
-                    <dd class="text-pipocas-texto-2">Pₙ = (rⁿ/n!)·P₀ si n ≤ c; Pₙ = rⁿ/(c!·cⁿ⁻ᶜ)·P₀ si c &lt; n ≤ K, con r = λ/μ.</dd></div>
-                <div><dt class="font-semibold">Clientes en cola y en el sistema</dt>
-                    <dd class="text-pipocas-texto-2">Lq = Σ (n − c)·Pₙ · L = Σ n·Pₙ</dd></div>
-                <div><dt class="font-semibold">Tiempos (Little)</dt>
-                    <dd class="text-pipocas-texto-2">λₑ = λ(1 − P_K) · Wq = Lq/λₑ · W = L/λₑ = Wq + 1/μ</dd></div>
-                <div><dt class="font-semibold">Costo total esperado</dt>
-                    <dd class="text-pipocas-texto-2">CT = Cₑ·Lq + Cₛ·(c − (L − Lq)) con Cₑ = Bs {{ $fmt($sel['cos_esp']) }}/h y Cₛ = Bs {{ $fmt($sel['cos_srv']) }}/h</dd></div>
-            </dl>
-            <p class="mt-4 rounded-xl bg-pipocas-fondo p-3 text-xs text-pipocas-texto-2">
-                Supuestos: llegadas de Poisson, servicio exponencial y capacidad finita K. Con capacidad finita el modelo es estable aun si ρ ≥ 1: el exceso de demanda aparece como rechazos.
-            </p>
-        </section>
-    </div>
-
-    {{-- ===================== Simulación de escenarios ===================== --}}
-    <section class="rsv-tarjeta">
-        <div class="flex flex-wrap items-end justify-between gap-4">
+    <section class="grid grid-cols-2 gap-4 xl:grid-cols-4" aria-label="Situación actual">
+        @foreach ([['Solicitudes por día', $fmt($sel['lambda']), $sel['origen_lambda'], 'fa-ticket'], ['Guías del modelo', $sel['c'], 'Configurados para este análisis', 'fa-user-group'], ['Espera estimada', $tiempo($m['wq_hrs']), 'Promedio antes de recibir atención', 'fa-hourglass-half'], ['Riesgo de rechazo', $pct($m['p_rec']), 'Probabilidad de encontrar el sistema lleno', 'fa-circle-exclamation']] as [$titulo, $valor, $nota, $icono])
+            <div class="admin-metric">
+                <div class="flex items-start justify-between gap-2">
+                    <p class="admin-metric-label">{{ $titulo }}</p><span class="admin-metric-icon"><i aria-hidden="true" class="fa-solid {{ $icono }}"></i></span>
+                </div>
+                <p class="admin-metric-value">{{ $valor }}</p>
+                <p class="admin-metric-note">{{ $nota }}</p>
+            </div>
+        @endforeach
+    </section>
+    <section class="rsv-tarjeta" id="simulador">
+        <div class="admin-section-head">
             <div>
-                <h3 class="rsv-titulo">Simulación de escenarios de guías y cupos</h3>
-                <p class="mt-1 text-sm text-pipocas-texto-2">Compara el costo total esperado al variar el número de guías. La simulación no modifica los parámetros guardados.</p>
-            </div>
-            <form method="GET" action="{{ $formAction }}" class="flex flex-wrap items-end gap-3">
-                <input type="hidden" name="tour" value="{{ $sel['id'] }}">
-                <label class="text-xs font-semibold">Guías (c)
-                    <input type="number" name="c" min="1" max="{{ $simK }}" value="{{ $simC }}" class="mt-1 block w-24 rounded-xl border-black/10 text-sm focus:border-pipocas-principal focus:ring-pipocas-principal">
-                </label>
-                <label class="text-xs font-semibold">Cupos (K)
-                    <input type="number" name="k" min="1" max="60" value="{{ $simK }}" class="mt-1 block w-24 rounded-xl border-black/10 text-sm focus:border-pipocas-principal focus:ring-pipocas-principal">
-                </label>
-                <label class="text-xs font-semibold">λ (reservas/día)
-                    <input type="number" name="lambda" step="0.1" min="0" value="{{ $sel['lambda'] }}" class="mt-1 block w-28 rounded-xl border-black/10 text-sm focus:border-pipocas-principal focus:ring-pipocas-principal">
-                </label>
-                <button class="inline-flex items-center gap-2 rounded-xl bg-pipocas-secundario px-4 py-2.5 text-sm font-bold text-white shadow transition hover:brightness-95">
-                    <i class="fa-solid fa-flask-vial"></i> Simular
-                </button>
-            </form>
+                <h2>¿Qué pasaría si cambias tu capacidad?</h2>
+                <p>Prueba una alternativa. Tu configuración y tus asignaciones se mantienen intactas.</p>
+            </div><span class="admin-pill"><i aria-hidden="true" class="fa-solid fa-flask"></i> Simulador</span>
         </div>
-
-        @if ($sim)
-            <div class="mt-5 grid gap-3 rounded-2xl border border-pipocas-secundario/30 bg-pipocas-secundario/5 p-4 text-sm sm:grid-cols-5">
-                <p class="sm:col-span-5 font-semibold text-pipocas-calido"><i class="fa-solid fa-wand-magic-sparkles"></i> Escenario simulado: c = {{ $simC }}, K = {{ $simK }}, λ = {{ $fmt($sel['lambda']) }}</p>
-                <p>ρ <strong class="block text-lg">{{ $pct($sim['rho']) }}</strong></p>
-                <p>Lq <strong class="block text-lg">{{ $fmt($sim['lq']) }}</strong></p>
-                <p>Wq <strong class="block text-lg">{{ $fmt($sim['wq_hrs']) }} h</strong></p>
-                <p>P(rechazo) <strong class="block text-lg">{{ $pct($sim['p_rec'], 2) }}</strong></p>
-                <p>CT <strong class="block text-lg">Bs {{ $fmt($sim['ct']) }}/h</strong></p>
+        <form method="GET" action="{{ $formAction }}"
+            class="grid gap-4 rounded-xl bg-slate-50 p-4 sm:grid-cols-2 xl:grid-cols-4">
+            <input type="hidden" name="tour" value="{{ $sel['id'] }}">
+            <label class="rsv-etiqueta !mb-0">Guías disponibles<input name="c" type="number" min="1"
+                    max="60" required value="{{ $simC }}" class="rsv-campo mt-2"><span
+                    class="mt-1 block text-[10px] font-normal text-slate-500">Personas que atenderían el
+                    tour.</span></label>
+            <label class="rsv-etiqueta !mb-0">Capacidad del modelo<input name="k" type="number" min="1"
+                    max="200" required value="{{ $simK }}" class="rsv-campo mt-2"><span
+                    class="mt-1 block text-[10px] font-normal text-slate-500">Límite del sistema; debe ser ≥
+                    guías.</span></label>
+            <label class="rsv-etiqueta !mb-0">Solicitudes esperadas por día<input name="lambda" type="number"
+                    step="0.0001" min="0" max="500" required value="{{ $simLambda }}"
+                    class="rsv-campo mt-2"><span class="mt-1 block text-[10px] font-normal text-slate-500">Prueba también un
+                    día de alta demanda.</span></label>
+            <div class="flex flex-col justify-center gap-2"><button class="rsv-btn"><i aria-hidden="true" class="fa-solid fa-play"></i>
+                    Comparar escenario</button>
+                @if ($sim)
+                    <a href="{{ $formAction }}?tour={{ $sel['id'] }}"
+                        class="text-center text-[11px] font-semibold text-slate-500">Restablecer valores actuales</a>
+                @endif
             </div>
-        @endif
-
-        <div class="mt-5 grid gap-6 lg:grid-cols-5">
-            <div class="overflow-x-auto lg:col-span-3">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-pipocas-fondo text-xs uppercase text-pipocas-texto-2">
+        </form>
+        @if ($sim)
+            <div class="mt-5 overflow-x-auto">
+                <table class="w-full min-w-[530px] text-left">
+                    <thead>
                         <tr>
-                            <th class="rounded-l-xl p-3">Guías (c)</th><th class="p-3 normal-case">ρ</th><th class="p-3">Lq</th>
-                            <th class="p-3">Wq</th><th class="p-3">P(rechazo)</th><th class="rounded-r-xl p-3">CT (Bs/h)</th>
+                            <th>Qué comparamos</th>
+                            <th>Situación actual</th>
+                            <th>Tu escenario</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-black/5">
-                        @foreach ($escenarios as $e)
-                            <tr class="{{ $e['optimo'] ? 'bg-emerald-50 font-semibold' : '' }}">
-                                <td class="p-3">{{ $e['c'] }} @if ($e['c'] == $sel['c'])<span class="ml-1 rounded bg-pipocas-principal/10 px-1.5 py-0.5 text-[10px] font-bold text-pipocas-principal">actual</span>@endif</td>
-                                <td class="p-3">{{ $pct($e['rho']) }}</td>
-                                <td class="p-3">{{ $fmt($e['lq']) }}</td>
-                                <td class="p-3">{{ $fmt($e['wq_hrs']) }} h</td>
-                                <td class="p-3">{{ $pct($e['p_rec'], 2) }}</td>
-                                <td class="p-3">{{ $fmt($e['ct']) }} @if ($e['optimo'])<i class="fa-solid fa-star ml-1 text-emerald-600" title="Menor costo"></i>@endif</td>
-                            </tr>
-                        @endforeach
+                    <tbody>
+                        <tr>
+                            <td>Guías / capacidad</td>
+                            <td>{{ $sel['c'] }} / {{ $sel['k'] }}</td>
+                            <td class="font-bold text-pipocas-principal">{{ $simC }} / {{ $simK }}</td>
+                        </tr>
+                        <tr>
+                            <td>Solicitudes por día</td>
+                            <td>{{ $fmt($sel['lambda']) }}</td>
+                            <td>{{ $fmt($simLambda) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Espera estimada</td>
+                            <td>{{ $tiempo($m['wq_hrs']) }}</td>
+                            <td class="font-bold">{{ $tiempo($sim['wq_hrs']) }} <span
+                                    class="ml-1 text-[10px] font-normal text-slate-500">{{ $sim['wq_hrs'] < $m['wq_hrs'] ? '↓ Menor espera' : ($sim['wq_hrs'] > $m['wq_hrs'] ? '↑ Mayor espera' : 'Sin cambio') }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Riesgo de rechazo</td>
+                            <td>{{ $pct($m['p_rec']) }}</td>
+                            <td class="font-bold">{{ $pct($sim['p_rec']) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Costo estimado del modelo</td>
+                            <td>Bs {{ $fmt($costoActual, 2) }}/h</td>
+                            <td>Bs {{ $fmt($sim['ct'], 2) }}/h</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="h-64 lg:col-span-2"><canvas id="graficoCosto" aria-label="Costo total esperado por número de guías"></canvas></div>
-        </div>
+            <p class="mt-4 text-xs text-slate-500"><i aria-hidden="true" class="fa-solid fa-circle-info mr-1 text-pipocas-principal"></i> Estos
+                cambios son hipotéticos. Para organizar salidas reales, revisa las propuestas de asignación y la
+                disponibilidad de personal.</p>
+        @else<p class="mt-4 text-xs text-slate-500">Empieza con una pregunta sencilla: si llega más gente, ¿mantener los
+                mismos guías sería suficiente?</p>
+        @endif
     </section>
-
-    <div class="grid gap-6 xl:grid-cols-2">
-        {{-- ===================== Historial ===================== --}}
-        <section class="rsv-tarjeta">
-            <h3 class="rsv-titulo">Historial de métricas diarias</h3>
-            <p class="mt-1 text-sm text-pipocas-texto-2">λ observado y utilización registrados por el cálculo diario (cola_metricas_diarias).</p>
-            @if (count($historial))
-                <div class="mt-4 h-64"><canvas id="graficoHistorial" aria-label="Historial de lambda y utilización"></canvas></div>
-            @else
-                <div class="mt-4 grid h-64 place-items-center rounded-2xl border border-dashed border-black/10 text-center text-sm text-pipocas-texto-2">
-                    <p><i class="fa-regular fa-calendar mb-2 block text-2xl"></i>Aún no hay métricas diarias para este tour.<br>Se generan con <code class="rounded bg-pipocas-fondo px-1">php artisan io:metricas-colas</code>.</p>
+    <div class="grid gap-6 xl:grid-cols-5">
+        <section class="rsv-tarjeta xl:col-span-3">
+            <div class="admin-section-head">
+                <div>
+                    <h2>Compara distintas cantidades de guías</h2>
+                    <p>La opción destacada tiene el menor costo entre las alternativas mostradas, no necesariamente la menor
+                        espera.</p>
                 </div>
-            @endif
-        </section>
-
-        {{-- ===================== Todos los tours ===================== --}}
-        <section class="rsv-tarjeta">
-            <h3 class="rsv-titulo">Estado de las colas por tour</h3>
-            <div class="mt-4 max-h-[320px] overflow-y-auto">
-                <table class="w-full whitespace-nowrap text-left text-sm">
-                    <thead class="sticky top-0 bg-pipocas-fondo text-xs uppercase text-pipocas-texto-2">
-                        <tr><th class="p-3">Tour</th><th class="p-3">M/M/c/K</th><th class="p-3 normal-case">ρ</th><th class="p-3">Wq</th><th class="p-3">Estado</th></tr>
+            </div>
+            <p class="mb-2 text-[10px] text-slate-500 sm:hidden">Desliza la tabla para ver todas las columnas →</p>
+            <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tabla de resultados">
+                <table class="w-full min-w-[490px] text-left">
+                    <thead>
+                        <tr>
+                            <th>Guías</th>
+                            <th>Espera estimada</th>
+                            <th>Riesgo de rechazo</th>
+                            <th>Costo estimado</th>
+                        </tr>
                     </thead>
-                    <tbody class="divide-y divide-black/5">
-                        @foreach ($tours as $t)
-                            <tr class="{{ $t['id'] == $sel['id'] ? 'bg-pipocas-principal/5' : '' }}">
-                                <td class="p-3"><a href="{{ $formAction }}?tour={{ $t['id'] }}" class="font-semibold text-pipocas-principal hover:underline">{{ $t['nom'] }}</a></td>
-                                <td class="p-3 text-xs text-pipocas-texto-2">{{ $t['c'] }} / {{ $t['k'] }} · λ {{ $fmt($t['lambda'], 1) }}</td>
-                                <td class="p-3">{{ $pct($t['rho'], 0) }}</td>
-                                <td class="p-3">{{ $fmt($t['wq_hrs'], 1) }} h</td>
-                                <td class="p-3"><span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold {{ $badge[$t['estado']][1] }}">{{ $badge[$t['estado']][0] }}</span></td>
+                    <tbody>
+                        @foreach ($escenarios as $e)
+                            <tr class="{{ $e['optimo'] ? 'bg-emerald-50/70' : '' }}">
+                                <td class="font-bold">{{ $e['c'] }} @if ($e['optimo'])
+                                        <span class="ml-1 text-[9px] font-semibold text-emerald-700">Menor costo</span>
+                                    @endif
+                                </td>
+                                <td>{{ $tiempo($e['wq_hrs']) }}</td>
+                                <td>{{ $pct($e['p_rec']) }}</td>
+                                <td>Bs {{ $fmt($e['ct'], 2) }}/h</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+            <p class="mt-3 text-[10px] text-slate-500">Comparamos de 1 a {{ count($escenarios) }} guías con
+                {{ $simK }} de capacidad y {{ $fmt($simLambda) }} solicitudes/día. Costos de espera y personal
+                ocioso configurados; no representan una cotización.</p>
+        </section>
+        <section class="rsv-tarjeta xl:col-span-2">
+            <div class="admin-section-head">
+                <div>
+                    <h2>Tu siguiente paso</h2>
+                    <p>Del escenario a una decisión revisada</p>
+                </div>
+            </div>
+            <div class="space-y-5">
+                @foreach ([['Confirma los datos', 'La demanda actual usa ' . $sel['origen_lambda'] . '. La atención por guía está configurada en ' . $fmt($sel['mu']) . ' tours/día.'], ['Valida la alternativa', 'Contrasta la espera y el costo con tus horarios, la seguridad del tour y los guías realmente disponibles.'], ['Organiza tus recursos', 'Genera propuestas de asignación y revisa cada salida antes de confirmarla.']] as [$titulo, $detalle])
+                    <div class="admin-step"><span class="admin-step-number">{{ $loop->iteration }}</span>
+                        <div>
+                            <h3 class="text-xs font-bold">{{ $titulo }}</h3>
+                            <p class="mt-1 text-[11px] leading-relaxed text-slate-500">{{ $detalle }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            <a href="{{ route('admin.io.propuestas') }}" class="rsv-btn mt-6 w-full">Revisar asignaciones <i aria-hidden="true" class="fa-solid fa-arrow-right"></i></a>
         </section>
     </div>
+    <section class="rsv-tarjeta">
+        <div class="admin-section-head">
+            <div>
+                <h2>¿Qué tours conviene revisar?</h2>
+                <p>La misma lectura para todos los tours con configuración.</p>
+            </div>
+        </div>
+        <p class="mb-2 text-[10px] text-slate-500 sm:hidden">Desliza la tabla para ver todas las columnas →</p>
+        <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tabla de resultados">
+            <table class="w-full min-w-[570px] text-left">
+                <thead>
+                    <tr>
+                        <th>Tour</th>
+                        <th>Guías / capacidad</th>
+                        <th>Solicitudes/día</th>
+                        <th>Espera estimada</th>
+                        <th>Lectura</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($tours as $t)
+                        <tr>
+                            <td><a href="{{ $formAction }}?tour={{ $t['id'] }}"
+                                    class="font-bold text-pipocas-principal">{{ $t['nom'] }} <i aria-hidden="true" class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px]"></i></a></td>
+                            <td>{{ $t['c'] }} / {{ $t['k'] }}</td>
+                            <td>{{ $fmt($t['lambda']) }}</td>
+                            <td>{{ $tiempo($t['wq_hrs']) }}</td>
+                            <td><span
+                                    class="admin-pill {{ $t['estado'] === 'saturado' ? '!bg-amber-50 !text-amber-800' : '' }}">{{ $t['lambda'] == 0 ? 'Sin llegadas' : $etiquetas[$t['estado']] }}</span>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <details class="admin-details">
+        <summary>Ver evolución, fórmulas y supuestos del análisis</summary>
+        <div class="technical-grid mb-6">
+            <div><strong>Demanda (λ)</strong>
+                <p>{{ $fmt($sel['lambda']) }} solicitudes por día · {{ $sel['origen_lambda'] }}. Una solicitud puede
+                    contener varios pasajeros.</p>
+            </div>
+            <div><strong>Atención (μ), guías (c), capacidad (K)</strong>
+                <p>{{ $fmt($sel['mu']) }} tours por guía/día; {{ $sel['c'] }} guías y {{ $sel['k'] }} de
+                    capacidad. Son parámetros del modelo, no un conteo en vivo.</p>
+            </div>
+            <div><strong>Presión de demanda (ρ)</strong>
+                <p>{{ $pct($m['rho']) }} = λ / (c × μ). Puede superar 100 %; no es la ocupación real de los guías.</p>
+            </div>
+            <div><strong>Teoría de colas M/M/c/K</strong>
+                <p>Supone llegadas aleatorias, tiempos de servicio exponenciales y capacidad finita. Wq = 24 × Lq / λ
+                    efectiva, expresado en horas.</p>
+            </div>
+        </div>
+        <div class="grid gap-6 md:grid-cols-2">
+            <div>
+                <h3 class="text-xs font-bold mb-2">Probabilidad de solicitudes dentro del sistema</h3>
+                <div class="h-56"><canvas id="graficoPn" aria-label="Distribución de solicitudes"
+                        role="img"></canvas></div>
+            </div>
+            <div>
+                <h3 class="text-xs font-bold mb-2">Evolución registrada · últimos 30 días</h3>
+                @if (count($historial))
+                    <div class="h-56"><canvas id="graficoHistorial" aria-label="Demanda diaria observada"
+                        role="img"></canvas></div>@else<div class="admin-empty">Aún no hay historial de cálculos
+                        para este tour. Se mostrará cuando se ejecute el proceso diario.</div>
+                @endif
+            </div>
+        </div>
+        <p class="mt-5 text-[11px] text-slate-500">El costo compara espera y guías ociosos: Costo = costo de espera ×
+            solicitudes en cola + costo de personal ocioso × guías libres. La comparación no incluye todos los costos reales
+            de la agencia.</p>
+    </details>
 @endsection
-
 @push('scripts')
-<script>
-    const pipocas = { principal: '#1F5F8B', secundario: '#C96F4A', acento: '#F4C95D', complementario: '#457699', texto2: '#6B6F72' };
-    Chart.defaults.font.family = '"Plus Jakarta Sans", system-ui, sans-serif';
-    Chart.defaults.color = pipocas.texto2;
-
-    const pn = @json(array_values($m['pn']));
-    const c = {{ (int) $sel['c'] }};
-    new Chart(document.getElementById('graficoPn'), {
-        type: 'bar',
-        data: {
-            labels: pn.map((_, n) => n),
-            datasets: [{ label: 'Pₙ', data: pn, borderRadius: 6,
-                backgroundColor: pn.map((_, n) => n < c ? pipocas.principal : (n === pn.length - 1 ? '#dc2626' : pipocas.acento)) }]
-        },
-        options: { maintainAspectRatio: false, plugins: { legend: { display: false },
-            tooltip: { callbacks: { label: ctx => 'P' + ctx.label + ' = ' + (ctx.raw * 100).toFixed(2) + ' %' } } },
-            scales: { x: { title: { display: true, text: 'n (reservas en el sistema)' } }, y: { ticks: { callback: v => (v * 100).toFixed(0) + ' %' } } } }
-    });
-
-    const esc = @json($escenarios);
-    new Chart(document.getElementById('graficoCosto'), {
-        type: 'line',
-        data: { labels: esc.map(e => 'c = ' + e.c),
-            datasets: [{ label: 'Costo total esperado (Bs/h)', data: esc.map(e => e.ct), borderColor: pipocas.secundario, backgroundColor: pipocas.secundario,
-                pointRadius: esc.map(e => e.optimo ? 7 : 4), tension: .25 }] },
-        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-    });
-
-    const hist = @json($historial);
-    if (hist.length && document.getElementById('graficoHistorial')) {
-        new Chart(document.getElementById('graficoHistorial'), {
-            data: { labels: hist.map(h => h.fec),
-                datasets: [
-                    { type: 'bar', label: 'λ observado (reservas/día)', data: hist.map(h => h.lmb_obs), backgroundColor: pipocas.complementario + '99', borderRadius: 4, yAxisID: 'y' },
-                    { type: 'line', label: 'ρ (utilización)', data: hist.map(h => h.rho), borderColor: pipocas.secundario, tension: .3, yAxisID: 'y1' }
-                ] },
-            options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } },
-                scales: { y: { position: 'left', beginAtZero: true }, y1: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false },
-                    ticks: { callback: v => (v * 100).toFixed(0) + ' %' } } } }
-        });
-    }
-</script>
+    <script>
+        if (typeof Chart !== 'undefined') {
+            const pn = @json(array_values($m['pn']));
+            new Chart(document.getElementById('graficoPn'), {
+                type: 'bar',
+                data: {
+                    labels: pn.map((_, n) => n),
+                    datasets: [{
+                        label: 'Probabilidad',
+                        data: pn,
+                        backgroundColor: '#407b9f',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: v => (v * 100).toFixed(0) + ' %'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Solicitudes en el sistema'
+                            }
+                        }
+                    }
+                }
+            });
+            const hist = @json($historial);
+            if (hist.length) new Chart(document.getElementById('graficoHistorial'), {
+                type: 'line',
+                data: {
+                    labels: hist.map(h => h.fec),
+                    datasets: [{
+                        label: 'Solicitudes por día',
+                        data: hist.map(h => h.lmb_obs),
+                        borderColor: '#1f5f8b',
+                        tension: .3,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } else {
+            document.querySelectorAll('canvas').forEach(c => c.replaceWith(Object.assign(document.createElement('p'), {
+                textContent: 'El gráfico no está disponible. Consulta los resultados en las tarjetas y tablas.'
+            })));
+        }
+    </script>
 @endpush

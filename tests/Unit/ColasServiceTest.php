@@ -60,3 +60,11 @@ test('clasifica el estado de la cola', function () {
         ->and($svc->estado(['rho' => 0.85, 'p_rec' => 0.01]))->toBe('atencion')
         ->and($svc->estado(['rho' => 0.4, 'p_rec' => 0.0]))->toBe('estable');
 });
+
+test('la simulación con capacidad 200 y demanda alta mantiene probabilidades finitas', function () {
+    $m = (new ColasService)->metricas(500, 0.1, 1, 200);
+    expect(array_sum($m['pn']))->toEqualWithDelta(1, 1e-12)
+        ->and($m['p_rec'])->toEqualWithDelta(0.9998, 1e-8)
+        ->and(is_finite($m['wq_hrs']))->toBeTrue()
+        ->and(is_finite($m['lq']))->toBeTrue();
+});

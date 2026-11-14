@@ -37,3 +37,5 @@ php artisan test   # 160 pruebas (requiere la base agencia_turismo_test)
 
 - [Instalación QA, CI y recuperación](docs/CI-Y-PRUEBAS.md)
 - [Avance del plan WAAAAAA y pendientes reales](docs/AVANCE-PLAN-TRABAJO.md)
+
+- [Panel administrativo y planificación: diseño y uso](docs/REDISENO-ADMIN.md)

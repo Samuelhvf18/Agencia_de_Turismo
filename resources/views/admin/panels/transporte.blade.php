@@ -2,6 +2,8 @@
 
 @section('header-title', 'Flota de transporte')
 
+@section('page-description', 'Mantén tu flota organizada y comprueba qué vehículos están disponibles.')
+
 @section('content')
 @php
     $campo = 'w-full rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 text-sm';

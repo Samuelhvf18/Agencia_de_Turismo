@@ -153,6 +153,7 @@ Route::middleware([
         Route::get('/analitica', [DashboardController::class, 'analitica'])->middleware('rol:'.User::ROL_ADMIN)->name('analitica');
 
         // Módulo 07 — Investigación Operativa II: paneles de teoría de colas y cadenas de Markov
+        Route::view('/io', 'admin.io.index')->name('io.index');
         Route::get('/io/colas', [AnalisisColasController::class, 'index'])->name('io.colas');
         Route::get('/io/ciclo-vida', [CicloVidaClienteController::class, 'index'])->name('io.ciclo-vida');
         Route::get('/io/parametros', [IoGestionController::class, 'parametros'])->name('io.parametros');

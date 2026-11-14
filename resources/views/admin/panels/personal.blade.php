@@ -2,6 +2,8 @@
 
 @section('header-title', 'Personal: guías y choferes')
 
+@section('page-description', 'Administra guías, idiomas, experiencia y licencias para cada salida.')
+
 @section('content')
 @php
     $campo = 'w-full rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 text-sm';

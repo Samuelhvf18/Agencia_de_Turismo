@@ -2,6 +2,8 @@
 
 @section('header-title', 'Finanzas, Facturación y Pagos')
 
+@section('page-description', 'Revisa cobros, comprobantes y saldos con una visión clara de tus ingresos.')
+
 @section('content')
 @php $bs = fn ($n) => 'Bs. ' . number_format((float) $n, 2, ',', '.'); @endphp
 <div class="space-y-6">

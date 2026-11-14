@@ -2,6 +2,8 @@
 
 @section('header-title', 'Operaciones y salidas')
 
+@section('page-description', 'Programa salidas, coordina responsables y revisa el estado de cada experiencia.')
+
 @section('content')
 @php
     $campo = 'rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 text-sm';

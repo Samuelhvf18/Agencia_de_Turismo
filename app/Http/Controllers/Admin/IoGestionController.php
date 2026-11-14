@@ -53,9 +53,9 @@ class IoGestionController extends Controller
             'cos_srv' => ['nullable', 'numeric', 'min:0', 'max:999999'],
             'obs' => ['nullable', 'string', 'max:500'],
         ], [
-            'mu.gt' => 'μ debe ser mayor que 0.',
-            'c_srv.min' => 'c debe ser al menos 1.',
-            'k_cap.gte' => 'K debe ser mayor o igual que c.',
+            'mu.gt' => 'La atención por guía debe ser mayor que cero.',
+            'c_srv.min' => 'Debes configurar al menos un guía.',
+            'k_cap.gte' => 'La capacidad del modelo debe ser igual o mayor que el número de guías.',
         ]);
 
         // Un solo juego activo por tour: el anterior queda como historial.
@@ -64,7 +64,7 @@ class IoGestionController extends Controller
             ColaParametroTour::create($datos + ['tur_id' => $tour->id, 'fec_cal' => today(), 'act' => true]);
         });
 
-        return back()->with('estado', "Parámetros de {$tour->nom} guardados (λ={$datos['lmb']}, μ={$datos['mu']}, c={$datos['c_srv']}, K={$datos['k_cap']}).");
+        return back()->with('estado', "Configuración de {$tour->nom} guardada. El análisis usará estos valores; las asignaciones y los cupos de las salidas no cambiaron.");
     }
 
     // ---- RF-22 a RF-24: propuestas de asignación ----------------------------------------------
@@ -106,7 +106,7 @@ class IoGestionController extends Controller
             : $optimizador->proponerVehiculos($desde, $hasta, $solo);
 
         return redirect()->route('admin.io.propuestas', ['tip' => $datos['tip']])
-            ->with('estado', "Modelo ejecutado: {$r['propuestas']} propuesta(s) nuevas; {$r['sin_solucion']} salida(s) sin recurso factible. Revísalas antes de aplicarlas.");
+            ->with('estado', "Se generaron {$r['propuestas']} propuestas. En {$r['sin_solucion']} salidas no se encontró un recurso disponible que cumpla las condiciones. Revisa las propuestas antes de confirmarlas.");
     }
 
     public function aplicarPropuesta(Request $request, PropuestaAsignacion $propuesta, OptimizadorService $optimizador): RedirectResponse

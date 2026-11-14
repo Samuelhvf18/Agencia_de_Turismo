@@ -2,6 +2,8 @@
 
 @section('header-title', 'Catálogo de tours y rutas')
 
+@section('page-description', 'Da forma a tus experiencias: catálogo, categorías, fotografías y rutas.')
+
 @section('content')
 @php $campo = 'rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 text-sm'; @endphp
 <div class="space-y-6" x-data="{ cat: null }">

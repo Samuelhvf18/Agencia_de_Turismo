@@ -2,6 +2,8 @@
 
 @section('header-title', 'Gestión de Reservas y Pasajeros')
 
+@section('page-description', 'Consulta reservas, revisa participantes y da seguimiento a cada viaje.')
+
 @section('content')
 @php
     $colores = [

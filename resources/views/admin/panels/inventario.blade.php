@@ -2,6 +2,8 @@
 
 @section('header-title', 'Inventario y equipo de alquiler')
 
+@section('page-description', 'Controla unidades, tallas y disponibilidad del equipo que acompaña cada viaje.')
+
 @section('content')
 @php $campo = 'rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 text-sm'; @endphp
 <div class="space-y-6" x-data="{ nuevoTipo: false, tipo: null }">
@@ -16,8 +18,8 @@
         @csrf
         <input name="nom" required placeholder="Nombre" class="md:col-span-2 {{ $campo }}">
         <input name="pre_alq_bas" type="number" step="0.01" min="0" required placeholder="Precio alquiler (Bs.)" class="{{ $campo }}">
-        <input name="cos_ord" type="number" step="0.01" min="0.01" placeholder="Costo de pedido S (Bs.)" class="{{ $campo }}">
-        <input name="cos_mnt_anu" type="number" step="0.01" min="0.01" placeholder="Costo anual H (Bs./u)" class="{{ $campo }}">
+        <input name="cos_ord" type="number" step="0.01" min="0.01" placeholder="Costo por pedido (Bs.)" class="{{ $campo }}">
+        <input name="cos_mnt_anu" type="number" step="0.01" min="0.01" placeholder="Mantenimiento anual (Bs./u)" class="{{ $campo }}">
         <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="eqp_cri" value="1"> Crítico</label>
         <input name="des" placeholder="Descripción" class="md:col-span-6 {{ $campo }}">
         <div class="md:col-span-6"><button class="rounded-xl bg-[#1F5F8B] px-4 py-2 text-sm font-semibold text-white">Guardar</button></div>
@@ -36,7 +38,7 @@
                             @if ($t->eqp_cri)<span class="ml-1 rounded-full bg-[#C96F4A]/15 px-2 py-0.5 text-[10px] font-bold uppercase text-[#C96F4A]">Crítico</span>@endif
                         </h3>
                         <p class="text-xs text-[#6B6F72]">{{ $t->des }}</p>
-                        <p class="text-xs text-[#6B6F72] mt-1">Alquiler Bs. {{ number_format($t->pre_alq_bas, 2, ',', '.') }} · S = {{ $t->cos_ord ?? '—' }} · H = {{ $t->cos_mnt_anu ?? '—' }}</p>
+                        <p class="text-xs text-[#6B6F72] mt-1">Alquiler Bs. {{ number_format($t->pre_alq_bas, 2, ',', '.') }} · Pedido: Bs {{ $t->cos_ord ?? '—' }} · Mantenimiento anual: Bs {{ $t->cos_mnt_anu ?? '—' }}</p>
                     </div>
                     <div class="text-right">
                         <p class="text-2xl font-bold {{ $tot && $dis / max(1, $tot) < 0.25 ? 'text-[#C96F4A]' : 'text-[#1F5F8B]' }}">{{ $dis }}/{{ $tot }}</p>
@@ -44,14 +46,14 @@
                     </div>
                 </div>
 
-                <table class="w-full text-sm">
+                <p class="text-[10px] text-slate-500 sm:hidden">Desliza para ver todas las columnas →</p><div class="overflow-x-auto" tabindex="0" role="region" aria-label="Stock por talla"><table class="w-full text-sm">
                     <thead class="text-xs text-[#6B6F72]"><tr><th class="text-left py-1">Talla</th><th class="text-right">Total</th><th class="text-right">Disponibles</th><th class="text-right">Alquiladas</th><th class="text-left pl-3">Condición</th></tr></thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach ($t->items as $i)
                             <tr><td class="py-1.5 font-semibold">{{ $i->tal }}</td><td class="text-right">{{ $i->cnt_tot }}</td><td class="text-right">{{ $i->cnt_dis }}</td><td class="text-right">{{ $i->cnt_tot - $i->cnt_dis }}</td><td class="pl-3">{{ $i->con }}</td></tr>
                         @endforeach
                     </tbody>
-                </table>
+                </table></div>
 
                 <form method="POST" action="{{ route('admin.inventario.item', $t) }}" class="flex flex-wrap gap-2">
                     @csrf
@@ -67,8 +69,8 @@
                         @csrf
                         <input name="nom" value="{{ $t->nom }}" required class="{{ $campo }}">
                         <input name="pre_alq_bas" type="number" step="0.01" min="0" value="{{ $t->pre_alq_bas }}" class="{{ $campo }}">
-                        <input name="cos_ord" type="number" step="0.01" min="0.01" value="{{ $t->cos_ord }}" placeholder="Costo de pedido S" class="{{ $campo }}">
-                        <input name="cos_mnt_anu" type="number" step="0.01" min="0.01" value="{{ $t->cos_mnt_anu }}" placeholder="Costo anual H" class="{{ $campo }}">
+                        <input name="cos_ord" type="number" step="0.01" min="0.01" value="{{ $t->cos_ord }}" placeholder="Costo por pedido" class="{{ $campo }}">
+                        <input name="cos_mnt_anu" type="number" step="0.01" min="0.01" value="{{ $t->cos_mnt_anu }}" placeholder="Mantenimiento anual" class="{{ $campo }}">
                         <input name="des" value="{{ $t->des }}" class="md:col-span-2 {{ $campo }}">
                         <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" name="eqp_cri" value="1" @checked($t->eqp_cri)> Equipo crítico</label>
                         <button class="rounded-xl bg-[#1F5F8B] px-3 py-2 text-xs font-semibold text-white">Guardar</button>

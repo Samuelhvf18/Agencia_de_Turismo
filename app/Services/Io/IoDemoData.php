@@ -31,8 +31,7 @@ class IoDemoData
         $base = collect($tours)->firstWhere('id', $tourId) ?? $tours[0];
         $sel = $base + ['cos_esp' => 15.0, 'cos_srv' => 25.0, 'origen_lambda' => 'parámetro configurado'];
         if ($lambda !== null) {
-            $sel['lambda'] = $lambda;
-            $sel['origen_lambda'] = 'valor simulado';
+            $sel['lambda_simulada'] = $lambda;
         }
 
         // Historial de 14 días con variación determinista alrededor de λ

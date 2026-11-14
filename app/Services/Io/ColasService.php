@@ -31,19 +31,23 @@ class ColasService
      */
     public function metricas(float $lambda, float $mu, int $c, int $k): array
     {
-        if ($mu <= 0 || $c < 1 || $k < $c) {
+        if (! is_finite($lambda) || ! is_finite($mu) || $lambda < 0 || $mu <= 0 || $c < 1 || $k < $c) {
             throw new \InvalidArgumentException('Parámetros inválidos: se requiere μ > 0, c ≥ 1 y K ≥ c.');
         }
 
-        $r = $lambda / $mu;
         $rho = $lambda / ($c * $mu);
-
-        $terminos = [1.0];
+        // Normalize in log space so high-demand, large-capacity simulations
+        // cannot overflow before the probabilities are computed.
+        $logR = $lambda > 0 ? log($lambda) - log($mu) : -INF;
+        $logTerminos = [0.0];
         for ($n = 1; $n <= $k; $n++) {
-            $terminos[$n] = $terminos[$n - 1] * $r / min($n, $c);
+            $logTerminos[$n] = $logTerminos[$n - 1] + $logR - log(min($n, $c));
         }
-        $p0 = 1 / array_sum($terminos);
-        $pn = array_map(fn ($t) => $t * $p0, $terminos);
+        $maxLog = max($logTerminos);
+        $terminos = array_map(fn ($t) => exp($t - $maxLog), $logTerminos);
+        $suma = array_sum($terminos);
+        $pn = array_map(fn ($t) => $t / $suma, $terminos);
+        $p0 = $pn[0];
 
         $lq = 0.0;
         $l = 0.0;

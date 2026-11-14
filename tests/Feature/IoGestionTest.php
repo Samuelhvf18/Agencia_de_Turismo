@@ -42,8 +42,9 @@ function nuevoGuia(string $nombre, array $idiomas, int $exp, int $limite = 40): 
 
 test('las pantallas de IO II cargan', function () {
     $this->actingAs($this->admin);
-    $this->get(route('admin.io.parametros'))->assertOk()->assertSee('Parámetros de colas');
-    $this->get(route('admin.io.propuestas'))->assertOk()->assertSee('Ejecutar el modelo');
+    $this->get(route('admin.io.index'))->assertOk()->assertSee('Planificación inteligente');
+    $this->get(route('admin.io.parametros'))->assertOk()->assertSee('Ajustes del análisis');
+    $this->get(route('admin.io.propuestas'))->assertOk()->assertSee('Elige qué necesitas organizar');
     $this->get(route('admin.io.eoq'))->assertOk()->assertSee('Casco de seguridad');
     $this->get(route('admin.io.colas'))->assertOk();
 });
@@ -161,7 +162,7 @@ test('RF-25 a RF-27: EOQ avisa historial insuficiente y alerta la reposición de
     $this->artisan('io:alertas-eoq')->assertSuccessful();
     expect(RegistroNotificacion::where('tip', 'alerta_reposicion')->count())->toBe($antes);
 
-    $this->get(route('admin.io.eoq'))->assertSee('Reponer');
+    $this->get(route('admin.io.eoq'))->assertSee('Revisar reposición');
 });
 
 test('el planificador n8n exige token y ejecuta las tareas', function () {
@@ -186,4 +187,23 @@ test('las métricas diarias usan la misma ventana de 30 días del panel y cero l
     $fila = ColaMetricaDiaria::where('tur_id', $par->tur_id)->whereDate('fec', today())->firstOrFail();
     expect((float) $fila->lmb_obs)->toBe(round(1 / 30, 4));
     expect($servicio->lambdaObservado($par->tur_id, today()->subDays(60), today()->subDays(31)))->toBe(0.0);
+});
+
+test('la simulación compara con la demanda actual y no cambia la configuración', function () {
+    $this->actingAs($this->admin);
+    $par = ColaParametroTour::where('act', true)->firstOrFail();
+    app(ColasService::class)->registrarLlegada($par->tur_id, null, null, 1);
+    $actual = app(ColasService::class)->metricas(1 / 30, (float) $par->mu, $par->c_srv, $par->k_cap);
+    $simulado = app(ColasService::class)->metricas(50, (float) $par->mu, 3, 20);
+    $respuesta = $this->get(route('admin.io.colas', ['tour' => $par->tur_id, 'lambda' => 50, 'c' => 3, 'k' => 20]));
+    $respuesta->assertOk()->assertViewHas('m', fn ($m) => abs($m['rho'] - $actual['rho']) < 1e-8)
+        ->assertViewHas('sim', fn ($m) => abs($m['rho'] - $simulado['rho']) < 1e-8)
+        ->assertSee('Situación actual')->assertSee('Tu escenario');
+    expect($par->fresh()->getAttributes())->toEqual($par->getAttributes());
+
+    // Cambiar solo la demanda también debe producir una comparación.
+    $this->get(route('admin.io.colas', ['tour' => $par->tur_id, 'lambda' => 20]))->assertOk()
+        ->assertViewHas('sim', fn ($m) => $m !== null);
+    $this->get(route('admin.io.colas', ['tour' => $par->tur_id, 'c' => 5, 'k' => 2]))
+        ->assertSessionHasErrors('k');
 });

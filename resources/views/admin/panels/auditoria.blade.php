@@ -2,6 +2,8 @@
 
 @section('header-title', 'Usuarios, roles y auditoría de seguridad')
 
+@section('page-description', 'Consulta cambios y accesos para mantener el control de tu agencia.')
+
 @section('content')
 @php
     $campo = 'rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 text-sm';

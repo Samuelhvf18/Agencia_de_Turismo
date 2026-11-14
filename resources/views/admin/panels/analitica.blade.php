@@ -2,6 +2,8 @@
 
 @section('header-title', 'Analítica, demanda y BI')
 
+@section('page-description', 'Explora demanda, ocupación y resultados para planificar con información.')
+
 @section('content')
 @php $fmt = fn ($v, $d = 1) => number_format((float) $v, $d, ',', '.'); @endphp
 <div class="space-y-6">
