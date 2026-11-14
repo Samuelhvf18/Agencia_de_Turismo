@@ -28,7 +28,7 @@
     ];
     $accionForm ??= url('/reservas/preview/confirmada'); // controlador: route('reservas.confirmar')
 
-    $f = \Carbon\Carbon::parse($salida['fec_sal'])->locale('es');
+    $f = \Carbon\Carbon::parse($salida['fec_sal'])->locale(app()->getLocale());
     $subtotalTour = (float) $tour->pre_bas * count($participantes);
     $subtotalEquipo = (float) collect($participantes)->flatMap(fn ($p) => $p['alquileres'] ?? [])->sum('pre');
     $total = $subtotalTour + $subtotalEquipo; // => reservas.pre_tot
@@ -74,7 +74,7 @@
                 </div>
                 <div>
                     <dt class="text-pipocas-texto-2">{{ __('Guía') }}</dt>
-                    <dd class="font-semibold">{{ $salida['gui_nom'] ?? 'Por asignar' }}</dd>
+                    <dd class="font-semibold">{{ $salida['gui_nom'] ?? __('Por asignar') }}</dd>
                 </div>
             </dl>
         </section>
@@ -109,7 +109,7 @@
                                     <p class="font-semibold">
                                         {{ $p['nom_cpl'] }}
                                         @if (! empty($p['es_ctc_pri']))
-                                            <span class="ml-1 rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario">Principal</span>
+                                            <span class="ml-1 rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario">{{ __('Principal') }}</span>
                                         @endif
                                     </p>
                                     <p class="text-xs text-pipocas-texto-2">
@@ -167,8 +167,7 @@
             </div>
 
             <button type="submit" class="rsv-btn w-full text-base">
-                <i class="fa-solid fa-lock"></i> Confirmar reserva
-            </button>
+                <i class="fa-solid fa-lock"></i>{{ __('Confirmar reserva') }}</button>
             <p class="text-center text-xs text-pipocas-texto-2">{{ __('Tu cupo queda reservado como') }} <b>{{ __('pendiente de pago') }}</b>.</p>
         </div>
     </aside>

@@ -9,12 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class RegistroNotificacion extends Model
 {
     protected $table = 'registros_notificacion';
+
     public $timestamps = false;
-    protected $fillable = ['rsv_id', 'usr_id', 'can', 'tip', 'est', 'cnd', 'env_en'];
+
+    protected $fillable = ['rsv_id', 'usr_id', 'can', 'tip', 'est', 'cnd', 'env_en', 'clave_evento', 'intentos', 'disponible_en', 'bloqueado_hasta', 'token_entrega'];
 
     protected function casts(): array
     {
-        return ['cnd' => 'array', 'env_en' => 'datetime'];
+        return ['cnd' => 'array', 'env_en' => 'datetime', 'disponible_en' => 'datetime', 'bloqueado_hasta' => 'datetime', 'intentos' => 'integer'];
     }
 
     public function reserva(): BelongsTo

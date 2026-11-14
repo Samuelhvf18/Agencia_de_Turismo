@@ -10,6 +10,7 @@ use App\Models\PuntoRuta;
 use App\Models\Tour;
 use App\Services\Catalogo\SlugService;
 use App\Services\CodeGeneratorService;
+use App\Support\GeoJsonRuta;
 use App\Support\PresentadorTour;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -189,9 +190,10 @@ class CatalogoAdminController extends Controller
         $trazado = null;
         if (! empty($datos['trazado'])) {
             $trazado = json_decode($datos['trazado'], true);
-            if (! is_array($trazado) || ! in_array($trazado['type'] ?? null, ['LineString', 'MultiLineString', 'Feature', 'FeatureCollection'], true)) {
-                throw ValidationException::withMessages(['trazado' => 'El trazado debe ser GeoJSON (LineString, MultiLineString, Feature o FeatureCollection).']);
+            if (! is_array($trazado)) {
+                throw ValidationException::withMessages(['trazado' => __('El trazado debe contener líneas GeoJSON válidas con coordenadas geográficas.')]);
             }
+            $trazado = GeoJsonRuta::validar($trazado);
         } elseif ($request->boolean('trazado_desde_puntos') && count($datos['puntos']) > 1) {
             $trazado = ['type' => 'LineString', 'coordinates' => array_map(
                 fn ($p) => array_filter([(float) $p['lon'], (float) $p['lat'], isset($p['alt_m']) ? (int) $p['alt_m'] : null], fn ($v) => $v !== null),

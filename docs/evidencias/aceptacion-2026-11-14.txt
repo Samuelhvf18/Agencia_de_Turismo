@@ -1,0 +1,143 @@
+ENTORNO LOCAL DE QA; no se usaron servicios externos de la agencia.
+14-11-2026 UTC. Los códigos y contactos son datos artificiales.
+
+Offline: reapertura y duplicados
+prepared encrypted
+wrong key denied
+scan saved
+reopened offline Válido hasta 11/14/2026, 11:08:27 AM · 1 por sincronizar
+duplicate suppressed
+synced 1 escaneos sincronizados. 0 conflictos para revisar.
+locked true
+
+
+Mapas, cifrado, pestañas, cancelación, caducidad y cambio de cuenta
+map CDN fallback: The map could not be loaded. Check the route points or try again with a connection.
+map tile fallback: The map background could not be loaded. The points and route remain available.
+encrypted prepared
+ciphertext contains passenger name: false
+second tab blocked
+cancelled while offline: 1 escaneos sincronizados. 1 conflictos para revisar. BOL-CY3CKBWQNT: El boleto está cancelado o la reserva no está confirmada.
+expiry rejected and cleared: true
+cross tab account change clears visible data: 0
+JS errors: []
+
+
+Chromium/Firefox y limitación WebKit
+{"browser":"Chromium","home360NoOverflow":true,"wizard360NoOverflow":true,"language":"en","webLocks":true,"crypto":true,"errors":[]}
+{"browser":"Firefox","home360NoOverflow":true,"wizard360NoOverflow":true,"language":"en","webLocks":true,"crypto":true,"errors":[]}
+WebKit UNVERIFIED browserType.launch: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /workspace/Agencia_de_Turismo/work/browsers/webkit-2388/pw_run.sh --inspector-pipe --headless --no-startup-window
+<launched> pid=82382
+[pid=82382][err] /workspace/Agencia_de_Turismo/work/browsers/webkit-2388/minibrowser-wpe/bin/MiniBrowser: error while loading shared libraries: libharfbuzz-icu.so.0: cannot open shared object file: No such file or directory
+Call log:
+  - <launching> /workspace/Agencia_de_Turismo/work/browsers/webkit-2388/pw_run.sh --inspector-pipe --headless --no-startup-window
+  - <launched> pid=82382
+  - [pid=82382][err] /workspace/Agencia_de_Turismo/work/browsers/webkit-2388/minibrowser-wpe/bin/MiniBrowser: error while loading shared libraries: libharfbuzz-icu.so.0: cannot open shared object file: No such
+
+
+Mapa con perfil 4G
+{"perfil":"4 Mbps descarga / 1 Mbps subida / 150 ms RTT, caché vacía, 390x844","mapa_ms":3076,"objetivo_ms":4000,"teselas":6}
+
+
+Concurrencia entre procesos
+pago: completado
+cancelada
+{"rechazada":"CupoAgotadoException"}
+{"creada":6}
+{"rechazada":"ValidationException"}
+{"creada":7}
+asignada
+rechazada por conflicto
+{
+    "cap": 1,
+    "eqp": 1,
+    "stock": 0,
+    "asignadas": 1,
+    "activos": 0
+}
+
+
+
+SMTP real capturado localmente; cola repetida sin segundo correo
+{
+    "reserva": "RES-TJYYBK",
+    "evento": 4,
+    "estado": "enviado",
+    "intentos": 1,
+    "mensajes_de_esta_reserva": 1,
+    "asunto": "Your booking RES-TJYYBK is confirmed \u00b7 Pipocas",
+    "pdfs": [
+        "boletos-RES-TJYYBK.pdf",
+        "comprobante-CMP-XYDK4VV4.pdf"
+    ]
+}
+
+
+Respaldo y retención de QA
+Respaldo completo: turismo_restore_source_qa_20261114_032810_bf846b.json. Archivos antiguos eliminados: 3.
+
+
+Restauración de BD y archivos
+Dump y ZIP SHA-256 correctos; pg_restore sin errores; archivos privados restaurados: 3
+reservas|9
+participantes|8
+pagos|6
+comprobantes|5
+boletos|6
+auditorias|356
+
+Relaciones huérfanas participantes/pagos/boletos: ['0', '0', '0']
+
+
+Carga HTTP; servidor de desarrollo y datos sintéticos
+{
+  "busqueda": {
+    "normal_qa": {
+      "solicitudes": 60,
+      "concurrencia": 5,
+      "p50_s": 0.1032,
+      "p95_s": 0.1979,
+      "max_s": 0.2468,
+      "errores": 0
+    },
+    "triple_qa": {
+      "solicitudes": 60,
+      "concurrencia": 15,
+      "p50_s": 0.3091,
+      "p95_s": 0.494,
+      "max_s": 0.5962,
+      "errores": 0
+    },
+    "degradacion_p95_pct": 149.6
+  },
+  "confirmacion": {
+    "normal_qa": {
+      "solicitudes": 30,
+      "concurrencia": 5,
+      "p50_s": 0.1156,
+      "p95_s": 0.1908,
+      "max_s": 0.2498,
+      "errores": 0
+    },
+    "triple_qa": {
+      "solicitudes": 30,
+      "concurrencia": 15,
+      "p50_s": 0.3019,
+      "p95_s": 0.4929,
+      "max_s": 0.5517,
+      "errores": 0
+    },
+    "degradacion_p95_pct": 158.3
+  }
+}
+
+
+Esquema físico generado
+417 columnas, 195 restricciones, 39 tablas auditadas.
+
+
+Instalador: rechazo de entorno production sin modificarlo
+El instalador automático solo admite APP_ENV=local/testing. Consulte docs/DESPLIEGUE.md.

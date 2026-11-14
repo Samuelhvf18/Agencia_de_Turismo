@@ -94,7 +94,7 @@ class ReservaService
                     foreach ($participantes as $i => $p) {
                         if (! FirmaDigital::existe($borrador['fichas'][$i]['rta_fir'] ?? null)) {
                             throw ValidationException::withMessages([
-                                'fichas' => "Falta la ficha médica firmada de {$p['nom_cpl']}: es obligatoria en este tour.",
+                                'fichas' => __('Falta la ficha médica firmada de :nombre: es obligatoria en este tour.', ['nombre' => $p['nom_cpl']]),
                             ]);
                         }
                     }
@@ -106,6 +106,7 @@ class ReservaService
 
                 $reserva = Reserva::create([
                     'cod' => CodeGeneratorService::generate('RES'),
+                    'idioma' => app()->getLocale(),
                     'sal_tur_id' => $salida->id,
                     'usr_id' => $usuario?->id,
                     'nom_ctc' => $borrador['contacto']['nom_ctc'],
@@ -262,7 +263,7 @@ class ReservaService
             && is_null($salida->tour->eli_en);
 
         if (! $abierta) {
-            throw ValidationException::withMessages(['sal_tur_id' => 'Esta salida ya no admite reservas. Elige otra.']);
+            throw ValidationException::withMessages(['sal_tur_id' => __('Esta salida ya no admite reservas. Elige otra.')]);
         }
     }
 
@@ -280,7 +281,7 @@ class ReservaService
                     continue;
                 }
                 if (! array_key_exists($tipId, $precios)) {
-                    throw ValidationException::withMessages(['alquileres' => 'Ese equipo ya no está disponible para este tour.']);
+                    throw ValidationException::withMessages(['alquileres' => __('Ese equipo ya no está disponible para este tour.')]);
                 }
                 $uso[$itemId] = ($uso[$itemId] ?? 0) + 1;
             }
@@ -294,7 +295,7 @@ class ReservaService
             $item = $items[$itemId] ?? null;
             if (! $item || $item->cnt_dis < $cantidad) {
                 $nombre = $item ? "{$item->tipo->nom} talla {$item->tal}" : 'el equipo elegido';
-                throw ValidationException::withMessages(['alquileres' => "No queda stock suficiente de {$nombre}."]);
+                throw ValidationException::withMessages(['alquileres' => __('No queda stock suficiente de :equipo.', ['equipo' => $nombre])]);
             }
             $item->decrement('cnt_dis', $cantidad);
         }

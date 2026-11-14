@@ -3,8 +3,11 @@
 use App\Models\CategoriaTour;
 use App\Models\FotoTour;
 use App\Models\PerfilGuia;
+use App\Models\Reserva;
+use App\Models\SalidaTour;
 use App\Models\Tour;
 use App\Models\User;
+use App\Services\CodeGeneratorService;
 use Database\Seeders\CatalogoLandingSeeder;
 use Database\Seeders\CatalogosBaseSeeder;
 use Database\Seeders\OperacionDemoSeeder;
@@ -148,4 +151,26 @@ test('categorías y guías tienen rutas públicas sin documentos ni correo priva
     $this->get(route('guias.perfil', $guia))->assertOk()->assertDontSee($guia->usuario->cor);
     $guia->update(['act' => false]);
     $this->get(route('guias.perfil', $guia))->assertNotFound();
+});
+
+test('rechaza geometrías vacías y coordenadas fuera de rango sin reemplazar la ruta anterior', function () {
+    $tour = Tour::firstOrFail();
+    $antes = $tour->trz_geo;
+    foreach ([['type' => 'LineString', 'coordinates' => []], ['type' => 'LineString', 'coordinates' => [[200, 20], [40, 20]]], ['type' => 'FeatureCollection', 'features' => []]] as $geo) {
+        $this->post(route('admin.catalogo.ruta', $tour), ['puntos' => [], 'trazado' => json_encode($geo)])->assertSessionHasErrors('trazado');
+        expect($tour->fresh()->trz_geo)->toBe($antes);
+    }
+});
+
+test('la búsqueda pública filtra nombre categoría y fecha con cupos reales', function () {
+    auth()->logout();
+    $tour = Tour::where('rta_amg', 'valle-de-la-luna-y-telefericos')->firstOrFail();
+    $dia = today()->addDays(80)->toDateString();
+    $salida = SalidaTour::create(['tur_id' => $tour->id, 'fec_sal' => $dia, 'hra_sal' => '08:00', 'cap_max' => 1, 'est' => 'programada']);
+    $this->get('/?'.http_build_query(['q' => 'Luna', 'fecha' => $dia, 'categoria' => $tour->categoria->rta_amg]))
+        ->assertOk()->assertViewHas('tours', fn ($tours) => $tours->pluck('id')->all() === [$tour->id]);
+    Reserva::create(['cod' => CodeGeneratorService::generate('RES'), 'sal_tur_id' => $salida->id,
+        'nom_ctc' => 'QA capacidad', 'cor_ctc' => 'qa@example.test', 'tel_ctc' => '70000000', 'cnt_ptc' => 1, 'pre_tot' => 100, 'est' => 'pendiente']);
+    $this->get('/?fecha='.$dia)->assertOk()->assertViewHas('tours', fn ($tours) => $tours->isEmpty());
+    $this->get('/?q=NoExisteEsteTour')->assertOk()->assertViewHas('tours', fn ($tours) => $tours->isEmpty());
 });

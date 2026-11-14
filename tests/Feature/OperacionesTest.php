@@ -3,6 +3,7 @@
 use App\Jobs\NotificacionJob;
 use App\Models\BitacoraViajeVehiculo;
 use App\Models\Boleto;
+use App\Models\Idioma;
 use App\Models\ItemEquipo;
 use App\Models\PerfilChofer;
 use App\Models\PerfilGuia;
@@ -13,6 +14,7 @@ use App\Models\TipoEquipo;
 use App\Models\Tour;
 use App\Models\User;
 use App\Models\Vehiculo;
+use App\Services\CodeGeneratorService;
 use App\Services\Pagos\PagoService;
 use Database\Seeders\CatalogoLandingSeeder;
 use Database\Seeders\CatalogosBaseSeeder;
@@ -35,7 +37,7 @@ beforeEach(function () {
 function reservaPagada(SalidaTour $salida, int $pax = 2): Reserva
 {
     $reserva = Reserva::create([
-        'cod' => \App\Services\CodeGeneratorService::generate('RES'), 'sal_tur_id' => $salida->id,
+        'cod' => CodeGeneratorService::generate('RES'), 'sal_tur_id' => $salida->id,
         'nom_ctc' => 'Ana Quispe', 'cor_ctc' => 'ana@example.com', 'tel_ctc' => '70000000',
         'cnt_ptc' => $pax, 'pre_tot' => 100 * $pax, 'est' => Reserva::EST_PENDIENTE,
     ]);
@@ -119,7 +121,7 @@ test('no se desactiva personal ni vehículos con salidas futuras', function () {
 
 test('registra un guía nuevo con sus idiomas y un chofer con licencia', function () {
     $this->actingAs($this->operaciones);
-    $idiomas = \App\Models\Idioma::whereIn('cod_iso', ['es', 'fr'])->pluck('id')->all();
+    $idiomas = Idioma::whereIn('cod_iso', ['es', 'fr'])->pluck('id')->all();
 
     $this->post(route('admin.personal.store', 'guia'), [
         'nom' => 'Rubén Choque', 'cor' => 'ruben@pipocas.test', 'password' => 'Clave2026', 'ani_exp' => 8, 'lim_hrs_sem' => 36, 'idiomas' => $idiomas,
@@ -204,3 +206,18 @@ test('un guía no puede operar salidas que no le asignaron', function () {
     $this->actingAs($otroGuia)->get(route('guias.salida', $salida))->assertForbidden();
     $this->postJson(route('guias.validar', $salida), ['cod' => 'BOL-X'])->assertForbidden();
 });
+
+test('retirar una asignación revoca HTML JSON validación y sincronización', function (string $rol) {
+    $salida = SalidaTour::where('tur_id', $this->tour->id)->firstOrFail();
+    $salida->update(['prf_gui_id' => $this->guia->id, 'prf_cho_id' => $this->chofer->id]);
+    $reserva = reservaPagada($salida, 1);
+    $codigo = $reserva->boletos()->first()->cod;
+    $perfil = $rol === 'guia' ? $this->guia : $this->chofer;
+    $campo = $rol === 'guia' ? 'prf_gui_id' : 'prf_cho_id';
+    $this->actingAs($perfil->usuario, 'web')->getJson(route('guias.manifiesto', $salida))->assertOk();
+    $salida->update([$campo => null]);
+    $this->get(route('guias.salida', $salida))->assertForbidden();
+    $this->getJson(route('guias.manifiesto', $salida))->assertForbidden();
+    $this->postJson(route('guias.validar', $salida), ['cod' => $codigo])->assertForbidden();
+    $this->postJson(route('guias.sincronizar', $salida), ['escaneos' => [['cod' => $codigo, 'vld_en' => now()->toIso8601String()]]])->assertForbidden();
+})->with(['guia', 'chofer']);

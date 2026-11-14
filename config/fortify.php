@@ -166,7 +166,7 @@ return [
         Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
-        // Sin 2FA ni passkeys: la tabla users del diccionario v4 no tiene sus columnas.
+        Features::twoFactorAuthentication(['confirm' => true, 'confirmPassword' => true]),
     ],
 
 ];

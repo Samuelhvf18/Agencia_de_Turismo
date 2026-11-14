@@ -24,3 +24,6 @@ Schedule::command('reservas:recordatorios')->dailyAt('18:00');
 
 // RNF-12 — respaldo diario de la base de datos (30 días de retención).
 Schedule::command('respaldo:bd')->dailyAt('02:30');
+
+// Outbox durable: recover notifications after queue/process failures.
+Schedule::command('notificaciones:recuperar')->everyMinute()->withoutOverlapping();

@@ -28,7 +28,7 @@ class AdminUserSeeder extends Seeder
             $password ??= 'Pipocas2026';
         }
 
-        User::updateOrCreate(
+        $usuario = User::updateOrCreate(
             ['cor' => strtolower($correo)],
             [
                 'rol_id' => $rolAdmin->id,
@@ -38,5 +38,8 @@ class AdminUserSeeder extends Seeder
                 'act' => true,
             ]
         );
+        if (app()->environment(['local', 'testing'])) {
+            $usuario->forceFill(['cor_vrf_en' => now()])->save();
+        }
     }
 }

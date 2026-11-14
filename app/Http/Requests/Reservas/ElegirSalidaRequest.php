@@ -23,7 +23,7 @@ class ElegirSalidaRequest extends FormRequest
     {
         return [
             'sal_tur_id.required' => 'Elige un horario de salida.',
-            'sal_tur_id.exists' => 'La salida elegida no existe.',
+            'sal_tur_id.exists' => __('La salida elegida no existe.'),
             'cnt_ptc.min' => 'Debe viajar al menos una persona.',
         ];
     }

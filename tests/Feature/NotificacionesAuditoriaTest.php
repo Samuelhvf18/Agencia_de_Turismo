@@ -3,6 +3,7 @@
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Jobs\NotificacionJob;
 use App\Mail\AvisoMail;
+use App\Mail\BoletosReservaMail;
 use App\Models\BitacoraAuditoria;
 use App\Models\FichaMedica;
 use App\Models\RegistroNotificacion;
@@ -185,4 +186,46 @@ test('si falla la bitácora se revierte una escritura masiva', function () {
     expect(fn () => DB::transaction(fn () => Reserva::whereKey($reserva->id)->update(['tel_ctc' => '77777777'])))
         ->toThrow(QueryException::class);
     expect($reserva->fresh()->tel_ctc)->toBe('+591 70000000');
+});
+
+test('recupera una confirmación durable aunque nunca se haya enviado el trabajo original', function () {
+    Queue::fake();
+    Mail::fake();
+    $reserva = reservaSimple();
+    app(PagoService::class)->registrarEfectivo($reserva, 200);
+    $evento = RegistroNotificacion::where('clave_evento', 'reserva-confirmada:'.$reserva->id)->firstOrFail();
+    expect($evento->est)->toBe('pendiente');
+    $this->artisan('notificaciones:recuperar')->assertSuccessful();
+    Queue::assertPushed(NotificacionJob::class, fn ($job) => $job->registroId === $evento->id);
+    (new NotificacionJob($evento->id))->handle();
+    (new NotificacionJob($evento->id))->handle();
+    Mail::assertSent(BoletosReservaMail::class, 1);
+    expect($evento->fresh()->est)->toBe('enviado')->and($evento->fresh()->intentos)->toBe(1);
+});
+
+test('una entrega con lease vigente no se envía otra vez y una caída se recupera al vencer', function () {
+    Queue::fake();
+    Mail::fake();
+    $evento = app(NotificacionService::class)->aReserva(reservaSimple(), 'recordatorio_salida');
+    $evento->update(['token_entrega' => 'worker-interrumpido', 'bloqueado_hasta' => now()->addMinutes(5)]);
+    (new NotificacionJob($evento->id))->handle();
+    Mail::assertNothingSent();
+    $this->travel(6)->minutes();
+    (new NotificacionJob($evento->id))->handle();
+    Mail::assertSent(AvisoMail::class, 1);
+    expect($evento->fresh()->token_entrega)->toBeNull();
+});
+
+test('los fallos conservan un evento recuperable con backoff sin crear duplicados', function () {
+    Queue::fake();
+    config(['services.n8n.webhook_notificaciones' => 'https://n8n.test/webhook/x']);
+    Http::fake(['n8n.test/*' => Http::sequence()->push('', 503)->push(['ok' => true])]);
+    $evento = app(NotificacionService::class)->aReserva(reservaSimple(), 'pago_recibido', clave: 'qa-evento');
+    expect(fn () => (new NotificacionJob($evento->id))->handle())->toThrow(Exception::class);
+    (new NotificacionJob($evento->id))->handle();
+    expect($evento->fresh()->intentos)->toBe(1)->and($evento->fresh()->est)->toBe('fallido');
+    $this->travel(31)->seconds();
+    (new NotificacionJob($evento->id))->handle();
+    expect($evento->fresh()->intentos)->toBe(2)->and($evento->fresh()->est)->toBe('enviado');
+    Http::assertSent(fn ($r) => $r->hasHeader('Idempotency-Key', 'qa-evento'));
 });

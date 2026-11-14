@@ -21,7 +21,7 @@ class BoletosReservaMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: "Tu reserva {$this->reserva->cod} está confirmada · Pipocas");
+        return new Envelope(subject: __('Tu reserva :codigo está confirmada', ['codigo' => $this->reserva->cod]).' · Pipocas');
     }
 
     public function content(): Content

@@ -6,6 +6,7 @@ use App\Jobs\NotificacionJob;
 use App\Models\RegistroNotificacion;
 use App\Models\Reserva;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Punto único para avisar a clientes y personal (RF-38). Cada aviso queda en
@@ -27,14 +28,15 @@ class NotificacionService
         'derivacion_chatbot' => 'Un cliente pide hablar con una persona',
     ];
 
-    public function aReserva(Reserva $reserva, string $tipo, array $datos = [], string $canal = 'email'): RegistroNotificacion
+    public function aReserva(Reserva $reserva, string $tipo, array $datos = [], string $canal = 'email', ?string $clave = null): RegistroNotificacion
     {
         return $this->crear([
+            'clave_evento' => $clave,
             'rsv_id' => $reserva->id,
             'usr_id' => $reserva->usr_id,
             'can' => $canal,
             'tip' => $tipo,
-            'cnd' => $datos + ['destino' => $reserva->cor_ctc, 'nombre' => $reserva->nom_ctc, 'reserva' => $reserva->cod],
+            'cnd' => $datos + ['destino' => $reserva->cor_ctc, 'nombre' => $reserva->nom_ctc, 'reserva' => $reserva->cod, 'idioma' => $reserva->idioma ?? 'es'],
         ]);
     }
 
@@ -52,10 +54,29 @@ class NotificacionService
         }
     }
 
+    public function confirmacionReserva(Reserva $reserva): RegistroNotificacion
+    {
+        return RegistroNotificacion::firstOrCreate(['clave_evento' => 'reserva-confirmada:'.$reserva->id], [
+            'rsv_id' => $reserva->id, 'usr_id' => $reserva->usr_id, 'can' => 'email',
+            'tip' => 'reserva_confirmada', 'est' => 'pendiente',
+            'cnd' => ['destino' => $reserva->cor_ctc, 'nombre' => $reserva->nom_ctc, 'idioma' => $reserva->idioma ?? 'es', 'adjuntos' => ['boletos', 'comprobante']],
+        ]);
+    }
+
     private function crear(array $atributos): RegistroNotificacion
     {
-        $registro = RegistroNotificacion::create($atributos + ['est' => 'pendiente']);
-        NotificacionJob::dispatch($registro->id)->afterCommit();
+        $registro = ! empty($atributos['clave_evento'])
+            ? RegistroNotificacion::firstOrCreate(['clave_evento' => $atributos['clave_evento']], $atributos + ['est' => 'pendiente'])
+            : RegistroNotificacion::create($atributos + ['est' => 'pendiente']);
+        // The event is saved with the business transaction. Recovery can dispatch
+        // it even if this callback never runs or the queue is unavailable.
+        DB::afterCommit(function () use ($registro) {
+            try {
+                NotificacionJob::dispatch($registro->id);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        });
 
         return $registro;
     }

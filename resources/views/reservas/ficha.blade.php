@@ -28,7 +28,7 @@
     $urlAnterior ??= url('/reservas/preview/equipo'); // controlador: route('reservas.equipo')
 @endphp
 
-@section('titulo', 'Ficha médica')
+@section('titulo', __('Ficha médica'))
 
 @section('stepper')
     <x-reserva.stepper :actual="4" :enlaces="[$urlSalida ?? url('/reservas/preview/salida'), $urlParticipantes ?? url('/reservas/preview/participantes'), $urlAnterior]" />
@@ -61,7 +61,7 @@
         <div class="flex gap-3 rounded-2xl border border-pipocas-acento/60 bg-pipocas-acento/15 p-4 text-sm">
             <i class="fa-solid fa-heart-pulse mt-0.5 text-lg text-pipocas-secundario"></i>
             <div>
-                <p class="font-bold text-pipocas-calido">Requisitos físicos de {{ $tour->nom }}</p>
+                <p class="font-bold text-pipocas-calido">{{ __('Requisitos físicos de :tour', ['tour' => $tour->nom]) }}</p>
                 <p class="text-pipocas-texto-2">{{ $tour->req_fis }}</p>
             </div>
         </div>
@@ -85,13 +85,13 @@
                 <div class="sm:col-span-2">
                     <label for="con_med_{{ $id }}" class="rsv-etiqueta">{{ __('Condiciones médicas, alergias o medicación') }}</label>
                     <textarea id="con_med_{{ $id }}" name="fichas[{{ $id }}][con_med]" rows="3" class="rsv-campo"
-                              placeholder="Ej. asma leve, alergia a la penicilina. Escribe «Ninguna» si no aplica.">{{ old("fichas.$id.con_med", $f['con_med'] ?? '') }}</textarea>
+                              placeholder="{{ __('Ej. asma leve, alergia a la penicilina. Escribe «Ninguna» si no aplica.') }}">{{ old("fichas.$id.con_med", $f['con_med'] ?? '') }}</textarea>
                     @error("fichas.$id.con_med") <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label for="nom_ctc_eme_{{ $id }}" class="rsv-etiqueta">{{ __('Contacto de emergencia') }}</label>
                     <input id="nom_ctc_eme_{{ $id }}" name="fichas[{{ $id }}][nom_ctc_eme]" type="text" maxlength="150" class="rsv-campo"
-                           value="{{ old("fichas.$id.nom_ctc_eme", $f['nom_ctc_eme'] ?? '') }}" placeholder="Nombre y parentesco">
+                           value="{{ old("fichas.$id.nom_ctc_eme", $f['nom_ctc_eme'] ?? '') }}" placeholder="{{ __('Nombre y parentesco') }}">
                     @error("fichas.$id.nom_ctc_eme") <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -121,15 +121,14 @@
             @endif
             <div class="mt-5" x-data="firmaPad(@js(old("fichas.$id.fir_b64", '')))">
                 <div class="mb-1.5 flex items-center justify-between">
-                    <span class="rsv-etiqueta mb-0">Firma de {{ $p['nom_cpl'] }}</span>
+                    <span class="rsv-etiqueta mb-0">{{ __('Firma de :nombre', ['nombre' => $p['nom_cpl']]) }}</span>
                     <button type="button" @click="limpiar()" x-show="firmado" x-cloak
                             class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-semibold text-pipocas-secundario transition hover:bg-pipocas-secundario/10">
-                        <i class="fa-solid fa-eraser"></i> Limpiar
-                    </button>
+                        <i class="fa-solid fa-eraser"></i>{{ __('Limpiar') }}</button>
                 </div>
                 <div class="relative overflow-hidden rounded-2xl border-2 border-dashed bg-white transition"
                      :class="firmado ? 'border-pipocas-principal' : 'border-gray-300'">
-                    <canvas x-ref="lienzo" class="block h-44 w-full cursor-crosshair touch-none sm:h-48" aria-label="Área para firmar"></canvas>
+                    <canvas x-ref="lienzo" class="block h-44 w-full cursor-crosshair touch-none sm:h-48" aria-label="{{ __('Área para firmar') }}"></canvas>
                     <div x-show="!firmado" class="pointer-events-none absolute inset-0 grid place-items-center text-sm text-gray-400">
                         <span><i class="fa-solid fa-signature mr-1.5"></i> {{ __('Firma aquí con el dedo o el mouse') }}</span>
                     </div>

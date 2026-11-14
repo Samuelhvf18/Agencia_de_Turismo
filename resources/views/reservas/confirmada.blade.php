@@ -18,11 +18,11 @@
     $urlPago ??= '#'; // controlador: route('pagos.create', $reserva)
     $urlEstado ??= url('/reservas/preview/estado');
 
-    $f = \Carbon\Carbon::parse($salida['fec_sal'])->locale('es');
-    $limitePago = \Carbon\Carbon::parse($reserva['cre_en'])->addHours(24)->locale('es');
+    $f = \Carbon\Carbon::parse($salida['fec_sal'])->locale(app()->getLocale());
+    $limitePago = \Carbon\Carbon::parse($reserva['cre_en'])->addHours(24)->locale(app()->getLocale());
 @endphp
 
-@section('titulo', 'Reserva registrada')
+@section('titulo', __('Reserva registrada'))
 
 @section('stepper')
     <x-reserva.stepper :actual="6" />
@@ -36,7 +36,7 @@
                 <i class="fa-solid fa-check text-3xl text-pipocas-acento"></i>
             </span>
             <h1 class="mt-5 font-titulo text-3xl font-semibold sm:text-4xl">{{ __('¡Reserva registrada!') }}</h1>
-            <p class="mt-2 text-white/80">Gracias, {{ \Illuminate\Support\Str::before($reserva['nom_ctc'], ' ') }}. Guardamos tus cupos para <b class="text-white">{{ $tour->nom }}</b>.</p>
+            <p class="mt-2 text-white/80">{{ __('Gracias, :nombre. Guardamos tus cupos para :tour.', ['nombre' => \Illuminate\Support\Str::before($reserva['nom_ctc'], ' '), 'tour' => $tour->nom]) }}</p>
         </div>
 
         <div class="px-5 py-8 sm:px-10" x-data="{ copiado: false }">
@@ -45,12 +45,11 @@
             <button type="button" class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover"
                     @click="navigator.clipboard ? navigator.clipboard.writeText(@js($reserva['cod'])) : copyToClipboardFallback(@js($reserva['cod'])); copiado = true; setTimeout(() => copiado = false, 2000)">
                 <i class="fa-regular" :class="copiado ? 'fa-circle-check' : 'fa-copy'"></i>
-                <span x-text="copiado ? '¡Copiado!' : 'Copiar código'">{{ __('Copiar código') }}</span>
+                <span x-text="copiado ? rsvText('¡Copiado!') : rsvText('Copiar código')">{{ __('Copiar código') }}</span>
             </button>
 
             <div class="mt-6 inline-flex items-center gap-2 rounded-full bg-pipocas-acento/25 px-4 py-2 text-sm font-bold text-pipocas-calido">
-                <span class="h-2 w-2 animate-pulse rounded-full bg-pipocas-secundario"></span> Pendiente de pago
-            </div>
+                <span class="h-2 w-2 animate-pulse rounded-full bg-pipocas-secundario"></span>{{ __('Pendiente de pago') }}</div>
 
             <dl class="mt-8 grid gap-4 rounded-2xl bg-pipocas-fondo p-5 text-left text-sm sm:grid-cols-3">
                 <div><dt class="text-pipocas-texto-2">{{ __('Salida') }}</dt><dd class="font-semibold">{{ ucfirst($f->translatedFormat('D j M')) }} · {{ substr($salida['hra_sal'], 0, 5) }}</dd></div>
@@ -59,9 +58,8 @@
             </dl>
 
             <a href="{{ $urlPago }}" class="rsv-btn mt-8 w-full text-base sm:w-auto">
-                <i class="fa-solid fa-credit-card"></i> Ir al pago
-            </a>
-            <p class="mt-3 text-xs text-pipocas-texto-2">Paga antes del {{ $limitePago->translatedFormat('j \d\e F, H:i') }} para no perder tus cupos.</p>
+                <i class="fa-solid fa-credit-card"></i>{{ __('Ir al pago') }}</a>
+            <p class="mt-3 text-xs text-pipocas-texto-2">{{ __('Paga antes del :fecha para no perder tus cupos.', ['fecha' => $limitePago->translatedFormat(app()->isLocale('en') ? 'F j, Y H:i' : 'j \d\e F, H:i')]) }}</p>
         </div>
     </section>
 
@@ -78,7 +76,7 @@
             </li>
             <li class="flex gap-4">
                 <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-pipocas-principal/15 text-sm font-bold text-pipocas-principal">3</span>
-                <div><p class="font-semibold">{{ __('Preséntate el día del tour') }}</p><p class="text-sm text-pipocas-texto-2">Llega 15 minutos antes; el guía escaneará tu QR al abordar.</p></div>
+                <div><p class="font-semibold">{{ __('Preséntate el día del tour') }}</p><p class="text-sm text-pipocas-texto-2">{{ __('Llega 15 minutos antes; el guía escaneará tu QR al abordar.') }}</p></div>
             </li>
         </ol>
         <div class="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-5 sm:flex-row">

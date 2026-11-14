@@ -7,6 +7,7 @@ use App\Models\Boleto;
 use App\Models\ColaEventoLlegada;
 use App\Models\ComprobantePago;
 use App\Models\DepartamentoBolivia;
+use App\Models\FichaMedica;
 use App\Models\ItemEquipo;
 use App\Models\MarkovClienteEstado;
 use App\Models\Pago;
@@ -18,8 +19,12 @@ use App\Models\Tour;
 use App\Models\User;
 use App\Services\CodeGeneratorService;
 use App\Services\Io\MarkovService;
+use App\Services\Notificaciones\NotificacionService;
+use App\Services\Operaciones\SalidaService;
 use App\Services\Pagos\PagoService;
 use App\Services\Pagos\PasarelaSimulada;
+use App\Services\Reservas\BoletoService;
+use App\Services\Reservas\FirmaDigital;
 use App\Services\Reservas\ReservaService;
 use Database\Seeders\CatalogoLandingSeeder;
 use Database\Seeders\CatalogosBaseSeeder;
@@ -472,4 +477,76 @@ test('el wizard conserva inglés entre pasos', function () {
     hastaParticipantes($this, tourBajoRiesgo());
     $this->get(route('reservas.participantes'))->assertOk()->assertSee('Who is travelling?')->assertSee('Contact details');
     $this->get(route('reservas.equipo'))->assertOk()->assertSee('Do you need equipment?');
+});
+
+test('un callback tardío después de cancelar no cobra ni vuelve a emitir boletos', function () {
+    $r = reservaConfirmada($this);
+    $svc = app(PagoService::class);
+    $p = $svc->iniciar($r, 'qr', (float) $r->pre_tot);
+    app(ReservaService::class)->cancelar($r);
+    $svc->procesarNotificacion(['ref_trx' => $p->ref_trx, 'est' => Pago::EST_COMPLETADO]);
+    expect($p->fresh()->est)->toBe(Pago::EST_FALLIDO)->and($r->fresh()->est)->toBe(Reserva::EST_CANCELADA);
+    expect(RegistroNotificacion::where('clave_evento', 'reserva-confirmada:'.$r->id)->exists())->toBeFalse();
+    expect($r->boletos()->count())->toBe(0);
+});
+
+test('si falla el registro durable del evento se revierte el pago y sus efectos', function () {
+    $r = reservaConfirmada($this);
+    $svc = app(PagoService::class);
+    $p = $svc->iniciar($r, 'qr', (float) $r->pre_tot);
+    $this->mock(NotificacionService::class, function ($mock) {
+        $mock->shouldReceive('confirmacionReserva')->once()->andThrow(new RuntimeException('outbox caída'));
+    });
+    expect(fn () => $svc->procesarNotificacion(['ref_trx' => $p->ref_trx, 'est' => Pago::EST_COMPLETADO]))->toThrow(RuntimeException::class);
+    expect($p->fresh()->est)->toBe(Pago::EST_PENDIENTE)->and($r->fresh()->est)->toBe(Reserva::EST_PENDIENTE);
+    expect($r->boletos()->count())->toBe(0);
+});
+
+test('un encabezado PNG truncado y una firma borrada antes de confirmar se rechazan', function () {
+    expect(fn () => FirmaDigital::guardarTemporal('data:image/png;base64,'.base64_encode("\x89PNG\r\n\x1a\n"), 'firma'))
+        ->toThrow(ValidationException::class);
+    hastaParticipantes($this, tourAltoRiesgo(), 1);
+    $this->post(route('reservas.equipo.store'), ['alquileres' => []]);
+    $this->post(route('reservas.ficha.store'), ['fichas' => [0 => [
+        'con_med' => 'Ninguna', 'nom_ctc_eme' => 'Luis Quispe', 'tel_ctc_eme' => '71111111', 'acp_ver' => 1, 'acp_rie' => 1, 'fir_b64' => FIRMA_PNG,
+    ]]])->assertSessionHasNoErrors();
+    Storage::disk('local')->deleteDirectory('firmas');
+    $this->post(route('reservas.confirmar'), ['acp_ter' => 1])->assertSessionHasErrors();
+    expect(Reserva::count())->toBe(0);
+});
+
+test('emisión reemisión y check-in de alto riesgo exigen el archivo de firma', function () {
+    $reserva = reservaConfirmada($this, cantidad: 1);
+    app(PagoService::class)->registrarEfectivo($reserva, (float) $reserva->pre_tot);
+    $reserva = $reserva->fresh(['salida.tour', 'participantes.boleto']);
+    $reserva->salida->tour->update(['alt_max_m' => 5000]);
+    $ptc = $reserva->participantes->first();
+    $boleto = $ptc->boleto;
+    $boleto->update(['est' => Boleto::EST_CANCELADO]);
+    $ficha = FichaMedica::create(['ptc_rsv_id' => $ptc->id, 'fir_en' => now(), 'rta_fir' => 'firmas/prueba.png']);
+    app(BoletoService::class)->emitir($reserva->fresh());
+    expect($boleto->fresh()->est)->toBe(Boleto::EST_CANCELADO);
+    Storage::disk('local')->put($ficha->rta_fir, base64_decode(explode(',', FIRMA_PNG)[1]));
+    app(BoletoService::class)->emitir($reserva->fresh());
+    expect($boleto->fresh()->est)->toBe(Boleto::EST_EMITIDO);
+    Storage::disk('local')->delete($ficha->rta_fir);
+    $resultado = app(SalidaService::class)->validarBoleto($reserva->salida, $boleto->cod, User::first());
+    expect($resultado['ok'])->toBeFalse()->and($boleto->fresh()->est)->toBe(Boleto::EST_EMITIDO);
+});
+
+test('la reserva inglesa conserva idioma en el evento y traduce estado errores y PDFs', function () {
+    $this->get('/?lang=en')->assertOk();
+    $reserva = reservaConfirmada($this, cantidad: 1);
+    expect($reserva->idioma)->toBe('en');
+    $this->get(route('reservas.confirmada', $reserva))->assertOk()->assertSee('Proceed to payment')->assertSee('Thank you,');
+    $this->post(route('pagos.store', $reserva), ['mtd' => 'qr', 'mto' => 0])->assertSessionHasErrors(['mto' => 'Enter a valid amount (up to 2 decimal places).']);
+    app(PagoService::class)->registrarEfectivo($reserva, (float) $reserva->pre_tot);
+    $reserva->refresh();
+    $event = RegistroNotificacion::where('clave_evento', 'reserva-confirmada:'.$reserva->id)->firstOrFail();
+    expect($event->cnd['idioma'])->toBe('en');
+    $this->get(route('reservas.estado', $reserva))->assertOk()->assertSee('Confirmed')->assertSee('Paid')
+        ->assertHeader('Cache-Control', 'no-store, private');
+    $this->get(route('reservas.comprobante', $reserva))->assertOk()->assertHeader('Content-Type', 'application/pdf');
+    $html = view('emails.reservas.boletos', ['reserva' => $reserva, 'tour' => $reserva->salida->tour, 'salida' => $reserva->salida])->render();
+    expect($html)->toContain('View my booking')->toContain('Your booking is confirmed!')->not->toContain('Ver mi reserva');
 });

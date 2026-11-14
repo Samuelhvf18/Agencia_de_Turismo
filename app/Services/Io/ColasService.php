@@ -208,6 +208,14 @@ class ColasService
             ColaMetricaDiaria::updateOrCreate(
                 ['tur_id' => $par->tur_id, 'fec' => $fecha->toDateString()],
                 [
+                    'contexto' => [
+                        'modelo' => 'MMcK-log-v2', 'unidad_llegada' => 'solicitud',
+                        'desde' => $fecha->copy()->subDays(29)->toDateString(), 'hasta' => $fecha->toDateString(),
+                        'fuente_lambda' => 'cola_eventos_llegada:admitido+rechazado',
+                        'fuente_mu' => 'configurado', 'parametro_id' => $par->id,
+                        'lambda' => $lambda, 'mu' => $mu, 'c' => (int) $par->c_srv, 'k' => (int) $par->k_cap,
+                        'ce' => (float) $par->cos_esp, 'cs' => (float) $par->cos_srv, 'calculado_en' => now()->toIso8601String(),
+                    ],
                     'lmb_obs' => round($lambda, 4),
                     'mu_obs' => round($mu, 4),
                     'rho' => round(min($m['rho'], 99.9999), 4),

@@ -12,22 +12,30 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Reserva extends Model
 {
     public const EST_PENDIENTE = 'pendiente';
+
     public const EST_CONFIRMADA = 'confirmada';
+
     public const EST_CANCELADA = 'cancelada';
+
     public const EST_COMPLETADA = 'completada';
 
     public const PAG_PENDIENTE = 'pendiente';
+
     public const PAG_PARCIAL = 'parcial';
+
     public const PAG_PAGADO = 'pagado';
+
     public const PAG_REEMBOLSADO = 'reembolsado';
 
     protected $table = 'reservas';
+
     const CREATED_AT = 'cre_en';
+
     const UPDATED_AT = 'mod_en';
 
     protected $fillable = [
         'cod', 'sal_tur_id', 'usr_id', 'nom_ctc', 'cor_ctc', 'tel_ctc',
-        'cnt_ptc', 'est', 'pre_tot', 'est_pag',
+        'cnt_ptc', 'est', 'pre_tot', 'est_pag', 'idioma',
     ];
 
     /** En las URL públicas se usa el código, no el id. */

@@ -50,21 +50,21 @@ class FichaMedicaRequest extends FormRequest
                     continue; // ficha opcional y vacía
                 }
 
-                foreach (['con_med' => 'Indica tus condiciones médicas o escribe «Ninguna».',
-                    'nom_ctc_eme' => 'Ingresa un contacto de emergencia.',
-                    'tel_ctc_eme' => 'Ingresa el teléfono de emergencia.'] as $campo => $mensaje) {
+                foreach (['con_med' => __('Indica tus condiciones médicas o escribe «Ninguna».'),
+                    'nom_ctc_eme' => __('Ingresa un contacto de emergencia.'),
+                    'tel_ctc_eme' => __('Ingresa el teléfono de emergencia.')] as $campo => $mensaje) {
                     if (empty($f[$campo])) {
                         $v->errors()->add("fichas.$i.$campo", $mensaje);
                     }
                 }
                 if (empty($f['acp_ver'])) {
-                    $v->errors()->add("fichas.$i.acp_ver", 'Debes aceptar la declaración.');
+                    $v->errors()->add("fichas.$i.acp_ver", __('Debes aceptar la declaración.'));
                 }
                 if (empty($f['acp_rie'])) {
-                    $v->errors()->add("fichas.$i.acp_rie", 'Debes aceptar los riesgos de la actividad.');
+                    $v->errors()->add("fichas.$i.acp_rie", __('Debes aceptar los riesgos de la actividad.'));
                 }
                 if (! $firma) {
-                    $v->errors()->add("fichas.$i.fir_b64", 'Falta la firma.');
+                    $v->errors()->add("fichas.$i.fir_b64", __('Falta la firma.'));
                 }
             }
         }];
@@ -73,8 +73,8 @@ class FichaMedicaRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'fichas.*.nom_ctc_eme.regex' => 'El nombre solo puede contener letras.',
-            'fichas.*.tel_ctc_eme.regex' => 'Ingresa un teléfono válido.',
+            'fichas.*.nom_ctc_eme.regex' => __('El nombre solo puede contener letras.'),
+            'fichas.*.tel_ctc_eme.regex' => __('Ingresa un teléfono válido.'),
         ];
     }
 }

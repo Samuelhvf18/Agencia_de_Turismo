@@ -80,7 +80,7 @@
                     <p class="text-pipocas-texto-2">{{ __('Podrás consultar tu reserva con el código y tu correo. Si inicias sesión, la guardamos en tu cuenta.') }}</p>
                 </div>
                 @if (Route::has('login'))
-                    <a href="{{ route('login') }}" class="rsv-btn-sec shrink-0 px-4 py-2.5">Iniciar sesión</a>
+                    <a href="{{ route('login') }}" class="rsv-btn-sec shrink-0 px-4 py-2.5">{{ __('Iniciar sesión') }}</a>
                 @endif
             </div>
         @endguest
@@ -94,13 +94,13 @@
                 <div class="sm:col-span-2">
                     <label for="nom_ctc" class="rsv-etiqueta">{{ __('Nombre completo') }}</label>
                     <input id="nom_ctc" name="nom_ctc" type="text" maxlength="150" autocomplete="name" required
-                           value="{{ old('nom_ctc', $contacto['nom_ctc']) }}" x-ref="nomCtc" class="rsv-campo" placeholder="Ej. Ana Quispe Mamani">
+                           value="{{ old('nom_ctc', $contacto['nom_ctc']) }}" x-ref="nomCtc" class="rsv-campo" placeholder="{{ __('Ej. Ana Quispe Mamani') }}">
                     @error('nom_ctc') <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label for="cor_ctc" class="rsv-etiqueta">{{ __('Correo electrónico') }}</label>
                     <input id="cor_ctc" name="cor_ctc" type="email" maxlength="150" autocomplete="email" required
-                           value="{{ old('cor_ctc', $contacto['cor_ctc']) }}" class="rsv-campo" placeholder="tucorreo@ejemplo.com">
+                           value="{{ old('cor_ctc', $contacto['cor_ctc']) }}" class="rsv-campo" placeholder="you@example.com">
                     @error('cor_ctc') <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -117,7 +117,7 @@
             <div class="flex items-end justify-between gap-3">
                 <div>
                     <h2 class="rsv-titulo">{{ __('Participantes') }}</h2>
-                    <p class="text-sm text-pipocas-texto-2"><span x-text="lista.length"></span> de <span x-text="max"></span> cupos disponibles en esta salida</p>
+                    <p class="text-sm text-pipocas-texto-2"><span x-text="lista.length"></span> {{ __('de') }} <span x-text="max"></span> {{ __('cupos disponibles en esta salida') }}</p>
                 </div>
             </div>
             @error('participantes') <p class="rsv-error">{{ $message }}</p> @enderror
@@ -127,13 +127,12 @@
                     <header class="mb-5 flex flex-wrap items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
                             <span class="grid h-9 w-9 place-items-center rounded-full bg-pipocas-principal font-bold text-white" x-text="i + 1"></span>
-                            <h3 class="font-bold" x-text="p.nom_cpl || 'Participante ' + (i + 1)"></h3>
+                            <h3 class="font-bold" x-text="p.nom_cpl || rsvText('Participante ') + (i + 1)"></h3>
                             <span x-show="pri === i" class="rounded-full bg-pipocas-secundario/15 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-secundario">{{ __('Contacto principal') }}</span>
                         </div>
                         <button type="button" x-show="lista.length > 1" @click="quitar(i)"
                                 class="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-semibold text-red-600 transition hover:bg-red-50">
-                            <i class="fa-regular fa-trash-can"></i> Quitar
-                        </button>
+                            <i class="fa-regular fa-trash-can"></i>{{ __('Quitar') }}</button>
                     </header>
 
                     <input type="hidden" :name="`participantes[${i}][es_ctc_pri]`" :value="pri === i ? 1 : 0">
@@ -141,7 +140,7 @@
                     <div class="grid gap-4 sm:grid-cols-6">
                         <div class="sm:col-span-4">
                             <label class="rsv-etiqueta" :for="`nom_cpl_${i}`">{{ __('Nombre completo') }}</label>
-                            <input type="text" maxlength="150" class="rsv-campo" :id="`nom_cpl_${i}`" :name="`participantes[${i}][nom_cpl]`" x-model="p.nom_cpl" placeholder="Como figura en su documento">
+                            <input type="text" maxlength="150" class="rsv-campo" :id="`nom_cpl_${i}`" :name="`participantes[${i}][nom_cpl]`" x-model="p.nom_cpl" placeholder="{{ __('Como figura en su documento') }}">
                             <p class="rsv-error" x-text="err(i, 'nom_cpl')" x-show="err(i, 'nom_cpl')"></p>
                         </div>
                         <div class="sm:col-span-2">
@@ -154,7 +153,7 @@
                             <label class="rsv-etiqueta" :for="`tip_doc_${i}`">{{ __('Tipo de documento') }}</label>
                             <select class="rsv-campo" :id="`tip_doc_${i}`" :name="`participantes[${i}][tip_doc]`" x-model="p.tip_doc">
                                 @foreach ($tiposDoc as $valor => $texto)
-                                    <option value="{{ $valor }}">{{ $texto }}</option>
+                                    <option value="{{ $valor }}">{{ __($texto) }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -162,7 +161,7 @@
                             <label class="rsv-etiqueta" :for="`num_doc_${i}`">{{ __('Número de documento') }}</label>
                             <div class="flex gap-2">
                                 <input type="text" maxlength="15" class="rsv-campo" :id="`num_doc_${i}`" :name="`participantes[${i}][num_doc]`" x-model="p.num_doc">
-                                <input type="text" maxlength="5" class="rsv-campo w-20" x-show="p.tip_doc === 'CI'" :name="`participantes[${i}][ci_cmp]`" x-model="p.ci_cmp" placeholder="Comp." aria-label="Complemento del CI">
+                                <input type="text" maxlength="5" class="rsv-campo w-20" x-show="p.tip_doc === 'CI'" :name="`participantes[${i}][ci_cmp]`" x-model="p.ci_cmp" placeholder="{{ __('Comp.') }}" aria-label="{{ __('Complemento del CI') }}">
                             </div>
                             <p class="rsv-error" x-text="err(i, 'num_doc')" x-show="err(i, 'num_doc')"></p>
                         </div>
@@ -188,9 +187,7 @@
                         </div>
                         <div class="flex flex-wrap items-end gap-x-5 gap-y-2 sm:col-span-3">
                             <label class="inline-flex cursor-pointer items-center gap-2 py-2 text-sm font-semibold">
-                                <input type="radio" class="h-5 w-5 border-gray-300 text-pipocas-principal focus:ring-pipocas-principal" :checked="pri === i" @change="pri = i">
-                                Contacto principal
-                            </label>
+                                <input type="radio" class="h-5 w-5 border-gray-300 text-pipocas-principal focus:ring-pipocas-principal" :checked="pri === i" @change="pri = i">{{ __('Contacto principal') }}</label>
                             <button type="button" x-show="i === 0" @click="p.nom_cpl = $refs.nomCtc.value"
                                     class="py-2 text-sm font-semibold text-pipocas-complementario underline-offset-2 hover:text-pipocas-hover hover:underline">
                                 Usar mis datos de contacto
@@ -203,7 +200,7 @@
             <button type="button" @click="agregar()" :disabled="lista.length >= max"
                     class="flex w-full items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-pipocas-complementario/50 bg-white/60 p-5 font-bold text-pipocas-complementario transition hover:border-pipocas-principal hover:text-pipocas-principal disabled:cursor-not-allowed disabled:opacity-50">
                 <i class="fa-solid fa-user-plus"></i>
-                <span x-text="lista.length >= max ? 'No quedan más cupos en esta salida' : 'Agregar participante'"></span>
+                <span x-text="lista.length >= max ? rsvText('No quedan más cupos en esta salida') : rsvText('Agregar participante')"></span>
             </button>
         </section>
 

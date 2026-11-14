@@ -75,7 +75,7 @@ class ProyeccionDemandaService
             return [array_map(fn ($k) => $a + $b * ($n + $k), range(1, $meses)), self::MODELO_REGRESION];
         }
 
-        $ultimos = array_slice(array_filter($serie, fn ($v) => $v > 0), -3);
+        $ultimos = array_slice($serie, -3);
         $promedio = $ultimos ? (float) array_sum($ultimos) / count($ultimos) : 0.0;
 
         return [array_fill(0, $meses, $promedio), self::MODELO_PROMEDIO];

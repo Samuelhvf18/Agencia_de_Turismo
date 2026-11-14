@@ -17,7 +17,7 @@
     $actual = max(1, min((int) $actual, $total + 1)); // $total + 1 = todo completado
 @endphp
 
-<nav aria-label="Progreso de la reserva" {{ $attributes }}>
+<nav aria-label="{{ __('Progreso de la reserva') }}" {{ $attributes }}>
     {{-- Móvil: texto + barra de progreso --}}
     <div class="sm:hidden">
         <div class="flex items-baseline justify-between text-sm">
@@ -25,7 +25,7 @@
                 @if ($actual > $total)
                     {{ __('Reserva completada') }}
                 @else
-                    {{ __('Paso :n de :t', ['n' => $actual, 't' => $total]) }} · {{ $pasos[$actual - 1] }}
+                    {{ __('Paso :n de :t', ['n' => $actual, 't' => $total]) }} · {{ __($pasos[$actual - 1]) }}
                 @endif
             </span>
             @if ($actual < $total)
@@ -78,7 +78,7 @@
                         'font-semibold text-pipocas-principal' => $hecho,
                         'text-pipocas-texto-2' => ! $hecho && ! $esActual,
                         'hidden lg:inline' => ! $esActual,
-                    ])>{{ $paso }}</span>
+                    ])>{{ __($paso) }}</span>
                 @if ($href) </a> @else </span> @endif
 
                 @if ($n < $total)

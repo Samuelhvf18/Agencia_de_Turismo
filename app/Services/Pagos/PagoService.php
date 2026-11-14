@@ -66,10 +66,10 @@ class PagoService
             $reserva = Reserva::lockForUpdate()->findOrFail($reserva->id);
 
             if (! $this->admitePago($reserva)) {
-                throw ValidationException::withMessages(['mto' => 'Esta reserva ya no admite pagos.']);
+                throw ValidationException::withMessages(['mto' => __('Esta reserva ya no admite pagos.')]);
             }
             if (! array_key_exists($metodo, self::METODOS)) {
-                throw ValidationException::withMessages(['mtd' => 'Elige un método de pago válido.']);
+                throw ValidationException::withMessages(['mtd' => __('Elige un método de pago válido.')]);
             }
 
             $saldo = $this->saldo($reserva);
@@ -77,13 +77,13 @@ class PagoService
             $monto = round($monto, 2);
             if ($monto < $minimo || $monto > $saldo) {
                 throw ValidationException::withMessages([
-                    'mto' => sprintf('El monto debe estar entre Bs. %s y Bs. %s.', number_format($minimo, 2, ',', '.'), number_format($saldo, 2, ',', '.')),
+                    'mto' => sprintf(__('El monto debe estar entre Bs. %s y Bs. %s.'), number_format($minimo, 2, ',', '.'), number_format($saldo, 2, ',', '.')),
                 ]);
             }
 
             $comprobante = $reserva->comprobante ?? $this->crearComprobante($reserva);
             if ($comprobante->pagos()->where('est', Pago::EST_PENDIENTE)->exists()) {
-                throw ValidationException::withMessages(['mto' => 'Existe un intento de pago pendiente. Resuélvelo antes de iniciar otro.']);
+                throw ValidationException::withMessages(['mto' => __('Existe un intento de pago pendiente. Resuélvelo antes de iniciar otro.')]);
             }
 
             return $comprobante->pagos()->create([
@@ -104,9 +104,8 @@ class PagoService
     public function procesarNotificacion(array $evento): ?Pago
     {
         $confirmada = false;
-        $procesado = false;
 
-        $pago = DB::transaction(function () use ($evento, &$confirmada, &$procesado) {
+        $pago = DB::transaction(function () use ($evento, &$confirmada) {
             $referencia = Pago::where('ref_trx', $evento['ref_trx'] ?? '')->first();
             if (! $referencia) {
                 return null;
@@ -128,7 +127,6 @@ class PagoService
             $aprobado = $aprobado && $this->admitePago($reserva)
                 && $comprobante->est !== ComprobantePago::EST_ANULADO
                 && (float) $pago->mto <= round((float) $reserva->pre_tot - $comprobante->montoPagado(), 2);
-            $procesado = true;
             $pago->update(['est' => $aprobado ? Pago::EST_COMPLETADO : Pago::EST_FALLIDO, 'pag_en' => now()]);
             if (! $aprobado) {
                 return $pago;
@@ -141,25 +139,25 @@ class PagoService
                 $reserva->update(['est_pag' => Reserva::PAG_PAGADO]);
                 $this->reservas->marcarConfirmada($reserva);
                 $this->boletos->emitir($reserva);
+                app(NotificacionService::class)->confirmacionReserva($reserva);
                 $confirmada = true;
             } else {
                 $reserva->update(['est_pag' => Reserva::PAG_PARCIAL]);
+                app(NotificacionService::class)->aReserva($reserva, 'pago_recibido', [
+                    'mensaje' => __('Recibimos tu pago de Bs. :monto. Saldo pendiente: Bs. :saldo.', ['monto' => number_format((float) $pago->mto, 2), 'saldo' => number_format($this->saldo($reserva), 2)], $reserva->idioma ?? 'es'),
+                    'monto' => (float) $pago->mto, 'saldo' => $this->saldo($reserva),
+                ], clave: 'pago-recibido:'.$pago->id);
             }
 
             return $pago;
         });
 
         if ($confirmada) {
-            // Boletos (PDF con QR) y comprobante por correo; queda en registros_notificacion.
-            EnviarBoletosReserva::dispatch($pago->comprobante->rsv_id)->afterCommit();
-        } elseif ($procesado && $pago?->est === Pago::EST_COMPLETADO) {
-            $reserva = $pago->comprobante->reserva;
-            app(NotificacionService::class)->aReserva($reserva, 'pago_recibido', [
-                'mensaje' => sprintf('Recibimos tu pago de Bs. %s. Saldo pendiente: Bs. %s. Los tickets se emiten al completar el pago.',
-                    number_format((float) $pago->mto, 2, ',', '.'), number_format($this->saldo($reserva), 2, ',', '.')),
-                'monto' => (float) $pago->mto,
-                'saldo' => $this->saldo($reserva),
-            ]);
+            try {
+                EnviarBoletosReserva::dispatch($pago->comprobante->rsv_id)->afterCommit();
+            } catch (\Throwable $e) {
+                report($e);
+            } // durable event remains recoverable
         }
 
         return $pago;
@@ -172,11 +170,11 @@ class PagoService
             $reserva = Reserva::lockForUpdate()->findOrFail($reserva->id);
             $monto = round($monto, 2);
             if (! $this->admitePago($reserva) || $monto <= 0 || $monto > $this->saldo($reserva)) {
-                throw ValidationException::withMessages(['mto' => 'El monto supera el saldo o la reserva no admite pagos.']);
+                throw ValidationException::withMessages(['mto' => __('El monto supera el saldo o la reserva no admite pagos.')]);
             }
             $comprobante = $reserva->comprobante ?? $this->crearComprobante($reserva);
             if ($comprobante->pagos()->where('est', Pago::EST_PENDIENTE)->exists()) {
-                throw ValidationException::withMessages(['mto' => 'Existe un intento de pago pendiente. Resuélvelo antes de iniciar otro.']);
+                throw ValidationException::withMessages(['mto' => __('Existe un intento de pago pendiente. Resuélvelo antes de iniciar otro.')]);
             }
 
             return $comprobante->pagos()->create([

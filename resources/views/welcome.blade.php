@@ -381,7 +381,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="wrap nav">
     <a href="{{ url('/') }}" class="brand">
       <span class="logo"><i class="fa-solid fa-mountain-sun"></i></span>
-      <span><b>Agencia de Turismo<i>.</i></b><small>Todo es con todos similado</small></span>
+      <span><b>{{ __('Agencia de Turismo') }}<i>.</i></b><small>{{ __('Demostración: pagos simulados') }}</small></span>
     </a>
     <nav class="links">
       <a href="#categorias">{{ __('Experiencias') }}</a>
@@ -418,7 +418,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   </div>
   <nav>
     <a href="#categorias">{{ __('Experiencias') }} <i class="fa-solid fa-arrow-right"></i></a>
-    <a href="#catalogo">Tours <i class="fa-solid fa-arrow-right"></i></a>
+    <a href="#catalogo">{{ __('Tours') }}<i class="fa-solid fa-arrow-right"></i></a>
     <a href="#como">{{ __('Cómo reservar') }} <i class="fa-solid fa-arrow-right"></i></a>
     <a href="{{ route('reservas.consultar') }}">{{ __('Mi reserva') }} <i class="fa-solid fa-arrow-right"></i></a>
     <a href="{{ url('/chatbot') }}">{{ __('Guía digital') }} <i class="fa-solid fa-robot"></i></a>
@@ -431,7 +431,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <a href="{{ route('login') }}" class="btn btn-glass">{{ __('Iniciar sesión') }}</a>
       @endif
       @if (Route::has('register'))
-        <a href="{{ route('register') }}" class="btn btn-gold">Registrarse</a>
+        <a href="{{ route('register') }}" class="btn btn-gold">{{ __('Registrarse') }}</a>
       @endif
     @endauth
   </div>
@@ -442,18 +442,18 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="sun"></div>
   <div class="wrap hero-grid">
     <div>
-      <span class="pill reveal"><span class="live"></span> Salidas diarias desde La Paz, Bolivia</span>
-      <h1 class="reveal d1">Conecta<br>con la aventura <em>en el corazón de Bolivia</em></h1>
+      <span class="pill reveal"><span class="live"></span>{{ __('Salidas diarias desde La Paz, Bolivia') }}</span>
+      <h1 class="reveal d1">{{ __('Conecta') }}<br>{{ __('con la aventura') }}<em>{{ __('en el corazón de Bolivia') }}</em></h1>
       <p class="lead reveal d2">Rutas georreferenciadas de Biking, Hiking, Trekking y Climbing. Reserva en línea, paga con QR y sal con equipo certificado y guías expertos.</p>
       <div class="hero-ctas reveal d3">
         <a href="#catalogo" class="btn btn-gold"><i class="fa-solid fa-compass"></i> {{ __('Explorar tours') }} <i class="fa-solid fa-arrow-right arrow"></i></a>
-        <a href="#verificar" class="btn btn-glass"><i class="fa-solid fa-qrcode"></i> Mi reserva</a>
+        <a href="#verificar" class="btn btn-glass"><i class="fa-solid fa-qrcode"></i>{{ __('Mi reserva') }}</a>
       </div>
-      <form class="search reveal d4" id="hero-search">
+      <form class="search reveal d4" id="hero-search" method="GET" action="{{ route('home') }}">
         <div class="f"><i class="fa-solid fa-person-hiking"></i><div style="flex:1;min-width:0"><label for="hero-cat">{{ __('Actividad') }}</label>
-          <select id="hero-cat"><option value="todos">{{ __('Todas') }}</option>@foreach ($categorias as $cat)<option value="{{ $cat->rta_amg }}">{{ $cat->nom }}</option>@endforeach</select></div></div>
-        <div class="f"><i class="fa-regular fa-calendar"></i><div style="flex:1;min-width:0"><label>Fecha</label><input type="date"></div></div>
-        <button class="btn btn-blue" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span></button>
+          <select id="hero-cat" name="categoria"><option value="todos">{{ __('Todas') }}</option>@foreach ($categorias as $cat)<option value="{{ $cat->rta_amg }}" @selected(request('categoria') === $cat->rta_amg)>{{ $cat->nom }}</option>@endforeach</select></div></div>
+        <div class="f"><i class="fa-regular fa-calendar"></i><div style="flex:1;min-width:0"><label for="hero-fecha">{{ __('Fecha') }}</label><input id="hero-fecha" name="fecha" type="date" min="{{ today()->toDateString() }}" value="{{ request('fecha') }}"></div></div>
+        <button class="btn btn-blue" aria-label="Buscar"><i class="fa-solid fa-magnifying-glass"></i> <span>{{ __('Buscar') }}</span></button>
       </form>
 
     </div>
@@ -462,7 +462,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <div class="ph a"><img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=900&auto=format&fit=crop" alt="Huayna Potosí"></div>
       <div class="ph b"><img src="https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=700&auto=format&fit=crop" alt="Camino de la Muerte"></div>
       <div class="ph c"><img src="https://images.unsplash.com/photo-1518638150340-f706e86654de?q=80&w=600&auto=format&fit=crop" alt="Valle de la Luna"></div>
-      <div class="badge b1"><span class="bi" style="background:var(--secundario)"><i class="fa-solid fa-shield-heart"></i></span><span>Reserva segura<small>Pago QR · Ficha médica</small></span></div>
+      <div class="badge b1"><span class="bi" style="background:var(--secundario)"><i class="fa-solid fa-shield-heart"></i></span><span>{{ __('Reserva segura') }}<small>{{ __('Pago QR · Ficha médica') }}</small></span></div>
       <div class="badge b2"><span class="bi" style="background:var(--principal)"><i class="fa-solid fa-mountain"></i></span><span>5.100 m<small>Huayna Potosí</small></span></div>
     </div>
   </div>
@@ -487,7 +487,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 <!-- ================= STATS ================= -->
 <div class="wrap" style="margin-top:80px">
   <div class="stats reveal">
-    <div class="stat"><div class="ic" style="background:rgba(31,95,139,.1);color:var(--principal)"><i class="fa-solid fa-route"></i></div><div class="n" data-count="15" data-suf="+">0</div><div class="l">Rutas georreferenciadas</div></div>
+    <div class="stat"><div class="ic" style="background:rgba(31,95,139,.1);color:var(--principal)"><i class="fa-solid fa-route"></i></div><div class="n" data-count="15" data-suf="+">0</div><div class="l">{{ __('Rutas georreferenciadas') }}</div></div>
     <div class="stat"><div class="ic" style="background:rgba(201,111,74,.12);color:var(--secundario)"><i class="fa-solid fa-mountain"></i></div><div class="n" data-count="5100" data-suf=" m">0</div><div class="l">{{ __('Altitud máxima') }}</div></div>
     <div class="stat"><div class="ic" style="background:rgba(244,201,93,.25);color:var(--calido)"><i class="fa-solid fa-helmet-safety"></i></div><div class="n" data-count="100" data-suf="%">0</div><div class="l">{{ __('Equipo certificado') }}</div></div>
     <div class="stat"><div class="ic" style="background:rgba(69,118,153,.12);color:var(--complementario)"><i class="fa-solid fa-robot"></i></div><div class="n">24/7</div><div class="l">{{ __('Asistencia con IA') }}</div></div>
@@ -530,7 +530,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     </div>
 
     <div class="filtros2 reveal d2" role="group" aria-label="Filtrar por dificultad y altitud">
-      <label class="sr-only" for="f-dif">Dificultad</label>
+      <label class="sr-only" for="f-dif">{{ __('Dificultad') }}</label>
       <select id="f-dif" class="fsel">
         <option value="">{{ __('Toda dificultad') }}</option>
         <option value="facil">{{ __('Fácil') }}</option>
@@ -538,7 +538,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <option value="dificil">{{ __('Difícil') }}</option>
         <option value="experto">{{ __('Experto') }}</option>
       </select>
-      <label class="sr-only" for="f-alt">Altitud máxima</label>
+      <label class="sr-only" for="f-alt">{{ __('Altitud máxima') }}</label>
       <select id="f-alt" class="fsel">
         <option value="">{{ __('Cualquier altitud') }}</option>
         <option value="0-3000">{{ __('Hasta 3.000 m') }}</option>
@@ -570,13 +570,13 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 <!-- ================= CÓMO RESERVAR ================= -->
 <section class="s how" id="como">
   <div class="wrap" style="text-align:center">
-    <span class="eyebrow reveal">Cómo reservar</span>
-    <h2 class="h2 reveal d1">Tu aventura en <em>4 pasos</em></h2>
+    <span class="eyebrow reveal">{{ __('Cómo reservar') }}</span>
+    <h2 class="h2 reveal d1">{{ __('Tu aventura en') }}<em>{{ __('4 pasos') }}</em></h2>
     <div class="steps">
-      <div class="step reveal"><div class="num" style="background:var(--principal)"><i class="fa-solid fa-map-location-dot"></i><b>1</b></div><h4>Elige tu ruta</h4><p>Explora el mapa y compara dificultad, altitud y duración.</p></div>
-      <div class="step reveal d1"><div class="num" style="background:var(--complementario)"><i class="fa-solid fa-file-medical"></i><b>2</b></div><h4>Completa tus datos</h4><p>Solo lo necesario, más la ficha médica en rutas de altura.</p></div>
-      <div class="step reveal d2"><div class="num" style="background:var(--secundario)"><i class="fa-solid fa-qrcode"></i><b>3</b></div><h4>Paga con QR</h4><p>Pago rápido y seguro, confirmación al instante.</p></div>
-      <div class="step reveal d3"><div class="num" style="background:var(--calido)"><i class="fa-solid fa-ticket"></i><b>4</b></div><h4>Recibe tu ticket</h4><p>Código único y QR para el check‑in con tu guía.</p></div>
+      <div class="step reveal"><div class="num" style="background:var(--principal)"><i class="fa-solid fa-map-location-dot"></i><b>1</b></div><h4>{{ __('Elige tu ruta') }}</h4><p>Explora el mapa y compara dificultad, altitud y duración.</p></div>
+      <div class="step reveal d1"><div class="num" style="background:var(--complementario)"><i class="fa-solid fa-file-medical"></i><b>2</b></div><h4>{{ __('Completa tus datos') }}</h4><p>Solo lo necesario, más la ficha médica en rutas de altura.</p></div>
+      <div class="step reveal d2"><div class="num" style="background:var(--secundario)"><i class="fa-solid fa-qrcode"></i><b>3</b></div><h4>{{ __('Paga con QR') }}</h4><p>Pago rápido y seguro, confirmación al instante.</p></div>
+      <div class="step reveal d3"><div class="num" style="background:var(--calido)"><i class="fa-solid fa-ticket"></i><b>4</b></div><h4>{{ __('Recibe tu ticket') }}</h4><p>Código único y QR para el check‑in con tu guía.</p></div>
     </div>
   </div>
 </section>
@@ -585,15 +585,15 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 <section class="s geo">
   <div class="wrap geo-grid">
     <div>
-      <span class="eyebrow reveal" style="color:var(--acento)">Rutas georreferenciadas</span>
-      <h2 class="h2 reveal d1">Cada paso,<br><em>trazado en el mapa</em></h2>
-      <p class="sub reveal d2">Conoce el recorrido exacto antes de salir: puntos de encuentro, altitudes y paradas, con seguimiento del grupo durante el tour.</p>
+      <span class="eyebrow reveal" style="color:var(--acento)">{{ __('Rutas georreferenciadas') }}</span>
+      <h2 class="h2 reveal d1">{{ __('Cada paso,') }}<br><em>{{ __('trazado en el mapa') }}</em></h2>
+      <p class="sub reveal d2">{{ __('Conoce el recorrido antes de salir: puntos de encuentro, altitudes y paradas.') }}</p>
       <ul>
-        <li class="reveal d2"><i class="fa-solid fa-location-crosshairs"></i>Punto de encuentro y paradas marcados en el mapa</li>
-        <li class="reveal d3"><i class="fa-solid fa-chart-area"></i>Perfil de altitud y distancia de cada ruta</li>
-        <li class="reveal d4"><i class="fa-solid fa-satellite-dish"></i>Guía con check‑in y monitoreo en tiempo real</li>
+        <li class="reveal d2"><i class="fa-solid fa-location-crosshairs"></i>{{ __('Punto de encuentro y paradas marcados en el mapa') }}</li>
+        <li class="reveal d3"><i class="fa-solid fa-chart-area"></i>{{ __('Perfil de altitud y distancia de cada ruta') }}</li>
+        <li class="reveal d4"><i class="fa-solid fa-satellite-dish"></i>{{ __('Check-in QR y registro del recorrido') }}</li>
       </ul>
-      <a href="#catalogo" class="btn btn-gold reveal d4">Ver rutas en el mapa <i class="fa-solid fa-arrow-right arrow"></i></a>
+      <a href="#catalogo" class="btn btn-gold reveal d4">{{ __('Ver rutas en el mapa') }}<i class="fa-solid fa-arrow-right arrow"></i></a>
     </div>
     <div class="mapbox reveal zoom d2" id="mapbox">
       <div style="position:relative">
@@ -616,7 +616,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <div class="pin" style="left:63%;top:37.5%"><span>Campo base 4.700 m</span><i></i></div>
       <div class="pin" style="left:88%;top:19.5%"><span>Cumbre 5.100 m</span><i></i></div>
       </div>
-      <div class="map-stats"><div><b>32 km</b>Distancia</div><div><b>+1.450 m</b>Desnivel</div><div><b>8 h</b>Duración</div></div>
+      <div class="map-stats"><div><b>32 km</b>{{ __('Distancia') }}</div><div><b>+1.450 m</b>{{ __('Desnivel') }}</div><div><b>8 h</b>{{ __('Duración') }}</div></div>
     </div>
   </div>
 </section>
@@ -626,16 +626,16 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="wrap">
     <div class="verify-box reveal">
       <div>
-        <span class="eyebrow" style="color:var(--acento)">Mi reserva</span>
-        <h2 class="h2">Consulta tu reserva al instante</h2>
+        <span class="eyebrow" style="color:var(--acento)">{{ __('Mi reserva') }}</span>
+        <h2 class="h2">{{ __('Consulta tu reserva al instante') }}</h2>
         <p class="sub">Ingresa tu código único (ej. <code>RES-88A9F2</code>) para ver el estado de pago, la salida y tu ticket QR.</p>
       </div>
       <div>
         <form class="vform" onsubmit="event.preventDefault();this.querySelector('button').innerHTML='<i class=\'fa-solid fa-circle-check\'></i> Confirmada'">
           <input type="text" placeholder="RES-XXXXXX" required>
-          <button class="btn btn-terra"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
+          <button class="btn btn-terra"><i class="fa-solid fa-magnifying-glass"></i>{{ __('Consultar') }}</button>
         </form>
-        <div class="vnote"><span><i class="fa-solid fa-lock"></i>Sin necesidad de cuenta</span><span><i class="fa-solid fa-qrcode"></i>Ticket QR descargable</span></div>
+        <div class="vnote"><span><i class="fa-solid fa-lock"></i>{{ __('Sin necesidad de cuenta') }}</span><span><i class="fa-solid fa-qrcode"></i>{{ __('Ticket QR descargable') }}</span></div>
       </div>
     </div>
   </div>
@@ -679,7 +679,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <p>Agencia de viajes y turismo de aventura en el corazón de La Paz, Bolivia.</p>
         <div class="soc"><a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a><a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a><a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a><a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a></div>
       </div>
-      <div class="fl"><h5>Tours</h5><a href="#">Biking</a><a href="#">Hiking</a><a href="#">Trekking</a><a href="#">Climbing</a><a href="#">City Tour</a></div>
+      <div class="fl"><h5>{{ __('Tours') }}</h5><a href="#">Biking</a><a href="#">Hiking</a><a href="#">Trekking</a><a href="#">Climbing</a><a href="#">City Tour</a></div>
       <div class="fl"><h5>Legal</h5><a href="#">Términos y condiciones</a><a href="#">Privacidad</a><a href="#">Cookies</a><a href="#">Reembolsos</a></div>
       <div>
         <h5>Novedades</h5>
@@ -706,14 +706,14 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <p>Estos términos regulan la contratación de tours y servicios de <b>Pipocas, Agencia de Viajes y Turismo</b>, con oficina en Calle Sagárnaga #234, Zona Central, La Paz, Bolivia. Al confirmar una reserva declaras haberlos leído y aceptado.</p>
     <h5>1. Reservas y cupos</h5>
     <ul>
-      <li>La reserva queda confirmada cuando se registra el pago (total o el anticipo indicado en el tour) y recibes tu ticket con código QR por correo.</li>
+      <li>{{ __('La reserva se confirma al completar el pago total. El anticipo mantiene un saldo pendiente y todavía no emite boletos.') }}</li>
       <li>Cada salida tiene un cupo máximo y un mínimo de participantes. Si no se alcanza el mínimo, te ofreceremos otra fecha, otro tour o la devolución total.</li>
       <li>Debes registrar a cada participante con nombre completo, documento de identidad o pasaporte, nacionalidad y un contacto de emergencia.</li>
     </ul>
     <h5>2. Precios y pagos</h5>
     <ul>
       <li>Los precios están expresados en bolivianos (Bs) e incluyen lo detallado en la ficha del tour. Lo no indicado (comidas extra, propinas, entradas a áreas protegidas cuando así se señale) corre por cuenta del turista.</li>
-      <li>Aceptamos pago con QR, tarjeta y transferencia. Emitimos factura conforme a la normativa del Servicio de Impuestos Nacionales (SIN).</li>
+      <li>{{ __('Esta demostración permite simular QR, tarjeta y transferencia. Genera un comprobante interno; no una factura tributaria del SIN.') }}</li>
     </ul>
     <h5>3. Salidas</h5>
     <ul>
@@ -784,7 +784,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <li><b>Mapas y contenido de terceros:</b> algunos mapas o videos incrustados pueden instalar cookies propias del proveedor.</li>
     </ul>
     <h5>Cómo gestionarlas</h5>
-    <p>Al entrar verás un banner con tres opciones: <b>Aceptar</b> todas, <b>Rechazar</b> las no esenciales o <b>Configurar</b> cada categoría. Puedes cambiar tu decisión cuando quieras borrando las cookies del navegador o desde el enlace de cookies al pie del sitio. Rechazarlas no te impide reservar.</p>
+    <p>Al entrar verás un banner con tres opciones: <b>Aceptar</b> todas, <b>{{ __('Rechazar') }}</b> las no esenciales o <b>Configurar</b> cada categoría. Puedes cambiar tu decisión cuando quieras borrando las cookies del navegador o desde el enlace de cookies al pie del sitio. Rechazarlas no te impide reservar.</p>
     <p>No usamos cookies para publicidad personalizada ni compartimos la información con redes publicitarias.</p>
   </div>
   <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
@@ -874,8 +874,8 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 
 <div class="cookie" id="cookie">
   <span class="ci"><i class="fa-solid fa-cookie-bite"></i></span>
-  <div class="ct"><b>Tu privacidad importa</b>Usamos cookies esenciales para que el sitio funcione. Las de analítica solo con tu permiso. <a href="#m-cookies" data-modal="m-cookies">Política de cookies</a></div>
-  <div class="ca"><button data-c>Rechazar</button><button data-c>Configurar</button><button class="acc" data-c>Aceptar</button></div>
+  <div class="ct"><b>{{ __('Tu privacidad importa') }}</b>{{ __('Usamos cookies esenciales para que el sitio funcione. Las de analítica solo con tu permiso.') }}<a href="#m-cookies" data-modal="m-cookies">{{ __('Política de cookies') }}</a></div>
+  <div class="ca"><button data-c>{{ __('Rechazar') }}</button><button data-c>Configurar</button><button class="acc" data-c>Aceptar</button></div>
 </div>
 <button class="totop" id="totop" aria-label="Volver arriba"><i class="fa-solid fa-arrow-up"></i></button>
 
@@ -914,8 +914,8 @@ const filter=f=>{fCat=f;chips.forEach(c=>c.classList.toggle('on',c.dataset.f===f
 chips.forEach(c=>c.onclick=()=>filter(c.dataset.f));
 fDif.onchange=aplicar;fAlt.onchange=aplicar;
 fLimpiar.onclick=()=>{fDif.value='';fAlt.value='';filter('todos')};
-document.getElementById('hero-search').addEventListener('submit',e=>{e.preventDefault();filter(document.getElementById('hero-cat').value);
-  document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})});
+// La fecha consulta disponibilidad real en el servidor. Los filtros locales refinan el resultado.
+if(new URLSearchParams(location.search).has('fecha')) document.getElementById('catalogo').scrollIntoView();
 aplicar();
 document.querySelectorAll('[data-go]').forEach(t=>t.onclick=()=>{filter(t.dataset.go);document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})});
 

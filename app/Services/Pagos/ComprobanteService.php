@@ -3,6 +3,7 @@
 namespace App\Services\Pagos;
 
 use App\Models\ComprobantePago;
+use App\Observers\AuditObserver;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 /** Comprobante de pago en PDF (RF-14). */
@@ -11,6 +12,7 @@ class ComprobanteService
     public function pdf(ComprobantePago $comprobante): \Barryvdh\DomPDF\PDF
     {
         $comprobante->loadMissing('reserva.salida.tour', 'reserva.participantes.alquileres.item.tipo', 'pagos');
+        $comprobante->reserva->participantes->each(fn ($p) => AuditObserver::lectura($p));
 
         return Pdf::loadView('pdf.comprobante', [
             'comprobante' => $comprobante,

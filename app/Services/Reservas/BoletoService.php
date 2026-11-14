@@ -4,6 +4,7 @@ namespace App\Services\Reservas;
 
 use App\Models\Boleto;
 use App\Models\Reserva;
+use App\Observers\AuditObserver;
 use App\Services\CodeGeneratorService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use chillerlan\QRCode\Common\EccLevel;
@@ -30,15 +31,15 @@ class BoletoService
         $emitidos = collect();
 
         foreach ($reserva->participantes as $ptc) {
+            if ($altoRiesgo && (! $ptc->fichaMedica?->fir_en || ! FirmaDigital::existe($ptc->fichaMedica?->rta_fir))) {
+                continue;
+            }
             if ($ptc->boleto) {
                 if ($ptc->boleto->est === Boleto::EST_CANCELADO) {
                     $ptc->boleto->update(['est' => Boleto::EST_EMITIDO]);
                 }
 
                 continue;
-            }
-            if ($altoRiesgo && (! $ptc->fichaMedica || ! $ptc->fichaMedica->fir_en || ! $ptc->fichaMedica->rta_fir)) {
-                continue; // bloqueado hasta que firme la ficha médica
             }
 
             $emitidos->push(Boleto::create([
@@ -69,6 +70,7 @@ class BoletoService
     {
         $reserva->loadMissing('salida.tour.categoria', 'salida.guia.usuario');
         $boletos->loadMissing('participante.pais');
+        $boletos->each(fn ($boleto) => AuditObserver::lectura($boleto->participante));
 
         $items = $boletos->map(fn (Boleto $b) => [
             'boleto' => $b,

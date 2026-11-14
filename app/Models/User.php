@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,9 +20,9 @@ use Laravel\Sanctum\HasApiTokens;
  * rol_id (roles). Se exponen los alias `name` y `email` para que las vistas
  * de Jetstream y Fortify sigan funcionando.
  */
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, \Laravel\Fortify\TwoFactorAuthenticatable, Notifiable;
 
     public const ROL_TURISTA = 'turista';
 
@@ -40,7 +41,7 @@ class User extends Authenticatable
         'ci_cmp', 'ci_dep_id', 'fot_prf', 'act',
     ];
 
-    protected $hidden = ['clv', 'remember_token'];
+    protected $hidden = ['clv', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
 
     protected $appends = ['name', 'email', 'profile_photo_url'];
 
@@ -48,7 +49,7 @@ class User extends Authenticatable
     {
         return [
             'clv' => 'hashed',
-            'cor_vrf_en' => 'datetime',
+            'cor_vrf_en' => 'datetime', 'two_factor_confirmed_at' => 'datetime',
             'eli_en' => 'datetime',
             'act' => 'boolean',
         ];
@@ -69,6 +70,21 @@ class User extends Authenticatable
     public function getEmailForPasswordReset(): string
     {
         return $this->cor;
+    }
+
+    public function hasVerifiedEmail(): bool
+    {
+        return $this->cor_vrf_en !== null;
+    }
+
+    public function markEmailAsVerified(): bool
+    {
+        return $this->forceFill(['cor_vrf_en' => $this->freshTimestamp()])->save();
+    }
+
+    protected function emailVerifiedAt(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->cor_vrf_en, set: fn ($v) => ['cor_vrf_en' => $v]);
     }
 
     public function getEmailForVerification(): string

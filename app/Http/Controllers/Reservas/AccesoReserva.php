@@ -32,6 +32,6 @@ class AccesoReserva
 
     public static function exigir(Request $request, Reserva $reserva): void
     {
-        abort_unless(self::permitido($request, $reserva), 403, 'Consulta la reserva con su código y el correo del contacto.');
+        abort_unless(self::permitido($request, $reserva), 403, __('Consulta la reserva con su código y el correo del contacto.'));
     }
 }

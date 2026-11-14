@@ -13,3 +13,6 @@ docker/certs
 
 .env*
 work
+
+storage/app/*
+storage/framework/testing

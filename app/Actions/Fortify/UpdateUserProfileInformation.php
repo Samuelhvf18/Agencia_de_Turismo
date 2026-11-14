@@ -29,9 +29,14 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             ])->save();
         }
 
+        $cambioCorreo = mb_strtolower($user->cor) !== mb_strtolower($input['email']);
         $user->forceFill([
+            'cor_vrf_en' => $cambioCorreo ? null : $user->cor_vrf_en,
             'nom' => $input['name'],
             'cor' => $input['email'],
         ])->save();
+        if ($cambioCorreo) {
+            $user->sendEmailVerificationNotification();
+        }
     }
 }

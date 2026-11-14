@@ -8,6 +8,7 @@ use App\Models\Reserva;
 use App\Models\SalidaTour;
 use App\Models\User;
 use App\Services\Notificaciones\NotificacionService;
+use App\Services\Reservas\FirmaDigital;
 use App\Services\Reservas\ReservaService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -28,100 +29,103 @@ class SalidaService
 
     public function programar(array $datos): SalidaTour
     {
-        $this->validar($datos);
+        return DB::transaction(function () use ($datos) {
+            $this->asignacion->bloquearAgenda();
+            $this->validar($datos);
 
-        return SalidaTour::create($datos + ['est' => SalidaTour::EST_PROGRAMADA]);
+            return SalidaTour::create($datos + ['est' => SalidaTour::EST_PROGRAMADA]);
+        }, 3);
     }
 
-    /** Cambia capacidad y asignaciones (guía, chofer, vehículo) sin mover la fecha. */
+    /** Cambia capacidad y asignaciones sin mover la fecha, validando dentro del bloqueo. */
     public function asignar(SalidaTour $salida, array $datos): SalidaTour
     {
-        $this->exigirEditable($salida);
-        $completo = $datos + $salida->only(['tur_id', 'fec_sal', 'hra_sal', 'cap_max', 'prf_gui_id', 'prf_cho_id', 'veh_id']);
-        $completo['fec_sal'] = $salida->fec_sal->toDateString();
-        $this->validar($completo, $salida);
-        $salida->update(array_intersect_key($datos, array_flip(['cap_max', 'prf_gui_id', 'prf_cho_id', 'veh_id'])));
+        return DB::transaction(function () use ($salida, $datos) {
+            $this->asignacion->bloquearAgenda();
+            $salida = SalidaTour::lockForUpdate()->findOrFail($salida->id);
+            $this->exigirEditable($salida);
+            $completo = $datos + $salida->only(['tur_id', 'fec_sal', 'hra_sal', 'cap_max', 'prf_gui_id', 'prf_cho_id', 'veh_id']);
+            $completo['fec_sal'] = $salida->fec_sal->toDateString();
+            $this->validar($completo, $salida);
+            $salida->update(array_intersect_key($datos, array_flip(['cap_max', 'prf_gui_id', 'prf_cho_id', 'veh_id'])));
 
-        return $salida;
+            return $salida;
+        }, 3);
     }
 
-    /** Cambia fecha u hora y avisa a cada reserva activa. */
     public function reprogramar(SalidaTour $salida, string $fecha, string $hora, string $motivo): SalidaTour
     {
-        $this->exigirEditable($salida);
-        $datos = ['fec_sal' => $fecha, 'hra_sal' => $hora] + $salida->only(['tur_id', 'cap_max', 'prf_gui_id', 'prf_cho_id', 'veh_id']);
-        $this->validar($datos, $salida);
+        return DB::transaction(function () use ($salida, $fecha, $hora, $motivo) {
+            $this->asignacion->bloquearAgenda();
+            $salida = SalidaTour::lockForUpdate()->findOrFail($salida->id);
+            $this->exigirEditable($salida);
+            $datos = ['fec_sal' => $fecha, 'hra_sal' => $hora] + $salida->only(['tur_id', 'cap_max', 'prf_gui_id', 'prf_cho_id', 'veh_id']);
+            $this->validar($datos, $salida);
+            $antes = $salida->fec_sal->format('d/m/Y').' '.substr($salida->hra_sal, 0, 5);
+            $salida->update(['fec_sal' => $fecha, 'hra_sal' => $hora]);
+            foreach ($this->reservasActivas($salida) as $reserva) {
+                $this->avisos->aReserva($reserva, 'salida_reprogramada', [
+                    'mensaje' => "La salida de {$salida->tour->nom} cambió de {$antes} al ".$salida->fec_sal->format('d/m/Y').' '.substr($hora, 0, 5).". Motivo: {$motivo}. Si la nueva fecha no te sirve, puedes cancelar sin costo desde tu reserva.",
+                    'fecha_anterior' => $antes,
+                ]);
+            }
 
-        $antes = $salida->fec_sal->format('d/m/Y').' '.substr($salida->hra_sal, 0, 5);
-        $salida->update(['fec_sal' => $fecha, 'hra_sal' => $hora]);
-
-        foreach ($this->reservasActivas($salida) as $reserva) {
-            $this->avisos->aReserva($reserva, 'salida_reprogramada', [
-                'mensaje' => "La salida de {$salida->tour->nom} cambió de {$antes} al ".$salida->fec_sal->format('d/m/Y').' '.substr($hora, 0, 5).". Motivo: {$motivo}. Si la nueva fecha no te sirve, puedes cancelar sin costo desde tu reserva.",
-                'fecha_anterior' => $antes,
-            ]);
-        }
-
-        return $salida;
+            return $salida;
+        }, 3);
     }
 
-    /** Cancela la salida: cancela sus reservas (reembolso de lo pagado) y avisa a los clientes. */
+    /** La salida y todas sus reservas se cancelan en la misma transacción. */
     public function cancelar(SalidaTour $salida, string $motivo): SalidaTour
     {
-        $this->exigirEditable($salida);
-        $reservas = $this->reservasActivas($salida);
-
-        DB::transaction(function () use ($salida, $reservas, $motivo) {
+        return DB::transaction(function () use ($salida, $motivo) {
+            $this->asignacion->bloquearAgenda();
+            $salida = SalidaTour::lockForUpdate()->findOrFail($salida->id);
+            $this->exigirEditable($salida);
             $salida->update(['est' => SalidaTour::EST_CANCELADA]);
-            foreach ($reservas as $reserva) {
+            foreach ($this->reservasActivas($salida) as $reserva) {
                 $this->reservas->cancelar($reserva, "Salida cancelada: {$motivo}");
+                $this->avisos->aReserva($reserva->refresh(), 'salida_cancelada', [
+                    'mensaje' => "La salida de {$salida->tour->nom} del ".$salida->fec_sal->format('d/m/Y')." fue cancelada ({$motivo}). Si hubo un pago real, contacta a la agencia para conciliar su devolución.",
+                ]);
             }
-        });
 
-        foreach ($reservas as $reserva) {
-            $this->avisos->aReserva($reserva->refresh(), 'salida_cancelada', [
-                'mensaje' => "Lamentamos informarte que la salida de {$salida->tour->nom} del ".$salida->fec_sal->format('d/m/Y')." fue cancelada ({$motivo}). Registramos la devolución de lo pagado.",
-            ]);
-        }
-
-        return $salida;
+            return $salida;
+        }, 3);
     }
 
     public function iniciar(SalidaTour $salida): SalidaTour
     {
-        if ($salida->est !== SalidaTour::EST_PROGRAMADA) {
-            throw ValidationException::withMessages(['salida' => 'La salida ya fue iniciada o está cerrada.']);
-        }
-        $salida->update(['est' => SalidaTour::EST_EN_CURSO, 'hra_ini_rea' => now()]);
+        return DB::transaction(function () use ($salida) {
+            $this->asignacion->bloquearAgenda();
+            $salida = SalidaTour::lockForUpdate()->findOrFail($salida->id);
+            $this->exigirEditable($salida);
+            $salida->update(['est' => SalidaTour::EST_EN_CURSO, 'hra_ini_rea' => now()]);
 
-        return $salida;
+            return $salida;
+        }, 3);
     }
 
-    /**
-     * Cierra la salida: registra la hora real de fin y el viaje del vehículo,
-     * completa las reservas pagadas (devuelve equipo, actualiza Markov) y
-     * cancela las que quedaron impagas.
-     */
+    /** Cierre y efectos sobre reservas/equipo atómicos, incluso si falla una notificación. */
     public function finalizar(SalidaTour $salida, ?float $km = null, ?float $combustible = null): SalidaTour
     {
-        if ($salida->est !== SalidaTour::EST_EN_CURSO) {
-            throw ValidationException::withMessages(['salida' => 'Primero registra el inicio del recorrido.']);
-        }
-
-        DB::transaction(function () use ($salida, $km, $combustible) {
+        return DB::transaction(function () use ($salida, $km, $combustible) {
+            $this->asignacion->bloquearAgenda();
+            $salida = SalidaTour::lockForUpdate()->findOrFail($salida->id);
+            if ($salida->est !== SalidaTour::EST_EN_CURSO) {
+                throw ValidationException::withMessages(['salida' => 'Primero registra el inicio del recorrido.']);
+            }
             $salida->update(['est' => SalidaTour::EST_COMPLETADA, 'hra_fin_rea' => now()]);
             if ($salida->veh_id && ($km !== null || $combustible !== null)) {
                 BitacoraViajeVehiculo::create(['veh_id' => $salida->veh_id, 'sal_tur_id' => $salida->id, 'dst_km' => $km, 'cos_cmb' => $combustible]);
             }
-        });
+            foreach ($this->reservasActivas($salida) as $reserva) {
+                $reserva->est === Reserva::EST_CONFIRMADA
+                    ? $this->reservas->completar($reserva)
+                    : $this->reservas->cancelar($reserva, 'Salida concluida sin pago');
+            }
 
-        foreach ($this->reservasActivas($salida) as $reserva) {
-            $reserva->est === Reserva::EST_CONFIRMADA
-                ? $this->reservas->completar($reserva)
-                : $this->reservas->cancelar($reserva, 'Salida concluida sin pago');
-        }
-
-        return $salida;
+            return $salida;
+        }, 3);
     }
 
     /**
@@ -141,12 +145,12 @@ class SalidaService
             }
             $ptc = $boleto->participante;
             if ($ptc->reserva->sal_tur_id !== $salida->id) {
-                return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'El boleto es de otra salida.'];
+                return ['ok' => false, 'cod' => $codigo, 'mensaje' => 'El boleto es de otra salida.'];
             }
             if ($boleto->est === Boleto::EST_CANCELADO || $ptc->reserva->est !== Reserva::EST_CONFIRMADA) {
                 return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'El boleto está cancelado o la reserva no está confirmada.'];
             }
-            if ($salida->tour->esAltoRiesgo() && (! $ptc->fichaMedica || ! $ptc->fichaMedica->fir_en || ! $ptc->fichaMedica->rta_fir)) {
+            if ($salida->tour->esAltoRiesgo() && (! $ptc->fichaMedica?->fir_en || ! FirmaDigital::existe($ptc->fichaMedica?->rta_fir))) {
                 return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'Falta la ficha médica firmada (tour de alto riesgo).'];
             }
             if ($boleto->est === Boleto::EST_VALIDADO) {

@@ -54,10 +54,10 @@
     ];
     [$estTxt, $estCls, $estIco] = $estados[$reserva['est']] ?? [ucfirst($reserva['est']), 'bg-gray-100 text-gray-700', 'fa-solid fa-circle-info'];
     [$pagTxt, $pagCls] = $pagos[$reserva['est_pag']] ?? [ucfirst($reserva['est_pag']), 'text-pipocas-texto'];
-    $f = \Carbon\Carbon::parse($salida['fec_sal'])->locale('es');
+    $f = \Carbon\Carbon::parse($salida['fec_sal'])->locale(app()->getLocale());
 @endphp
 
-@section('titulo', 'Reserva ' . $reserva['cod'])
+@section('titulo', __('Reserva') . ' ' . $reserva['cod'])
 
 @section('contenido')
 <div class="mx-auto max-w-4xl space-y-6">
@@ -67,8 +67,7 @@
 
     <a href="{{ $urlConsultar }}"
        class="inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
-        <i class="fa-solid fa-arrow-left"></i> Consultar otra reserva
-    </a>
+        <i class="fa-solid fa-arrow-left"></i>{{ __('Consultar otra reserva') }}</a>
 
     {{-- Cabecera --}}
     <section class="rsv-tarjeta">
@@ -76,10 +75,10 @@
             <div>
                 <p class="text-xs font-bold uppercase tracking-[0.2em] text-pipocas-texto-2">{{ __('Reserva') }}</p>
                 <h1 class="break-all font-mono text-2xl font-bold tracking-wider text-pipocas-principal sm:text-3xl">{{ $reserva['cod'] }}</h1>
-                <p class="mt-1 text-sm text-pipocas-texto-2">Registrada el {{ \Carbon\Carbon::parse($reserva['cre_en'])->locale('es')->translatedFormat('j \d\e F \d\e Y') }}</p>
+                <p class="mt-1 text-sm text-pipocas-texto-2">{{ __('Registrada el :fecha', ['fecha' => \Carbon\Carbon::parse($reserva['cre_en'])->locale(app()->getLocale())->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'j \d\e F \d\e Y')]) }}</p>
             </div>
             <span class="inline-flex items-center gap-2 self-start rounded-full px-4 py-2 text-sm font-bold sm:self-auto {{ $estCls }}">
-                <i class="{{ $estIco }}"></i> {{ $estTxt }}
+                <i class="{{ $estIco }}"></i> {{ __($estTxt) }}
             </span>
         </div>
 
@@ -87,9 +86,9 @@
             <div class="mt-5 flex flex-col gap-3 rounded-2xl bg-pipocas-acento/15 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-sm text-pipocas-calido"><i class="fa-solid fa-circle-info mr-1"></i>
                     @if ($reserva['est_pag'] === 'parcial')
-                        Tienes un saldo de <b>Bs. {{ number_format($saldo, 2, ',', '.') }}</b>. Complétalo para recibir los tickets con código QR.
+                        {{ __('Tienes un saldo de Bs. :saldo. Complétalo para recibir los tickets con código QR.', ['saldo' => number_format($saldo, 2, ',', '.')]) }}
                     @else
-                        Completa el pago para recibir los tickets con código QR.
+                        {{ __('Completa el pago para recibir los tickets con código QR.') }}
                     @endif
                 </p>
                 <a href="{{ $urlPago }}" class="rsv-btn shrink-0 px-5 py-2.5"><i class="fa-solid fa-credit-card"></i> {{ __('Pagar ahora') }}</a>
@@ -111,10 +110,10 @@
                 </div>
             </div>
             <dl class="grid gap-4 p-5 text-sm sm:grid-cols-2 sm:p-7">
-                <div><dt class="text-pipocas-texto-2">{{ __('Fecha') }}</dt><dd class="font-semibold">{{ ucfirst($f->translatedFormat('l j \d\e F')) }}</dd></div>
+                <div><dt class="text-pipocas-texto-2">{{ __('Fecha') }}</dt><dd class="font-semibold">{{ ucfirst($f->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'l j \d\e F')) }}</dd></div>
                 <div><dt class="text-pipocas-texto-2">{{ __('Hora de salida') }}</dt><dd class="font-semibold">{{ substr($salida['hra_sal'], 0, 5) }}</dd></div>
-                <div><dt class="text-pipocas-texto-2">{{ __('Punto de encuentro') }}</dt><dd class="font-semibold">{{ $salida['pun_enc'] ?? 'Se enviará por correo' }}</dd></div>
-                <div><dt class="text-pipocas-texto-2">{{ __('Guía') }}</dt><dd class="font-semibold">{{ $salida['gui_nom'] ?? 'Por asignar' }}</dd></div>
+                <div><dt class="text-pipocas-texto-2">{{ __('Punto de encuentro') }}</dt><dd class="font-semibold">{{ $salida['pun_enc'] ?? __('Se enviará por correo') }}</dd></div>
+                <div><dt class="text-pipocas-texto-2">{{ __('Guía') }}</dt><dd class="font-semibold">{{ $salida['gui_nom'] ?? __('Por asignar') }}</dd></div>
             </dl>
         </section>
 
@@ -123,7 +122,7 @@
             <h2 class="rsv-titulo mb-4">{{ __('Pago') }}</h2>
             <dl class="space-y-3 text-sm">
                 <div class="flex justify-between"><dt class="text-pipocas-texto-2">{{ __('Participantes') }}</dt><dd class="font-semibold">{{ $reserva['cnt_ptc'] }}</dd></div>
-                <div class="flex justify-between"><dt class="text-pipocas-texto-2">{{ __('Estado') }}</dt><dd class="font-bold {{ $pagCls }}">{{ $pagTxt }}</dd></div>
+                <div class="flex justify-between"><dt class="text-pipocas-texto-2">{{ __('Estado') }}</dt><dd class="font-bold {{ $pagCls }}">{{ __($pagTxt) }}</dd></div>
                 <div class="flex items-baseline justify-between border-t border-dashed border-gray-200 pt-3">
                     <dt class="font-bold">{{ __('Total') }}</dt>
                     <dd class="font-titulo text-2xl font-semibold text-pipocas-principal">Bs. {{ number_format($reserva['pre_tot'], 2, ',', '.') }}</dd>
@@ -136,8 +135,8 @@
                         @foreach ($historialPagos as $pago)
                             <li class="flex items-center justify-between gap-2">
                                 <span>
-                                    <span class="font-semibold">{{ $metodos[$pago->mtd] ?? $pago->mtd }}</span>
-                                    <span class="block text-xs text-pipocas-texto-2">{{ $pago->pag_en->format('d/m/Y H:i') }} · {{ ucfirst($pago->est) }}</span>
+                                    <span class="font-semibold">{{ __($metodos[$pago->mtd] ?? $pago->mtd) }}</span>
+                                    <span class="block text-xs text-pipocas-texto-2">{{ $pago->pag_en->format('d/m/Y H:i') }} · {{ ucfirst(__($pago->est)) }}</span>
                                 </span>
                                 <span @class(['font-semibold', 'text-emerald-700' => $pago->est === 'completado', 'text-red-600 line-through' => $pago->est === 'fallido'])>Bs. {{ number_format($pago->mto, 2, ',', '.') }}</span>
                             </li>
@@ -176,7 +175,7 @@
                         'border-2 border-dashed border-gray-300 text-gray-400' => ! $p['boleto'],
                     ])>
                         @if ($p['boleto'] && ! empty($p['boleto']['qr']))
-                            <img src="{{ $p['boleto']['qr'] }}" alt="Código QR del boleto {{ $p['boleto']['cod'] }}" class="h-full w-full rounded-xl bg-white p-1">
+                            <img src="{{ $p['boleto']['qr'] }}" alt="{{ __('Código QR del boleto :codigo', ['codigo' => $p['boleto']['cod']]) }}" class="h-full w-full rounded-xl bg-white p-1">
                         @elseif ($p['boleto'])
                             <div>
                                 <i class="fa-solid fa-qrcode text-5xl"></i>
@@ -193,14 +192,13 @@
                         <p class="font-semibold">{{ $p['nom_cpl'] }}</p>
                         <p class="text-xs text-pipocas-texto-2">{{ $p['tip_doc'] }} {{ $p['num_doc'] }}</p>
                         @if (! empty($p['es_ctc_pri']))
-                            <span class="mt-1 inline-block rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario">Principal</span>
+                            <span class="mt-1 inline-block rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario">{{ __('Principal') }}</span>
                         @endif
                         @if ($p['boleto'])
                             <p class="mt-2 break-all font-mono text-xs text-pipocas-texto-2">{{ $p['boleto']['cod'] }}</p>
                             <a href="{{ $p['boleto']['url'] ?? '#' }}"
                                class="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover">
-                                <i class="fa-solid fa-download"></i> Descargar ticket
-                            </a>
+                                <i class="fa-solid fa-download"></i>{{ __('Descargar ticket') }}</a>
                         @endif
                     </div>
                 </li>
@@ -221,7 +219,7 @@
             <p class="mb-4 text-sm text-pipocas-texto-2">{{ __('Tu reseña aparecerá como verificada en la página del tour.') }}</p>
             <form method="POST" action="{{ $urlResena }}" class="space-y-3">
                 @csrf
-                <div class="flex gap-1 text-3xl" role="radiogroup" aria-label="Calificación">
+                <div class="flex gap-1 text-3xl" role="radiogroup" aria-label="{{ __('Calificación') }}">
                     @for ($i = 1; $i <= 5; $i++)
                         <label class="cursor-pointer text-pipocas-acento">
                             <input type="radio" name="cal" value="{{ $i }}" class="sr-only" x-model.number="cal">
@@ -230,7 +228,7 @@
                     @endfor
                 </div>
                 @error('cal') <p class="rsv-error">{{ $message }}</p> @enderror
-                <textarea name="com" rows="3" maxlength="1000" class="rsv-campo" placeholder="Cuéntanos tu experiencia (opcional)">{{ old('com') }}</textarea>
+                <textarea name="com" rows="3" maxlength="1000" class="rsv-campo" placeholder="{{ __('Cuéntanos tu experiencia (opcional)') }}">{{ old('com') }}</textarea>
                 <button class="rsv-btn px-5 py-2.5" :disabled="!cal"><i class="fa-solid fa-paper-plane"></i> {{ __('Publicar reseña') }}</button>
             </form>
         </section>

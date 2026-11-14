@@ -60,6 +60,7 @@ class IoGestionController extends Controller
 
         // Un solo juego activo por tour: el anterior queda como historial.
         DB::transaction(function () use ($tour, $datos) {
+            Tour::whereKey($tour->id)->lockForUpdate()->firstOrFail();
             ColaParametroTour::where('tur_id', $tour->id)->where('act', true)->update(['act' => false]);
             ColaParametroTour::create($datos + ['tur_id' => $tour->id, 'fec_cal' => today(), 'act' => true]);
         });

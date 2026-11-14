@@ -10,6 +10,14 @@ set -euo pipefail
 # Ubicarse en la raíz del repositorio, sin importar desde dónde se invoque.
 cd "$(dirname "$0")/.."
 RAIZ="$(pwd)"
+task_entorno_nuevo=1
+if [ -f .env ]; then
+    task_entorno_nuevo=0
+    if ! sed -n 's/^APP_ENV=//p' .env | tr -d '\"\r' | grep -Eq '^(local|testing)$'; then
+        echo "El instalador automático solo admite APP_ENV=local/testing. Consulte docs/DESPLIEGUE.md."
+        exit 1
+    fi
+fi
 echo "==> Repositorio: $RAIZ"
 
 DB_NOMBRE="agencia_turismo_db"
@@ -39,23 +47,23 @@ if command -v apt-get >/dev/null 2>&1; then
     echo "==> Instalando utilidades base..."
     $SUDO apt-get install -y git unzip curl ca-certificates
 
-    # PHP 8.2+ (el proyecto exige ^8.2). Ubuntu 24.04 ya trae 8.3.
+    # PHP 8.4 para la aplicación y Pest 4.
     PHP_OK=0
     if command -v php >/dev/null 2>&1; then
-        if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge 80200 ]; then PHP_OK=1; fi
+        if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge 80400 ]; then PHP_OK=1; fi
     fi
     if [ "$PHP_OK" -eq 0 ]; then
         echo "==> Instalando PHP..."
         $SUDO apt-get install -y php-cli php-mbstring php-xml php-curl php-zip \
             php-bcmath php-intl php-pgsql php-sqlite3 || true
-        if ! command -v php >/dev/null 2>&1 || [ "$(php -r 'echo PHP_VERSION_ID;')" -lt 80200 ]; then
-            echo "==> PHP por defecto es antiguo; instalando PHP 8.3 desde el PPA..."
+        if ! command -v php >/dev/null 2>&1 || [ "$(php -r 'echo PHP_VERSION_ID;')" -lt 80400 ]; then
+            echo "==> PHP por defecto es antiguo; instalando PHP 8.4 desde el PPA..."
             $SUDO apt-get install -y software-properties-common
             $SUDO add-apt-repository -y ppa:ondrej/php
             $SUDO apt-get update -y
-            $SUDO apt-get install -y php8.3-cli php8.3-mbstring php8.3-xml php8.3-curl \
-                php8.3-zip php8.3-bcmath php8.3-intl php8.3-pgsql php8.3-sqlite3
-            $SUDO update-alternatives --set php /usr/bin/php8.3 >/dev/null 2>&1 || true
+            $SUDO apt-get install -y php8.4-cli php8.4-mbstring php8.4-xml php8.4-curl \
+                php8.4-zip php8.4-bcmath php8.4-intl php8.4-pgsql php8.4-sqlite3
+            $SUDO update-alternatives --set php /usr/bin/php8.4 >/dev/null 2>&1 || true
         fi
     fi
 
@@ -68,12 +76,12 @@ if command -v apt-get >/dev/null 2>&1; then
     fi
 
     # Node.js (18+ para Vite 6)
-    if ! command -v node >/dev/null 2>&1 || [ "$(node -v | sed 's/v\([0-9]*\).*/\1/')" -lt 18 ]; then
+    if ! command -v node >/dev/null 2>&1 || [ "$(node -v | sed 's/v\([0-9]*\).*/\1/')" -lt 22 ]; then
         echo "==> Instalando Node.js 20..."
         if [ -n "$SUDO" ]; then
-            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
         else
-            curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+            curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
         fi
         $SUDO apt-get install -y nodejs
     fi
@@ -105,12 +113,15 @@ for _ in $(seq 1 30); do
 done
 
 echo "==> Creando usuario y bases de datos..."
+if [ "$task_entorno_nuevo" -eq 1 ]; then
 $PG_RUN psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USUARIO'" | grep -q 1 \
     || $PG_RUN psql -c "CREATE USER $DB_USUARIO WITH PASSWORD '$DB_CLAVE' SUPERUSER;"
 $PG_RUN psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_NOMBRE'" | grep -q 1 \
     || $PG_RUN createdb -O "$DB_USUARIO" "$DB_NOMBRE"
 $PG_RUN psql -tAc "SELECT 1 FROM pg_database WHERE datname='$DB_TEST'" | grep -q 1 \
     || $PG_RUN createdb -O "$DB_USUARIO" "$DB_TEST"
+
+fi
 
 # ---------------------------------------------------------------------------
 # 3. Dependencias PHP
@@ -126,6 +137,7 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 
+if [ "$task_entorno_nuevo" -eq 1 ]; then
 php -r '
 $f = ".env";
 $s = file_get_contents($f);
@@ -151,9 +163,10 @@ $set("CACHE_STORE", "database");
 $set("QUEUE_CONNECTION", "database");
 file_put_contents($f, $s);
 '
+fi
 
 # Generar APP_KEY solo si está vacío (no invalidar sesiones en reinicios).
-if ! grep -q '^APP_KEY=base64:' .env; then
+if ! php -r 'require "vendor/autoload.php"; $v = Dotenv\Dotenv::parse(file_get_contents(".env")); exit(empty($v["APP_KEY"]) ? 1 : 0);'; then
     php artisan key:generate --force
 fi
 
@@ -161,7 +174,8 @@ fi
 # 5. Esquema y datos demo
 # ---------------------------------------------------------------------------
 echo "==> Migrando y sembrando datos demo..."
-php artisan migrate:fresh --seed --force
+php artisan migrate --force
+if [ "$task_entorno_nuevo" -eq 1 ]; then php artisan db:seed --force; fi
 php artisan storage:link >/dev/null 2>&1 || true
 
 # ---------------------------------------------------------------------------

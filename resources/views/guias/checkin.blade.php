@@ -9,6 +9,7 @@
 @section('contenido')
 <div x-data="checkin(@js([
         'salida' => $salida->id,
+        'tour' => $salida->tour->nom, 'fecha' => $salida->fec_sal->toDateString(),
         'pasajeros' => $manifiesto,
         'urlValidar' => route('guias.validar', $salida),
         'urlSincronizar' => route('guias.sincronizar', $salida),
@@ -70,6 +71,15 @@
         </div>
     </div>
 
+    <section class="rounded-2xl border border-blue-200 bg-white p-5 space-y-3">
+        <h3 class="font-bold">Preparar acceso sin conexión</h3>
+        <p class="text-sm text-slate-500">Guarda un manifiesto cifrado por 12 horas. La clave local debe tener al menos 12 caracteres. No se guardan documentos ni condiciones médicas. Sin la clave no se puede recuperar la copia.</p>
+        <label class="block text-sm">Clave local del dispositivo<input type="password" minlength="12" x-model="offlineClave" autocomplete="off" class="mt-1 w-full rounded-xl border-slate-300"></label>
+        <button type="button" @click="prepararOffline()" :disabled="preparando" class="rounded-xl bg-blue-700 px-4 py-3 font-bold text-white">Preparar y guardar</button>
+        <a href="/guias/offline" class="ml-2 text-sm underline">Abrir pantalla sin conexión</a>
+        <p x-show="preparado" class="text-sm text-emerald-700">Copia preparada. Revisa la fecha de vencimiento al abrirla.</p>
+    </section>
+
     {{-- Lector QR --}}
     <div x-show="escaneando" x-cloak class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
         <div id="lector" class="overflow-hidden rounded-xl"></div>
@@ -95,7 +105,7 @@
             <template x-for="p in pasajeros" :key="p.boleto ?? p.nom_cpl">
                 <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
                     <div class="min-w-0">
-                        <p class="font-bold text-slate-900 text-sm"><span x-text="p.nom_cpl"></span> <span class="text-xs font-normal text-slate-500" x-text="'(' + p.documento + ')'"></span></p>
+                        <p class="font-bold text-slate-900 text-sm"><span x-text="p.nom_cpl"></span> <span class="text-xs font-normal text-slate-500" x-show="p.documento" x-text="p.documento ? '(' + p.documento + ')' : ''"></span></p>
                         <p class="text-xs text-amber-600" x-show="p.equipo" x-text="'Equipo: ' + p.equipo"></p>
                         <p class="text-xs text-rose-600 font-semibold" x-show="p.alerta_medica"><i class="fa-solid fa-heart-pulse"></i> <span x-text="p.alerta_medica"></span></p>
                         <p class="text-xs text-slate-400 font-mono" x-text="p.boleto ?? 'Sin boleto'"></p>
@@ -118,149 +128,74 @@
 
 @push('scripts')
 <script>
-    // IndexedDB mínima: manifiesto por salida y cola de escaneos sin conexión (RNF-15).
-    const bd = {
-        abrir() {
-            return new Promise((ok, mal) => {
-                const r = indexedDB.open('pipocas-checkin-' + @json(hash('sha256', session()->getId() . ':' . auth()->id())), 1);
-                r.onupgradeneeded = () => {
-                    r.result.createObjectStore('manifiestos');
-                    r.result.createObjectStore('cola');
-                };
-                r.onsuccess = () => ok(r.result);
-                r.onerror = () => mal(r.error);
-            });
+function checkin(cfg) {
+    let store, vault = null;
+    return {
+        pasajeros: cfg.pasajeros, cola: [], online: navigator.onLine, escaneando: false,
+        ultimo: null, manual: '', lector: null, recientes: {}, preparado: false,
+        preparando: false, offlineClave: '', sincronizando: false,
+        token: document.querySelector('meta[name="csrf-token"]').content,
+        async init() {
+            store = await import('/js/checkin-store.js');
+            indexedDB.deleteDatabase('pipocas-checkin');
+            if (indexedDB.databases) for (const d of await indexedDB.databases()) {
+                if (d.name?.startsWith('pipocas-checkin-')) indexedDB.deleteDatabase(d.name);
+            }
+            window.addEventListener('online', () => { this.online = true; this.sincronizar(); });
+            window.addEventListener('offline', () => { this.online = false; });
+            window.addEventListener('storage', e => {if(e.key==='pipocas-offline-activo' && vault){vault.close();vault=null;this.pasajeros=[];this.cola=[];this.preparado=false;this.detener();this.ultimo={ok:false,mensaje:'La sesión local cambió. Vuelve a iniciar sesión.'};}});
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw-checkin.js', {scope:'/guias/'}).catch(() => {});
         },
-        async poner(almacen, clave, valor) {
-            const db = await this.abrir();
-            return new Promise(ok => { const t = db.transaction(almacen, 'readwrite'); t.objectStore(almacen).put(valor, clave); t.oncomplete = () => { db.close(); ok(); }; });
+        async prepararOffline() {
+            this.preparando = true;
+            try {
+                if (!('serviceWorker' in navigator)) throw new Error('Este navegador no admite la preparación sin conexión.');
+                if (!navigator.onLine) throw new Error('Necesitas conexión para preparar o actualizar el manifiesto.');
+                const contexto = await store.sesion();
+                vault?.close(); vault = await store.unlock(this.offlineClave, contexto);
+                const anterior = vault.data.salidas[cfg.salida];
+                const pasajeros = JSON.parse(JSON.stringify(this.pasajeros.map(({documento, alerta_medica, ficha, ...p}) => p)));
+                vault.data.salidas[cfg.salida] = {id:cfg.salida,tour:cfg.tour,fecha:cfg.fecha,
+                    vence:Date.now()+12*3600000,urlSincronizar:cfg.urlSincronizar,pasajeros,
+                    cola:anterior?.cola || [], conflictos:anterior?.conflictos || []};
+                for(const pendiente of anterior?.cola || []){const p=pasajeros.find(p=>p.boleto===pendiente.cod);if(p)p.est='pendiente_sync';}
+                await vault.save();
+                const registration = await navigator.serviceWorker.ready;
+                if (!registration.active) throw new Error('Espera a que se prepare el acceso sin conexión.');
+                this.offlineClave='';this.preparado=true;this.cola=vault.data.salidas[cfg.salida].cola;
+                this.ultimo={ok:true,mensaje:'Copia cifrada preparada por 12 horas. Usa la misma clave para abrirla sin red.'};
+            } catch (e) { this.ultimo={ok:false,mensaje:e.message}; }
+            finally { this.preparando=false; }
         },
-        async leer(almacen, clave) {
-            const db = await this.abrir();
-            return new Promise(ok => { const r = db.transaction(almacen).objectStore(almacen).get(clave); r.onsuccess = () => { db.close(); ok(r.result); }; r.onerror = () => { db.close(); ok(undefined); }; });
+        validados() {return this.pasajeros.filter(p=>['validado','pendiente_sync'].includes(p.est)).length;},
+        marcar(cod,est,hora=null){const p=this.pasajeros.find(p=>p.boleto===cod);if(p){p.est=est;if(hora)p.vld_en=hora;}return p;},
+        async procesar(cod) {
+            cod=(cod||'').trim().toUpperCase();if(!cod)return;
+            if(this.recientes[cod]&&Date.now()-this.recientes[cod]<3000)return;this.recientes[cod]=Date.now();
+            if(!this.online)return this.validarSinConexion(cod);
+            try {
+                const r=await fetch(cfg.urlValidar,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json','X-CSRF-TOKEN':this.token},body:JSON.stringify({cod})});
+                const datos=await r.json();this.ultimo=datos;
+                if(r.status===401||r.status===403){vault?.close();vault=null;await store.clear();return;}
+                if(datos.ok){this.marcar(cod,'validado',new Date().toTimeString().slice(0,5));if(vault){const p=vault.data.salidas[cfg.salida].pasajeros.find(p=>p.boleto===cod);if(p)p.est='validado';await vault.save();}}
+                this.vibrar(datos.ok);
+            } catch(e){this.online=false;await this.validarSinConexion(cod);}
         },
+        async validarSinConexion(cod) {
+            try {
+                if(!vault)throw new Error('Primero prepara el dispositivo o abre la pantalla sin conexión con tu clave local.');
+                const salida=vault.data.salidas[cfg.salida];const mensaje=await store.scan(vault,salida,cod);
+                this.cola=salida.cola;this.marcar(cod,salida.pasajeros.find(p=>p.boleto===cod)?.est);this.ultimo={ok:true,mensaje};
+            }catch(e){this.ultimo={ok:false,mensaje:e.message};}
+        },
+        async sincronizar(){if(!vault||!this.cola.length||this.sincronizando)return;this.sincronizando=true;
+            try{const salida=vault.data.salidas[cfg.salida],res=await store.sync(vault,salida);this.cola=salida.cola;res.forEach(r=>this.marcar(r.cod,r.ok?'validado':'conflicto'));this.ultimo={ok:!salida.conflictos.length,mensaje:salida.conflictos.length?salida.conflictos.map(r=>r.cod+': '+r.mensaje).join('; '):res.length+' escaneos sincronizados.'};}
+            catch(e){this.ultimo={ok:false,mensaje:e.message};}finally{this.sincronizando=false;}
+        },
+        async escanear(){if(typeof Html5Qrcode==='undefined'){this.ultimo={ok:false,mensaje:'No se pudo cargar la cámara QR. Usa el ingreso manual.'};return;}this.escaneando=true;await this.$nextTick();this.lector=new Html5Qrcode('lector');this.lector.start({facingMode:'environment'},{fps:10,qrbox:240},texto=>this.procesar(texto)).catch(()=>{this.escaneando=false;this.ultimo={ok:false,mensaje:'No se pudo abrir la cámara. Usa el ingreso manual.'};});},
+        async detener(){if(this.lector)try{await this.lector.stop();}catch{}this.escaneando=false;},
+        vibrar(ok){if(navigator.vibrate)navigator.vibrate(ok?80:[80,60,80]);},
     };
-
-    function checkin(cfg) {
-        return {
-            pasajeros: cfg.pasajeros,
-            cola: [],
-            online: navigator.onLine,
-            escaneando: false,
-            ultimo: null,
-            manual: '',
-            lector: null,
-            recientes: {},
-            token: document.querySelector('meta[name="csrf-token"]').content,
-
-            async init() {
-                const claveCola = 'salida-' + cfg.salida;
-                indexedDB.deleteDatabase('pipocas-checkin'); // purge legacy unscoped data
-                const vencimiento = await bd.leer('manifiestos', 'vence');
-                if (vencimiento && vencimiento < Date.now()) {
-                    await bd.poner('manifiestos', claveCola, []);
-                    await bd.poner('cola', claveCola, []);
-                }
-                if (this.online) await bd.poner('manifiestos', 'vence', Date.now() + 12 * 3600000);
-                if (this.online) {
-                    await bd.poner('manifiestos', claveCola, JSON.parse(JSON.stringify(this.pasajeros.map(({documento, alerta_medica, ficha, ...publico}) => publico))));
-                } else {
-                    this.pasajeros = (await bd.leer('manifiestos', claveCola)) || this.pasajeros;
-                }
-                this.cola = (await bd.leer('cola', claveCola)) || [];
-                this.cola.forEach(e => this.marcar(e.cod, 'pendiente_sync'));
-
-                window.addEventListener('online', () => { this.online = true; this.sincronizar(); });
-                window.addEventListener('offline', () => { this.online = false; });
-                if (this.online && this.cola.length) this.sincronizar();
-
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('/sw-checkin.js', { scope: '/guias/' }).catch(() => {});
-                }
-            },
-
-            validados() { return this.pasajeros.filter(p => ['validado', 'pendiente_sync'].includes(p.est)).length; },
-
-            marcar(cod, est, hora = null) {
-                const p = this.pasajeros.find(x => x.boleto === cod);
-                if (p) { p.est = est; if (hora) p.vld_en = hora; }
-                return p;
-            },
-
-            async procesar(cod) {
-                cod = (cod || '').trim().toUpperCase();
-                if (!cod) return;
-                // Evita leer dos veces el mismo QR mientras está frente a la cámara.
-                if (this.recientes[cod] && Date.now() - this.recientes[cod] < 3000) return;
-                this.recientes[cod] = Date.now();
-
-                if (!this.online) return this.validarSinConexion(cod);
-
-                try {
-                    const r = await fetch(cfg.urlValidar, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.token },
-                        body: JSON.stringify({ cod }),
-                    });
-                    const datos = await r.json();
-                    this.ultimo = datos;
-                    if (datos.ok) this.marcar(cod, 'validado', new Date().toTimeString().slice(0, 5));
-                    this.vibrar(datos.ok);
-                } catch (e) {
-                    this.online = false;
-                    this.validarSinConexion(cod);
-                }
-            },
-
-            async validarSinConexion(cod) {
-                const p = this.pasajeros.find(x => x.boleto === cod);
-                if (!p) { this.ultimo = { ok: false, mensaje: 'El boleto no está en el manifiesto de esta salida.' }; return this.vibrar(false); }
-                if (p.est === 'validado' || p.est === 'pendiente_sync') { this.ultimo = { ok: true, participante: p.nom_cpl, mensaje: 'Ya estaba registrado.' }; return; }
-                if (p.est !== 'emitido') { this.ultimo = { ok: false, participante: p.nom_cpl, mensaje: 'Boleto no válido.' }; return this.vibrar(false); }
-
-                this.cola.push({ cod, vld_en: new Date().toISOString() });
-                await bd.poner('cola', 'salida-' + cfg.salida, JSON.parse(JSON.stringify(this.cola)));
-                this.marcar(cod, 'pendiente_sync', new Date().toTimeString().slice(0, 5));
-                this.ultimo = { ok: true, participante: p.nom_cpl, mensaje: 'Registrado sin conexión; se sincronizará.' };
-                this.vibrar(true);
-            },
-
-            async sincronizar() {
-                if (!this.cola.length) return;
-                try {
-                    const r = await fetch(cfg.urlSincronizar, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': this.token },
-                        body: JSON.stringify({ escaneos: this.cola }),
-                    });
-                    if (!r.ok) throw new Error('sync');
-                    const { resultados } = await r.json();
-                    resultados.forEach(res => this.marcar(res.cod, res.ok ? 'validado' : 'emitido'));
-                    const fallidos = resultados.filter(res => !res.ok);
-                    this.ultimo = fallidos.length
-                        ? { ok: false, mensaje: fallidos.length + ' boleto(s) no se pudieron validar: ' + fallidos.map(f => f.cod + ' (' + f.mensaje + ')').join(', ') }
-                        : { ok: true, mensaje: resultados.length + ' escaneo(s) sincronizados.' };
-                    this.cola = [];
-                    await bd.poner('cola', 'salida-' + cfg.salida, []);
-                } catch (e) { /* se reintenta al volver la conexión */ }
-            },
-
-            async escanear() {
-                if (typeof Html5Qrcode === 'undefined') { this.ultimo = { ok: false, mensaje: 'No se pudo cargar el lector QR. Usa el ingreso manual.' }; return; }
-                this.escaneando = true;
-                await this.$nextTick();
-                this.lector = new Html5Qrcode('lector');
-                this.lector.start({ facingMode: 'environment' }, { fps: 10, qrbox: 240 }, texto => this.procesar(texto))
-                    .catch(() => { this.escaneando = false; this.ultimo = { ok: false, mensaje: 'No se pudo abrir la cámara. Revisa los permisos o usa el ingreso manual.' }; });
-            },
-
-            async detener() {
-                if (this.lector) { try { await this.lector.stop(); } catch (e) {} }
-                this.escaneando = false;
-            },
-
-            vibrar(ok) { if (navigator.vibrate) navigator.vibrate(ok ? 80 : [80, 60, 80]); },
-        };
-    }
+}
 </script>
 @endpush

@@ -62,3 +62,9 @@ Solo funciona con `APP_ENV=testing` y base terminada en `_qa`.
 Para reproducir la carrera, ejecutar dos procesos `iniciar` del mismo ID al mismo
 tiempo; después, dos `webhook` de las referencias devueltas por `legacy`. Cada
 proceso debe tener su propia conexión PostgreSQL. Las notificaciones se simulan.
+
+## Verificación de la entrega 14/11
+
+El [informe](ENTREGA-2026-11-14.md) y las [evidencias](evidencias/aceptacion-2026-11-14.txt) documentan SMTP capturado, reapertura offline, fallos de mapas, carga y restauración con firmas. `scripts/qa-concurrencia.php` agrega carreras de cupos, equipo, asignaciones y pago/cancelación; exige APP_ENV=testing y base terminada en `_qa`, simula la cola y crea datos de prueba. No ejecutarlo sobre datos reales.
+
+`setup` devuelve JSON con IDs. Ejecutar dos procesos `reservar ID` sobre la misma salida; para equipo usar `reservar SALIDA TIPO ITEM`; `asignar SALIDA GUIA` en dos salidas simultáneas; y `pagar REFERENCIA` contra `cancelar RESERVA`. Ejecutar primero la carrera de pago/cancelación, luego cupos/equipo/asignación y `verify /ruta/fixture.json`. Cada proceso debe tener su propia conexión.

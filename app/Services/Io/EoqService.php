@@ -79,7 +79,7 @@ class EoqService
             } elseif ($meses < self::MESES_MINIMOS || $demanda <= 0) {
                 $fila['aviso'] = 'Historial insuficiente: se necesitan alquileres en al menos '.self::MESES_MINIMOS.' meses para estimar D.';
             } else {
-                $sigmaDiaria = $this->desviacion(array_map(fn ($m) => $m / 30.4, $historial));
+                $sigmaDiaria = $this->desviacion(array_values($this->demandaDiaria($tipo->id)));
                 $fila['eoq'] = $this->calcular($demanda, (float) $tipo->cos_ord, (float) $tipo->cos_mnt_anu, $sigmaDiaria);
                 $fila['reponer'] = $stock <= $fila['eoq']['r'];
             }
@@ -118,7 +118,7 @@ class EoqService
                 'stock_disponible' => $fila['stock_disponible'],
                 'punto_reorden' => $fila['eoq']['r_redondeado'],
                 'cantidad_a_pedir' => $fila['eoq']['q_redondeado'],
-                'mensaje' => "El stock de {$fila['tipo']->nom} ({$fila['stock_disponible']} u.) llegó al punto de reorden R = {$fila['eoq']['r_redondeado']}. Se sugiere pedir Q* = {$fila['eoq']['q_redondeado']} unidades.",
+                'mensaje' => "El stock de {$fila['tipo']->nom} ({$fila['stock_disponible']} u.) llegó al punto de reorden R = {$fila['eoq']['r_redondeado']}. Referencia académica Q* = {$fila['eoq']['q_redondeado']} usos. Revise disponibilidad y desgaste antes de decidir una compra.",
             ], ['admin', 'operaciones']);
             $nuevas++;
         }
@@ -134,7 +134,7 @@ class EoqService
             $meses[now()->startOfYear()->addMonths(11 - $i)->format('Y-m')] = 0;
         }
 
-        // vista_demanda_equipo_anual agrupa por año; para σ se baja al mes con la misma lógica.
+        // Mismo período y estados que la vista anual.
         $filas = DB::table('alquileres_equipo_reserva as a')
             ->join('items_equipo as ie', 'ie.id', '=', 'a.itm_eqp_id')
             ->join('participantes_reserva as pr', 'pr.id', '=', 'a.ptc_rsv_id')
@@ -142,7 +142,7 @@ class EoqService
             ->join('salidas_tour as st', 'st.id', '=', 'r.sal_tur_id')
             ->where('ie.tip_eqp_id', $tipEqpId)
             ->whereIn('r.est', ['confirmada', 'completada'])
-            ->where('st.fec_sal', '>=', now()->startOfYear()->toDateString())
+            ->whereBetween('st.fec_sal', [now()->startOfYear()->toDateString(), now()->endOfYear()->toDateString()])
             ->selectRaw("to_char(st.fec_sal, 'YYYY-MM') AS mes, COUNT(a.id) AS n")
             ->groupBy('mes')
             ->pluck('n', 'mes');
@@ -154,6 +154,28 @@ class EoqService
         }
 
         return $meses;
+    }
+
+    /** Serie diaria del año calendario, incluidos días sin alquileres. */
+    public function demandaDiaria(int $tipEqpId): array
+    {
+        $dias = [];
+        for ($fecha = now()->startOfYear(); $fecha->year === now()->year; $fecha->addDay()) {
+            $dias[$fecha->toDateString()] = 0;
+        }
+        $filas = DB::table('alquileres_equipo_reserva as a')
+            ->join('items_equipo as ie', 'ie.id', '=', 'a.itm_eqp_id')
+            ->join('participantes_reserva as pr', 'pr.id', '=', 'a.ptc_rsv_id')
+            ->join('reservas as r', 'r.id', '=', 'pr.rsv_id')
+            ->join('salidas_tour as st', 'st.id', '=', 'r.sal_tur_id')
+            ->where('ie.tip_eqp_id', $tipEqpId)->whereIn('r.est', ['confirmada', 'completada'])
+            ->whereBetween('st.fec_sal', [now()->startOfYear()->toDateString(), now()->endOfYear()->toDateString()])
+            ->selectRaw('st.fec_sal AS dia, COUNT(a.id) AS n')->groupBy('st.fec_sal')->pluck('n', 'dia');
+        foreach ($filas as $dia => $cantidad) {
+            $dias[$dia] = (int) $cantidad;
+        }
+
+        return $dias;
     }
 
     /** Demanda anual (D) según vista_demanda_equipo_anual para el año indicado. */

@@ -9,15 +9,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ColaMetricaDiaria extends Model
 {
     protected $table = 'cola_metricas_diarias';
+
     const CREATED_AT = 'cre_en';
+
     const UPDATED_AT = null;
 
-    protected $fillable = ['tur_id', 'fec', 'lmb_obs', 'mu_obs', 'rho', 'p0', 'lq', 'l_sis', 'wq_hrs', 'w_hrs', 'pq', 'p_rec'];
+    protected $fillable = ['tur_id', 'fec', 'lmb_obs', 'mu_obs', 'rho', 'p0', 'lq', 'l_sis', 'wq_hrs', 'w_hrs', 'pq', 'p_rec', 'contexto'];
 
     protected function casts(): array
     {
         return [
             'fec' => 'date',
+            'contexto' => 'array',
             'lmb_obs' => 'float',
             'mu_obs' => 'float',
             'rho' => 'float',

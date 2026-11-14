@@ -91,6 +91,7 @@
                 <h3 class="font-bold text-[#343A40]">Trazado y puntos de interés</h3>
                 <p class="text-xs text-[#6B6F72]">Haz clic en el mapa para agregar un punto; arrástralo para moverlo.</p>
             </div>
+            <p x-show="errorMapa" x-text="errorMapa" class="text-sm text-amber-700" role="status"></p>
             <div id="mapa-editor" class="h-80 rounded-xl border border-gray-200"></div>
 
             <div class="space-y-2">
@@ -140,8 +141,9 @@ function editorRuta(iniciales, trazado) {
     return {
         puntos: iniciales.map(p => ({ ...p })),
         geojson: '',
-        mapa: null, capa: null, linea: null,
+        mapa: null, capa: null, linea: null, errorMapa: '',
         init() {
+            if (typeof L === 'undefined') { this.errorMapa = 'No se pudo cargar el mapa. Puedes editar las coordenadas de la lista y guardar.'; return; }
             this.mapa = L.map('mapa-editor');
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(this.mapa);
             this.capa = L.layerGroup().addTo(this.mapa);

@@ -1,8 +1,8 @@
-# Despliegue completo: Nginx + PHP-FPM + PostgreSQL 16 + Redis + n8n,
+# Despliegue completo: Nginx + PHP-FPM + PostgreSQL 17 + Redis + n8n,
 # con un worker de colas y el planificador de Laravel. Ver docs/DESPLIEGUE.md.
 services:
   app:
-    build: { context: ., dockerfile: docker/Dockerfile }
+    build: { context: ., dockerfile: docker/Dockerfile, target: app }
     env_file: .env
     environment:
       DB_HOST: db
@@ -13,17 +13,14 @@ services:
       PG_DUMP_PATH: pg_dump
     volumes:
       - storage:/var/www/html/storage
-      # El volumen se llena con public/ (incluye los assets compilados) al primer arranque.
-      - public:/var/www/html/public
     depends_on: [db, redis]
     restart: unless-stopped
 
   web:
-    image: nginx:1.27-alpine
+    build: { context: ., dockerfile: docker/Dockerfile, target: web }
     ports: ["80:80", "443:443"]
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - public:/var/www/html/public:ro
       - storage:/var/www/html/storage:ro
       - ./docker/certs:/etc/nginx/certs:ro
     depends_on: [app]
@@ -31,7 +28,7 @@ services:
 
   # Envío de correos, notificaciones y boletos (colas de Laravel).
   queue:
-    build: { context: ., dockerfile: docker/Dockerfile }
+    build: { context: ., dockerfile: docker/Dockerfile, target: app }
     env_file: .env
     environment: { DB_HOST: db, REDIS_HOST: redis, QUEUE_CONNECTION: redis, CACHE_STORE: redis }
     command: php artisan queue:work --tries=3 --backoff=30 --max-time=3600
@@ -41,7 +38,7 @@ services:
 
   # Cron de Laravel: reservas:expirar (cada hora), recordatorios y respaldo:bd (diario).
   scheduler:
-    build: { context: ., dockerfile: docker/Dockerfile }
+    build: { context: ., dockerfile: docker/Dockerfile, target: app }
     env_file: .env
     environment: { DB_HOST: db, REDIS_HOST: redis, CACHE_STORE: redis, PG_DUMP_PATH: pg_dump }
     command: php artisan schedule:work
@@ -50,7 +47,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     environment:
       POSTGRES_DB: ${DB_DATABASE}
       POSTGRES_USER: ${DB_USERNAME}
@@ -73,7 +70,7 @@ services:
       GENERIC_TIMEZONE: America/La_Paz
       N8N_HOST: ${N8N_HOST:-localhost}
       WEBHOOK_URL: ${N8N_PUBLIC_URL:-http://localhost:5678/}
-      PIPOCAS_URL: http://web
+      PIPOCAS_URL: ${APP_URL}
       PIPOCAS_N8N_TOKEN: ${N8N_TOKEN}
       PIPOCAS_MAIL_FROM: ${MAIL_FROM_ADDRESS}
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
@@ -82,7 +79,6 @@ services:
 
 volumes:
   storage:
-  public:
   pgdata:
   redisdata:
   n8ndata:

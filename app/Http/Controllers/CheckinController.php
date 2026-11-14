@@ -23,6 +23,13 @@ class CheckinController extends Controller
 {
     public function __construct(private SalidaService $salidas) {}
 
+    public function sesionOffline(Request $request): JsonResponse
+    {
+        return response()->json(['usuario' => $request->user()->id, 'csrf' => csrf_token(),
+            'id' => hash('sha256', $request->session()->getId().':'.$request->user()->id)])
+            ->header('Cache-Control', 'no-store, private');
+    }
+
     public function index(Request $request): View
     {
         $usuario = $request->user();

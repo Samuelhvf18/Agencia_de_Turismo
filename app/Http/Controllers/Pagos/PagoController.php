@@ -28,7 +28,7 @@ class PagoController extends Controller
     {
         AccesoReserva::exigir($request, $reserva);
         if (! $this->pagos->admitePago($reserva)) {
-            return redirect()->route('reservas.estado', $reserva)->with('estado', 'Esta reserva no tiene pagos pendientes.');
+            return redirect()->route('reservas.estado', $reserva)->with('estado', __('Esta reserva no tiene pagos pendientes.'));
         }
         $reserva->load('salida.tour', 'comprobante.pagos');
 
@@ -51,8 +51,8 @@ class PagoController extends Controller
             'mtd' => ['required', Rule::in(array_keys(PagoService::METODOS))],
             'mto' => ['required', 'numeric', 'min:0.01', 'max:99999999.99', 'regex:/^\d+(\.\d{1,2})?$/'],
         ], [
-            'mtd.*' => 'Elige un método de pago.',
-            'mto.*' => 'Ingresa un monto válido (hasta 2 decimales).',
+            'mtd.*' => __('Elige un método de pago.'),
+            'mto.*' => __('Ingresa un monto válido (hasta 2 decimales).'),
         ]);
 
         $pago = $this->pagos->iniciar($reserva, $datos['mtd'], (float) $datos['mto']);
@@ -92,9 +92,9 @@ class PagoController extends Controller
 
         $pago->refresh();
         $mensaje = match ($pago->est) {
-            Pago::EST_COMPLETADO => 'Pago aprobado. ¡Gracias!',
-            Pago::EST_FALLIDO => 'El pago fue rechazado. Puedes intentarlo de nuevo.',
-            default => 'Estamos esperando la confirmación de la pasarela.',
+            Pago::EST_COMPLETADO => __('Pago aprobado. ¡Gracias!'),
+            Pago::EST_FALLIDO => __('El pago fue rechazado. Puedes intentarlo de nuevo.'),
+            default => __('Estamos esperando la confirmación de la pasarela.'),
         };
 
         return redirect()->route('reservas.estado', $reserva)->with('estado', $mensaje);
@@ -106,7 +106,7 @@ class PagoController extends Controller
     {
         $cuerpo = $request->getContent();
         if (! PasarelaSimulada::verificar($cuerpo, $request->header(PasarelaSimulada::CABECERA_FIRMA))) {
-            return response()->json(['ok' => false, 'error' => 'Firma inválida'], 401);
+            return response()->json(['ok' => false, 'error' => __('Firma inválida')], 401);
         }
 
         $evento = json_decode($cuerpo, true);

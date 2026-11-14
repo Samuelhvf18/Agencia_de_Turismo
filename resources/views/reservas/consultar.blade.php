@@ -10,7 +10,7 @@
     $accionForm ??= url('/reservas/preview/estado'); // controlador: route('reservas.consultar.buscar')
 @endphp
 
-@section('titulo', 'Consultar reserva')
+@section('titulo', __('Consultar reserva'))
 
 @section('contenido')
 <div class="mx-auto grid max-w-5xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
@@ -53,7 +53,7 @@
             <div class="relative">
                 <i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-pipocas-texto-2"></i>
                 <input id="cor_ctc" name="cor_ctc" type="email" maxlength="150" required autocomplete="email"
-                       value="{{ old('cor_ctc') }}" placeholder="tucorreo@ejemplo.com" class="rsv-campo py-3 pl-10">
+                       value="{{ old('cor_ctc') }}" placeholder="you@example.com" class="rsv-campo py-3 pl-10">
             </div>
             @error('cor_ctc') <p class="rsv-error">{{ $message }}</p> @enderror
         </div>
@@ -62,7 +62,7 @@
 
         <p class="text-center text-sm text-pipocas-texto-2">
             ¿Perdiste tu código? Escríbenos a nuestro chatbot
-            <a href="{{ url('/chatbot') }}" class="font-semibold text-pipocas-principal hover:text-pipocas-hover">aquí</a>.
+            <a href="{{ url('/chatbot') }}" class="font-semibold text-pipocas-principal hover:text-pipocas-hover">{{ __('aquí') }}</a>.
         </p>
     </form>
 </div>

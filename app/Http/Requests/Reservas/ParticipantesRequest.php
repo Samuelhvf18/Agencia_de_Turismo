@@ -65,13 +65,13 @@ class ParticipantesRequest extends FormRequest
             $participantes = $this->input('participantes', []);
             foreach ($participantes as $i => $p) {
                 if (($p['tip_doc'] ?? null) === 'CI' && ! preg_match('/^[0-9]{5,10}$/', $p['num_doc'] ?? '')) {
-                    $v->errors()->add("participantes.$i.num_doc", 'El CI debe tener solo números (5 a 10 dígitos).');
+                    $v->errors()->add("participantes.$i.num_doc", __('El CI debe tener solo números (5 a 10 dígitos).'));
                 }
             }
 
             $documentos = collect($participantes)->map(fn ($p) => ($p['tip_doc'] ?? '').($p['num_doc'] ?? '').($p['ci_cmp'] ?? ''));
             foreach ($documentos->duplicates() as $i => $doc) {
-                $v->errors()->add("participantes.$i.num_doc", 'Este documento está repetido en la reserva.');
+                $v->errors()->add("participantes.$i.num_doc", __('Este documento está repetido en la reserva.'));
             }
 
             if (collect($participantes)->filter(fn ($p) => ! empty($p['es_ctc_pri']))->count() !== 1) {
@@ -83,16 +83,16 @@ class ParticipantesRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nom_ctc.regex' => 'El nombre solo puede contener letras.',
-            'tel_ctc.regex' => 'Ingresa un teléfono válido (solo números, + y guiones).',
-            'participantes.*.nom_cpl.required' => 'Ingresa el nombre completo.',
-            'participantes.*.nom_cpl.regex' => 'El nombre solo puede contener letras.',
-            'participantes.*.num_doc.required' => 'Ingresa el número de documento.',
-            'participantes.*.num_doc.regex' => 'El documento solo puede tener letras, números y guiones.',
-            'participantes.*.ci_dep_id.required_if' => 'Indica dónde se expidió el CI.',
-            'participantes.*.eda.required' => 'Ingresa la edad.',
-            'participantes.*.eda.*' => 'La edad debe estar entre 1 y 110 años.',
-            'participantes.*.pai_id.required' => 'Elige la nacionalidad.',
+            'nom_ctc.regex' => __('El nombre solo puede contener letras.'),
+            'tel_ctc.regex' => __('Ingresa un teléfono válido (solo números, + y guiones).'),
+            'participantes.*.nom_cpl.required' => __('Ingresa el nombre completo.'),
+            'participantes.*.nom_cpl.regex' => __('El nombre solo puede contener letras.'),
+            'participantes.*.num_doc.required' => __('Ingresa el número de documento.'),
+            'participantes.*.num_doc.regex' => __('El documento solo puede tener letras, números y guiones.'),
+            'participantes.*.ci_dep_id.required_if' => __('Indica dónde se expidió el CI.'),
+            'participantes.*.eda.required' => __('Ingresa la edad.'),
+            'participantes.*.eda.*' => __('La edad debe estar entre 1 y 110 años.'),
+            'participantes.*.pai_id.required' => __('Elige la nacionalidad.'),
         ];
     }
 }

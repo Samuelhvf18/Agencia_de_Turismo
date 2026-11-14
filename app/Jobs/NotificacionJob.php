@@ -3,13 +3,15 @@
 namespace App\Jobs;
 
 use App\Mail\AvisoMail;
+use App\Mail\BoletosReservaMail;
 use App\Models\RegistroNotificacion;
+use App\Models\Reserva;
+use App\Services\Notificaciones\EntregaNotificacion;
 use App\Services\Notificaciones\NotificacionService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use Throwable;
 
 /**
  * Despacha un registro de notificación (RF-38, M10):
@@ -30,27 +32,28 @@ class NotificacionJob implements ShouldQueue
 
     public function handle(): void
     {
-        $registro = RegistroNotificacion::with('reserva.salida.tour')->find($this->registroId);
-        if (! $registro || $registro->est === 'enviado') {
-            return;
-        }
+        app(EntregaNotificacion::class)->entregar($this->registroId, function (RegistroNotificacion $registro) {
+            $registro->load('reserva.salida.tour');
+            if ($registro->tip === 'reserva_confirmada' && ! empty($registro->cnd['adjuntos'])) {
+                if (! $registro->reserva || $registro->reserva->est_pag !== Reserva::PAG_PAGADO) {
+                    throw new \RuntimeException('La reserva ya no está pagada; revisar antes de enviar boletos.');
+                }
+                Mail::to($registro->cnd['destino'])->send((new BoletosReservaMail($registro->reserva))->locale($registro->cnd['idioma'] ?? 'es'));
 
-        try {
+                return;
+            }
             $webhook = config('services.n8n.webhook_notificaciones');
             if ($webhook) {
-                Http::timeout(10)
-                    ->withHeaders(['X-Pipocas-Token' => (string) config('services.n8n.token')])
-                    ->post($webhook, $this->evento($registro))
-                    ->throw();
+                Http::timeout(10)->withHeaders([
+                    'X-Pipocas-Token' => (string) config('services.n8n.token'),
+                    'Idempotency-Key' => $registro->clave_evento ?? 'notificacion:'.$registro->id,
+                ])->post($webhook, $this->evento($registro))->throw();
             } elseif ($registro->can === 'email' && ! empty($registro->cnd['destino'])) {
-                Mail::to($registro->cnd['destino'], $registro->cnd['nombre'] ?? null)->send(new AvisoMail($registro));
+                Mail::to($registro->cnd['destino'], $registro->cnd['nombre'] ?? null)->send((new AvisoMail($registro))->locale($registro->cnd['idioma'] ?? 'es'));
+            } elseif ($registro->can !== 'panel') {
+                throw new \RuntimeException('No hay un canal configurado para entregar la notificación.');
             }
-
-            $registro->update(['est' => 'enviado', 'env_en' => now()]);
-        } catch (Throwable $e) {
-            $registro->update(['est' => 'fallido', 'cnd' => ($registro->cnd ?? []) + ['error' => mb_substr($e->getMessage(), 0, 300)]]);
-            throw $e;
-        }
+        });
     }
 
     /** Evento que recibe n8n. */

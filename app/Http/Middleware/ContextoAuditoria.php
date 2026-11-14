@@ -15,7 +15,7 @@ class ContextoAuditoria
         ]);
         try {
             $response = $next($request);
-            if ($request->user()) {
+            if ($request->user() || $request->routeIs('reservas.*', 'pagos.*', 'pasarela.*', 'boletos.*')) {
                 $response->headers->set('Cache-Control', 'no-store, private');
             }
 

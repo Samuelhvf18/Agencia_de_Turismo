@@ -1,23 +1,23 @@
 # Estado de implementación por requisito
 
-Rama `WAAAAAA`, código de referencia `33abc90`, actualización documental del 13/11/2026 (Bolivia). La tabla describe implementación localizada; no acredita aceptación operativa. Consultar primero el [plan vigente](../Plan_Trabajo_Agencia_Turismo.md). Ver también [avance y pendientes](AVANCE-PLAN-TRABAJO.md) y [verificación reproducible](CI-Y-PRUEBAS.md) para evidencia y límites.
+Rama `WAAAAAA`, actualización del 14/11/2026 UTC. Incluye el desarrollo y las pruebas del [informe de entrega](ENTREGA-2026-11-14.md). La tabla describe implementación localizada; no acredita aceptación operativa. Consultar primero el [plan vigente](../Plan_Trabajo_Agencia_Turismo.md). Ver también [avance y pendientes](AVANCE-PLAN-TRABAJO.md) y [verificación reproducible](CI-Y-PRUEBAS.md) para evidencia y límites.
 
 ## Requerimientos funcionales
 
 | RF | Requisito | Implementación | Pruebas |
 |---|---|---|---|
-| RF-01 | Filtros del catálogo | Categoría + dificultad + altitud sin recargar (`welcome.blade.php`) | CatalogoTest |
+| RF-01 | Filtros del catálogo | Categoría, dificultad y altitud; nombre/fecha con disponibilidad real (`CatalogoController`, `welcome`) | CatalogoTest |
 | RF-02 | Mapa y perfil de elevación | Leaflet con `trz_geo`/`puntos_ruta` y Chart.js (`tours/show`) | CatalogoTest |
 | RF-03, RF-04 | Registro, login, roles e historial propio | Fortify sobre `users`, middleware y `/mis-reservas` por titular | RolesTest, RegistrationTest, ReservasTest |
 | RF-05 a RF-07 | Salida, participantes, equipo | `ReservaController`, `BorradorReserva`, FormRequests CI/pasaporte | ReservasTest |
-| RF-08 | Ficha médica con firma | Canvas → `FirmaDigital`; obligatoria en alto riesgo | ReservasTest |
+| RF-08 | Ficha médica con firma | Canvas → PNG privado validado; exigido también al emitir/reactivar/check-in de alto riesgo | ReservasTest |
 | RF-09, RF-36 | Cupo y código único | `ReservaService::confirmar` con `lockForUpdate`; `CodeGeneratorService` | ReservasTest |
 | RF-10, RF-11 | Boletos QR y PDF | `BoletoService` (QR SVG, dompdf), correo `EnviarBoletosReserva` | ReservasTest |
 | RF-12 | Consulta por código | `ConsultaReservaController` (código + correo) | ReservasTest |
 | RF-13, RF-14 | Pagos y comprobante | `PagoService`, `PasarelaSimulada` (webhook HMAC), `ComprobanteService` | ReservasTest |
 | RF-15, RF-19, RF-20 | Personal, flota, inventario | `PersonalController`, `FlotaController`, `InventarioController` | OperacionesTest |
 | RF-16, RF-21 | Programación, asignación y cancelación | `SalidaService`, `AsignacionService` | OperacionesTest |
-| RF-17, RF-18 | Check-in QR y manifiesto | `CheckinController` + html5-qrcode + IndexedDB | OperacionesTest |
+| RF-17, RF-18 | Check-in QR y manifiesto | `CheckinController` + QR + IndexedDB AES-GCM y shell offline | OperacionesTest |
 | RF-22 | Asignación de guías | `OptimizadorService` + `MetodoHungaro` | OptimizacionTest, IoGestionTest |
 | RF-23 | Asignación de vehículos | `OptimizadorService::proponerVehiculos` | IoGestionTest |
 | RF-24 | Revisión de propuestas | Tabla `propuestas_asignacion`, panel de propuestas | IoGestionTest |
@@ -42,22 +42,22 @@ Rama `WAAAAAA`, código de referencia `33abc90`, actualización documental del 1
 | RNF-05 Lecturas sensibles | `AuditObserver::lectura` en participantes y fichas médicas |
 | RNF-06 Auditoría | Triggers PostgreSQL transaccionales; READ mediante AuditObserver; panel con antes/después |
 | RNF-07 Integridad | CHECK, UNIQUE y FK del esquema; transacciones con bloqueo |
-| RNF-08 a RNF-10 Rendimiento | Infraestructura prevista; mediciones de p95/4G/3× pendientes |
-| RNF-12 Respaldo | Comando con retención configurada; restauración local pequeña comprobada; recuperación/retención operativas pendientes |
+| RNF-08 a RNF-10 Rendimiento | p95 y 4G medidos en QA; degradación 3× incumplida en servidor de desarrollo; falta infraestructura/carga final |
+| RNF-12 Respaldo | Dump + ZIP + SHA-256 y retención de 30 días; restauración conjunta local comprobada; entrega operativa pendiente |
 | RNF-13 Responsive | 16 pantallas administrativas revisadas a 360 px en Chromium; completar flujos públicos/campo y otros navegadores |
-| RNF-14 Idiomas | ES/EN principal con selector y sesión; textos secundarios y recorrido integral pendientes |
-| RNF-15 Sin conexión | IndexedDB separado por sesión y caché privada retirada; reapertura desde cero sin red y aceptación integral pendientes |
+| RNF-14 Idiomas | ES/EN principal, errores, JS, correo/PDF y reserva con idioma; contenido editorial/políticas por revisar |
+| RNF-15 Sin conexión | Shell offline reabre con clave local; manifiesto cifrado 12 h, bloqueo/cambio de usuario y conflictos comprobados; jornada en dispositivo real pendiente |
 | RNF-20 Fallo controlado | Chatbot con respaldo local si la IA no responde |
 
 ## Administración y planificación
 
-El [rediseño implementado](REDISENO-ADMIN.md) unifica administración e IO. La entrada `/admin/io` organiza las herramientas como demanda/capacidad, asignaciones, equipo, retención y ajustes. La suite local más reciente tiene **170 aprobadas, 4 omitidas y 0 fallidas**; ver [evidencia](evidencias/suite-33abc90.txt). Esto no sustituye aceptación externa ni certifica CI remoto.
+El [rediseño implementado](REDISENO-ADMIN.md) unifica administración e IO. La entrada `/admin/io` organiza las herramientas como demanda/capacidad, asignaciones, equipo, retención y ajustes. La suite local y los ensayos de esta entrega están en el [informe actualizado](ENTREGA-2026-11-14.md). Esto no sustituye aceptación externa ni certifica CI remoto.
 
 ## Cambios respecto al diseño original
 
-- **Tabla nueva `propuestas_asignacion`** (RF-24): el esquema pasa de 40 a 41 tablas. Ver `Documentacion actualizada/03_Base_de_Datos/schema_postgresql_v6.sql` y `diccionario_datos_v5.docx`.
+- **Tabla `propuestas_asignacion`** (RF-24) y nuevas columnas de avisos, autenticación, idioma y contexto de colas: consultar el [diccionario físico actual](DICCIONARIO-ACTUAL.md). El cotejo con los documentos externos citados originalmente sigue pendiente.
 - La tabla de usuarios es `users` (decisión del equipo). El registro pide nombre y apellidos y los guarda juntos en `nom`. El inicio de sesión es por correo.
-- Sin 2FA ni passkeys: `users` no tiene esas columnas en el diccionario.
+- 2FA TOTP opcional con recuperación y verificación real de correo implementadas. No se agregan passkeys como requisito.
 - La pasarela de pago es una simulación propia con webhook firmado (decisión del equipo).
 - El planificador de IO II es n8n (`docs/n8n/planificador-io.json`); el cron de Laravel queda para la expiración de reservas, los recordatorios y el respaldo.
 

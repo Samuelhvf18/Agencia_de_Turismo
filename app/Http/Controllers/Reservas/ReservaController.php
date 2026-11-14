@@ -67,7 +67,7 @@ class ReservaController extends Controller
         $salida = SalidaTour::where('tur_id', $tour->id)->findOrFail($request->integer('sal_tur_id'));
 
         if ($salida->est !== SalidaTour::EST_PROGRAMADA || $salida->fec_sal->lt(today())) {
-            return back()->withErrors(['sal_tur_id' => 'Esta salida ya no admite reservas. Elige otra.'])->withInput();
+            return back()->withErrors(['sal_tur_id' => __('Esta salida ya no admite reservas. Elige otra.')])->withInput();
         }
 
         $cantidad = $request->integer('cnt_ptc');
@@ -197,13 +197,13 @@ class ReservaController extends Controller
                 $equipo = $equipos->get((int) $tipId);
                 $item = $equipo ? collect($equipo['items'])->firstWhere('id', (int) $itemId) : null;
                 if (! $item) {
-                    $errores["alquileres.$i.$tipId"] = 'Elige una talla válida.';
+                    $errores["alquileres.$i.$tipId"] = __('Elige una talla válida.');
 
                     continue;
                 }
                 $uso[$item['id']] = ($uso[$item['id']] ?? 0) + 1;
                 if ($uso[$item['id']] > $item['cnt_dis']) {
-                    $errores["alquileres.$i.$tipId"] = "No queda stock de {$equipo['nom']} talla {$item['tal']}.";
+                    $errores["alquileres.$i.$tipId"] = __('No queda stock de :equipo talla :talla.', ['equipo' => $equipo['nom'], 'talla' => $item['tal']]);
 
                     continue;
                 }
@@ -324,7 +324,7 @@ class ReservaController extends Controller
         if ($r = $this->exigirPaso('participantes')) {
             return $r;
         }
-        $request->validate(['acp_ter' => ['accepted']], ['acp_ter.accepted' => 'Debes aceptar los términos y condiciones.']);
+        $request->validate(['acp_ter' => ['accepted']], ['acp_ter.accepted' => __('Debes aceptar los términos y condiciones.')]);
 
         try {
             $reserva = $this->reservas->confirmar($this->borrador->datos(), $request->user());

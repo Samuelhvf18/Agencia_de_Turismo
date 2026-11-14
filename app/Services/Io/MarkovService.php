@@ -321,8 +321,8 @@ class MarkovService
         $obs = 0;
         $fin = now()->startOfMonth();
         for ($m = $meses; $m >= 1; $m--) {
-            $a = $this->estadosAl($fin->copy()->subMonths($m)->endOfMonth());
-            $b = $this->estadosAl($fin->copy()->subMonths($m - 1)->endOfMonth());
+            $a = $this->estadosAl($fin->copy()->subMonths($m + 1)->endOfMonth());
+            $b = $this->estadosAl($fin->copy()->subMonths($m)->endOfMonth());
             foreach ($a as $usr => $i) {
                 $j = $b[$usr] ?? $i;
                 $conteos[$i][$j] = ($conteos[$i][$j] ?? 0) + 1;

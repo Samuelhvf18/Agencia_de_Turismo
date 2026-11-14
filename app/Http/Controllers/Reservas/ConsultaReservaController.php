@@ -51,7 +51,7 @@ class ConsultaReservaController extends Controller
             ->first();
 
         if (! $reserva) {
-            return back()->withErrors(['cod' => 'No encontramos una reserva con esos datos.'])->withInput();
+            return back()->withErrors(['cod' => __('No encontramos una reserva con esos datos.')])->withInput();
         }
 
         AccesoReserva::conceder($request, $reserva);
@@ -108,18 +108,18 @@ class ConsultaReservaController extends Controller
     public function cancelar(Request $request, Reserva $reserva, ReservaService $servicio): RedirectResponse
     {
         AccesoReserva::exigir($request, $reserva);
-        abort_unless($this->cancelable($reserva), 422, 'Esta reserva ya no se puede cancelar.');
+        abort_unless($this->cancelable($reserva), 422, __('Esta reserva ya no se puede cancelar.'));
 
         $servicio->cancelar($reserva, 'Cancelada por el cliente');
 
-        return redirect()->route('reservas.estado', $reserva)->with('estado', 'Tu reserva fue cancelada y los cupos se liberaron.');
+        return redirect()->route('reservas.estado', $reserva)->with('estado', __('Tu reserva fue cancelada y los cupos se liberaron.'));
     }
 
     public function boletosPdf(Request $request, Reserva $reserva): Response
     {
         AccesoReserva::exigir($request, $reserva);
         $boletos = $reserva->boletos()->where('boletos.est', '<>', Boleto::EST_CANCELADO)->get();
-        abort_if($boletos->isEmpty(), 404, 'Los boletos se emiten cuando el pago está completo.');
+        abort_if($boletos->isEmpty(), 404, __('Los boletos se emiten cuando el pago está completo.'));
 
         return $this->boletos->pdf($reserva, $boletos)->download("boletos-{$reserva->cod}.pdf");
     }

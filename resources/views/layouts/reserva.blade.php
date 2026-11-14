@@ -10,6 +10,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+    @auth<meta name="offline-account" content="{{ auth()->id() }}">@endauth
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -21,6 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>window.rsvText = key => (@json(app()->getLocale() === 'en' ? json_decode(file_get_contents(lang_path('en.json')), true) : (object) []))[key] ?? key;</script>
     @livewireStyles
 </head>
 <body class="flex min-h-screen flex-col bg-pipocas-fondo font-cuerpo text-pipocas-texto antialiased">

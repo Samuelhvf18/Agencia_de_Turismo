@@ -4,6 +4,9 @@ use App\Models\AlquilerEquipoReserva;
 use App\Models\ColaMetricaDiaria;
 use App\Models\ColaParametroTour;
 use App\Models\Idioma;
+use App\Models\MarkovClienteEstado;
+use App\Models\MarkovCohort;
+use App\Models\MarkovCohortDistribucion;
 use App\Models\Pais;
 use App\Models\PerfilGuia;
 use App\Models\PropuestaAsignacion;
@@ -16,7 +19,10 @@ use App\Models\User;
 use App\Models\Vehiculo;
 use App\Services\CodeGeneratorService;
 use App\Services\Io\ColasService;
+use App\Services\Io\EoqService;
+use App\Services\Io\MarkovService;
 use App\Services\Io\OptimizadorService;
+use Carbon\Carbon;
 use Database\Seeders\CatalogoLandingSeeder;
 use Database\Seeders\CatalogosBaseSeeder;
 use Database\Seeders\IoColasMarkovSeeder;
@@ -24,6 +30,7 @@ use Database\Seeders\OperacionDemoSeeder;
 use Database\Seeders\RolesSeeder;
 use Database\Seeders\UsuariosDemoSeeder;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function () {
     $this->seed([RolesSeeder::class, CatalogosBaseSeeder::class, UsuariosDemoSeeder::class, CatalogoLandingSeeder::class, OperacionDemoSeeder::class, IoColasMarkovSeeder::class]);
@@ -206,4 +213,76 @@ test('la simulación compara con la demanda actual y no cambia la configuración
         ->assertViewHas('sim', fn ($m) => $m !== null);
     $this->get(route('admin.io.colas', ['tour' => $par->tur_id, 'c' => 5, 'k' => 2]))
         ->assertSessionHasErrors('k');
+});
+
+test('el cálculo histórico conserva parámetros y ventana aunque cambie la configuración', function () {
+    $par = ColaParametroTour::where('act', true)->firstOrFail();
+    $service = app(ColasService::class);
+    $service->registrarLlegada($par->tur_id, null, null, 2);
+    $service->generarMetricasDiarias(today());
+    $row = ColaMetricaDiaria::where('tur_id', $par->tur_id)->whereDate('fec', today())->firstOrFail();
+    $par->update(['mu' => 9, 'c_srv' => 1]);
+    $ctx = $row->fresh()->contexto;
+    $m = $service->metricas($ctx['lambda'], $ctx['mu'], $ctx['c'], $ctx['k']);
+    expect($row->lq)->toEqualWithDelta($m['lq'], 0.0001)
+        ->and($ctx['desde'])->toBe(today()->subDays(29)->toDateString())
+        ->and($ctx['hasta'])->toBe(today()->toDateString())
+        ->and($ctx['unidad_llegada'])->toBe('solicitud');
+});
+
+test('la demanda diaria EOQ incluye ceros y coincide con la fuente anual sin mezclar años', function () {
+    $this->travelTo(Carbon::parse('2026-06-15'));
+    $item = TipoEquipo::first()->items()->first();
+    foreach (['2025-12-31', '2026-01-01', '2026-04-30', '2026-06-15', '2027-01-01'] as $i => $dia) {
+        $salida = SalidaTour::create(['tur_id' => Tour::first()->id, 'fec_sal' => $dia, 'hra_sal' => '08:00', 'cap_max' => 10, 'est' => 'completada']);
+        $r = Reserva::create(['cod' => CodeGeneratorService::generate('RES'), 'sal_tur_id' => $salida->id, 'nom_ctc' => 'QA', 'cor_ctc' => 'qa@example.test', 'tel_ctc' => '70000000', 'cnt_ptc' => 1, 'pre_tot' => 100, 'est' => 'completada']);
+        $p = $r->participantes()->create(['nom_cpl' => 'QA Uno', 'tip_doc' => 'PASAPORTE', 'num_doc' => "EOQ{$i}", 'eda' => 30]);
+        AlquilerEquipoReserva::create(['ptc_rsv_id' => $p->id, 'itm_eqp_id' => $item->id, 'pre' => 15]);
+    }
+    $service = app(EoqService::class);
+    $diaria = $service->demandaDiaria($item->tip_eqp_id);
+    expect($diaria)->toHaveCount(365)->and($diaria['2026-01-02'])->toBe(0)
+        ->and(array_sum($diaria))->toBe(3)->and(array_sum($service->demandaMensual($item->tip_eqp_id)))->toBe(3)
+        ->and($service->demandaAnualVista($item->tip_eqp_id, 2026))->toBe(3);
+    $fila = collect($service->analizar())->firstWhere('tipo.id', $item->tip_eqp_id);
+    // Muestra de 365 días: tres días con un uso y 362 días sin usos.
+    $sigma = sqrt((3 * (1 - 3 / 365) ** 2 + 362 * (3 / 365) ** 2) / 364);
+    expect($fila['eoq']['ss'])->toEqualWithDelta(1.65 * $sigma * sqrt(7), 1e-9);
+    $this->travelBack();
+});
+
+test('una propuesta aplicada no puede volver a aplicarse ni rechazarse con una página antigua', function () {
+    SalidaTour::query()->update(['prf_gui_id' => null]);
+    $svc = app(OptimizadorService::class);
+    $svc->proponerGuias(today(), today()->addDays(10));
+    $p = PropuestaAsignacion::where('est', 'pendiente')->firstOrFail();
+    $svc->aplicar($p, $this->admin);
+    expect(fn () => $svc->aplicar($p, $this->admin))->toThrow(ValidationException::class);
+    expect(fn () => $svc->rechazar($p, $this->admin))->toThrow(ValidationException::class);
+    expect($p->fresh()->est)->toBe(PropuestaAsignacion::EST_APLICADA);
+});
+
+test('Markov recalibra solo meses completos y las cohortes conservan sus integrantes', function () {
+    $this->travelTo(Carbon::parse('2026-07-15'));
+    MarkovClienteEstado::query()->delete();
+    $svc = app(MarkovService::class);
+    for ($i = 0; $i < 7; $i++) {
+        $u = User::factory()->rol(User::ROL_TURISTA)->create();
+        $svc->registrarCambio($u->id, 'prospecto', fecha: Carbon::parse('2026-03-01'));
+        $svc->registrarCambio($u->id, ['reservado', 'completado', 'perdido'][$i % 3], fecha: Carbon::parse('2026-04-01'));
+        // Julio aún no terminó; esta fidelización no debe contaminar la matriz mensual.
+        if ($i % 3 === 1) {
+            $svc->registrarCambio($u->id, 'fidelizado', fecha: now());
+        }
+    }
+    $svc->recalibrar(3);
+    $p = $svc->matrizVigente()['P'];
+    expect($svc->esEstocastica($p))->toBeTrue()->and($p['completado']['fidelizado'])->toBe(0.0)
+        ->and($p['fidelizado']['fidelizado'])->toBe(1.0)->and($p['perdido']['perdido'])->toBe(1.0);
+    $svc->construirCohortes();
+    $cohort = MarkovCohort::whereDate('per_cap', '2026-03-01')->firstOrFail();
+    foreach ([0, 1, 2, 3, 4] as $rel) {
+        expect((int) MarkovCohortDistribucion::where('coh_id', $cohort->id)->where('per_rel', $rel)->sum('cnt'))->toBe(7);
+    }
+    $this->travelBack();
 });

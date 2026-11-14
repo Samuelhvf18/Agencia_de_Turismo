@@ -1,0 +1,44 @@
+14/11/2026 UTC — builds locales; no despliegue de producción
+
+Targets app y web de docker/Dockerfile construidos correctamente.
+App: turismo-entrega / Web: turismo-web-entrega
+Redis PHP fijado en 6.2.0, archivo fuente HTTPS verificado por SHA-256.
+Secret BuildKit corp_ca: cadena PEM confiable del entorno, no incluida en Git.
+
+Laravel Framework 12.69.2
+
+   INFO  Routes cached successfully.  
+
+
+
+   INFO  Blade templates cached successfully.  
+
+Checking non-dev platform requirements for packages in the vendor dir
+composer-runtime-api 2.2.2      success                                       
+ext-ctype            *          success provided by symfony/polyfill-ctype    
+ext-date             8.4.27     success                                       
+ext-dom              20031129   success                                       
+ext-fileinfo         8.4.27     success                                       
+ext-filter           8.4.27     success                                       
+ext-hash             8.4.27     success                                       
+ext-iconv            8.4.27     success                                       
+ext-json             8.4.27     success                                       
+ext-libxml           8.4.27     success                                       
+ext-mbstring         *          success provided by symfony/polyfill-mbstring 
+ext-openssl          8.4.27     success                                       
+ext-pcre             8.4.27     success                                       
+ext-session          8.4.27     success                                       
+ext-tokenizer        8.4.27     success                                       
+php                  8.4.27     success                                       
+
+Módulos PHP:
+pdo_pgsql:ok
+mbstring:ok
+dom:ok
+xml:ok
+xmlwriter:ok
+zip:ok
+bcmath:ok
+redis:ok
+
+Estáticos y shell presentes en web; .env ausente. Contexto excluye work, storage/app, testing y backups.

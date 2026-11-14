@@ -9,6 +9,7 @@ use App\Models\SalidaTour;
 use App\Models\Tour;
 use App\Models\Vehiculo;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Reglas de asignación de recursos a una salida (RF-16, RF-17, M04):
@@ -20,6 +21,12 @@ use Carbon\Carbon;
  */
 class AsignacionService
 {
+    /** Serializa decisiones que comparten guía, chofer o vehículo (incluye propuestas IO). */
+    public function bloquearAgenda(): void
+    {
+        DB::select('SELECT pg_advisory_xact_lock(64026, 1)');
+    }
+
     /**
      * @param  array{tur_id:int, fec_sal:string, hra_sal:string, cap_max:int, prf_gui_id?:?int, prf_cho_id?:?int, veh_id?:?int}  $d
      * @return array<string, string> errores por campo (vacío si es válida)

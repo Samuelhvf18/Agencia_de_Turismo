@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Optimización de recursos (Módulo 07, RF-22 a RF-24).
@@ -255,29 +256,37 @@ class OptimizadorService
      */
     public function aplicar(PropuestaAsignacion $propuesta, User $usuario, ?int $recursoAjustado = null): PropuestaAsignacion
     {
-        $campo = $propuesta->tip === 'guia' ? 'prf_gui_id' : 'veh_id';
-        $recurso = $recursoAjustado ?? $propuesta->rec_pro_id;
+        return DB::transaction(function () use ($propuesta, $usuario, $recursoAjustado) {
+            app(AsignacionService::class)->bloquearAgenda();
+            $propuesta = PropuestaAsignacion::lockForUpdate()->findOrFail($propuesta->id);
+            if ($propuesta->est !== PropuestaAsignacion::EST_PENDIENTE) {
+                throw ValidationException::withMessages(['propuesta' => 'Esta propuesta ya fue revisada. Actualiza la página.']);
+            }
+            $campo = $propuesta->tip === 'guia' ? 'prf_gui_id' : 'veh_id';
+            $recurso = $recursoAjustado ?? $propuesta->rec_pro_id;
+            $this->salidas->asignar($propuesta->salida, [$campo => $recurso]);
+            $propuesta->update([
+                'est' => $recursoAjustado && $recursoAjustado !== $propuesta->rec_pro_id ? PropuestaAsignacion::EST_AJUSTADA : PropuestaAsignacion::EST_APLICADA,
+                'rec_pro_id' => $recurso, 'rev_por' => $usuario->id, 'rev_en' => now(),
+            ]);
+            PropuestaAsignacion::where('sal_tur_id', $propuesta->sal_tur_id)->where('tip', $propuesta->tip)
+                ->where('est', PropuestaAsignacion::EST_PENDIENTE)->where('id', '<>', $propuesta->id)
+                ->update(['est' => PropuestaAsignacion::EST_RECHAZADA, 'rev_por' => $usuario->id, 'rev_en' => now()]);
 
-        $this->salidas->asignar($propuesta->salida, [$campo => $recurso]);
-
-        $propuesta->update([
-            'est' => $recursoAjustado && $recursoAjustado !== $propuesta->rec_pro_id ? PropuestaAsignacion::EST_AJUSTADA : PropuestaAsignacion::EST_APLICADA,
-            'rec_pro_id' => $recurso,
-            'rev_por' => $usuario->id,
-            'rev_en' => now(),
-        ]);
-
-        // Las demás propuestas pendientes para la misma salida y recurso quedan obsoletas.
-        PropuestaAsignacion::where('sal_tur_id', $propuesta->sal_tur_id)->where('tip', $propuesta->tip)
-            ->where('est', PropuestaAsignacion::EST_PENDIENTE)->where('id', '<>', $propuesta->id)
-            ->update(['est' => PropuestaAsignacion::EST_RECHAZADA, 'rev_por' => $usuario->id, 'rev_en' => now()]);
-
-        return $propuesta;
+            return $propuesta;
+        }, 3);
     }
 
     public function rechazar(PropuestaAsignacion $propuesta, User $usuario): void
     {
-        $propuesta->update(['est' => PropuestaAsignacion::EST_RECHAZADA, 'rev_por' => $usuario->id, 'rev_en' => now()]);
+        DB::transaction(function () use ($propuesta, $usuario) {
+            app(AsignacionService::class)->bloquearAgenda();
+            $propuesta = PropuestaAsignacion::lockForUpdate()->findOrFail($propuesta->id);
+            if ($propuesta->est !== PropuestaAsignacion::EST_PENDIENTE) {
+                throw ValidationException::withMessages(['propuesta' => 'Esta propuesta ya fue revisada. Actualiza la página.']);
+            }
+            $propuesta->update(['est' => PropuestaAsignacion::EST_RECHAZADA, 'rev_por' => $usuario->id, 'rev_en' => now()]);
+        }, 3);
     }
 
     /** @return Collection<int, SalidaTour> */

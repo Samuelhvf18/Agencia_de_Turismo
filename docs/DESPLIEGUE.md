@@ -6,7 +6,7 @@
 composer install
 npm install && npm run build      # o: npm run dev
 cp .env.example .env              # configurar DB_*, APP_KEY (php artisan key:generate), MAIL_*
-php artisan migrate:fresh --seed  # esquema v5 + datos demo
+php artisan migrate --seed       # base local nueva: esquema y datos demo
 php artisan storage:link          # fotos subidas desde el panel
 php artisan serve                 # http://127.0.0.1:8000
 php artisan queue:work            # correos, boletos y notificaciones
@@ -32,9 +32,9 @@ remoto sin intervención manual:
 | **Script de instalación** | `bash scripts/setup.sh` |
 | **Habilidad de inicio** (startup) | `bash scripts/start.sh` |
 
-`scripts/setup.sh` instala PHP 8.2+, Composer, Node 20 y PostgreSQL 16, crea
-las bases `agencia_turismo_db` y `agencia_turismo_test`, genera `.env`,
-ejecuta `migrate:fresh --seed`, enlaza `storage` y compila los assets con Vite.
+`scripts/setup.sh` instala PHP 8.4+, Composer, Node 22 y PostgreSQL, crea
+las bases `agencia_turismo_db` y `agencia_turismo_test`, crea `.env` solo si no existe,
+aplica `migrate` y si el entorno es nuevo agrega semillas demo, enlaza `storage` y compila los assets con Vite.
 
 `scripts/start.sh` arranca PostgreSQL y sirve la aplicación con
 `php artisan serve --host=0.0.0.0 --port=8000`. Para elegir otro puerto:
@@ -53,7 +53,7 @@ Servicios de `docker-compose.yml`:
 | `app` | PHP-FPM 8.4 (`docker/Dockerfile`) | Laravel |
 | `queue` | la misma imagen | `queue:work` (correos, boletos, notificaciones) |
 | `scheduler` | la misma imagen | `schedule:work` (expiración de reservas, recordatorios y respaldo) |
-| `db` | postgres 16 | Base de datos |
+| `db` | postgres 17 | Base de datos |
 | `redis` | redis 7 | Caché, sesiones y colas |
 | `n8n` | n8nio/n8n | Planificador de IO II, notificaciones y chatbot |
 
@@ -61,28 +61,31 @@ Pasos:
 
 1. Copiar `.env.example` a `.env` y completar al menos: `APP_KEY`, `APP_URL=https://…`, `APP_ENV=production`, `APP_DEBUG=false`, `DB_*`, `MAIL_*`, `PIPOCAS_ADMIN_*`, `PASARELA_SECRETO`, `N8N_TOKEN` y `N8N_WEBHOOK_*`. Con `APP_ENV=production` se fuerza HTTPS (RNF-01); conviene además `SESSION_SECURE_COOKIE=true` y `PASARELA_WEBHOOK_HTTP=true`.
 2. Colocar los certificados en `docker/certs/fullchain.pem` y `docker/certs/privkey.pem` (p. ej. con certbot).
-3. Levantar y preparar:
+3. Si ya existe un volumen PostgreSQL 16, migrarlo mediante dump/restore a un volumen nuevo antes de usar la imagen 17; no conectar la versión nueva directamente al volumen anterior. Conservar y verificar la copia previa. Los estáticos ahora están en la imagen web del mismo build; el volumen público antiguo ya no se usa y no es necesario borrarlo para desplegar.
+
+4. Levantar y preparar:
 
    ```bash
    docker compose up -d --build
-   docker compose exec app php artisan migrate --force --seed
+   docker compose exec app php artisan migrate --force
    docker compose exec app php artisan storage:link
    docker compose exec app php artisan config:cache && docker compose exec app php artisan route:cache && docker compose exec app php artisan view:cache
    ```
 
-4. En n8n (`:5678`), importar los flujos de `docs/n8n/` y configurar las credenciales SMTP y de Anthropic (ver `docs/n8n/README.md`).
+5. En n8n (`:5678`), importar los flujos de `docs/n8n/` y configurar las credenciales SMTP y de Anthropic (ver `docs/n8n/README.md`).
 
 ## Respaldo (RNF-12)
 
-`php artisan respaldo:bd` ejecuta `pg_dump -Fc` hacia `storage/backups/` y borra los respaldos de más de 30 días. El planificador lo corre todos los días a las 02:30. Fuera de Docker, si `pg_dump` no está en el PATH, se indica con `PG_DUMP_PATH`.
+`php artisan respaldo:bd` crea dump, ZIP de adjuntos privados y manifiesto SHA-256, con retención de treinta días. El procedimiento de corte, restauración segura en base vacía, archivos públicos, permisos, secretos y evidencia está en [OPERACION.md](OPERACION.md). Configurar `pg_dump` en PATH o `PG_DUMP_PATH` y copiar las copias fuera del servidor.
 
-Para restaurar:
+Si la red del build usa una CA corporativa, suministrarla sin desactivar TLS:
 
-```bash
-pg_restore -h HOST -U USUARIO -d agencia_turismo_db --clean --if-exists storage/backups/agencia_turismo_db_AAAAMMDD_HHMMSS.dump
+```sh
+docker build --secret id=corp_ca,src=/ruta/ca-confiable.pem --target app -t pipocas-app -f docker/Dockerfile .
+docker build --secret id=corp_ca,src=/ruta/ca-confiable.pem --target web -t pipocas-web -f docker/Dockerfile .
 ```
 
-Se recomienda copiar `storage/backups` a otro equipo o a la nube (p. ej. con `rclone` en el cron del servidor).
+La CA es una cadena PEM válida del entorno. No subir secretos o certificados privados al repositorio. El build comprueba los requisitos de plataforma de Composer en PHP 8.4. Las imágenes no incluyen `.env`, firmas de QA ni respaldos. Las fotos cargadas y adjuntos pertenecen al volumen `storage` y se conservan separadamente del build.
 
 ## Rendimiento (RNF-08 a RNF-10)
 

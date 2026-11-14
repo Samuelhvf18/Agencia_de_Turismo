@@ -48,10 +48,9 @@
         <div>
             <a href="{{ Route::has('tours.show') && isset($tour->id) ? route('tours.show', $tour) : url('/') }}"
                class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
-                <i class="fa-solid fa-arrow-left"></i> Volver al tour
-            </a>
+                <i class="fa-solid fa-arrow-left"></i>{{ __('Volver al tour') }}</a>
             <h1 class="font-titulo text-3xl font-semibold leading-tight text-pipocas-texto sm:text-4xl">{{ __('¿Cuándo quieres ir?') }}</h1>
-            <p class="mt-2 text-pipocas-texto-2">{{ __('Elige una de las salidas programadas para') }} <b class="text-pipocas-texto">{{ $tour->nom }}</b>. Los cupos se actualizan en tiempo real.</p>
+            <p class="mt-2 text-pipocas-texto-2">{{ __('Elige una de las salidas programadas para') }} <b class="text-pipocas-texto">{{ $tour->nom }}</b>{{ __('. Los cupos se actualizan en tiempo real.') }}</p>
         </div>
 
         @error('sal_tur_id')
@@ -59,7 +58,7 @@
         @enderror
 
         @forelse ($porFecha as $fecha => $lista)
-            @php $f = \Carbon\Carbon::parse($fecha)->locale('es'); @endphp
+            @php $f = \Carbon\Carbon::parse($fecha)->locale(app()->getLocale()); @endphp
             <section class="rsv-tarjeta">
                 <header class="mb-4 flex items-center gap-4">
                     <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-pipocas-principal/10 text-center leading-none text-pipocas-principal">
@@ -67,8 +66,8 @@
                         <span class="font-titulo text-2xl font-semibold">{{ $f->format('j') }}</span>
                     </div>
                     <div>
-                        <h2 class="font-bold">{{ ucfirst($f->translatedFormat('l j \d\e F')) }}</h2>
-                        <p class="text-sm text-pipocas-texto-2">{{ $f->diffForHumans(['parts' => 1, 'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW]) }} · {{ $lista->count() }} {{ $lista->count() == 1 ? 'horario' : 'horarios' }}</p>
+                        <h2 class="font-bold">{{ ucfirst($f->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'l j \d\e F')) }}</h2>
+                        <p class="text-sm text-pipocas-texto-2">{{ $f->diffForHumans(['parts' => 1, 'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW]) }} · {{ $lista->count() }} {{ $lista->count() == 1 ? __('horario') : __('horarios') }}</p>
                     </div>
                 </header>
 
@@ -100,7 +99,7 @@
                                 @if ($agotada)
                                     <span class="rounded-full bg-gray-200 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-gray-600">{{ __('Agotado') }}</span>
                                 @elseif ($pocos)
-                                    <span class="rounded-full bg-pipocas-acento/30 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-calido">¡Últimos {{ $libres }}!</span>
+                                    <span class="rounded-full bg-pipocas-acento/30 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-calido">{{ __('¡Últimos :cantidad!', ['cantidad' => $libres]) }}</span>
                                 @else
                                     <span class="grid h-6 w-6 place-items-center rounded-full border-2 border-gray-300 text-[10px] text-white"
                                           :class="sal === {{ $s['id'] }} && '!border-pipocas-principal bg-pipocas-principal'">
@@ -116,7 +115,7 @@
                                     </span>
                                     <span class="text-pipocas-texto-2">{{ $s['cup_ocu'] }}/{{ $s['cap_max'] }}</span>
                                 </div>
-                                <div class="h-2 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="Ocupación">
+                                <div class="h-2 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('Ocupación') }}">
                                     <div @class([
                                         'h-full rounded-full',
                                         'bg-gray-400' => $agotada,
@@ -143,17 +142,17 @@
                 <div>
                     <h2 class="rsv-titulo">{{ __('¿Cuántas personas?') }}</h2>
                     <p class="text-sm text-pipocas-texto-2" x-show="!sal">{{ __('Primero elige un horario.') }}</p>
-                    <p class="text-sm text-pipocas-texto-2" x-show="sal" x-cloak>{{ __('Máximo') }} <span x-text="disp"></span> en esta salida.</p>
+                    <p class="text-sm text-pipocas-texto-2" x-show="sal" x-cloak>{{ __('Máximo') }} <span x-text="disp"></span> {{ __('en esta salida.') }}</p>
                 </div>
                 <div class="flex items-center gap-3 self-start sm:self-auto">
                     <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-pipocas-principal transition hover:bg-pipocas-fondo disabled:opacity-40"
-                            @click="cnt = Math.max(1, cnt - 1)" :disabled="cnt <= 1" aria-label="Quitar una persona">
+                            @click="cnt = Math.max(1, cnt - 1)" :disabled="cnt <= 1" aria-label="{{ __('Quitar una persona') }}">
                         <i class="fa-solid fa-minus"></i>
                     </button>
                     <input type="number" name="cnt_ptc" min="1" max="{{ $maxCupo }}" x-model.number="cnt" :max="disp || {{ $maxCupo }}"
-                           class="rsv-campo w-16 text-center text-lg font-bold" aria-label="Cantidad de participantes">
+                           class="rsv-campo w-16 text-center text-lg font-bold" aria-label="{{ __('Cantidad de participantes') }}">
                     <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-pipocas-principal transition hover:bg-pipocas-fondo disabled:opacity-40"
-                            @click="cnt = Math.min(disp || {{ $maxCupo }}, cnt + 1)" :disabled="sal && cnt >= disp" aria-label="Agregar una persona">
+                            @click="cnt = Math.min(disp || {{ $maxCupo }}, cnt + 1)" :disabled="sal && cnt >= disp" aria-label="{{ __('Agregar una persona') }}">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>

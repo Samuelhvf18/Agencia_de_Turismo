@@ -2,6 +2,7 @@
 <html lang="es">
 
 <head>
+    @auth<meta name="offline-account" content="{{ auth()->id() }}">@endauth
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">

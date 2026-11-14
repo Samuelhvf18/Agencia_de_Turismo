@@ -178,6 +178,8 @@ Route::middleware([
 
     // Operación en campo: guías y choferes (y supervisión de operaciones/admin).
     Route::middleware('rol:'.User::ROL_GUIA.','.User::ROL_CHOFER.','.User::ROL_OPERACIONES.','.User::ROL_ADMIN)->group(function () {
+        Route::get('/guias/offline', fn () => response()->file(public_path('checkin-offline.html')))->name('guias.offline');
+        Route::get('/guias/offline/sesion', [CheckinController::class, 'sesionOffline'])->name('guias.offline.sesion');
         Route::get('/guias/checkin', [CheckinController::class, 'index'])->name('guias.checkin');
         Route::get('/guias/salidas/{salida}', [CheckinController::class, 'show'])->name('guias.salida');
         Route::get('/guias/salidas/{salida}/manifiesto', [CheckinController::class, 'manifiestoJson'])->name('guias.manifiesto');

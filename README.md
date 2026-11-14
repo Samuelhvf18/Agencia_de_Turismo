@@ -1,8 +1,10 @@
 # Pipocas · Sistema web de control logístico y venta de tours georreferenciados
 
-Sistema para agencias de viajes y turismo de La Paz (Bolivia): catálogo georreferenciado, motor de reservas con pago en línea y boletos QR, logística de salidas, guías, choferes, vehículos y equipo, modelos de Investigación Operativa II, chatbot con IA y tableros de decisión.
+Sistema para agencias de viajes y turismo de La Paz (Bolivia): catálogo georreferenciado, motor de reservas con pagos simulados y boletos QR, logística de salidas, guías, choferes, vehículos y equipo, modelos de Investigación Operativa II, chatbot con IA y tableros de decisión.
 
-**Stack:** Laravel 12 (MVC + capa de servicios), PostgreSQL 16 (JSONB, vistas y CHECK), Livewire/Alpine, Tailwind, Leaflet, Chart.js, n8n, Redis y Pest.
+**Stack:** Laravel 12 (MVC + capa de servicios), PostgreSQL 17 (JSONB, vistas y CHECK), Livewire/Alpine, Tailwind, Leaflet, Chart.js, n8n, Redis y Pest.
+
+[Entrega y pruebas del 14/11/2026](docs/ENTREGA-2026-11-14.md) · [Plan vigente](Plan_Trabajo_Agencia_Turismo.md)
 
 ## Módulos
 
@@ -30,7 +32,7 @@ composer install && npm install && npm run build
 cp .env.example .env && php artisan key:generate
 php artisan migrate:fresh --seed && php artisan storage:link
 php artisan serve
-php artisan test   # última suite local: 170 aprobadas, 4 omitidas; base agencia_turismo_test
+php artisan test   # última suite local: 195 aprobadas, 1 omitida; base agencia_turismo_test
 ```
 
 ## Verificación y avance

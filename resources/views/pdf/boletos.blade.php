@@ -1,9 +1,9 @@
 {{-- Boletos con QR (uno por página, A5). Variables: $reserva, $salida, $tour, $items = [['boleto' => Boleto, 'qr' => data URI SVG]] --}}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
-    <title>Boletos {{ $reserva->cod }}</title>
+    <title>{{ __('Boletos de la reserva') }} {{ $reserva->cod }}</title>
     <style>
         @page { margin: 22px; }
         body { font-family: DejaVu Sans, sans-serif; color: #343A40; font-size: 11px; }
@@ -27,23 +27,23 @@
     @php($p = $b->participante)
     <div class="boleto">
         <div class="marca">Pipocas</div>
-        <div class="sub">Agencia de Viajes y Turismo · La Paz, Bolivia</div>
+        <div class="sub">{{ __('Agencia de Viajes y Turismo · La Paz, Bolivia') }}</div>
 
         <div class="tour">{{ $tour->nom }}</div>
-        <div class="sub">{{ $tour->cod }} · Reserva {{ $reserva->cod }}</div>
+        <div class="sub">{{ $tour->cod }} · {{ __('Reserva') }} {{ $reserva->cod }}</div>
 
         <div class="qr"><img src="{{ $item['qr'] }}" alt="QR {{ $b->cod }}"></div>
         <div class="cod">{{ $b->cod }}</div>
 
         <table>
-            <tr><td class="k">Participante</td><td><b>{{ $p->nom_cpl }}</b></td></tr>
-            <tr><td class="k">Documento</td><td>{{ $p->tip_doc }} {{ $p->num_doc }}{{ $p->ci_cmp ? '-'.$p->ci_cmp : '' }}</td></tr>
-            <tr><td class="k">Fecha y hora</td><td>{{ $salida->fec_sal->locale('es')->translatedFormat('l j \d\e F \d\e Y') }} · {{ substr($salida->hra_sal, 0, 5) }}</td></tr>
-            <tr><td class="k">Guía</td><td>{{ $salida->guia?->usuario?->nom ?? 'Por asignar' }}</td></tr>
-            <tr><td class="k">Estado</td><td>{{ ucfirst($b->est) }}</td></tr>
+            <tr><td class="k">{{ __('Participante') }}</td><td><b>{{ $p->nom_cpl }}</b></td></tr>
+            <tr><td class="k">{{ __('Documento') }}</td><td>{{ $p->tip_doc }} {{ $p->num_doc }}{{ $p->ci_cmp ? '-'.$p->ci_cmp : '' }}</td></tr>
+            <tr><td class="k">{{ __('Fecha y hora') }}</td><td>{{ $salida->fec_sal->locale(app()->getLocale())->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'l j \d\e F \d\e Y') }} · {{ substr($salida->hra_sal, 0, 5) }}</td></tr>
+            <tr><td class="k">{{ __('Guía') }}</td><td>{{ $salida->guia?->usuario?->nom ?? __('Por asignar') }}</td></tr>
+            <tr><td class="k">{{ __('Estado') }}</td><td>{{ ucfirst(__($b->est)) }}</td></tr>
         </table>
 
-        <div class="aviso">Presenta este código QR al guía antes de abordar. Llega 15 minutos antes de la hora de salida. El boleto es personal e intransferible.</div>
+        <div class="aviso">{{ __('Presenta este código QR al guía antes de abordar. Llega 15 minutos antes de la hora de salida. El boleto es personal e intransferible.') }}</div>
     </div>
 @endforeach
 </body>

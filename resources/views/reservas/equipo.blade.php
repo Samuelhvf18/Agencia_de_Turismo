@@ -70,8 +70,7 @@
     <div class="space-y-6">
         <div>
             <span class="inline-flex items-center gap-1.5 rounded-full bg-pipocas-complementario/10 px-3 py-1 text-xs font-bold text-pipocas-complementario">
-                <i class="fa-solid fa-circle-info"></i> Paso opcional
-            </span>
+                <i class="fa-solid fa-circle-info"></i>{{ __('Paso opcional') }}</span>
             <h1 class="mt-3 font-titulo text-3xl font-semibold leading-tight sm:text-4xl">{{ __('¿Necesitan equipo?') }}</h1>
             <p class="mt-2 text-pipocas-texto-2">{{ __('Alquila lo que te falte y lo recibes al iniciar el tour. Si ya tienes tu equipo, continúa sin elegir nada.') }}</p>
         </div>
@@ -103,25 +102,25 @@
                                 <p class="flex flex-wrap items-center gap-2 font-semibold">
                                     {{ $e['nom'] }}
                                     @if ($e['eqp_cri'])
-                                        <span class="rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario" title="Equipo de seguridad recomendado">{{ __('Recomendado') }}</span>
+                                        <span class="rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario" title="{{ __('Equipo de seguridad recomendado') }}">{{ __('Recomendado') }}</span>
                                     @endif
                                 </p>
                                 <p class="text-sm text-pipocas-texto-2">{{ $e['des'] }} · <b class="text-pipocas-texto">Bs. {{ number_format($e['pre'], 2, ',', '.') }}</b></p>
                             </div>
                             <div class="col-span-2 sm:col-span-1 sm:w-48">
-                                <label for="eq-{{ $clave }}" class="sr-only">Talla de {{ $e['nom'] }} para {{ $p['nom_cpl'] }}</label>
+                                <label for="eq-{{ $clave }}" class="sr-only">{{ __('Talla de :equipo para :nombre', ['equipo' => $e['nom'], 'nombre' => $p['nom_cpl']]) }}</label>
                                 <select id="eq-{{ $clave }}" name="alquileres[{{ $p['id'] }}][{{ $e['tip_eqp_id'] }}]"
                                         x-model="sel['{{ $clave }}']" class="rsv-campo" @disabled($sinStock)>
                                     <option value="">{{ $sinStock ? 'Sin stock' : 'No alquilar' }}</option>
                                     @foreach ($e['items'] as $it)
                                         <option value="{{ $it['id'] }}" :disabled="libres({{ $it['id'] }}, '{{ $clave }}') <= 0">
-                                            Talla {{ $it['tal'] }}
+                                            {{ __('Talla') }} {{ $it['tal'] }}
                                         </option>
                                     @endforeach
                                 </select>
                                 <p class="mt-1 text-xs" x-show="sel['{{ $clave }}']" x-cloak>
                                     <span :class="libres(sel['{{ $clave }}'], '{{ $clave }}') <= 1 ? 'text-pipocas-secundario font-semibold' : 'text-pipocas-texto-2'"
-                                          x-text="'Quedan ' + (libres(sel['{{ $clave }}'], '{{ $clave }}') - 1) + ' en esta talla'"></span>
+                                          x-text="rsvText('Quedan :cantidad en esta talla').replace(':cantidad', libres(sel['{{ $clave }}'], '{{ $clave }}') - 1)"></span>
                                 </p>
                                 @error($campo) <p class="rsv-error">{{ $message }}</p> @enderror
                             </div>
@@ -134,7 +133,7 @@
         <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
             <a href="{{ $urlAnterior }}" class="rsv-btn-sec"><i class="fa-solid fa-arrow-left"></i> {{ __('Participantes') }}</a>
             <button type="submit" class="rsv-btn">
-                <span x-text="total() > 0 ? 'Continuar a la ficha médica' : 'Continuar sin equipo'">{{ __('Continuar a la ficha médica') }}</span>
+                <span x-text="total() > 0 ? rsvText('Continuar a la ficha médica') : rsvText('Continuar sin equipo')">{{ __('Continuar a la ficha médica') }}</span>
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>

@@ -68,3 +68,12 @@ test('la simulación con capacidad 200 y demanda alta mantiene probabilidades fi
         ->and(is_finite($m['wq_hrs']))->toBeTrue()
         ->and(is_finite($m['lq']))->toBeTrue();
 });
+
+test('M/M/2/12 reproduce λ5 μ3.2 del plan con error menor a 0.001', function () {
+    $m = (new ColasService)->metricas(5, 3.2, 2, 12);
+    expect($m['p0'])->toEqualWithDelta(0.1286408565, 0.001)
+        ->and($m['lq'])->toEqualWithDelta(1.8715897297, 0.001)
+        ->and($m['l'])->toEqualWithDelta(3.4133066785, 0.001)
+        ->and($m['wq_hrs'])->toEqualWithDelta(9.1047341631, 0.001)
+        ->and(array_sum($m['pn']))->toEqualWithDelta(1, 1e-12);
+});

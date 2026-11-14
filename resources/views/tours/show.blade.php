@@ -119,7 +119,7 @@ a{color:inherit;text-decoration:none}
     </div>
 
     <div class="panel">
-      <h2>Sobre este tour</h2>
+      <h2>{{ __('Sobre este tour') }}</h2>
       <p>{{ $tour->des }}</p>
     </div>
 
@@ -133,6 +133,7 @@ a{color:inherit;text-decoration:none}
     @if ($hayRuta)
     <div class="panel">
       <h2>{{ __('Recorrido') }}</h2>
+      <p id="map-notice" role="status" hidden style="padding:12px;background:#fff3cf;border-radius:10px;margin-bottom:12px"></p>
       <div id="map" aria-label="Mapa del recorrido"></div>
       <h2 style="margin-top:22px">{{ __('Perfil de elevación') }}</h2>
       <div class="perfil"><canvas id="perfil" aria-label="Perfil de elevación del recorrido"></canvas></div>
@@ -198,21 +199,22 @@ a{color:inherit;text-decoration:none}
 // Trazado: GeoJSON de tours.trz_geo si existe; si no, la polilínea de puntos_ruta.
 const puntos = @json($puntos);
 const trazado = @json($tour->trz_geo);
-const map = L.map('map', { scrollWheelZoom: false });
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
-
-const colores = { inicio: '#2E7D32', checkpoint: '#457699', mirador: '#C96F4A', fin: '#1F5F8B' };
-puntos.forEach(p => L.circleMarker([+p.lat, +p.lon], { radius: 8, color: '#fff', weight: 2, fillColor: colores[p.tip_pun] || '#457699', fillOpacity: 1 })
-  .addTo(map).bindPopup('<b>' + (p.nom || '') + '</b>' + (p.alt_m ? ' · ' + p.alt_m + ' m' : '')));
-
-let capa;
-if (trazado) {
-  capa = L.geoJSON(trazado, { style: { color: '#C96F4A', weight: 4 } }).addTo(map);
-} else if (puntos.length > 1) {
-  capa = L.polyline(puntos.map(p => [+p.lat, +p.lon]), { color: '#C96F4A', weight: 4 }).addTo(map);
-}
-const limites = capa ? capa.getBounds() : L.latLngBounds(puntos.map(p => [+p.lat, +p.lon]));
-map.fitBounds(limites.pad(0.2));
+const avisoMapa = texto => { const aviso=document.getElementById('map-notice'); aviso.hidden=false; aviso.textContent=texto; };
+if (typeof L === 'undefined') {
+  avisoMapa(@json(__('No se pudo cargar el mapa. Consulta los puntos del recorrido o vuelve a intentarlo con conexión.')));
+  document.getElementById('map').hidden=true;
+} else try {
+  const map=L.map('map',{scrollWheelZoom:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'})
+    .on('tileerror',()=>avisoMapa(@json(__('No se pudo cargar el fondo del mapa. Los puntos y el trazado siguen disponibles.')))).addTo(map);
+  const colores={inicio:'#2E7D32',checkpoint:'#457699',mirador:'#C96F4A',fin:'#1F5F8B'};
+  puntos.forEach(p=>{const texto=document.createElement('span');texto.textContent=(p.nom||'')+(p.alt_m?' · '+p.alt_m+' m':'');L.circleMarker([+p.lat,+p.lon],{radius:8,color:'#fff',weight:2,fillColor:colores[p.tip_pun]||'#457699',fillOpacity:1}).addTo(map).bindPopup(texto);});
+  let capa;
+  if(trazado)capa=L.geoJSON(trazado,{style:{color:'#C96F4A',weight:4}}).addTo(map);
+  else if(puntos.length>1)capa=L.polyline(puntos.map(p=>[+p.lat,+p.lon]),{color:'#C96F4A',weight:4}).addTo(map);
+  const limites=capa?capa.getBounds():L.latLngBounds(puntos.map(p=>[+p.lat,+p.lon]));
+  if(limites.isValid())map.fitBounds(limites.pad(.2));else {map.setView([-16.5,-68.15],9);avisoMapa(@json(__('Todavía no hay coordenadas válidas para este recorrido.')));}
+} catch(e){avisoMapa(@json(__('El trazado no pudo mostrarse. Consulta los puntos del recorrido.')));}
 
 // Perfil de elevación (RF-02): distancia acumulada (haversine) contra altitud.
 const lineas = [];
@@ -233,7 +235,7 @@ const km = (a, b) => { const R = 6371, dLat = rad(b.lat - a.lat), dLon = rad(b.l
 let acumulado = 0;
 const datos = serie.map((p, i) => { if (i) acumulado += km(serie[i - 1], p); return { x: +acumulado.toFixed(2), y: p.alt }; });
 
-if (datos.length > 1) {
+if (datos.length > 1 && typeof Chart !== 'undefined') {
   new Chart(document.getElementById('perfil'), {
     type: 'line',
     data: { datasets: [{ label: 'Altitud (m s. n. m.)', data: datos, parsing: false, fill: true, tension: 0.3, pointRadius: 0,
@@ -243,7 +245,7 @@ if (datos.length > 1) {
       scales: { x: { type: 'linear', title: { display: true, text: 'Distancia (km)' } }, y: { title: { display: true, text: 'Altitud (m)' } } } },
   });
 } else {
-  document.querySelector('.perfil').outerHTML = '<p style="color:var(--texto-2);font-size:14px">Este recorrido todavía no tiene altitudes registradas.</p>';
+  const aviso=document.createElement('p'); aviso.textContent=datos.length>1?@json(__('No se pudo cargar el gráfico de elevación. Las altitudes están en los puntos del recorrido.')):@json(__('Este recorrido todavía no tiene altitudes registradas.'));document.querySelector('.perfil').replaceWith(aviso);
 }
 </script>
 @endif

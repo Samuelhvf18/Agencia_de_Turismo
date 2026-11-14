@@ -1,14 +1,15 @@
 <?php
 
-use App\Http\Controllers\Reservas\AccesoReserva;
+use App\Models\Pais;
 use App\Models\ProyeccionDemanda;
-use App\Models\Reserva;
 use App\Models\Resena;
+use App\Models\Reserva;
 use App\Models\SalidaTour;
 use App\Models\Tour;
 use App\Models\User;
 use App\Services\Analitica\ProyeccionDemandaService;
 use App\Services\CodeGeneratorService;
+use App\Services\Pagos\PagoService;
 use Database\Seeders\CatalogoLandingSeeder;
 use Database\Seeders\CatalogosBaseSeeder;
 use Database\Seeders\OperacionDemoSeeder;
@@ -87,8 +88,8 @@ test('el comando proyecta la demanda por tour desde vista_demanda_por_tour_mes y
 test('el dashboard y la analítica muestran datos de las vistas SQL', function () {
     $tour = Tour::first();
     $r = reservaEn($tour, today()->toDateString(), Reserva::EST_COMPLETADA, 3);
-    $r->participantes()->create(['nom_cpl' => 'Hans Müller', 'tip_doc' => 'PASAPORTE', 'num_doc' => 'DE1', 'eda' => 40, 'pai_id' => \App\Models\Pais::where('cod_iso', 'DE')->value('id')]);
-    app(\App\Services\Pagos\PagoService::class)->registrarEfectivo(reservaEn($tour, today()->addDays(5)->toDateString(), Reserva::EST_PENDIENTE), 100);
+    $r->participantes()->create(['nom_cpl' => 'Hans Müller', 'tip_doc' => 'PASAPORTE', 'num_doc' => 'DE1', 'eda' => 40, 'pai_id' => Pais::where('cod_iso', 'DE')->value('id')]);
+    app(PagoService::class)->registrarEfectivo(reservaEn($tour, today()->addDays(5)->toDateString(), Reserva::EST_PENDIENTE), 100);
     $this->artisan('io:proyectar-demanda')->assertSuccessful();
 
     $this->actingAs(User::factory()->rol(User::ROL_ADMIN)->create());
@@ -97,4 +98,9 @@ test('el dashboard y la analítica muestran datos de las vistas SQL', function (
         ->assertSee('Alemania')
         ->assertSee($tour->nom)
         ->assertSee(ProyeccionDemandaService::MODELO_PROMEDIO);
+});
+
+test('el promedio móvil incluye meses sin ventas después de la primera reserva', function () {
+    [$serie] = app(ProyeccionDemandaService::class)->proyectar([0, 0, 6, 0, 0], 2);
+    expect($serie)->toBe([2.0, 2.0]);
 });

@@ -92,7 +92,7 @@ class AuditoriaController extends Controller
     public function reintentar(RegistroNotificacion $registro): RedirectResponse
     {
         abort_unless($registro->est === 'fallido', 422, 'Solo se reintentan notificaciones fallidas.');
-        $registro->update(['est' => 'pendiente']);
+        $registro->update(['est' => 'pendiente', 'intentos' => 0, 'disponible_en' => null, 'bloqueado_hasta' => null, 'token_entrega' => null]);
         NotificacionJob::dispatch($registro->id);
 
         return back()->with('estado', "Notificación #{$registro->id} enviada otra vez a la cola.");
