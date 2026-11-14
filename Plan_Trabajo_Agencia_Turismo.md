@@ -29,7 +29,7 @@ Las pruebas usan datos artificiales y bases desechables. La medición 4G es una 
 
 | ID | Implementación y verificación local | Qué falta para cerrar la aceptación |
 |---|---|---|
-| T01 · Entorno/CI | Dependencias, suite, build, workflow y diccionario físico generado | Resultado CI del commit final; cotejo formal con D7/SQL externo; repetir instalación en el equipo de entrega |
+| T01 · Entorno/CI | Dependencias, suite, build, [CI aprobado](https://github.com/Samuelhvf18/Agencia_de_Turismo/actions/runs/43554908984) para `8240366` y diccionario físico generado | Cotejo formal con D7/SQL externo; repetir instalación en el equipo de entrega |
 | T02 · Pagos | Saldo protegido, webhook repetido/tardío tras cancelación y carrera pago–cancelación | Aceptar la simulación o aportar proveedor real, conciliación y devolución bancaria |
 | T03 · Avisos | Outbox transaccional, recuperación, lease, backoff, fallos y SMTP capturado con dos PDF | Configurar correo real, revisar mensajes no entregables y acordar política de duplicados del proveedor |
 | T04 · Permisos | Roles, titularidad, documentos/salud filtrados y revocación de guía/chofer; PDF auditado | Revisar la [matriz de accesos](docs/OPERACION.md) con responsables y repetirla sobre el despliegue |

@@ -5,3 +5,5 @@ Actualizado el 14/11/2026 UTC. El [plan vigente](../Plan_Trabajo_Agencia_Turismo
 Esta entrega implementa recuperación durable de notificaciones, offline cifrado con reapertura, 2FA y verificación de correo, firmas verificadas en emisión/check-in, revocación de acceso, agenda transaccional y nuevas validaciones de IO/mapas/idioma. Añade restauración conjunta de datos y archivos y corrige la búsqueda por fecha. El panel administrativo y su módulo de planificación permanecen integrados.
 
 Continúan sin acreditarse las integraciones externas, producción/TLS/monitoreo, aceptación del PO/administrador y conciliación documental. La carga triple no cumple aún el límite de degradación en el servidor de desarrollo medido. No se utiliza un porcentaje global ni se declara terminada una operación real.
+
+[CI remoto aprobado](https://github.com/Samuelhvf18/Agencia_de_Turismo/actions/runs/43554908984) para el commit de código `8240366`: instalación, build y pruebas correctos.

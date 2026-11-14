@@ -1,0 +1,10 @@
+GitHub Actions — Pruebas y build
+Commit de código: 82403669fd8eb5c14a3ad3c7b4d1012e8897206e
+Run: 43554908984
+Job test: 132325456321
+Estado: completed / conclusion: success
+Instalación Composer y npm, compilación Vite y php artisan test: success
+URL: https://github.com/Samuelhvf18/Agencia_de_Turismo/actions/runs/43554908984
+
+Consultado mediante API pública de Actions y GitHub fetch_workflow_run_jobs.
+El endpoint de estados combinados del conector devolvió statuses=[]; no se confundió ese resultado con el estado de Actions.
