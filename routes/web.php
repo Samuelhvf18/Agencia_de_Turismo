@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ReservaController;
 use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\Admin\FinanzaController;
 use App\Http\Controllers\Admin\AnaliticaController;
+use App\Http\Controllers\ChoferViajeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -123,7 +124,5 @@ Route::middleware(['auth', \Spatie\Permission\Middleware\RoleMiddleware::class.'
 });
 
 Route::middleware(['auth', \Spatie\Permission\Middleware\RoleMiddleware::class.':chofer'])->prefix('chofer')->name('chofer.')->group(function () {
-    Route::get('/viajes', function () {
-        return view('chofer.viajes');
-    })->name('mis-viajes');
+    Route::get('/viajes', [ChoferViajeController::class, 'index'])->name('mis-viajes');
 });

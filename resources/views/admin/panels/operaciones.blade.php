@@ -39,7 +39,7 @@
                             {{ $salida->fec_sal ? \Carbon\Carbon::parse($salida->fec_sal)->format('d/m/Y') : '' }}
                         </td>
                         <td class="p-4 font-semibold text-gray-700">
-                            {{ $salida->guia->user->name ?? $salida->guia->user->nom ?? 'Sin guía' }}
+                            {{ $salida->guia?->user?->name ?? $salida->guia?->user?->nom ?? 'Sin guía' }}
                         </td>
                         <td class="p-4">
                             @if($salida->vehiculo)
@@ -99,7 +99,7 @@
                         <option value="">Seleccione un guía...</option>
                         @foreach($guias ?? [] as $g)
                             <option value="{{ $g->id }}">
-                                {{ $g->user->name ?? $g->user->nom ?? 'Guía #' . $g->id }} (Guía Autorizado)
+                                {{ $g->user?->name ?? $g->user?->nom ?? 'Guía #' . $g->id }}
                             </option>
                         @endforeach
                     </select>
@@ -163,23 +163,23 @@
     }
 
     function abrirModalEditarSalida(salida) {
-    const tourInput = document.getElementById('inputNombreTour');
+        const tourInput = document.getElementById('inputNombreTour');
 
-    document.getElementById('salidaModalTitulo').innerText = 'Editar Salida';
-    document.getElementById('salidaForm').action = "/admin/operaciones/" + salida.id;
-    document.getElementById('salidaMethodField').innerHTML = '@method("PUT")';
+        document.getElementById('salidaModalTitulo').innerText = 'Editar Salida';
+        document.getElementById('salidaForm').action = "/admin/operaciones/" + salida.id;
+        document.getElementById('salidaMethodField').innerHTML = '@method("PUT")';
 
-    tourInput.value = salida.tour ? salida.tour.nom : 'Tour General';
-    tourInput.readOnly = true;
-    tourInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+        tourInput.value = salida.tour ? salida.tour.nom : 'Tour General';
+        tourInput.readOnly = true;
+        tourInput.classList.add('bg-gray-100', 'cursor-not-allowed');
 
-    document.getElementById('inputGuiaId').value = salida.prf_gui_id || '';
-    document.getElementById('inputVehId').value = salida.veh_id || '';
-    document.getElementById('inputFecSal').value = salida.fec_sal ? salida.fec_sal.substring(0, 10) : '';
-    document.getElementById('inputEst').value = salida.est || 'programada';
+        document.getElementById('inputGuiaId').value = salida.prf_gui_id || '';
+        document.getElementById('inputVehId').value = salida.veh_id || '';
+        document.getElementById('inputFecSal').value = salida.fec_sal ? salida.fec_sal.substring(0, 10) : '';
+        document.getElementById('inputEst').value = salida.est || 'programada';
 
-    toggleModalSalida(false);
-}
+        toggleModalSalida(false);
+    }
 
     @if(session('success'))
         Swal.fire({

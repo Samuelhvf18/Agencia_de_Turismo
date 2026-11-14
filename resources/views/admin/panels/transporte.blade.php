@@ -10,7 +10,7 @@
             <h3 class="text-base font-bold text-[#343A40]">Unidades de Transporte</h3>
             <p class="text-xs text-gray-500 mt-1">Monitoreo y administración de la flota disponible para las salidas de tours.</p>
         </div>
-        <button onclick="toggleModalVehiculo(false)" class="bg-[#1F5F8B] hover:bg-[#16476b] text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">
+        <button type="button" onclick="toggleModalVehiculo(false)" class="bg-[#1F5F8B] hover:bg-[#16476b] text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm">
             Nuevo Vehículo
         </button>
     </div>
@@ -22,8 +22,8 @@
                     <th class="p-4">Placa</th>
                     <th class="p-4">Marca / Modelo</th>
                     <th class="p-4">Tipo</th>
-                    <th class="p-4">Capacidad Turistas</th>
-                    <th class="p-4">Combustible</th>
+                    <th class="p-4">Chofer Asignado</th>
+                    <th class="p-4">Capacidad</th>
                     <th class="p-4">Estado</th>
                     <th class="p-4 text-center">Acciones</th>
                 </tr>
@@ -34,8 +34,14 @@
                         <td class="p-4 font-bold text-[#1F5F8B] uppercase">{{ $veh->pla }}</td>
                         <td class="p-4 text-gray-700 font-semibold">{{ $veh->mar }} {{ $veh->mdl }}</td>
                         <td class="p-4 text-gray-600 font-medium capitalize">{{ $veh->tip }}</td>
-                        <td class="p-4 font-bold text-gray-800">{{ $veh->cap_asi }} Asientos útiles</td>
-                        <td class="p-4 text-gray-600 capitalize">{{ $veh->tip_cmb ?? 'Gasolina' }}</td>
+                        <td class="p-4 font-medium text-gray-800">
+                            @if($veh->chofer && $veh->chofer->user)
+                                {{ $veh->chofer->user->name }}
+                            @else
+                                <span class="text-gray-400 italic">Sin chofer asignado</span>
+                            @endif
+                        </td>
+                        <td class="p-4 font-bold text-gray-800">{{ $veh->cap_asi }} Asientos</td>
                         <td class="p-4">
                             <span class="px-3 py-1 rounded-full font-bold text-[10px] 
                                 {{ $veh->est == 'act' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : '' }}
@@ -44,7 +50,7 @@
                             </span>
                         </td>
                         <td class="p-4 text-center">
-                            <button onclick="abrirModalEditarVehiculo({{ json_encode($veh) }})" class="text-[#1F5F8B] font-bold underline bg-transparent border-0 cursor-pointer">
+                            <button type="button" onclick="abrirModalEditarVehiculo({{ json_encode($veh) }})" class="text-[#1F5F8B] font-bold underline bg-transparent border-0 cursor-pointer">
                                 Editar
                             </button>
                         </td>
@@ -64,7 +70,7 @@
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">
                 <h4 id="vehiculoModalTitulo" class="font-bold text-sm text-[#343A40]">Registrar Unidad de Transporte</h4>
-                <button onclick="toggleModalVehiculo(true)" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+                <button type="button" onclick="toggleModalVehiculo(true)" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
             </div>
 
             <form id="vehiculoForm" action="{{ route('admin.transporte.store') }}" method="POST" class="space-y-4 text-xs">
@@ -112,6 +118,16 @@
                             <option value="GNV">GNV</option>
                         </select>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-600 mb-1">Chofer Asignado</label>
+                    <select name="prf_cho_id" id="inputChofer" class="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-[#1F5F8B] focus:outline-none">
+                        <option value="">Sin chofer asignado</option>
+                        @foreach($choferes ?? [] as $chof)
+                            <option value="{{ $chof->id }}">{{ $chof->user->name ?? 'Chofer #'.$chof->id }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div id="divEstado" class="hidden">
@@ -171,7 +187,7 @@
     function abrirModalEditarVehiculo(veh) {
         document.getElementById('vehiculoModalTitulo').innerText = 'Editar Unidad de Transporte: ' + veh.pla;
         document.getElementById('vehiculoForm').action = "/admin/transporte/" + veh.id;
-        document.getElementById('vehiculoMethodField').innerHTML = '@method("PUT")';
+        document.getElementById('vehiculoMethodField').innerHTML = '<input type="hidden" name="_method" value="PUT">';
 
         document.getElementById('inputPla').value = veh.pla || '';
         document.getElementById('inputMar').value = veh.mar || '';
@@ -179,6 +195,7 @@
         document.getElementById('inputTip').value = veh.tip || '';
         document.getElementById('inputCap').value = veh.cap_asi || '';
         document.getElementById('inputCmb').value = veh.tip_cmb || 'Gasolina';
+        document.getElementById('inputChofer').value = veh.prf_cho_id || '';
 
         const estadoInput = document.getElementById('inputEst');
         estadoInput.value = (veh.est === 'inact') ? 'inact' : 'act';

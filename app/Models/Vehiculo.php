@@ -20,10 +20,17 @@ class Vehiculo extends Model
         'cap_asi',
         'tip_cmb',
         'est',
+        'prf_cho_id',
     ];
 
     public function salidas()
     {
         return $this->hasMany(SalidaTour::class, 'veh_id');
     }
+
+    public function chofer()
+    {
+        return $this->belongsTo(PerfilChofer::class, 'prf_cho_id');
+    }
+    
 }

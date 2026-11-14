@@ -5,13 +5,13 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-
 
 class User extends Authenticatable
 {
@@ -65,6 +65,13 @@ class User extends Authenticatable
         ];
     }
 
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->nom,
+        );
+    }
+
     public function getAuthPassword()
     {
         return $this->clv;
@@ -94,4 +101,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(DepartamentoBolivia::class, 'ci_dep_id');
     } 
+
+    public function perfilChofer()
+    {
+        return $this->hasOne(PerfilChofer::class, 'usr_id');
+    }
 }

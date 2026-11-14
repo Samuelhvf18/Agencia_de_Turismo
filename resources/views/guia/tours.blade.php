@@ -5,32 +5,24 @@
 @section('content')
     <div class="space-y-6">
         
-        <!-- Tarjeta de Bienvenida -->
         <div class="bg-gradient-to-r from-[#1F5F8B] to-[#174870] rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <span class="bg-[#F4C95D] text-[#1F5F8B] text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full">Guía Encargado de Salida</span>
                 <h3 class="text-lg font-bold mt-2">¡Hola, {{ auth()->user()->name ?? auth()->user()->nom }}!</h3>
                 <p class="text-xs text-white/80 mt-1">Control operativo de tu ruta: supervisa el itinerario, los pasajeros y el transporte asignado.</p>
             </div>
-            <div class="bg-white/10 border border-white/20 rounded-xl p-3 text-right">
-                <p class="text-[10px] uppercase text-white/70">Fecha actual</p>
-                <p class="text-sm font-bold">{{ date('d / m / Y') }}</p>
-            </div>
         </div>
 
-        <!-- Listado de Salidas Asignadas Exclusivamente a este Guía -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-5 border-b border-gray-100 flex justify-between items-center">
                 <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2">
                     <i class="fa-solid fa-mountain-sun text-[#C96F4A]"></i> Mis Expediciones Asignadas
                 </h4>
-                <span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-lg">Filtrado en tiempo real</span>
             </div>
 
             <div class="p-6">
                 @php
                     $userId = auth()->id();
-                    // Obtenemos el perfil de guía vinculado a este usuario
                     $perfilGuia = App\Models\PerfilGuia::where('usr_id', $userId)->first();
                     $perfilGuiaId = $perfilGuia ? $perfilGuia->id : null;
 
@@ -79,7 +71,6 @@
                                                 </div>
                                                 <div class="flex justify-between border-t border-gray-100 pt-1 text-gray-500">
                                                     <span>Asientos: {{ $vehiculo->cap_asi ?? 'N/D' }}</span>
-                                                    <span>Combustible: {{ $vehiculo->comb ?? 'N/D' }}</span>
                                                 </div>
                                             </div>
                                         </div>

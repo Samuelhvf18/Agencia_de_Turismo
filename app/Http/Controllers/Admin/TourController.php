@@ -81,6 +81,10 @@ class TourController extends Controller
         'act' => $tour->act
     ]);
 }
+    public function chofer()
+    {
+        return $this->belongsTo(PerfilChofer::class, 'prf_cho_id');
+    }
 
     public function destroy(Tour $tour)
     {

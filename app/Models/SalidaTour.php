@@ -47,6 +47,11 @@ class SalidaTour extends Model
         return $this->belongsTo(PerfilGuia::class, 'prf_gui_id');
     }
 
+    public function chofer()
+    {
+        return $this->belongsTo(PerfilChofer::class, 'prf_cho_id');
+    }
+
     public function reservas()
     {
         return $this->hasMany(Reserva::class, 'sal_tur_id');
@@ -59,6 +64,7 @@ class SalidaTour extends Model
             ->sum('cnt_ptc');
 
         $capacidad = (int) ($this->cap_max ?? ($this->tour?->cap_max ?? 15));
+        
         return max(0, $capacidad - $ocupados);
     }
 }
