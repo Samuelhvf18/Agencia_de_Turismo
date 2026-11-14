@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Panel de turista') | Pipocas</title>
+    <title>@yield('title', 'Explorar tours') | Pipocas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
@@ -38,6 +38,7 @@
             font-family: 'Fraunces', serif;
         }
         .tourist-shell {
+            min-height: 100vh;
             background:
                 radial-gradient(
                     ellipse at 85% 0%,
@@ -46,13 +47,31 @@
                 ),
                 var(--fondo);
         }
-        .tourist-sidebar {
-            background: linear-gradient(
-                165deg,
-                #1F5F8B 0%,
-                #174870 100%
-            );
-            box-shadow: 10px 0 40px rgba(23,72,112,.10);
+        .tourist-header {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: rgba(255,255,255,.94);
+            backdrop-filter: blur(16px);
+            border-bottom: 3px solid var(--acento);
+            box-shadow: 0 5px 20px rgba(31,58,80,.05);
+        }
+        .tourist-header-inner {
+            max-width: 1800px;
+            min-height: 82px;
+            margin: auto;
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .tourist-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            flex-shrink: 0;
         }
         .tourist-brand-icon {
             display: grid;
@@ -65,70 +84,107 @@
             color: var(--principal);
             box-shadow: 0 5px 15px rgba(0,0,0,.12);
         }
-        .tourist-link {
+        .tourist-brand-name {
+            color: var(--principal);
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+        .tourist-brand-name span {
+            color: var(--secundario);
+        }
+        .tourist-brand-subtitle {
+            color: var(--texto-2);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+        .tourist-header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-height: 44px;
-            padding: 11px 13px;
-            border: 1px solid transparent;
-            border-radius: 12px;
-            color: rgba(255,255,255,.82);
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .tourist-welcome {
+            margin-right: 10px;
+            text-align: right;
+        }
+        .tourist-welcome-label {
+            color: var(--complementario);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+        }
+        .tourist-welcome-name {
+            color: var(--texto);
             font-size: 12px;
-            font-weight: 600;
-            transition:
-                background .2s ease,
-                color .2s ease,
-                transform .2s ease,
-                border-color .2s ease;
+            font-weight: 800;
         }
-        .tourist-link i {
-            width: 17px;
-            text-align: center;
-            font-size: 14px;
-            opacity: .9;
-        }
-        .tourist-link:hover {
-            background: rgba(255,255,255,.09);
-            border-color: rgba(255,255,255,.08);
-            color: #fff;
-            transform: translateX(2px);
-        }
-        .tourist-link.active {
-            color: #fff;
-            background: linear-gradient(
-                110deg,
-                #C96F4A,
-                #b85c3b
-            );
-            border-color: rgba(255,255,255,.12);
-            box-shadow: 0 6px 16px rgba(10,35,55,.18);
-        }
-        .tourist-link.active i {
-            color: var(--acento);
-        }
-        .tourist-logout {
-            display: flex;
+        .tourist-nav-button {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 9px;
-            width: 100%;
-            padding: 12px 14px;
+            gap: 8px;
+            min-height: 42px;
+            padding: 10px 15px;
+            border: 1px solid rgba(31,95,139,.15);
             border-radius: 12px;
-            background: rgba(201,111,74,.16);
-            border: 1px solid rgba(244,201,93,.18);
-            color: #fff;
-            font-size: 12px;
-            font-weight: 700;
-            transition: background .2s ease;
+            background: var(--principal);
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            text-decoration: none;
+            transition: .2s ease;
+        }
+        .tourist-nav-button:hover {
+            background: var(--hover);
+            transform: translateY(-1px);
+        }
+        .tourist-profile-button {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border: 1px solid rgba(201,111,74,.2);
+            border-radius: 12px;
+            background: rgba(244,201,93,.28);
+            color: var(--principal);
+            font-size: 16px;
+            text-decoration: none;
+            transition: .2s ease;
+        }
+        .tourist-profile-button:hover {
+            background: var(--acento);
+            color: var(--hover);
+            transform: translateY(-1px);
+        }
+        .tourist-logout {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 10px 14px;
+            border: 1px solid rgba(201,111,74,.25);
+            border-radius: 12px;
+            background: rgba(201,111,74,.10);
+            color: var(--secundario);
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: .2s ease;
         }
         .tourist-logout:hover {
             background: var(--secundario);
+            color: white;
         }
-        .tourist-topbar {
-            background: rgba(255,255,255,.88);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(31,95,139,.10);
+        .tourist-content {
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 32px 28px;
         }
         .tourist-card {
             background: rgba(255,255,255,.94);
@@ -175,37 +231,56 @@
             border-color: var(--complementario);
             box-shadow: 0 0 0 3px rgba(69,118,153,.13);
         }
-        .tourist-mobile-link {
-            flex-shrink: 0;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 13px;
-            border-radius: 12px;
-            color: var(--complementario);
-            background: rgba(31,95,139,.05);
-            border: 1px solid rgba(31,95,139,.08);
-            font-size: 12px;
-            font-weight: 700;
-            white-space: nowrap;
-            transition: .2s ease;
-        }
-        .tourist-mobile-link:hover {
-            background: rgba(31,95,139,.10);
-        }
-        .tourist-mobile-link.active {
-            color: white;
-            background: linear-gradient(
-                110deg,
-                #C96F4A,
-                #b85c3b
-            );
-            border-color: rgba(201,111,74,.2);
-        }
-        .tourist-mobile-link.active i {
-            color: var(--acento);
+        .tourist-footer {
+            padding: 22px 20px;
+            color: var(--texto-2);
+            text-align: center;
+            font-size: 11px;
         }
         @media (max-width: 767px) {
+            .tourist-header-inner {
+                min-height: 70px;
+                padding: 10px 14px;
+                gap: 10px;
+            }
+            .tourist-brand-icon {
+                width: 38px;
+                height: 38px;
+            }
+            .tourist-brand-name {
+                font-size: 18px;
+            }
+            .tourist-brand-subtitle {
+                font-size: 8px;
+            }
+            .tourist-welcome {
+                display: none;
+            }
+            .tourist-header-actions {
+                gap: 6px;
+            }
+            .tourist-nav-button {
+                min-height: 39px;
+                padding: 9px 11px;
+                font-size: 10px;
+            }
+            .tourist-profile-button {
+                width: 39px;
+                height: 39px;
+            }
+            .tourist-logout {
+                width: 39px;
+                height: 39px;
+                min-height: 39px;
+                padding: 0;
+                font-size: 14px;
+            }
+            .tourist-logout .logout-label {
+                display: none;
+            }
+            .tourist-content {
+                padding: 22px 14px;
+            }
             .page-title {
                 font-size: 1.6rem;
             }
@@ -220,135 +295,139 @@
     </style>
     @stack('styles')
 </head>
-<body class="antialiased min-h-screen">
-    <div class="tourist-shell min-h-screen flex">
-        <aside class="tourist-sidebar hidden md:flex flex-col justify-between w-64 min-h-screen text-white">
-            <div class="p-5">
-                <a href="{{ route('turista.dashboard') }}"
-                   class="flex items-center gap-3 pb-5 border-b border-white/10">
+<body class="antialiased">
+    <div class="tourist-shell">
+        <header class="tourist-header">
+            <div class="tourist-header-inner">
+                <a href="{{ route('turista.tours.index') }}"
+                   class="tourist-brand">
                     <div class="tourist-brand-icon">
                         <i class="fa-solid fa-mountain-sun text-xl"></i>
                     </div>
-                    <div class="min-w-0">
-                        <h1 class="text-xl font-extrabold tracking-tight text-white">
-                            Pipocas<span class="text-[#F4C95D]">.</span>
-                        </h1>
-                        <p class="text-[9px] font-bold tracking-[.16em] text-white/65 uppercase">
+                    <div>
+                        <div class="tourist-brand-name">
+                            Pipocas<span>.</span>
+                        </div>
+                        <p class="tourist-brand-subtitle">
                             Agencia de turismo
                         </p>
                     </div>
                 </a>
-                <div class="mt-6 mb-3 px-3">
-                    <p class="text-[9px] uppercase tracking-[.2em] font-bold text-white/45">
-                        Mi espacio
-                    </p>
-                </div>
-                <nav class="space-y-1">
-                    <a href="{{ route('turista.dashboard') }}"
-                       class="tourist-link {{ request()->routeIs('turista.dashboard') ? 'active' : '' }}">
-                        <i class="fa-solid fa-house"></i>
-                        <span>Inicio</span>
-                    </a>
-                    <a href="{{ route('turista.tours.index') }}"
-                       class="tourist-link {{ request()->routeIs('turista.tours.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-compass"></i>
-                        <span>Explorar tours</span>
-                    </a>
-                    <a href="{{ route('turista.reservas.index') }}"
-                       class="tourist-link {{ request()->routeIs('turista.reservas.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-ticket"></i>
-                        <span>Mis reservas</span>
-                    </a>
-                    <div class="mt-7 mb-3 px-3">
-                        <p class="text-[9px] uppercase tracking-[.2em] font-bold text-white/45">
-                            Mi cuenta
-                        </p>
-                    </div>
-                    <a href="{{ route('turista.perfil') }}"
-                       class="tourist-link {{ request()->routeIs('turista.perfil') ? 'active' : '' }}">
-                        <i class="fa-solid fa-user"></i>
-                        <span>Mi perfil</span>
-                    </a>
-                </nav>
-            </div>
-            <div class="p-4 border-t border-white/10">
-                <div class="flex items-center gap-3 mb-4 px-1">
-                    <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-[#F4C95D]">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-white truncate">
-                            {{ auth()->user()->nom }}
-                        </p>
-                        <p class="text-[10px] text-white/55 truncate">
-                            {{ auth()->user()->cor }}
-                        </p>
-                    </div>
-                </div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="tourist-logout">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        Cerrar sesión
-                    </button>
-                </form>
-                <p class="text-center text-[9px] text-white/35 mt-4">
-                    © {{ date('Y') }} Pipocas · Turismo
-                </p>
-            </div>
-        </aside>
-        <div class="flex-1 flex flex-col min-w-0 w-full">
-            <header class="tourist-topbar min-h-16 px-5 md:px-8 py-4 sticky top-0 z-10">
-                <div class="flex items-center justify-between gap-4">
-                    <div class="min-w-0">
-                        <p class="text-[9px] sm:text-[10px] font-bold uppercase tracking-[.16em] text-[#457699] mb-0.5">
+                <div class="tourist-header-actions">
+                    <div class="tourist-welcome">
+                        <p class="tourist-welcome-label">
                             Pipocas · Mi espacio
                         </p>
-                        <p class="font-bold text-[#343A40] truncate">
+                        <p class="tourist-welcome-name">
                             Bienvenido, {{ auth()->user()->nom }}
                         </p>
                     </div>
-                    <div class="hidden sm:flex items-center gap-2 rounded-full bg-[#1F5F8B]/5 border border-[#1F5F8B]/10 px-3 py-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span class="text-[10px] font-bold text-[#457699]">
-                            Panel de turista
-                        </span>
-                    </div>
-                </div>
-                <nav class="flex md:hidden gap-2 overflow-x-auto pt-4 pb-1">
-                    <a href="{{ route('turista.dashboard') }}"
-                       class="tourist-mobile-link {{ request()->routeIs('turista.dashboard') ? 'active' : '' }}">
-                        <i class="fa-solid fa-house"></i>
-                        Inicio
-                    </a>
-                    <a href="{{ route('turista.tours.index') }}"
-                       class="tourist-mobile-link {{ request()->routeIs('turista.tours.*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-compass"></i>
-                        Tours
-                    </a>
                     <a href="{{ route('turista.reservas.index') }}"
-                       class="tourist-mobile-link {{ request()->routeIs('turista.reservas.*') ? 'active' : '' }}">
+                       class="tourist-nav-button">
                         <i class="fa-solid fa-ticket"></i>
-                        Reservas
+                        <span>Mis reservas</span>
                     </a>
                     <a href="{{ route('turista.perfil') }}"
-                       class="tourist-mobile-link {{ request()->routeIs('turista.perfil') ? 'active' : '' }}">
+                       class="tourist-profile-button"
+                       title="Mi perfil"
+                       aria-label="Ir a mi perfil">
                         <i class="fa-solid fa-user"></i>
-                        Perfil
                     </a>
-                </nav>
-            </header>
-            <main class="p-5 md:p-8 flex-1 w-full">
-                <div class="w-full max-w-[1800px] mx-auto">
-                    @yield('content')
+                    <form id="logout-form"
+                          method="POST"
+                          action="{{ route('logout') }}">
+                        @csrf
+                        <button type="button"
+                                id="logout-button"
+                                class="tourist-logout"
+                                title="Cerrar sesión"
+                                aria-label="Cerrar sesión">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                            <span class="logout-label">Cerrar sesión</span>
+                        </button>
+                    </form>
                 </div>
-            </main>
-            <footer class="px-5 md:px-8 py-5 text-center text-xs text-[#6B6F72]">
-                © {{ date('Y') }} Pipocas · Turismo.
-                Todos los derechos reservados.
-            </footer>
-        </div>
+            </div>
+        </header>
+        <main class="tourist-content">
+            @yield('content')
+        </main>
+        <footer class="tourist-footer">
+            © {{ date('Y') }} Pipocas · Turismo.
+            Todos los derechos reservados.
+        </footer>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const successMessage = @json(session('success'));
+            const errorMessage = @json(session('error'));
+            const validationErrors = @json($errors->all());
+            if (typeof window.Swal !== 'undefined') {
+                if (validationErrors.length > 0) {
+                    window.Swal.fire({
+                        title: 'Revisa los datos',
+                        text: validationErrors.join(' | '),
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#1F5F8B'
+                    });
+                } else if (errorMessage) {
+                    window.Swal.fire({
+                        title: 'Ocurrió un problema',
+                        text: errorMessage,
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#1F5F8B'
+                    });
+                } else if (successMessage) {
+                    window.Swal.fire({
+                        title: '¡Operación exitosa!',
+                        text: successMessage,
+                        icon: 'success',
+                        confirmButtonText: 'Continuar',
+                        confirmButtonColor: '#1F5F8B'
+                    });
+                }
+            } else {
+                if (validationErrors.length > 0) {
+                    alert(validationErrors.join('\n'));
+                } else if (errorMessage) {
+                    alert(errorMessage);
+                } else if (successMessage) {
+                    alert(successMessage);
+                }
+            }
+            const logoutButton = document.getElementById('logout-button');
+            const logoutForm = document.getElementById('logout-form');
+            if (!logoutButton || !logoutForm) {
+                return;
+            }
+            logoutButton.addEventListener('click', function () {
+                if (typeof window.Swal === 'undefined') {
+                    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                        logoutForm.submit();
+                    }
+                    return;
+                }
+                window.Swal.fire({
+                    title: '¿Cerrar sesión?',
+                    text: '¿Estás seguro de que deseas salir de tu cuenta?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cerrar sesión',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#1F5F8B',
+                    cancelButtonColor: '#C96F4A',
+                    reverseButtons: true,
+                    focusCancel: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
+                    }
+                });
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

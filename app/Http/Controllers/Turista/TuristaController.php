@@ -15,38 +15,7 @@ class TuristaController extends Controller
 {
     public function dashboard()
     {
-        $usuarioId = Auth::id();
-        $totalReservas = Reserva::where('usr_id', $usuarioId)
-            ->count();
-        $reservasPendientes = Reserva::where('usr_id', $usuarioId)
-            ->where('est', 'pendiente')
-            ->count();
-        $toursDestacados = Tour::where('act', true)
-            ->with(['categoria', 'fotos'])
-            ->with(['salidas' => function ($query) {
-                $query->where('est', 'programada')
-                    ->whereDate('fec_sal', '>=', today())
-                    ->orderBy('fec_sal')
-                    ->withSum([
-                        'reservas as participantes_reservados' => function ($reservas) {
-                            $reservas->where('est', '<>', 'cancelada');
-                        }
-                    ], 'cnt_ptc');
-            }])
-            ->latest('id')
-            ->take(3)
-            ->get();
-        $misReservas = Reserva::with(['salidaTour.tour'])
-            ->where('usr_id', $usuarioId)
-            ->latest('cre_en')
-            ->take(5)
-            ->get();
-        return view('turista.dashboard', compact(
-            'totalReservas',
-            'reservasPendientes',
-            'toursDestacados',
-            'misReservas'
-        ));
+        return redirect()->route('turista.tours.index');
     }
     public function tours(Request $request)
     {

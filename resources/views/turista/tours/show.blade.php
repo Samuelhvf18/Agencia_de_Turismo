@@ -10,16 +10,23 @@
 <div class="grid gap-6 xl:grid-cols-[1.35fr_.85fr]">
     <div class="space-y-6">
         <section class="tourist-card overflow-hidden">
-            <div class="grid gap-1 sm:grid-cols-2">
-                @forelse($tour->fotos->take(2) as $foto)
-                    <img class="h-56 w-full object-cover {{ $loop->first && $tour->fotos->count() === 1 ? 'sm:col-span-2' : '' }}"
-                        src="{{ filter_var($foto->rta_arc, FILTER_VALIDATE_URL) ? $foto->rta_arc : asset('storage/' . $foto->rta_arc) }}"
-                        alt="{{ $foto->txt_atv ?? $tour->nom }}">
-                @empty
-                    <div class="grid h-64 place-items-center bg-pipocas-background text-6xl text-pipocas-blue/40 sm:col-span-2">
+            <div class="relative grid min-h-[260px] place-items-center overflow-hidden bg-gradient-to-br from-[#1F5F8B] via-[#457699] to-[#174870] p-8 text-center sm:min-h-[320px]">
+                <div class="absolute -right-10 -top-16 h-64 w-64 rounded-full bg-white/5"></div>
+                <div class="absolute -bottom-20 -left-10 h-64 w-64 rounded-full bg-[#F4C95D]/10"></div>
+                <div class="relative z-10">
+                    <div class="mx-auto grid h-24 w-24 place-items-center rounded-3xl border border-white/20 bg-white/10 text-5xl text-[#F4C95D] shadow-xl">
                         <i class="fa-solid fa-mountain-sun"></i>
                     </div>
-                @endforelse
+                    <p class="mt-5 text-xs font-bold uppercase tracking-[.25em] text-white/70">
+                        Descubre Bolivia
+                    </p>
+                    <h2 class="mt-2 font-display text-3xl font-semibold text-white sm:text-4xl">
+                        {{ $tour->nom }}
+                    </h2>
+                    <p class="mt-2 text-sm text-white/75">
+                        {{ $tour->categoria->nom ?? 'Experiencia turística' }}
+                    </p>
+                </div>
             </div>
             <div class="p-6 sm:p-8">
                 <p class="text-xs font-bold uppercase tracking-wider text-pipocas-terra">

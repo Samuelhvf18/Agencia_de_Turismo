@@ -128,7 +128,7 @@
                 Guardar cambios
             </button>
             <a
-                href="{{ route('turista.dashboard') }}"
+                href="{{ route('turista.tours.index') }}"
                 class="rounded-xl border border-slate-200 px-6 py-3 text-sm font-bold text-pipocas-muted transition hover:bg-slate-50">
                 Cancelar
             </a>
