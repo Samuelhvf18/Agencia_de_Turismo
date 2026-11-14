@@ -22,6 +22,27 @@ Cuentas de prueba (solo `APP_ENV=local`, clave `Pipocas2026`): `admin@`, `operac
 php artisan test
 ```
 
+## Entorno remoto (Codespaces / sandbox Linux)
+
+El repositorio incluye dos scripts para levantar el proyecto en un entorno
+remoto sin intervención manual:
+
+| Campo del panel | Valor a pegar |
+|---|---|
+| **Script de instalación** | `bash scripts/setup.sh` |
+| **Habilidad de inicio** (startup) | `bash scripts/start.sh` |
+
+`scripts/setup.sh` instala PHP 8.2+, Composer, Node 20 y PostgreSQL 16, crea
+las bases `agencia_turismo_db` y `agencia_turismo_test`, genera `.env`,
+ejecuta `migrate:fresh --seed`, enlaza `storage` y compila los assets con Vite.
+
+`scripts/start.sh` arranca PostgreSQL y sirve la aplicación con
+`php artisan serve --host=0.0.0.0 --port=8000`. Para elegir otro puerto:
+`PORT=8080 bash scripts/start.sh`.
+
+Los scripts funcionan tanto si el sandbox ejecuta como `root` como si usa
+`sudo`, y son idempotentes: pueden ejecutarse varias veces sin romper nada.
+
 ## Producción con Docker
 
 Servicios de `docker-compose.yml`:

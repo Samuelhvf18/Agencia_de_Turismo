@@ -43,7 +43,7 @@
             <p class="text-xs font-bold uppercase tracking-[0.2em] text-pipocas-texto-2">Código de reserva</p>
             <p class="mt-2 break-all font-mono text-3xl font-bold tracking-wider text-pipocas-principal sm:text-5xl">{{ $reserva['cod'] }}</p>
             <button type="button" class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover"
-                    @click="navigator.clipboard?.writeText(@js($reserva['cod'])); copiado = true; setTimeout(() => copiado = false, 2000)">
+                    @click="navigator.clipboard ? navigator.clipboard.writeText(@js($reserva['cod'])) : copyToClipboardFallback(@js($reserva['cod'])); copiado = true; setTimeout(() => copiado = false, 2000)">
                 <i class="fa-regular" :class="copiado ? 'fa-circle-check' : 'fa-copy'"></i>
                 <span x-text="copiado ? '¡Copiado!' : 'Copiar código'">Copiar código</span>
             </button>
