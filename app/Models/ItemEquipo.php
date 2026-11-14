@@ -21,4 +21,9 @@ class ItemEquipo extends Model
     {
         return $this->belongsTo(TipoEquipo::class, 'tip_eqp_id');
     }
+
+    public function tipo()
+    {
+        return $this->belongsTo(TipoEquipo::class, 'tip_eqp_id');
+    }
 }

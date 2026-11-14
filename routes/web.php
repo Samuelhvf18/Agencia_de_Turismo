@@ -11,7 +11,10 @@ use App\Http\Controllers\Admin\ReservaController;
 use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\Admin\FinanzaController;
 use App\Http\Controllers\Admin\AnaliticaController;
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\Turista\TuristaController;
 use App\Http\Controllers\ChoferViajeController;
+use App\Http\Middleware\RoleMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,14 +26,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Chatbot con IA
 Route::get('/chatbot', function () {
     return view('chatbot.index');
-});
+})->name('chatbot');
 
+Route::post('/chatbot/mensaje', [
+    ChatbotController::class,
+    'enviar',
+])->name('chatbot.mensaje');
+
+// Verificación / Checkin de guías
 Route::get('/guias/checkin', function () {
     return view('guias.checkin');
-});
+})->name('guias.checkin');
 
+// Autenticación con Google
 Route::get('/auth/google/redirect', [
     GoogleAuthController::class,
     'redirect',
@@ -43,7 +54,7 @@ Route::get('/auth/google/callback', [
 
 /*
 |--------------------------------------------------------------------------
-| Rutas del Panel Administrativo (Autenticadas)
+| Rutas del Panel Administrativo y Roles (Autenticadas)
 |--------------------------------------------------------------------------
 */
 
@@ -53,23 +64,40 @@ Route::middleware([
     'verified',
 ])->group(function () {
 
+    // Redirección inteligente según el rol del usuario
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
-        if ($user->hasRole('guia')) {
+        // 1. Si es admin
+        if ($user->hasRole('admin') || ($user->rol ?? '') === 'admin' || optional($user->rol)->nom === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        // 2. Si es guía
+        if ($user->hasRole('guia') || ($user->rol ?? '') === 'guia' || optional($user->rol)->nom === 'guia') {
             return redirect()->route('guia.mis-tours');
         }
 
-        if ($user->hasRole('chofer')) {
+        // 3. Si es chofer
+        if ($user->hasRole('chofer') || ($user->rol ?? '') === 'chofer' || optional($user->rol)->nom === 'chofer') {
             return redirect()->route('chofer.mis-viajes');
         }
 
-        return app(DashboardController::class)->index();
+        // 4. Si es turista
+        if ($user->hasRole('turista') || ($user->rol ?? '') === 'turista' || optional($user->rol)->nom === 'turista') {
+            return redirect()->route('turista.tours.index');
+        }
+
+        return redirect('/');
     })->name('dashboard');
 
-    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    // Panel Principal de Administrador
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])
+        ->middleware(RoleMiddleware::class . ':admin')
+        ->name('admin.dashboard');
 
-    Route::prefix('admin')->name('admin.')->group(function () {
+    // Módulos del Administrador
+    Route::prefix('admin')->name('admin.')->middleware(RoleMiddleware::class . ':admin')->group(function () {
 
         Route::patch('/tours/{tour}/toggle', [TourController::class, 'toggleStatus'])->name('tours.toggle');
         Route::resource('tours', TourController::class);
@@ -106,9 +134,20 @@ Route::middleware([
 
         Route::get('/analitica', [AnaliticaController::class, 'index'])->name('analitica');
         Route::get('/analitica/exportar', [AnaliticaController::class, 'exportarExcel'])->name('analitica.exportar');
-
     });
 
+    // Portal Turista
+    Route::prefix('turista')->name('turista.')
+        ->middleware(RoleMiddleware::class . ':turista,admin')
+        ->group(function () {
+            Route::get('/dashboard', [TuristaController::class, 'dashboard'])->name('dashboard');
+            Route::get('/tours', [TuristaController::class, 'tours'])->name('tours.index');
+            Route::get('/tours/{tour}', [TuristaController::class, 'showTour'])->name('tours.show');
+            Route::get('/reservas', [TuristaController::class, 'reservas'])->name('reservas.index');
+            Route::post('/reservas', [TuristaController::class, 'solicitarReserva'])->name('reservas.solicitar');
+            Route::get('/perfil', [TuristaController::class, 'perfil'])->name('perfil');
+            Route::put('/perfil', [TuristaController::class, 'actualizarPerfil'])->name('perfil.update');
+        });
 });
 
 /*
@@ -117,12 +156,12 @@ Route::middleware([
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', \Spatie\Permission\Middleware\RoleMiddleware::class.':guia'])->prefix('guia')->name('guia.')->group(function () {
+Route::middleware(['auth', RoleMiddleware::class . ':guia,admin'])->prefix('guia')->name('guia.')->group(function () {
     Route::get('/tours', function () {
         return view('guia.tours');
     })->name('mis-tours');
 });
 
-Route::middleware(['auth', \Spatie\Permission\Middleware\RoleMiddleware::class.':chofer'])->prefix('chofer')->name('chofer.')->group(function () {
+Route::middleware(['auth', RoleMiddleware::class . ':chofer,admin'])->prefix('chofer')->name('chofer.')->group(function () {
     Route::get('/viajes', [ChoferViajeController::class, 'index'])->name('mis-viajes');
 });

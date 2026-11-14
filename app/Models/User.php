@@ -87,6 +87,11 @@ class User extends Authenticatable
         return $this->cor;
     }
 
+    public function routeNotificationForMail($notification): string
+    {
+        return $this->cor;
+    }
+
     public function rolRelacion()
     {
         return $this->belongsTo(Rol::class, 'rol_id');
@@ -105,5 +110,19 @@ class User extends Authenticatable
     public function perfilChofer()
     {
         return $this->hasOne(PerfilChofer::class, 'usr_id');
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        if (app()->environment('local')) {
+            $enlace = route('password.reset', [
+                'token' => $token,
+                'email' => $this->getEmailForPasswordReset(),
+            ]);
+            session()->flash('password_reset_link', $enlace);
+            return;
+        }
+
+        $this->notify(new \Illuminate\Auth\Notifications\ResetPassword($token));
     }
 }

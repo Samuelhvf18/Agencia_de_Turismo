@@ -68,6 +68,12 @@ class Tour extends Model
         return $this->hasMany(SalidaTour::class, 'tur_id');
     }
 
+    // Fotos asociadas al Tour
+    public function fotos()
+    {
+        return $this->hasMany(FotoTour::class, 'tur_id')->orderBy('ord_vis');
+    }
+
     // Relación HasManyThrough: Obtiene las Reservas del Tour a través de sus Salidas
     public function reservas()
     {

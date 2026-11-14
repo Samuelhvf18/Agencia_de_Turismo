@@ -14,7 +14,20 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Plus Jakarta Sans', ...defaultTheme.fontFamily.sans],
+                display: ['Fraunces', ...defaultTheme.fontFamily.serif],
+            },
+
+            colors: {
+                pipocas: {
+                    blue: '#1F5F8B',
+                    dark: '#343A40',
+                    light: '#457699',
+                    terra: '#C96F4A',
+                    gold: '#F4C95D',
+                    background: '#F0F0F1',
+                    muted: '#6B6F72',
+                },
             },
         },
     },

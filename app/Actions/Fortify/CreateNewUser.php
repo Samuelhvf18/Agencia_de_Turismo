@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
@@ -27,6 +28,46 @@ class CreateNewUser implements CreatesNewUsers
                 'unique:users,cor',
             ],
             'password' => $this->passwordRules(),
+
+            'g-recaptcha-response' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    try {
+                        $secretKey = config('services.recaptcha.secret_key');
+
+                        if (!$secretKey) {
+                            report(new \RuntimeException(
+                                'Falta configurar RECAPTCHA_SECRET_KEY.'
+                            ));
+
+                            $fail('No se pudo verificar el CAPTCHA. Inténtalo más tarde.');
+                            return;
+                        }
+
+                        $response = Http::asForm()
+                            ->timeout(10)
+                            ->post(
+                                'https://www.google.com/recaptcha/api/siteverify',
+                                [
+                                    'secret' => $secretKey,
+                                    'response' => $value,
+                                ]
+                            );
+
+                        if (
+                            !$response->successful()
+                            || $response->json('success') !== true
+                        ) {
+                            $fail('Completa correctamente la verificación «No soy un robot».');
+                        }
+                    } catch (\Throwable $e) {
+                        report($e);
+
+                        $fail('No se pudo verificar el CAPTCHA. Inténtalo de nuevo.');
+                    }
+                },
+            ],
+
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature()
                 ? ['accepted', 'required']
                 : [],
@@ -37,6 +78,7 @@ class CreateNewUser implements CreatesNewUsers
             'cor.email' => 'Ingresa un correo electrónico válido.',
             'cor.unique' => 'Este correo ya está registrado.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
+            'g-recaptcha-response.required' => 'Marca la casilla «No soy un robot».',
             'terms.accepted' => 'Debes aceptar los términos y condiciones.',
         ])->validate();
 
@@ -45,21 +87,27 @@ class CreateNewUser implements CreatesNewUsers
                 ->where('nom', 'turista')
                 ->value('id');
 
-            if (!$rolTuristaId) {
-                throw new \RuntimeException(
-                    'No existe el rol turista en la tabla roles.'
-                );
+            $user = User::create([
+                'rol_id' => $rolTuristaId,
+                'rol'    => 'turista',
+                'pai_id' => null,
+                'nom'    => $input['nom'],
+                'cor'    => $input['cor'],
+                'clv'    => $input['password'],
+                'ci_cmp' => '',
+                'act'    => true,
+            ]);
+
+            // Asignar rol con Spatie Permission si está disponible
+            if (method_exists($user, 'assignRole')) {
+                try {
+                    $user->assignRole('turista');
+                } catch (\Throwable $e) {
+                    // Si el rol en Spatie no está sembrado aún, continúa sin error
+                }
             }
 
-            return User::create([
-                'rol_id' => $rolTuristaId,
-                'pai_id' => null,
-                'nom' => $input['nom'],
-                'cor' => $input['cor'],
-                'clv' => $input['password'],
-                'ci_cmp' => '',
-                'act' => true,
-            ]);
+            return $user;
         });
     }
 }
