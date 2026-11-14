@@ -118,6 +118,7 @@ Route::middleware([
         Route::get('/reservas', [ReservaController::class, 'index'])->name('reservas');
         Route::get('/reservas/create-data', [ReservaController::class, 'getCreateData'])->name('reservas.create-data');
         Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
+        Route::patch('/reservas/{id}/confirmar', [ReservaController::class, 'confirmar'])->name('reservas.confirmar');
         Route::get('/reservas/{id}', [ReservaController::class, 'show'])->name('reservas.show');
         Route::put('/reservas/{id}', [ReservaController::class, 'update'])->name('reservas.update');
         Route::delete('/reservas/{id}', [ReservaController::class, 'destroy'])->name('reservas.destroy');

@@ -52,6 +52,9 @@
                     </td>
                     <td class="p-4 text-right space-x-2">
                         <button onclick="verDetalle({{ $reserva->id }})" class="text-xs font-bold text-[#1F5F8B] hover:underline">Ver Detalle</button>
+                        @if($reserva->est === 'pendiente')
+                            <button onclick="confirmarReserva({{ $reserva->id }})" class="text-xs font-bold text-emerald-600 hover:underline">Confirmar</button>
+                        @endif
                         @if($reserva->est !== 'cancelada')
                             <button onclick="cancelarReserva({{ $reserva->id }})" class="text-xs font-bold text-red-600 hover:underline">Cancelar</button>
                         @endif
@@ -120,18 +123,6 @@
 const CSRF = '{{ csrf_token() }}';
 let deptosData = [];
 
-const swalTailwindConfig = {
-    buttonsStyling: false,
-    customClass: {
-        popup: 'rounded-2xl p-6 shadow-xl border border-gray-100',
-        title: 'text-base font-bold text-gray-800',
-        confirmButton: 'px-4 py-2 bg-[#1F5F8B] hover:bg-[#184B6E] text-white text-xs font-semibold rounded-xl transition mx-1',
-        cancelButton: 'px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition mx-1',
-        denyButton: 'px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-xl transition mx-1',
-        validationMessage: 'bg-red-50 text-red-600 text-xs p-2 rounded-lg mt-2 border border-red-200'
-    }
-};
-
 function verDetalle(id) {
     fetch(`/admin/reservas/${id}`, { headers: { 'Accept': 'application/json' } })
         .then(res => res.json())
@@ -147,7 +138,6 @@ function verDetalle(id) {
             `).join('');
 
             Swal.fire({
-                ...swalTailwindConfig,
                 title: `Reserva #${data.cod}`,
                 html: `
                     <div class="text-left text-xs space-y-2 mt-2">
@@ -237,44 +227,50 @@ function guardarReserva(e) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            Swal.fire({
-                ...swalTailwindConfig,
-                icon: 'success',
-                title: '¡Éxito!',
-                text: data.message
-            }).then(() => location.reload());
+            Swal.fire('¡Éxito!', data.message, 'success').then(() => location.reload());
         } else {
-            Swal.fire({
-                ...swalTailwindConfig,
-                icon: 'warning',
-                title: 'Atención',
-                text: data.message || 'Error al procesar la reserva'
-            });
+            Swal.fire('Atención', data.message || 'Error al procesar la reserva', 'warning');
         }
     })
     .catch(() => {
-        Swal.fire({
-            ...swalTailwindConfig,
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudo guardar la reserva.'
-        });
+        Swal.fire('Error', 'No se pudo guardar la reserva.', 'error');
+    });
+}
+
+function confirmarReserva(id) {
+    Swal.fire({
+        title: '¿Confirmar reserva?',
+        text: 'La reserva pasará a estado confirmada y sus boletos quedarán activos.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, confirmar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/reservas/${id}/confirmar`, {
+                method: 'PATCH',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                Swal.fire(data.success ? '¡Confirmada!' : 'Error', data.message, data.success ? 'success' : 'error')
+                    .then(() => location.reload());
+            })
+            .catch(() => {
+                Swal.fire('Error', 'No se pudo confirmar la reserva.', 'error');
+            });
+        }
     });
 }
 
 function cancelarReserva(id) {
     Swal.fire({
-        ...swalTailwindConfig,
         title: '¿Cancelar reserva?',
         text: 'Esta acción cancelará la reserva y anulará sus boletos asociados.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Sí, cancelar',
-        cancelButtonText: 'No, mantener',
-        customClass: {
-            ...swalTailwindConfig.customClass,
-            confirmButton: swalTailwindConfig.customClass.denyButton
-        }
+        cancelButtonText: 'No, mantener'
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`/admin/reservas/${id}`, {
@@ -283,12 +279,8 @@ function cancelarReserva(id) {
             })
             .then(res => res.json())
             .then(data => {
-                Swal.fire({
-                    ...swalTailwindConfig,
-                    icon: data.success ? 'success' : 'error',
-                    title: data.success ? 'Cancelada' : 'Error',
-                    text: data.message
-                }).then(() => location.reload());
+                Swal.fire(data.success ? 'Cancelada' : 'Error', data.message, data.success ? 'success' : 'error')
+                    .then(() => location.reload());
             });
         }
     });

@@ -204,6 +204,54 @@ class ReservaController extends Controller
         ]);
     }
 
+    public function confirmar($id)
+    {
+        $reserva = Reserva::with('participantes')->findOrFail($id);
+
+        if ($reserva->est === 'confirmada') {
+            return response()->json([
+                'success' => true,
+                'message' => 'La reserva ya se encuentra confirmada.',
+            ]);
+        }
+
+        DB::transaction(function () use ($reserva) {
+            $reserva->update(['est' => 'confirmada']);
+
+            // Si los participantes no tenían boleto emitido, emitirselo
+            foreach ($reserva->participantes as $pax) {
+                $existeBoleto = DB::table('boletos')->where('ptc_rsv_id', $pax->id)->exists();
+                if (!$existeBoleto) {
+                    DB::table('boletos')->insert([
+                        'cod'        => 'TKT-' . strtoupper(Str::random(8)),
+                        'ptc_rsv_id' => $pax->id,
+                        'est'        => 'emitido',
+                        'emt_en'     => now(),
+                    ]);
+                } else {
+                    DB::table('boletos')->where('ptc_rsv_id', $pax->id)->update(['est' => 'emitido']);
+                }
+            }
+
+            // Asegurar que exista su comprobante de pago en Finanzas
+            $existeComprobante = DB::table('comprobantes_pago')->where('rsv_id', $reserva->id)->exists();
+            if (!$existeComprobante) {
+                DB::table('comprobantes_pago')->insert([
+                    'cod'     => 'CMP-' . strtoupper(Str::random(6)),
+                    'rsv_id'  => $reserva->id,
+                    'fec_emi' => now()->toDateString(),
+                    'mto_tot' => $reserva->pre_tot,
+                    'est'     => 'emitido',
+                ]);
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => "La reserva #{$reserva->cod} ha sido confirmada con éxito.",
+        ]);
+    }
+
     public function destroy($id)
     {
         $reserva = Reserva::with('participantes')->findOrFail($id);

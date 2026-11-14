@@ -183,12 +183,30 @@ class TuristaController extends Controller
                 'pre_tot' => $precioTotal,
                 'est_pag' => 'pendiente',
             ]);
+
             foreach ($datos['participantes'] as $indice => $participante) {
-                $reserva->participantes()->create([
+                $pax = $reserva->participantes()->create([
                     'nom_cpl' => trim($participante['nom_cpl']),
                     'es_ctc_pri' => $indice === 0,
                 ]);
+
+                // Generar boleto para el participante
+                DB::table('boletos')->insert([
+                    'cod'        => 'TKT-' . strtoupper(Str::random(8)),
+                    'ptc_rsv_id' => $pax->id,
+                    'est'        => 'emitido',
+                    'emt_en'     => now(),
+                ]);
             }
+
+            // Generar comprobante de pago para que aparezca en el módulo de Finanzas
+            DB::table('comprobantes_pago')->insert([
+                'cod'     => 'CMP-' . strtoupper(Str::random(6)),
+                'rsv_id'  => $reserva->id,
+                'fec_emi' => now()->toDateString(),
+                'mto_tot' => $precioTotal,
+                'est'     => 'emitido',
+            ]);
         });
         return redirect()
             ->route('turista.reservas.index')
