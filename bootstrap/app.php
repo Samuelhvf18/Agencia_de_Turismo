@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Middleware\ContextoAuditoria;
+use App\Http\Middleware\EstablecerIdioma;
+use App\Http\Middleware\ForzarHttps;
+use App\Http\Middleware\TokenN8n;
+use App\Http\Middleware\VerificarRol;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,15 +21,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: ['webhooks/*']);
 
         // RNF-01: HTTPS obligatorio en producción y cabeceras de seguridad.
-        $middleware->prepend(\App\Http\Middleware\ForzarHttps::class);
+        $middleware->prepend(ForzarHttps::class);
         $middleware->trustProxies(at: '*');
 
         // RNF-14: idioma de la interfaz (español / inglés).
-        $middleware->web(append: [\App\Http\Middleware\EstablecerIdioma::class]);
+        $middleware->web(append: [EstablecerIdioma::class, ContextoAuditoria::class]);
 
         $middleware->alias([
-            'rol' => \App\Http\Middleware\VerificarRol::class,
-            'n8n' => \App\Http\Middleware\TokenN8n::class,
+            'rol' => VerificarRol::class,
+            'n8n' => TokenN8n::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

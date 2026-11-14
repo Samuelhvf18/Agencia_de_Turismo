@@ -9,6 +9,8 @@ use App\Models\PropuestaAsignacion;
 use App\Models\RegistroNotificacion;
 use App\Models\Reserva;
 use App\Models\SalidaTour;
+use App\Models\Tour;
+use App\Models\User;
 use App\Services\Io\EoqService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -21,8 +23,9 @@ use Illuminate\View\View;
  */
 class DashboardController extends Controller
 {
-    public function dashboard(EoqService $eoq): View
+    public function dashboard(Request $request, EoqService $eoq): View
     {
+        $financiero = $request->user()->tieneRol(User::ROL_ADMIN);
         $hoy = today();
         $mes = $hoy->copy()->startOfMonth();
 
@@ -56,25 +59,26 @@ class DashboardController extends Controller
         $cupos = (int) $proximas->sum('cap_max');
 
         return view('admin.dashboard', [
-            'ingresosHoy' => (float) Pago::where('est', 'completado')->whereDate('pag_en', $hoy)->sum('mto'),
-            'ingresosMes' => (float) Pago::where('est', 'completado')->where('pag_en', '>=', $mes)->sum('mto'),
+            'ingresosHoy' => ! $financiero ? null : (float) Pago::where('est', 'completado')->whereDate('pag_en', $hoy)->sum('mto'),
+            'ingresosMes' => ! $financiero ? null : (float) Pago::where('est', 'completado')->where('pag_en', '>=', $mes)->sum('mto'),
             'reservasHoy' => Reserva::whereDate('cre_en', $hoy)->count(),
             'pendientesPago' => Reserva::where('est', 'pendiente')->count(),
             'ocupacion' => $cupos ? round($proximas->sum('ocupados') * 100 / $cupos, 1) : 0,
             'salidasHoy' => $salidasHoy,
             'alertas' => $alertas,
-            'ventas30' => $this->ventasDiarias($hoy->copy()->subDays(29), $hoy),
+            'ventas30' => $financiero ? $this->ventasDiarias($hoy->copy()->subDays(29), $hoy) : [],
         ]);
     }
 
     public function analitica(Request $request): View
     {
-        $f = $request->validate(['desde' => ['nullable', 'date'], 'hasta' => ['nullable', 'date', 'after_or_equal:desde']]);
+        $f = $request->validate(['tour' => ['nullable', 'integer', 'exists:tours,id'], 'desde' => ['nullable', 'date'], 'hasta' => ['nullable', 'date', 'after_or_equal:desde']]);
+        $tourId = $f['tour'] ?? null;
         $desde = Carbon::parse($f['desde'] ?? today()->subMonths(11)->startOfMonth())->startOfMonth();
         $hasta = Carbon::parse($f['hasta'] ?? today()->addMonths(3)->endOfMonth())->endOfMonth();
 
         // RF-33: demanda por tour y mes (vista_demanda_por_tour_mes) con filtro de fechas.
-        $demanda = DB::table('vista_demanda_por_tour_mes')
+        $demanda = DB::table('vista_demanda_por_tour_mes')->when($tourId, fn ($q) => $q->where('tur_id', $tourId))
             ->whereRaw('make_date(anio, mes, 1) BETWEEN ? AND ?', [$desde->toDateString(), $hasta->toDateString()])
             ->orderBy('anio')->orderBy('mes')->get();
         $meses = [];
@@ -86,7 +90,7 @@ class DashboardController extends Controller
         ));
 
         // RF-35: proyección de demanda (proyecciones_demanda) frente a lo real.
-        $proyecciones = DB::table('proyecciones_demanda as p')->join('tours as t', 't.id', '=', 'p.tur_id')
+        $proyecciones = DB::table('proyecciones_demanda as p')->join('tours as t', 't.id', '=', 'p.tur_id')->when($tourId, fn ($q) => $q->where('p.tur_id', $tourId))
             ->whereRaw('make_date(p.ani_per, p.mes_per, 1) BETWEEN ? AND ?', [$desde->toDateString(), $hasta->toDateString()])
             ->select('p.ani_per', 'p.mes_per', DB::raw('SUM(p.rsv_pry) AS reservas'), DB::raw('MAX(p.ver_mdl) AS modelo'), DB::raw('MAX(p.gen_en) AS generado'))
             ->groupBy('p.ani_per', 'p.mes_per')->get();
@@ -94,11 +98,16 @@ class DashboardController extends Controller
         $real = array_map(fn ($i) => $porTour->sum(fn ($serie) => $serie[$i]), array_keys($meses));
 
         return view('admin.panels.analitica', [
-            'filtros' => ['desde' => $desde->toDateString(), 'hasta' => $hasta->toDateString()],
+            'toursFiltro' => Tour::orderBy('nom')->get(['id', 'nom']),
+            'filtros' => ['tour' => $tourId, 'desde' => $desde->toDateString(), 'hasta' => $hasta->toDateString()],
             'meses' => $meses,
             'porTour' => $porTour,
             'real' => $real,
             'proyectado' => $proyectado,
+            'proyeccionesPorTour' => DB::table('proyecciones_demanda as p')->join('tours as t', 't.id', '=', 'p.tur_id')->when($tourId, fn ($q) => $q->where('p.tur_id', $tourId))
+                ->whereRaw('make_date(p.ani_per, p.mes_per, 1) BETWEEN ? AND ?', [$desde->toDateString(), $hasta->toDateString()])
+                ->orderBy('t.nom')->orderBy('p.ani_per')->orderBy('p.mes_per')
+                ->get(['t.nom', 'p.ani_per', 'p.mes_per', 'p.rsv_pry', 'p.ver_mdl', 'p.gen_en']),
             'modeloProyeccion' => $proyecciones->pluck('modelo')->filter()->unique()->implode(', ') ?: null,
             'proyeccionGenerada' => $proyecciones->max('generado'),
             // RF-34: nacionalidad (la vista ya excluye reservas canceladas).

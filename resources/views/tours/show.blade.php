@@ -104,7 +104,7 @@ a{color:inherit;text-decoration:none}
   @if ($tour->img)<img src="{{ $tour->img }}" alt="{{ $tour->img_alt }}">@endif
   <div class="wrap">
     <nav class="crumbs" aria-label="Ruta de navegación"><a href="{{ route('home') }}">{{ __('Inicio') }}</a> / <a href="{{ route('home') }}#catalogo">{{ __('Tours') }}</a> / {{ $tour->nom }}</nav>
-    <span class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</span><span class="code">{{ $tour->cod }}</span>
+    <a href="{{ route('categorias.show', $tour->categoria) }}" class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</a><span class="code">{{ $tour->cod }}</span>
     <h1>{{ $tour->nom }}</h1>
   </div>
 </section>

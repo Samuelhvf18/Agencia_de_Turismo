@@ -33,7 +33,7 @@ test('new users can register as turista', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('home', absolute: false));
+    $response->assertRedirect(route('reservas.historial', absolute: false));
 
     $user = User::where('cor', 'ana@example.com')->first();
     expect($user->nom)->toBe('Ana Quispe Mamani')

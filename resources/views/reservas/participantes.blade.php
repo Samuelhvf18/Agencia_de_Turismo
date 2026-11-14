@@ -68,16 +68,16 @@
 
     <div class="space-y-6">
         <div>
-            <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">¿Quiénes viajan?</h1>
-            <p class="mt-2 text-pipocas-texto-2">Necesitamos los datos de cada participante para emitir su ticket con código QR y su seguro.</p>
+            <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">{{ __('¿Quiénes viajan?') }}</h1>
+            <p class="mt-2 text-pipocas-texto-2">{{ __('Necesitamos los datos de cada participante para emitir su ticket con código QR y su seguro.') }}</p>
         </div>
 
         @guest
             <div class="flex flex-col gap-3 rounded-2xl border border-pipocas-acento/60 bg-pipocas-acento/15 p-4 sm:flex-row sm:items-center">
                 <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-pipocas-acento text-pipocas-calido"><i class="fa-regular fa-user"></i></span>
                 <div class="flex-1 text-sm">
-                    <p class="font-bold text-pipocas-calido">Estás reservando como invitado</p>
-                    <p class="text-pipocas-texto-2">Podrás consultar tu reserva con el código y tu correo. Si inicias sesión, la guardamos en tu cuenta.</p>
+                    <p class="font-bold text-pipocas-calido">{{ __('Estás reservando como invitado') }}</p>
+                    <p class="text-pipocas-texto-2">{{ __('Podrás consultar tu reserva con el código y tu correo. Si inicias sesión, la guardamos en tu cuenta.') }}</p>
                 </div>
                 @if (Route::has('login'))
                     <a href="{{ route('login') }}" class="rsv-btn-sec shrink-0 px-4 py-2.5">Iniciar sesión</a>
@@ -87,24 +87,24 @@
 
         {{-- Contacto --}}
         <section class="rsv-tarjeta">
-            <h2 class="rsv-titulo mb-1">Datos de contacto</h2>
-            <p class="mb-5 text-sm text-pipocas-texto-2">A este correo enviaremos la confirmación, el comprobante y los tickets.</p>
+            <h2 class="rsv-titulo mb-1">{{ __('Datos de contacto') }}</h2>
+            <p class="mb-5 text-sm text-pipocas-texto-2">{{ __('A este correo enviaremos la confirmación, el comprobante y los tickets.') }}</p>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
-                    <label for="nom_ctc" class="rsv-etiqueta">Nombre completo</label>
+                    <label for="nom_ctc" class="rsv-etiqueta">{{ __('Nombre completo') }}</label>
                     <input id="nom_ctc" name="nom_ctc" type="text" maxlength="150" autocomplete="name" required
                            value="{{ old('nom_ctc', $contacto['nom_ctc']) }}" x-ref="nomCtc" class="rsv-campo" placeholder="Ej. Ana Quispe Mamani">
                     @error('nom_ctc') <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="cor_ctc" class="rsv-etiqueta">Correo electrónico</label>
+                    <label for="cor_ctc" class="rsv-etiqueta">{{ __('Correo electrónico') }}</label>
                     <input id="cor_ctc" name="cor_ctc" type="email" maxlength="150" autocomplete="email" required
                            value="{{ old('cor_ctc', $contacto['cor_ctc']) }}" class="rsv-campo" placeholder="tucorreo@ejemplo.com">
                     @error('cor_ctc') <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="tel_ctc" class="rsv-etiqueta">Teléfono / WhatsApp</label>
+                    <label for="tel_ctc" class="rsv-etiqueta">{{ __('Teléfono / WhatsApp') }}</label>
                     <input id="tel_ctc" name="tel_ctc" type="tel" maxlength="20" autocomplete="tel" required
                            value="{{ old('tel_ctc', $contacto['tel_ctc']) }}" class="rsv-campo" placeholder="+591 70000000">
                     @error('tel_ctc') <p class="rsv-error">{{ $message }}</p> @enderror
@@ -116,7 +116,7 @@
         <section class="space-y-4">
             <div class="flex items-end justify-between gap-3">
                 <div>
-                    <h2 class="rsv-titulo">Participantes</h2>
+                    <h2 class="rsv-titulo">{{ __('Participantes') }}</h2>
                     <p class="text-sm text-pipocas-texto-2"><span x-text="lista.length"></span> de <span x-text="max"></span> cupos disponibles en esta salida</p>
                 </div>
             </div>
@@ -128,7 +128,7 @@
                         <div class="flex items-center gap-3">
                             <span class="grid h-9 w-9 place-items-center rounded-full bg-pipocas-principal font-bold text-white" x-text="i + 1"></span>
                             <h3 class="font-bold" x-text="p.nom_cpl || 'Participante ' + (i + 1)"></h3>
-                            <span x-show="pri === i" class="rounded-full bg-pipocas-secundario/15 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-secundario">Contacto principal</span>
+                            <span x-show="pri === i" class="rounded-full bg-pipocas-secundario/15 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-secundario">{{ __('Contacto principal') }}</span>
                         </div>
                         <button type="button" x-show="lista.length > 1" @click="quitar(i)"
                                 class="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-semibold text-red-600 transition hover:bg-red-50">
@@ -140,18 +140,18 @@
 
                     <div class="grid gap-4 sm:grid-cols-6">
                         <div class="sm:col-span-4">
-                            <label class="rsv-etiqueta" :for="`nom_cpl_${i}`">Nombre completo</label>
+                            <label class="rsv-etiqueta" :for="`nom_cpl_${i}`">{{ __('Nombre completo') }}</label>
                             <input type="text" maxlength="150" class="rsv-campo" :id="`nom_cpl_${i}`" :name="`participantes[${i}][nom_cpl]`" x-model="p.nom_cpl" placeholder="Como figura en su documento">
                             <p class="rsv-error" x-text="err(i, 'nom_cpl')" x-show="err(i, 'nom_cpl')"></p>
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="rsv-etiqueta" :for="`eda_${i}`">Edad</label>
+                            <label class="rsv-etiqueta" :for="`eda_${i}`">{{ __('Edad') }}</label>
                             <input type="number" min="1" max="99" class="rsv-campo" :id="`eda_${i}`" :name="`participantes[${i}][eda]`" x-model="p.eda">
                             <p class="rsv-error" x-text="err(i, 'eda')" x-show="err(i, 'eda')"></p>
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label class="rsv-etiqueta" :for="`tip_doc_${i}`">Tipo de documento</label>
+                            <label class="rsv-etiqueta" :for="`tip_doc_${i}`">{{ __('Tipo de documento') }}</label>
                             <select class="rsv-campo" :id="`tip_doc_${i}`" :name="`participantes[${i}][tip_doc]`" x-model="p.tip_doc">
                                 @foreach ($tiposDoc as $valor => $texto)
                                     <option value="{{ $valor }}">{{ $texto }}</option>
@@ -159,7 +159,7 @@
                             </select>
                         </div>
                         <div :class="p.tip_doc === 'CI' ? 'sm:col-span-2' : 'sm:col-span-4'">
-                            <label class="rsv-etiqueta" :for="`num_doc_${i}`">Número de documento</label>
+                            <label class="rsv-etiqueta" :for="`num_doc_${i}`">{{ __('Número de documento') }}</label>
                             <div class="flex gap-2">
                                 <input type="text" maxlength="15" class="rsv-campo" :id="`num_doc_${i}`" :name="`participantes[${i}][num_doc]`" x-model="p.num_doc">
                                 <input type="text" maxlength="5" class="rsv-campo w-20" x-show="p.tip_doc === 'CI'" :name="`participantes[${i}][ci_cmp]`" x-model="p.ci_cmp" placeholder="Comp." aria-label="Complemento del CI">
@@ -167,7 +167,7 @@
                             <p class="rsv-error" x-text="err(i, 'num_doc')" x-show="err(i, 'num_doc')"></p>
                         </div>
                         <div class="sm:col-span-2" x-show="p.tip_doc === 'CI'">
-                            <label class="rsv-etiqueta" :for="`ci_dep_${i}`">Expedido en</label>
+                            <label class="rsv-etiqueta" :for="`ci_dep_${i}`">{{ __('Expedido en') }}</label>
                             <select class="rsv-campo" :id="`ci_dep_${i}`" :name="`participantes[${i}][ci_dep_id]`" x-model="p.ci_dep_id" :disabled="p.tip_doc !== 'CI'">
                                 <option value="">—</option>
                                 @foreach ($departamentos as $d)
@@ -177,9 +177,9 @@
                         </div>
 
                         <div class="sm:col-span-3">
-                            <label class="rsv-etiqueta" :for="`pai_${i}`">Nacionalidad</label>
+                            <label class="rsv-etiqueta" :for="`pai_${i}`">{{ __('Nacionalidad') }}</label>
                             <select class="rsv-campo" :id="`pai_${i}`" :name="`participantes[${i}][pai_id]`" x-model="p.pai_id">
-                                <option value="">Selecciona un país</option>
+                                <option value="">{{ __('Selecciona un país') }}</option>
                                 @foreach ($paises as $pais)
                                     <option value="{{ $pais['id'] }}">{{ $pais['nom'] }}</option>
                                 @endforeach
@@ -208,8 +208,8 @@
         </section>
 
         <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-            <a href="{{ $urlAnterior }}" class="rsv-btn-sec"><i class="fa-solid fa-arrow-left"></i> Cambiar salida</a>
-            <button type="submit" class="rsv-btn">Continuar al equipo <i class="fa-solid fa-arrow-right"></i></button>
+            <a href="{{ $urlAnterior }}" class="rsv-btn-sec"><i class="fa-solid fa-arrow-left"></i> {{ __('Cambiar salida') }}</a>
+            <button type="submit" class="rsv-btn">{{ __('Continuar al equipo') }} <i class="fa-solid fa-arrow-right"></i></button>
         </div>
     </div>
 

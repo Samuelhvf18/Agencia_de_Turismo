@@ -1,5 +1,8 @@
 # Plan de trabajo: contraste de documentación y código de Agencia de Turismo
 
+> Seguimiento de ejecución: [avance, pruebas y pendientes residuales](docs/AVANCE-PLAN-TRABAJO.md). Esta revisión histórica se conserva; no todos sus criterios de aceptación están cerrados.
+
+
 Fecha de revisión: 12 de noviembre de 2026 (Bolivia).
 Repositorio: [Samuelhvf18/Agencia_de_Turismo](https://github.com/Samuelhvf18/Agencia_de_Turismo/tree/WAAAAAA).
 Rama real: **WAAAAAA**. Commit revisado: **2db08026fc752a125177738b58c1d346f6ea12ea**, del 20/10/2026.

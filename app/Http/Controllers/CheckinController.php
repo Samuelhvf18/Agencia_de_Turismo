@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Boleto;
 use App\Models\FichaMedica;
+use App\Models\ParticipanteReserva;
 use App\Models\Reserva;
 use App\Models\SalidaTour;
 use App\Models\User;
@@ -46,7 +46,7 @@ class CheckinController extends Controller
 
         return view('guias.checkin', [
             'salida' => $salida,
-            'manifiesto' => $this->manifiesto($salida),
+            'manifiesto' => $this->manifiesto($salida, $request->user()),
         ]);
     }
 
@@ -55,7 +55,7 @@ class CheckinController extends Controller
     {
         $this->autorizar($request, $salida);
 
-        return response()->json(['salida' => $salida->id, 'generado' => now()->toIso8601String(), 'pasajeros' => $this->manifiesto($salida)]);
+        return response()->json(['salida' => $salida->id, 'generado' => now()->toIso8601String(), 'pasajeros' => $this->manifiesto($salida, $request->user())]);
     }
 
     public function validar(Request $request, SalidaTour $salida): JsonResponse
@@ -105,11 +105,16 @@ class CheckinController extends Controller
         return redirect()->route('guias.checkin')->with('estado', 'Recorrido finalizado. ¡Buen trabajo!');
     }
 
-    private function manifiesto(SalidaTour $salida): array
+    private function manifiesto(SalidaTour $salida, User $usuario): array
     {
         // RNF-05: el guía ve condiciones médicas; esa lectura queda en la bitácora.
-        FichaMedica::whereHas('participante.reserva', fn ($q) => $q->where('sal_tur_id', $salida->id)->where('est', Reserva::EST_CONFIRMADA))
-            ->get()->each(fn ($f) => AuditObserver::lectura($f));
+        $sensible = ! $usuario->tieneRol(User::ROL_CHOFER);
+        if ($sensible) {
+            ParticipanteReserva::whereHas('reserva', fn ($q) => $q->where('sal_tur_id', $salida->id)->where('est', Reserva::EST_CONFIRMADA))
+                ->get()->each(fn ($p) => AuditObserver::lectura($p));
+            FichaMedica::whereHas('participante.reserva', fn ($q) => $q->where('sal_tur_id', $salida->id)->where('est', Reserva::EST_CONFIRMADA))
+                ->get()->each(fn ($f) => AuditObserver::lectura($f));
+        }
 
         return Reserva::with('participantes.boleto', 'participantes.fichaMedica', 'participantes.alquileres.item.tipo')
             ->where('sal_tur_id', $salida->id)
@@ -118,12 +123,12 @@ class CheckinController extends Controller
             ->flatMap(fn (Reserva $r) => $r->participantes->map(fn ($p) => [
                 'reserva' => $r->cod,
                 'nom_cpl' => $p->nom_cpl,
-                'documento' => trim($p->tip_doc.' '.$p->num_doc.($p->ci_cmp ? '-'.$p->ci_cmp : '')),
+                'documento' => ! $sensible ? null : trim($p->tip_doc.' '.$p->num_doc.($p->ci_cmp ? '-'.$p->ci_cmp : '')),
                 'boleto' => $p->boleto?->cod,
                 'est' => $p->boleto?->est ?? 'sin_boleto',
                 'vld_en' => $p->boleto?->vld_en?->format('H:i'),
-                'ficha' => (bool) $p->fichaMedica,
-                'alerta_medica' => $p->fichaMedica && ! in_array(mb_strtolower(trim((string) $p->fichaMedica->con_med)), ['', 'ninguna', 'ninguno', 'no'], true)
+                'ficha' => $sensible && (bool) $p->fichaMedica,
+                'alerta_medica' => $sensible && $p->fichaMedica && ! in_array(mb_strtolower(trim((string) $p->fichaMedica->con_med)), ['', 'ninguna', 'ninguno', 'no'], true)
                     ? $p->fichaMedica->con_med : null,
                 'equipo' => $p->alquileres->map(fn ($a) => $a->item->tipo->nom.' ('.$a->item->tal.')')->implode(', '),
             ]))

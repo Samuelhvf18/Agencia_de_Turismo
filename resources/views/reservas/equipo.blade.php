@@ -72,8 +72,8 @@
             <span class="inline-flex items-center gap-1.5 rounded-full bg-pipocas-complementario/10 px-3 py-1 text-xs font-bold text-pipocas-complementario">
                 <i class="fa-solid fa-circle-info"></i> Paso opcional
             </span>
-            <h1 class="mt-3 font-titulo text-3xl font-semibold leading-tight sm:text-4xl">¿Necesitan equipo?</h1>
-            <p class="mt-2 text-pipocas-texto-2">Alquila lo que te falte y lo recibes al iniciar el tour. Si ya tienes tu equipo, continúa sin elegir nada.</p>
+            <h1 class="mt-3 font-titulo text-3xl font-semibold leading-tight sm:text-4xl">{{ __('¿Necesitan equipo?') }}</h1>
+            <p class="mt-2 text-pipocas-texto-2">{{ __('Alquila lo que te falte y lo recibes al iniciar el tour. Si ya tienes tu equipo, continúa sin elegir nada.') }}</p>
         </div>
 
         @error('alquileres') <p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{{ $message }}</p> @enderror
@@ -103,7 +103,7 @@
                                 <p class="flex flex-wrap items-center gap-2 font-semibold">
                                     {{ $e['nom'] }}
                                     @if ($e['eqp_cri'])
-                                        <span class="rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario" title="Equipo de seguridad recomendado">Recomendado</span>
+                                        <span class="rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario" title="Equipo de seguridad recomendado">{{ __('Recomendado') }}</span>
                                     @endif
                                 </p>
                                 <p class="text-sm text-pipocas-texto-2">{{ $e['des'] }} · <b class="text-pipocas-texto">Bs. {{ number_format($e['pre'], 2, ',', '.') }}</b></p>
@@ -132,9 +132,9 @@
         @endforeach
 
         <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-            <a href="{{ $urlAnterior }}" class="rsv-btn-sec"><i class="fa-solid fa-arrow-left"></i> Participantes</a>
+            <a href="{{ $urlAnterior }}" class="rsv-btn-sec"><i class="fa-solid fa-arrow-left"></i> {{ __('Participantes') }}</a>
             <button type="submit" class="rsv-btn">
-                <span x-text="total() > 0 ? 'Continuar a la ficha médica' : 'Continuar sin equipo'">Continuar a la ficha médica</span>
+                <span x-text="total() > 0 ? 'Continuar a la ficha médica' : 'Continuar sin equipo'">{{ __('Continuar a la ficha médica') }}</span>
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
         </div>

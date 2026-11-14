@@ -2,12 +2,15 @@
 
 use App\Models\CategoriaTour;
 use App\Models\FotoTour;
+use App\Models\PerfilGuia;
 use App\Models\Tour;
 use App\Models\User;
 use Database\Seeders\CatalogoLandingSeeder;
 use Database\Seeders\CatalogosBaseSeeder;
+use Database\Seeders\OperacionDemoSeeder;
 use Database\Seeders\RolesSeeder;
 use Database\Seeders\RutasCatalogoSeeder;
+use Database\Seeders\UsuariosDemoSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -135,4 +138,14 @@ test('las pantallas de administración del catálogo cargan', function () {
     $this->get(route('admin.tours'))->assertOk()->assertSee('Tours publicados');
     $this->get(route('admin.catalogo.create'))->assertOk();
     $this->get(route('admin.catalogo.edit', Tour::first()))->assertOk()->assertSee('mapa-editor', false);
+});
+
+test('categorías y guías tienen rutas públicas sin documentos ni correo privado', function () {
+    $categoria = CategoriaTour::firstOrFail();
+    $this->get(route('categorias.show', $categoria))->assertOk()->assertSee($categoria->nom);
+    $this->seed([UsuariosDemoSeeder::class, OperacionDemoSeeder::class]);
+    $guia = PerfilGuia::where('act', true)->firstOrFail();
+    $this->get(route('guias.perfil', $guia))->assertOk()->assertDontSee($guia->usuario->cor);
+    $guia->update(['act' => false]);
+    $this->get(route('guias.perfil', $guia))->assertNotFound();
 });

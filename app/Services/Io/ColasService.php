@@ -150,9 +150,6 @@ class ColasService
             ->whereBetween('fec_evt', [$desde->copy()->startOfDay(), $hasta->copy()->endOfDay()])
             ->count();
 
-        if ($llegadas === 0) {
-            return null;
-        }
         $dias = max(1, $desde->copy()->startOfDay()->diffInDays($hasta->copy()->startOfDay()) + 1);
 
         return $llegadas / $dias;
@@ -200,8 +197,8 @@ class ColasService
     {
         $procesados = 0;
         foreach (ColaParametroTour::where('act', true)->get() as $par) {
-            $lambda = $this->lambdaObservado($par->tur_id, $fecha, $fecha) ?? (float) $par->lmb;
-            $mu = $this->muObservado($par->tur_id, $fecha->copy()->subDays(30), $fecha) ?? (float) $par->mu;
+            $lambda = $this->lambdaObservado($par->tur_id, $fecha->copy()->subDays(29), $fecha);
+            $mu = (float) $par->mu;
             $m = $this->metricas($lambda, $mu, (int) $par->c_srv, (int) $par->k_cap);
 
             ColaMetricaDiaria::updateOrCreate(

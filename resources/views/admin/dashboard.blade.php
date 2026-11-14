@@ -6,11 +6,13 @@
 @php $bs = fn ($n) => 'Bs. ' . number_format((float) $n, 2, ',', '.'); @endphp
 <div class="space-y-6">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        @if ($ingresosHoy !== null)
         <div class="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[#1F5F8B]">
             <p class="text-xs font-semibold uppercase tracking-wider text-[#6B6F72]">Ingresos de hoy</p>
             <h3 class="text-2xl font-extrabold mt-2 text-[#1F5F8B]">{{ $bs($ingresosHoy) }}</h3>
             <span class="text-xs text-[#6B6F72]">Mes: {{ $bs($ingresosMes) }}</span>
         </div>
+        @endif
         <div class="bg-white border border-gray-200 p-5 rounded-2xl shadow-sm border-l-4 border-l-[#C96F4A]">
             <p class="text-xs font-semibold uppercase tracking-wider text-[#6B6F72]">Reservas de hoy</p>
             <h3 class="text-2xl font-extrabold mt-2 text-[#C96F4A]">{{ $reservasHoy }}</h3>

@@ -28,6 +28,12 @@ class ConsultaReservaController extends Controller
         private PagoService $pagos,
     ) {}
 
+    public function historial(Request $request): View
+    {
+        return view('reservas.historial', ['reservas' => $request->user()->reservas()
+            ->with('salida.tour')->orderByDesc('cre_en')->paginate(10)]);
+    }
+
     public function consultar(): View
     {
         return view('reservas.consultar', ['accionForm' => route('reservas.consultar.buscar')]);

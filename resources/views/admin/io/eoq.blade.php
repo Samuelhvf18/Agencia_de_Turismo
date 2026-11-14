@@ -13,8 +13,9 @@
 
 @section('contenido')
 @php $fmt = fn ($v, $d = 2) => number_format((float) $v, $d, ',', '.'); @endphp
-<p class="text-sm text-pipocas-texto-2">D = unidades alquiladas en reservas confirmadas o completadas de los últimos 12 meses (vista_demanda_equipo_anual) · S = costo por pedido · H = costo anual de mantener una unidad · L = {{ $lead }} días de reposición · z = {{ $z }} (95 % de nivel de servicio).</p>
+<p class="text-sm text-pipocas-texto-2">D = unidades alquiladas en reservas confirmadas o completadas del año calendario actual (vista_demanda_equipo_anual) · S = costo por pedido · H = costo anual de mantener una unidad · L = {{ $lead }} días de reposición · z = {{ $z }} (95 % de nivel de servicio).</p>
 
+<p class="my-4 rounded-xl bg-amber-50 p-4 text-sm">Modelo académico basado en usos/alquileres. D no mide desgaste ni compras de reemplazo: Q y R requieren validar una tasa de reposición antes de usarse como orden de compra. La desviación diaria es una aproximación a partir de medias mensuales.</p>
 <div class="grid gap-6 xl:grid-cols-2">
     @foreach ($filas as $f)
         @php $t = $f['tipo']; $e = $f['eoq']; @endphp
@@ -56,7 +57,7 @@
                     <div class="flex-1 rounded-t bg-pipocas-complementario/70" style="height: {{ max(3, round($n * 100 / $max)) }}%" title="{{ $mes }}: {{ $n }}"></div>
                 @endforeach
             </div>
-            <p class="mt-1 text-[11px] text-pipocas-texto-2">Demanda mensual de los últimos 12 meses ({{ $f['meses_con_datos'] }} meses con alquileres).</p>
+            <p class="mt-1 text-[11px] text-pipocas-texto-2">Demanda mensual del año calendario actual ({{ $f['meses_con_datos'] }} meses con alquileres).</p>
         </section>
     @endforeach
 </div>

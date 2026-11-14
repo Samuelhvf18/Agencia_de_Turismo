@@ -1,20 +1,21 @@
 <?php
 
 use App\Models\AlquilerEquipoReserva;
+use App\Models\ColaMetricaDiaria;
 use App\Models\ColaParametroTour;
 use App\Models\Idioma;
-use App\Models\ItemEquipo;
 use App\Models\Pais;
 use App\Models\PerfilGuia;
 use App\Models\PropuestaAsignacion;
 use App\Models\RegistroNotificacion;
 use App\Models\Reserva;
-use App\Models\Role;
 use App\Models\SalidaTour;
 use App\Models\TipoEquipo;
 use App\Models\Tour;
 use App\Models\User;
+use App\Models\Vehiculo;
 use App\Services\CodeGeneratorService;
+use App\Services\Io\ColasService;
 use App\Services\Io\OptimizadorService;
 use Database\Seeders\CatalogoLandingSeeder;
 use Database\Seeders\CatalogosBaseSeeder;
@@ -125,7 +126,7 @@ test('RF-23: propone vehículos con asientos suficientes y menor costo', functio
 
     expect($res['propuestas'])->toBeGreaterThan(0);
     foreach (PropuestaAsignacion::where('tip', 'vehiculo')->with('salida')->get() as $p) {
-        $vehiculo = \App\Models\Vehiculo::find($p->rec_pro_id);
+        $vehiculo = Vehiculo::find($p->rec_pro_id);
         expect($vehiculo->cap_asi)->toBeGreaterThanOrEqual($p->salida->cap_max)
             ->and($p->det)->toHaveKeys(['km_estimados', 'costo_km', 'combustible']);
     }
@@ -171,8 +172,18 @@ test('el planificador n8n exige token y ejecuta las tareas', function () {
 
     $this->postJson('/api/n8n/tareas/metricas-colas', ['dias' => 1], ['X-Pipocas-Token' => 'secreto-n8n'])
         ->assertOk()->assertJson(['ok' => true, 'comando' => 'io:metricas-colas']);
-    expect(\App\Models\ColaMetricaDiaria::count())->toBeGreaterThan(0);
+    expect(ColaMetricaDiaria::count())->toBeGreaterThan(0);
 
     $this->postJson('/api/n8n/tareas/propuestas-guias', ['dias' => 7], ['X-Pipocas-Token' => 'secreto-n8n'])->assertOk();
     $this->postJson('/api/n8n/tareas/no-existe', [], ['X-Pipocas-Token' => 'secreto-n8n'])->assertNotFound();
+});
+
+test('las métricas diarias usan la misma ventana de 30 días del panel y cero llegadas no sustituye demanda', function () {
+    $par = ColaParametroTour::where('act', true)->firstOrFail();
+    $servicio = app(ColasService::class);
+    $servicio->registrarLlegada($par->tur_id, null, null, 3);
+    $servicio->generarMetricasDiarias(today());
+    $fila = ColaMetricaDiaria::where('tur_id', $par->tur_id)->whereDate('fec', today())->firstOrFail();
+    expect((float) $fila->lmb_obs)->toBe(round(1 / 30, 4));
+    expect($servicio->lambdaObservado($par->tur_id, today()->subDays(60), today()->subDays(31)))->toBe(0.0);
 });

@@ -1,6 +1,6 @@
 # Estado de implementación por requisito
 
-Rama `WAAAAAA`, 20/10/2026. Todo lo listado está implementado y cubierto por pruebas automáticas (`php artisan test`), salvo lo indicado en *Configuración pendiente*.
+Rama `WAAAAAA`. La tabla describe implementación localizada; no acredita aceptación operativa. Ver [avance y pendientes del plan](AVANCE-PLAN-TRABAJO.md) y [verificación reproducible](CI-Y-PRUEBAS.md) para evidencia y límites.
 
 ## Requerimientos funcionales
 
@@ -16,8 +16,8 @@ Rama `WAAAAAA`, 20/10/2026. Todo lo listado está implementado y cubierto por pr
 | RF-12 | Consulta por código | `ConsultaReservaController` (código + correo) | ReservasTest |
 | RF-13, RF-14 | Pagos y comprobante | `PagoService`, `PasarelaSimulada` (webhook HMAC), `ComprobanteService` | ReservasTest |
 | RF-15, RF-19, RF-20 | Personal, flota, inventario | `PersonalController`, `FlotaController`, `InventarioController` | OperacionesTest |
-| RF-16 a RF-18 | Programación y asignación | `SalidaService`, `AsignacionService` | OperacionesTest |
-| RF-21 | Check-in QR | `CheckinController` + html5-qrcode + IndexedDB | OperacionesTest |
+| RF-16, RF-21 | Programación, asignación y cancelación | `SalidaService`, `AsignacionService` | OperacionesTest |
+| RF-17, RF-18 | Check-in QR y manifiesto | `CheckinController` + html5-qrcode + IndexedDB | OperacionesTest |
 | RF-22 | Asignación de guías | `OptimizadorService` + `MetodoHungaro` | OptimizacionTest, IoGestionTest |
 | RF-23 | Asignación de vehículos | `OptimizadorService::proponerVehiculos` | IoGestionTest |
 | RF-24 | Revisión de propuestas | Tabla `propuestas_asignacion`, panel de propuestas | IoGestionTest |
@@ -40,11 +40,11 @@ Rama `WAAAAAA`, 20/10/2026. Todo lo listado está implementado y cubierto por pr
 | RNF-02/03 Roles | Middleware `rol:` en todas las rutas del panel y del check-in |
 | RNF-04 Alertas de seguridad | `AlertasSeguridad`: cuenta nueva, 3 intentos fallidos, cambio de contraseña |
 | RNF-05 Lecturas sensibles | `AuditObserver::lectura` en participantes y fichas médicas |
-| RNF-06 Auditoría | `AuditObserver` en 27 modelos; panel con antes/después |
+| RNF-06 Auditoría | Triggers PostgreSQL transaccionales; READ mediante AuditObserver; panel con antes/después |
 | RNF-07 Integridad | CHECK, UNIQUE y FK del esquema; transacciones con bloqueo |
-| RNF-08 a RNF-10 Rendimiento | Índices, OPcache, Redis, colas, caché de estáticos |
+| RNF-08 a RNF-10 Rendimiento | Infraestructura prevista; mediciones de p95/4G/3× pendientes |
 | RNF-12 Respaldo | `respaldo:bd` diario con retención de 30 días |
-| RNF-13 Responsive | Revisado a 360 px |
+| RNF-13 Responsive | Diseño adaptable; pendiente recorrido completo a 360 px |
 | RNF-14 Idiomas | ES/EN con selector y detección del navegador |
 | RNF-15 Sin conexión | Check-in con IndexedDB y service worker |
 | RNF-20 Fallo controlado | Chatbot con respaldo local si la IA no responde |

@@ -45,6 +45,7 @@
                     <span class="hidden sm:inline">{{ __('Consultar reserva') }}</span>
                 </a>
                 @auth
+                    <a href="{{ route('reservas.historial') }}">{{ __('Mis reservas') }}</a>
                     <span class="hidden items-center gap-2 rounded-xl bg-pipocas-fondo px-3 py-2 text-pipocas-texto md:inline-flex">
                         <i class="fa-regular fa-user"></i> {{ auth()->user()->name }}
                     </span>

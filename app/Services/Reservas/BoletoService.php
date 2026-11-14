@@ -6,6 +6,7 @@ use App\Models\Boleto;
 use App\Models\Reserva;
 use App\Services\CodeGeneratorService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use chillerlan\QRCode\Common\EccLevel;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 use Illuminate\Support\Collection;
@@ -33,9 +34,10 @@ class BoletoService
                 if ($ptc->boleto->est === Boleto::EST_CANCELADO) {
                     $ptc->boleto->update(['est' => Boleto::EST_EMITIDO]);
                 }
+
                 continue;
             }
-            if ($altoRiesgo && ! $ptc->fichaMedica) {
+            if ($altoRiesgo && (! $ptc->fichaMedica || ! $ptc->fichaMedica->fir_en || ! $ptc->fichaMedica->rta_fir)) {
                 continue; // bloqueado hasta que firme la ficha médica
             }
 
@@ -54,7 +56,7 @@ class BoletoService
     {
         $opciones = new QROptions([
             'outputBase64' => true,
-            'eccLevel' => \chillerlan\QRCode\Common\EccLevel::M,
+            'eccLevel' => EccLevel::M,
             'scale' => 5,
             'addQuietzone' => true,
         ]);

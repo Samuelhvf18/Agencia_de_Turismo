@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  *   CT = (D/Q)·S + (Q/2)·H   costo total anual de inventario
  *
  * D sale de vista_demanda_equipo_anual (unidades alquiladas en reservas
- * confirmadas o completadas en los últimos 12 meses); S = tipos_equipo.cos_ord
+ * confirmadas o completadas en los año calendario actual); S = tipos_equipo.cos_ord
  * y H = tipos_equipo.cos_mnt_anu.
  */
 class EoqService
@@ -60,7 +60,7 @@ class EoqService
         foreach (TipoEquipo::with('items')->orderByDesc('eqp_cri')->orderBy('nom')->get() as $tipo) {
             $historial = $this->demandaMensual($tipo->id);
             $meses = count(array_filter($historial));
-            $demanda = array_sum($historial);
+            $demanda = $this->demandaAnualVista($tipo->id, (int) now()->year);
             $stock = (int) $tipo->items->sum('cnt_dis');
             $fila = [
                 'tipo' => $tipo,
@@ -126,12 +126,12 @@ class EoqService
         return $nuevas;
     }
 
-    /** Unidades alquiladas por mes en los últimos 12 meses: ['2026-01' => n, ...]. */
+    /** Unidades alquiladas por mes en los año calendario actual: ['2026-01' => n, ...]. */
     public function demandaMensual(int $tipEqpId): array
     {
         $meses = [];
         for ($i = 11; $i >= 0; $i--) {
-            $meses[now()->startOfMonth()->subMonths($i)->format('Y-m')] = 0;
+            $meses[now()->startOfYear()->addMonths(11 - $i)->format('Y-m')] = 0;
         }
 
         // vista_demanda_equipo_anual agrupa por año; para σ se baja al mes con la misma lógica.
@@ -142,7 +142,7 @@ class EoqService
             ->join('salidas_tour as st', 'st.id', '=', 'r.sal_tur_id')
             ->where('ie.tip_eqp_id', $tipEqpId)
             ->whereIn('r.est', ['confirmada', 'completada'])
-            ->where('st.fec_sal', '>=', now()->startOfMonth()->subMonths(11)->toDateString())
+            ->where('st.fec_sal', '>=', now()->startOfYear()->toDateString())
             ->selectRaw("to_char(st.fec_sal, 'YYYY-MM') AS mes, COUNT(a.id) AS n")
             ->groupBy('mes')
             ->pluck('n', 'mes');

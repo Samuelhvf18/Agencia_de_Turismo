@@ -32,3 +32,8 @@ php artisan migrate:fresh --seed && php artisan storage:link
 php artisan serve
 php artisan test   # 160 pruebas (requiere la base agencia_turismo_test)
 ```
+
+## Verificación y avance
+
+- [Instalación QA, CI y recuperación](docs/CI-Y-PRUEBAS.md)
+- [Avance del plan WAAAAAA y pendientes reales](docs/AVANCE-PLAN-TRABAJO.md)

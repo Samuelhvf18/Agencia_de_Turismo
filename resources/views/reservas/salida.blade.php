@@ -50,8 +50,8 @@
                class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
                 <i class="fa-solid fa-arrow-left"></i> Volver al tour
             </a>
-            <h1 class="font-titulo text-3xl font-semibold leading-tight text-pipocas-texto sm:text-4xl">¿Cuándo quieres ir?</h1>
-            <p class="mt-2 text-pipocas-texto-2">Elige una de las salidas programadas para <b class="text-pipocas-texto">{{ $tour->nom }}</b>. Los cupos se actualizan en tiempo real.</p>
+            <h1 class="font-titulo text-3xl font-semibold leading-tight text-pipocas-texto sm:text-4xl">{{ __('¿Cuándo quieres ir?') }}</h1>
+            <p class="mt-2 text-pipocas-texto-2">{{ __('Elige una de las salidas programadas para') }} <b class="text-pipocas-texto">{{ $tour->nom }}</b>. Los cupos se actualizan en tiempo real.</p>
         </div>
 
         @error('sal_tur_id')
@@ -95,10 +95,10 @@
                             <div class="flex items-start justify-between gap-3">
                                 <div>
                                     <p class="font-titulo text-2xl font-semibold text-pipocas-texto">{{ substr($s['hra_sal'], 0, 5) }}</p>
-                                    <p class="text-xs text-pipocas-texto-2">Salida desde La Paz</p>
+                                    <p class="text-xs text-pipocas-texto-2">{{ __('Salida desde La Paz') }}</p>
                                 </div>
                                 @if ($agotada)
-                                    <span class="rounded-full bg-gray-200 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-gray-600">Agotado</span>
+                                    <span class="rounded-full bg-gray-200 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-gray-600">{{ __('Agotado') }}</span>
                                 @elseif ($pocos)
                                     <span class="rounded-full bg-pipocas-acento/30 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-calido">¡Últimos {{ $libres }}!</span>
                                 @else
@@ -132,8 +132,8 @@
         @empty
             <div class="rsv-tarjeta text-center">
                 <i class="fa-regular fa-calendar-xmark text-4xl text-pipocas-secundario"></i>
-                <h2 class="rsv-titulo mt-3">No hay salidas programadas</h2>
-                <p class="mt-1 text-pipocas-texto-2">Vuelve pronto o escríbenos para armar una salida privada.</p>
+                <h2 class="rsv-titulo mt-3">{{ __('No hay salidas programadas') }}</h2>
+                <p class="mt-1 text-pipocas-texto-2">{{ __('Vuelve pronto o escríbenos para armar una salida privada.') }}</p>
             </div>
         @endforelse
 
@@ -141,9 +141,9 @@
         <section class="rsv-tarjeta">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h2 class="rsv-titulo">¿Cuántas personas?</h2>
-                    <p class="text-sm text-pipocas-texto-2" x-show="!sal">Primero elige un horario.</p>
-                    <p class="text-sm text-pipocas-texto-2" x-show="sal" x-cloak>Máximo <span x-text="disp"></span> en esta salida.</p>
+                    <h2 class="rsv-titulo">{{ __('¿Cuántas personas?') }}</h2>
+                    <p class="text-sm text-pipocas-texto-2" x-show="!sal">{{ __('Primero elige un horario.') }}</p>
+                    <p class="text-sm text-pipocas-texto-2" x-show="sal" x-cloak>{{ __('Máximo') }} <span x-text="disp"></span> en esta salida.</p>
                 </div>
                 <div class="flex items-center gap-3 self-start sm:self-auto">
                     <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-pipocas-principal transition hover:bg-pipocas-fondo disabled:opacity-40"
@@ -168,7 +168,7 @@
             <button type="submit" class="rsv-btn w-full" :disabled="!sal">
                 Continuar con los participantes <i class="fa-solid fa-arrow-right"></i>
             </button>
-            <p class="text-center text-xs text-pipocas-texto-2"><i class="fa-solid fa-shield-halved mr-1 text-pipocas-complementario"></i> Aún no se cobra nada</p>
+            <p class="text-center text-xs text-pipocas-texto-2"><i class="fa-solid fa-shield-halved mr-1 text-pipocas-complementario"></i> {{ __('Aún no se cobra nada') }}</p>
         </x-reserva.resumen-tour>
     </aside>
 </form>

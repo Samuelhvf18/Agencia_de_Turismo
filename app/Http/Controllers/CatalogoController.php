@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CategoriaTour;
+use App\Models\PerfilGuia;
 use App\Models\Tour;
 use App\Support\PresentadorTour;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +25,22 @@ class CatalogoController extends Controller
         $categorias = $tours->pluck('categoria')->unique('id')->values();
 
         return view('welcome', compact('tours', 'categorias'));
+    }
+
+    public function categoria(CategoriaTour $categoria)
+    {
+        $tours = $categoria->tours()->where('act', true)->whereNull('eli_en')->get();
+
+        return view('tours.categoria', compact('categoria', 'tours'));
+    }
+
+    public function guia(PerfilGuia $guia)
+    {
+        abort_unless($guia->act && $guia->usuario?->act, 404);
+
+        return view('tours.guia', ['nombre' => $guia->usuario->nom,
+            'bio' => $guia->bio, 'experiencia' => $guia->ani_exp,
+            'idiomas' => $guia->idiomas()->pluck('nom')]);
     }
 
     // Detalle del tour con ruta amigable: /tours/{rta_amg}

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Request;
 class AuditObserver
 {
     /** Columnas que nunca se copian a la bitácora. */
-    private const OCULTOS = ['clv', 'password', 'remember_token'];
+    private const OCULTOS = ['clv', 'password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'token'];
 
     public function created(Model $model): void
     {
@@ -68,13 +68,14 @@ class AuditObserver
                 'cre_en' => now(),
             ]));
         } catch (\Throwable $e) {
-            // La auditoría no debe tumbar la operación de negocio, pero el fallo queda en el log.
+            // Las lecturas sensibles también fallan si no pueden auditarse.
             Log::error('No se pudo registrar la auditoría', [
                 'tabla' => $model->getTable(),
                 'id' => $model->getKey(),
                 'accion' => $accion,
                 'error' => $e->getMessage(),
             ]);
+            throw $e;
         }
     }
 

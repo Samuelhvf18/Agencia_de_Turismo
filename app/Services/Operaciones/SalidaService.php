@@ -9,6 +9,7 @@ use App\Models\SalidaTour;
 use App\Models\User;
 use App\Services\Notificaciones\NotificacionService;
 use App\Services\Reservas\ReservaService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -145,7 +146,7 @@ class SalidaService
             if ($boleto->est === Boleto::EST_CANCELADO || $ptc->reserva->est !== Reserva::EST_CONFIRMADA) {
                 return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'El boleto está cancelado o la reserva no está confirmada.'];
             }
-            if ($salida->tour->esAltoRiesgo() && ! $ptc->fichaMedica) {
+            if ($salida->tour->esAltoRiesgo() && (! $ptc->fichaMedica || ! $ptc->fichaMedica->fir_en || ! $ptc->fichaMedica->rta_fir)) {
                 return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'Falta la ficha médica firmada (tour de alto riesgo).'];
             }
             if ($boleto->est === Boleto::EST_VALIDADO) {
@@ -158,7 +159,7 @@ class SalidaService
         });
     }
 
-    /** @return \Illuminate\Support\Collection<int, Reserva> */
+    /** @return Collection<int, Reserva> */
     public function reservasActivas(SalidaTour $salida)
     {
         return Reserva::where('sal_tur_id', $salida->id)

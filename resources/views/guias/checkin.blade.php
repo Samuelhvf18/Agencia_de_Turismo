@@ -122,7 +122,7 @@
     const bd = {
         abrir() {
             return new Promise((ok, mal) => {
-                const r = indexedDB.open('pipocas-checkin', 1);
+                const r = indexedDB.open('pipocas-checkin-' + @json(hash('sha256', session()->getId() . ':' . auth()->id())), 1);
                 r.onupgradeneeded = () => {
                     r.result.createObjectStore('manifiestos');
                     r.result.createObjectStore('cola');
@@ -133,11 +133,11 @@
         },
         async poner(almacen, clave, valor) {
             const db = await this.abrir();
-            return new Promise(ok => { const t = db.transaction(almacen, 'readwrite'); t.objectStore(almacen).put(valor, clave); t.oncomplete = ok; });
+            return new Promise(ok => { const t = db.transaction(almacen, 'readwrite'); t.objectStore(almacen).put(valor, clave); t.oncomplete = () => { db.close(); ok(); }; });
         },
         async leer(almacen, clave) {
             const db = await this.abrir();
-            return new Promise(ok => { const r = db.transaction(almacen).objectStore(almacen).get(clave); r.onsuccess = () => ok(r.result); r.onerror = () => ok(undefined); });
+            return new Promise(ok => { const r = db.transaction(almacen).objectStore(almacen).get(clave); r.onsuccess = () => { db.close(); ok(r.result); }; r.onerror = () => { db.close(); ok(undefined); }; });
         },
     };
 
@@ -155,8 +155,15 @@
 
             async init() {
                 const claveCola = 'salida-' + cfg.salida;
+                indexedDB.deleteDatabase('pipocas-checkin'); // purge legacy unscoped data
+                const vencimiento = await bd.leer('manifiestos', 'vence');
+                if (vencimiento && vencimiento < Date.now()) {
+                    await bd.poner('manifiestos', claveCola, []);
+                    await bd.poner('cola', claveCola, []);
+                }
+                if (this.online) await bd.poner('manifiestos', 'vence', Date.now() + 12 * 3600000);
                 if (this.online) {
-                    await bd.poner('manifiestos', claveCola, JSON.parse(JSON.stringify(this.pasajeros)));
+                    await bd.poner('manifiestos', claveCola, JSON.parse(JSON.stringify(this.pasajeros.map(({documento, alerta_medica, ficha, ...publico}) => publico))));
                 } else {
                     this.pasajeros = (await bd.leer('manifiestos', claveCola)) || this.pasajeros;
                 }

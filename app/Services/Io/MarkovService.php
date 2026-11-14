@@ -104,7 +104,7 @@ class MarkovService
      *
      * @param  array  $p  matriz [cod][cod]
      * @return array{transitorios: string[], absorbentes: string[], N: array, B: array, t: array}
-     *               N[i][j] = meses esperados en j partiendo de i; B[i][a] = prob. de terminar en a; t[i] = meses hasta absorción
+     *                                                                                            N[i][j] = meses esperados en j partiendo de i; B[i][a] = prob. de terminar en a; t[i] = meses hasta absorción
      */
     public function analizar(array $p, array $absorbentes = self::ABSORBENTES): array
     {
@@ -178,6 +178,7 @@ class MarkovService
             if (in_array($i, self::ABSORBENTES, true)) {
                 $p[$i] = array_fill_keys(self::ORDEN, 0.0);
                 $p[$i][$i] = 1.0;
+
                 continue;
             }
             $total = array_sum($conteos[$i] ?? []);
@@ -280,15 +281,19 @@ class MarkovService
             $res = DB::table('reservas as r')
                 ->join('salidas_tour as s', 's.id', '=', 'r.sal_tur_id')
                 ->where('r.usr_id', $u->id)
-                ->get(['r.est', 's.fec_sal', 's.est as est_sal', 'r.cre_en']);
+                ->get(['r.est', 'r.est_pag', 's.fec_sal', 's.est as est_sal', 'r.cre_en']);
 
-            $completadas = $res->filter(fn ($r) => $r->est === 'completada' || $r->est_sal === 'completada')->count();
-            $pendientes = $res->filter(fn ($r) => in_array($r->est, ['pendiente', 'confirmada'], true) && $r->est_sal !== 'completada' && Carbon::parse($r->fec_sal)->gte($hoy))->count();
-            $ultima = $res->max('cre_en') ?? $u->created_at;
+            $completadas = $res->filter(fn ($r) => $r->est === 'completada' || ($r->est === 'confirmada' && $r->est_sal === 'completada'))->count();
+            $pendientes = $res->filter(fn ($r) => $r->est === 'confirmada' && in_array($r->est_pag, ['parcial', 'pagado'], true) && $r->est_sal !== 'completada' && Carbon::parse($r->fec_sal)->gte($hoy))->count();
+            $ultimoPago = DB::table('pagos as p')->join('comprobantes_pago as c', 'c.id', '=', 'p.cmp_pag_id')
+                ->join('reservas as r', 'r.id', '=', 'c.rsv_id')->where('r.usr_id', $u->id)
+                ->where('p.est', 'completado')->max('p.pag_en');
+            $ultima = max(array_filter([$u->created_at, $ultimoPago,
+                $res->filter(fn ($r) => $r->est === 'completada' || ($r->est === 'confirmada' && $r->est_sal === 'completada'))->max('fec_sal')]));
 
             $cod = match (true) {
-                $pendientes > 0 => 'reservado',
                 $completadas >= 2 => 'fidelizado',
+                $pendientes > 0 => 'reservado',
                 $ultima && Carbon::parse($ultima)->lt($hoy->copy()->subMonths(self::MESES_INACTIVIDAD)) => 'perdido',
                 $completadas === 1 => 'completado',
                 default => 'prospecto',
@@ -326,6 +331,12 @@ class MarkovService
         }
 
         $p = $this->estimarMatriz($conteos, $previa);
+        foreach ($p as &$fila) {
+            $fila = array_map(fn ($v) => round($v, 4), $fila);
+            $mayor = array_search(max($fila), $fila, true);
+            $fila[$mayor] = round($fila[$mayor] + 1 - array_sum($fila), 4);
+        }
+        unset($fila);
         $ids = MarkovEstadoCliente::pluck('id', 'cod');
         $hoy = now()->toDateString();
 
@@ -364,7 +375,7 @@ class MarkovService
             $inicio = Carbon::parse($perCap);
             $coh = MarkovCohort::updateOrCreate(
                 ['per_cap' => $perCap],
-                ['nom' => 'Cohorte ' . $inicio->locale('es')->isoFormat('MMMM YYYY'), 'tot_cli' => $usuarios->count()]
+                ['nom' => 'Cohorte '.$inicio->locale('es')->isoFormat('MMMM YYYY'), 'tot_cli' => $usuarios->count()]
             );
             $miembros = $usuarios->pluck('usr_id')->all();
             for ($rel = 0; $inicio->copy()->addMonths($rel)->startOfMonth()->lte($hoy); $rel++) {

@@ -1,8 +1,10 @@
 <?php
 
+use App\Actions\Fortify\UpdateUserPassword;
 use App\Jobs\NotificacionJob;
 use App\Mail\AvisoMail;
 use App\Models\BitacoraAuditoria;
+use App\Models\FichaMedica;
 use App\Models\RegistroNotificacion;
 use App\Models\Reserva;
 use App\Models\Role;
@@ -16,6 +18,8 @@ use Database\Seeders\CatalogosBaseSeeder;
 use Database\Seeders\OperacionDemoSeeder;
 use Database\Seeders\RolesSeeder;
 use Database\Seeders\UsuariosDemoSeeder;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -106,7 +110,7 @@ test('RNF-04: el cambio de contraseña desde el perfil alerta al administrador',
     $turista = User::where('cor', 'turista@pipocas.test')->first();
     $this->actingAs($turista);
 
-    app(\App\Actions\Fortify\UpdateUserPassword::class)->update($turista, [
+    app(UpdateUserPassword::class)->update($turista, [
         'current_password' => 'Pipocas2026', 'password' => 'NuevaClave2026', 'password_confirmation' => 'NuevaClave2026',
     ]);
 
@@ -157,9 +161,28 @@ test('ver el manifiesto del check-in audita la lectura de fichas médicas (RNF-0
     Queue::fake();
     $salida = SalidaTour::orderBy('fec_sal')->first();
     $reserva = reservaSimple($salida, Reserva::EST_CONFIRMADA);
-    \App\Models\FichaMedica::create(['ptc_rsv_id' => $reserva->participantes()->first()->id, 'con_med' => 'Asma', 'rta_fir' => 'firmas/x.png', 'fir_en' => now()]);
+    FichaMedica::create(['ptc_rsv_id' => $reserva->participantes()->first()->id, 'con_med' => 'Asma', 'rta_fir' => 'firmas/x.png', 'fir_en' => now()]);
 
     $this->actingAs(User::where('cor', 'operaciones@pipocas.test')->first())->get(route('guias.salida', $salida))->assertOk()->assertSee('Asma');
 
     expect(BitacoraAuditoria::where('acc', 'READ')->where('nom_tbl', 'fichas_medicas')->exists())->toBeTrue();
+});
+
+test('chofer asignado no recibe documentos ni condiciones médicas', function () {
+    Queue::fake();
+    $salida = SalidaTour::whereNotNull('prf_cho_id')->firstOrFail();
+    $reserva = reservaSimple($salida, Reserva::EST_CONFIRMADA);
+    FichaMedica::create(['ptc_rsv_id' => $reserva->participantes()->first()->id, 'con_med' => 'Asma privada', 'rta_fir' => 'firmas/x.png', 'fir_en' => now()]);
+    $chofer = $salida->chofer->usuario;
+    $this->actingAs($chofer)->getJson(route('guias.manifiesto', $salida))->assertOk()
+        ->assertJsonPath('pasajeros.0.documento', null)->assertJsonPath('pasajeros.0.alerta_medica', null)
+        ->assertDontSee('Asma privada');
+});
+
+test('si falla la bitácora se revierte una escritura masiva', function () {
+    $reserva = reservaSimple();
+    DB::statement("ALTER TABLE bitacora_auditoria ADD CONSTRAINT prueba_fallo CHECK (acc <> 'UPDATE') NOT VALID");
+    expect(fn () => DB::transaction(fn () => Reserva::whereKey($reserva->id)->update(['tel_ctc' => '77777777'])))
+        ->toThrow(QueryException::class);
+    expect($reserva->fresh()->tel_ctc)->toBe('+591 70000000');
 });

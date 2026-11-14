@@ -11,8 +11,8 @@ use App\Http\Controllers\Admin\FlotaController;
 use App\Http\Controllers\Admin\InventarioController;
 use App\Http\Controllers\Admin\IoGestionController;
 use App\Http\Controllers\Admin\PersonalController;
-use App\Http\Controllers\Admin\SalidasController;
 use App\Http\Controllers\Admin\ReservasAdminController;
+use App\Http\Controllers\Admin\SalidasController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CheckinController;
@@ -32,6 +32,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [CatalogoController::class, 'index'])->name('home');
+Route::get('/categorias/{categoria:rta_amg}', [CatalogoController::class, 'categoria'])->name('categorias.show');
+Route::get('/guias/perfil/{guia:rta_amg}', [CatalogoController::class, 'guia'])->name('guias.perfil');
 Route::get('/tours/{tour:rta_amg}', [CatalogoController::class, 'show'])->name('tours.show');
 
 /*
@@ -91,10 +93,12 @@ Route::middleware([
     'verified',
 ])->group(function () {
     // Inicio genérico: cada rol va a su propia pantalla.
+    Route::get('/mis-reservas', [ConsultaReservaController::class, 'historial'])->name('reservas.historial');
     Route::get('/dashboard', fn (Request $request) => redirect($request->user()->rutaInicio()))->name('dashboard');
 
     // Panel administrativo: administrador y personal de operaciones.
     Route::prefix('admin')->name('admin.')->middleware('rol:'.User::ROL_ADMIN.','.User::ROL_OPERACIONES)->group(function () {
+        Route::get('/mis-reservas', [ConsultaReservaController::class, 'historial'])->name('reservas.historial');
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
         // Operaciones y salidas (M04)
@@ -135,7 +139,7 @@ Route::middleware([
         Route::get('/reservas/{reserva}', [ReservasAdminController::class, 'show'])->name('reservas.show');
         Route::post('/reservas/{reserva}/cancelar', [ReservasAdminController::class, 'cancelar'])->name('reservas.cancelar');
 
-        Route::get('/finanzas', [FinanzasController::class, 'index'])->name('finanzas');
+        Route::get('/finanzas', [FinanzasController::class, 'index'])->middleware('rol:'.User::ROL_ADMIN)->name('finanzas');
 
         // Chatbot: atención humana de conversaciones derivadas (RF-31)
         Route::get('/chatbot', [ChatbotAdminController::class, 'index'])->name('chatbot');
@@ -146,7 +150,7 @@ Route::middleware([
         Route::get('/finanzas/comprobantes/{comprobante}.pdf', [FinanzasController::class, 'comprobantePdf'])->name('finanzas.comprobante');
         Route::post('/finanzas/comprobantes/{comprobante}/anular', [FinanzasController::class, 'anular'])
             ->middleware('rol:'.User::ROL_ADMIN)->name('finanzas.anular');
-        Route::get('/analitica', [DashboardController::class, 'analitica'])->name('analitica');
+        Route::get('/analitica', [DashboardController::class, 'analitica'])->middleware('rol:'.User::ROL_ADMIN)->name('analitica');
 
         // Módulo 07 — Investigación Operativa II: paneles de teoría de colas y cadenas de Markov
         Route::get('/io/colas', [AnalisisColasController::class, 'index'])->name('io.colas');

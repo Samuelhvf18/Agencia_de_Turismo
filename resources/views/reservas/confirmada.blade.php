@@ -35,17 +35,17 @@
             <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-white/15 ring-8 ring-white/10">
                 <i class="fa-solid fa-check text-3xl text-pipocas-acento"></i>
             </span>
-            <h1 class="mt-5 font-titulo text-3xl font-semibold sm:text-4xl">¡Reserva registrada!</h1>
+            <h1 class="mt-5 font-titulo text-3xl font-semibold sm:text-4xl">{{ __('¡Reserva registrada!') }}</h1>
             <p class="mt-2 text-white/80">Gracias, {{ \Illuminate\Support\Str::before($reserva['nom_ctc'], ' ') }}. Guardamos tus cupos para <b class="text-white">{{ $tour->nom }}</b>.</p>
         </div>
 
         <div class="px-5 py-8 sm:px-10" x-data="{ copiado: false }">
-            <p class="text-xs font-bold uppercase tracking-[0.2em] text-pipocas-texto-2">Código de reserva</p>
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-pipocas-texto-2">{{ __('Código de reserva') }}</p>
             <p class="mt-2 break-all font-mono text-3xl font-bold tracking-wider text-pipocas-principal sm:text-5xl">{{ $reserva['cod'] }}</p>
             <button type="button" class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover"
                     @click="navigator.clipboard ? navigator.clipboard.writeText(@js($reserva['cod'])) : copyToClipboardFallback(@js($reserva['cod'])); copiado = true; setTimeout(() => copiado = false, 2000)">
                 <i class="fa-regular" :class="copiado ? 'fa-circle-check' : 'fa-copy'"></i>
-                <span x-text="copiado ? '¡Copiado!' : 'Copiar código'">Copiar código</span>
+                <span x-text="copiado ? '¡Copiado!' : 'Copiar código'">{{ __('Copiar código') }}</span>
             </button>
 
             <div class="mt-6 inline-flex items-center gap-2 rounded-full bg-pipocas-acento/25 px-4 py-2 text-sm font-bold text-pipocas-calido">
@@ -53,9 +53,9 @@
             </div>
 
             <dl class="mt-8 grid gap-4 rounded-2xl bg-pipocas-fondo p-5 text-left text-sm sm:grid-cols-3">
-                <div><dt class="text-pipocas-texto-2">Salida</dt><dd class="font-semibold">{{ ucfirst($f->translatedFormat('D j M')) }} · {{ substr($salida['hra_sal'], 0, 5) }}</dd></div>
-                <div><dt class="text-pipocas-texto-2">Participantes</dt><dd class="font-semibold">{{ $reserva['cnt_ptc'] }}</dd></div>
-                <div><dt class="text-pipocas-texto-2">Total</dt><dd class="font-titulo text-xl font-semibold text-pipocas-principal">Bs. {{ number_format($reserva['pre_tot'], 2, ',', '.') }}</dd></div>
+                <div><dt class="text-pipocas-texto-2">{{ __('Salida') }}</dt><dd class="font-semibold">{{ ucfirst($f->translatedFormat('D j M')) }} · {{ substr($salida['hra_sal'], 0, 5) }}</dd></div>
+                <div><dt class="text-pipocas-texto-2">{{ __('Participantes') }}</dt><dd class="font-semibold">{{ $reserva['cnt_ptc'] }}</dd></div>
+                <div><dt class="text-pipocas-texto-2">{{ __('Total') }}</dt><dd class="font-titulo text-xl font-semibold text-pipocas-principal">Bs. {{ number_format($reserva['pre_tot'], 2, ',', '.') }}</dd></div>
             </dl>
 
             <a href="{{ $urlPago }}" class="rsv-btn mt-8 w-full text-base sm:w-auto">
@@ -66,24 +66,24 @@
     </section>
 
     <section class="rsv-tarjeta">
-        <h2 class="rsv-titulo mb-5">Próximos pasos</h2>
+        <h2 class="rsv-titulo mb-5">{{ __('Próximos pasos') }}</h2>
         <ol class="space-y-5">
             <li class="flex gap-4">
                 <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-pipocas-secundario text-sm font-bold text-white">1</span>
-                <div><p class="font-semibold">Realiza el pago en línea</p><p class="text-sm text-pipocas-texto-2">Con tarjeta o QR bancario. Recibirás el comprobante en tu correo.</p></div>
+                <div><p class="font-semibold">{{ __('Realiza el pago en línea') }}</p><p class="text-sm text-pipocas-texto-2">{{ __('Con tarjeta o QR bancario. Recibirás el comprobante en tu correo.') }}</p></div>
             </li>
             <li class="flex gap-4">
                 <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-pipocas-principal/15 text-sm font-bold text-pipocas-principal">2</span>
-                <div><p class="font-semibold">Recibe los tickets con código QR</p><p class="text-sm text-pipocas-texto-2">Enviaremos un ticket por participante a <b class="break-all text-pipocas-texto">{{ $reserva['cor_ctc'] }}</b>.</p></div>
+                <div><p class="font-semibold">{{ __('Recibe los tickets con código QR') }}</p><p class="text-sm text-pipocas-texto-2">{{ __('Enviaremos un ticket por participante a') }} <b class="break-all text-pipocas-texto">{{ $reserva['cor_ctc'] }}</b>.</p></div>
             </li>
             <li class="flex gap-4">
                 <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-pipocas-principal/15 text-sm font-bold text-pipocas-principal">3</span>
-                <div><p class="font-semibold">Preséntate el día del tour</p><p class="text-sm text-pipocas-texto-2">Llega 15 minutos antes; el guía escaneará tu QR al abordar.</p></div>
+                <div><p class="font-semibold">{{ __('Preséntate el día del tour') }}</p><p class="text-sm text-pipocas-texto-2">Llega 15 minutos antes; el guía escaneará tu QR al abordar.</p></div>
             </li>
         </ol>
         <div class="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-5 sm:flex-row">
-            <a href="{{ $urlEstado }}" class="rsv-btn-sec flex-1"><i class="fa-solid fa-magnifying-glass"></i> Ver estado de la reserva</a>
-            <a href="{{ Route::has('home') ? route('home') : url('/') }}" class="rsv-btn-sec flex-1"><i class="fa-solid fa-compass"></i> Explorar más tours</a>
+            <a href="{{ $urlEstado }}" class="rsv-btn-sec flex-1"><i class="fa-solid fa-magnifying-glass"></i> {{ __('Ver estado de la reserva') }}</a>
+            <a href="{{ Route::has('home') ? route('home') : url('/') }}" class="rsv-btn-sec flex-1"><i class="fa-solid fa-compass"></i> {{ __('Explorar más tours') }}</a>
         </div>
     </section>
 </div>

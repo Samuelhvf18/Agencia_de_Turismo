@@ -1,6 +1,8 @@
 <?php
 
 use App\Jobs\EnviarBoletosReserva;
+use App\Mail\BoletosReservaMail;
+use App\Models\BitacoraAuditoria;
 use App\Models\Boleto;
 use App\Models\ColaEventoLlegada;
 use App\Models\ComprobantePago;
@@ -9,20 +11,26 @@ use App\Models\ItemEquipo;
 use App\Models\MarkovClienteEstado;
 use App\Models\Pago;
 use App\Models\Pais;
+use App\Models\RegistroNotificacion;
 use App\Models\Reserva;
 use App\Models\SalidaTour;
 use App\Models\Tour;
 use App\Models\User;
 use App\Services\CodeGeneratorService;
+use App\Services\Io\MarkovService;
+use App\Services\Pagos\PagoService;
 use App\Services\Pagos\PasarelaSimulada;
+use App\Services\Reservas\ReservaService;
 use Database\Seeders\CatalogoLandingSeeder;
 use Database\Seeders\CatalogosBaseSeeder;
 use Database\Seeders\IoColasMarkovSeeder;
 use Database\Seeders\OperacionDemoSeeder;
 use Database\Seeders\RolesSeeder;
 use Database\Seeders\UsuariosDemoSeeder;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 const FIRMA_PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
@@ -328,13 +336,15 @@ test('el personal ve la reserva, cobra en efectivo y la lectura de datos sensibl
 
     $this->get(route('admin.reservas'))->assertOk()->assertSee($reserva->cod);
     $this->get(route('admin.reservas.show', $reserva))->assertOk()->assertSee('Persona Uno');
-    expect(\App\Models\BitacoraAuditoria::where('acc', 'READ')->where('nom_tbl', 'participantes_reserva')->where('usr_id', $operaciones->id)->count())->toBe(2);
+    expect(BitacoraAuditoria::where('acc', 'READ')->where('nom_tbl', 'participantes_reserva')->where('usr_id', $operaciones->id)->count())->toBe(2);
 
     $this->post(route('admin.finanzas.efectivo', $reserva), ['mto' => (float) $reserva->pre_tot])->assertSessionHasNoErrors();
     expect($reserva->fresh()->est)->toBe(Reserva::EST_CONFIRMADA)
         ->and($reserva->comprobante->pagos()->where('mtd', 'efectivo')->where('est', 'completado')->exists())->toBeTrue();
 
-    $this->get(route('admin.finanzas'))->assertOk()->assertSee($reserva->comprobante->cod);
+    $this->get(route('admin.finanzas'))->assertForbidden();
+    $this->flushSession();
+    $this->actingAs(User::factory()->rol(User::ROL_ADMIN)->create())->get(route('admin.finanzas'))->assertOk()->assertSee($reserva->comprobante->cod);
 });
 
 test('solo el administrador anula comprobantes; la anulación cancela sin borrar', function () {
@@ -348,7 +358,7 @@ test('solo el administrador anula comprobantes; la anulación cancela sin borrar
 
     // Otra sesión: AuthenticateSession cierra la sesión si cambia el usuario en la misma.
     $this->flushSession();
-    $this->actingAs(User::where('cor', 'admin@pipocas.test')->first() ?? User::factory()->rol(User::ROL_ADMIN)->create())
+    $this->actingAs(User::factory()->rol(User::ROL_ADMIN)->create() ?? User::factory()->rol(User::ROL_ADMIN)->create())
         ->post(route('admin.finanzas.anular', $comprobante), ['motivo' => 'Error de cobro'])->assertSessionHas('estado');
 
     expect($comprobante->fresh()->est)->toBe(ComprobantePago::EST_ANULADO)
@@ -358,21 +368,21 @@ test('solo el administrador anula comprobantes; la anulación cancela sin borrar
 });
 
 test('el correo de confirmación adjunta boletos y comprobante y queda registrado', function () {
-    \Illuminate\Support\Facades\Mail::fake();
+    Mail::fake();
     $reserva = reservaConfirmada($this);
     $this->post(route('pagos.store', $reserva), ['mtd' => 'qr', 'mto' => (float) $reserva->pre_tot]);
     $this->post(route('pasarela.resolver', Pago::latest('id')->first()->ref_trx), ['resultado' => 'aprobar']);
 
     (new EnviarBoletosReserva($reserva->id))->handle();
 
-    \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\BoletosReservaMail::class, function ($mail) use ($reserva) {
+    Mail::assertSent(BoletosReservaMail::class, function ($mail) use ($reserva) {
         $nombres = collect($mail->attachments())->map(fn ($a) => $a->as)->all();
 
         return $mail->hasTo($reserva->cor_ctc)
             && in_array("boletos-{$reserva->cod}.pdf", $nombres, true)
             && count($nombres) === 2;
     });
-    expect(\App\Models\RegistroNotificacion::where('rsv_id', $reserva->id)->where('est', 'enviado')->where('can', 'email')->exists())->toBeTrue();
+    expect(RegistroNotificacion::where('rsv_id', $reserva->id)->where('est', 'enviado')->where('can', 'email')->exists())->toBeTrue();
 });
 
 test('completar la reserva devuelve el equipo y lleva al turista a completado', function () {
@@ -382,8 +392,84 @@ test('completar la reserva devuelve el equipo y lleva al turista a completado', 
     $this->post(route('pagos.store', $reserva), ['mtd' => 'qr', 'mto' => (float) $reserva->pre_tot]);
     $this->post(route('pasarela.resolver', Pago::latest('id')->first()->ref_trx), ['resultado' => 'aprobar']);
 
-    app(\App\Services\Reservas\ReservaService::class)->completar($reserva->fresh());
+    app(ReservaService::class)->completar($reserva->fresh());
 
     expect($reserva->fresh()->est)->toBe(Reserva::EST_COMPLETADA)
         ->and(MarkovClienteEstado::where('usr_id', $turista->id)->latest('id')->first()->estado->cod)->toBe('completado');
+});
+
+test('no admite dos intentos activos ni efectivo mientras exista uno pendiente', function () {
+    $reserva = reservaConfirmada($this);
+    $servicio = app(PagoService::class);
+    $servicio->iniciar($reserva, 'qr', (float) $reserva->pre_tot);
+    expect(fn () => $servicio->iniciar($reserva, 'qr', (float) $reserva->pre_tot))
+        ->toThrow(ValidationException::class);
+    expect(fn () => $servicio->registrarEfectivo($reserva, 10))
+        ->toThrow(ValidationException::class);
+});
+
+test('un webhook parcial repetido no vuelve a notificar ni sumar el pago', function () {
+    $reserva = reservaConfirmada($this);
+    $servicio = app(PagoService::class);
+    $pago = $servicio->iniciar($reserva, 'qr', round($reserva->pre_tot * .5, 2));
+    $evento = ['ref_trx' => $pago->ref_trx, 'est' => Pago::EST_COMPLETADO];
+    $servicio->procesarNotificacion($evento);
+    $servicio->procesarNotificacion($evento);
+    expect(RegistroNotificacion::where('rsv_id', $reserva->id)->where('tip', 'pago_recibido')->count())->toBe(1);
+    expect($servicio->montoPagado($reserva->fresh()))->toBe((float) $pago->mto);
+});
+
+test('el callback de un intento heredado no permite sobrepago ni pago tras cancelar', function () {
+    $reserva = reservaConfirmada($this);
+    $servicio = app(PagoService::class);
+    $pago = $servicio->iniciar($reserva, 'qr', (float) $reserva->pre_tot);
+    $otro = $pago->comprobante->pagos()->create(['mtd' => 'qr', 'mto' => $reserva->pre_tot, 'ref_trx' => 'SIM-LEGACY', 'est' => Pago::EST_PENDIENTE]);
+    $servicio->procesarNotificacion(['ref_trx' => $pago->ref_trx, 'est' => Pago::EST_COMPLETADO]);
+    $servicio->procesarNotificacion(['ref_trx' => $otro->ref_trx, 'est' => Pago::EST_COMPLETADO]);
+    expect($otro->fresh()->est)->toBe(Pago::EST_FALLIDO);
+    expect($servicio->montoPagado($reserva->fresh()))->toBe((float) $reserva->pre_tot);
+    Queue::assertPushed(EnviarBoletosReserva::class, 1);
+});
+
+test('mis reservas solo lista las propias y rechaza acceso directo de otro titular', function () {
+    $a = User::factory()->rol(User::ROL_TURISTA)->create();
+    $b = User::factory()->rol(User::ROL_TURISTA)->create();
+    $reserva = reservaConfirmada($this);
+    $reserva->update(['usr_id' => $a->id]);
+    $this->flushSession();
+    $this->actingAs($a)->get(route('reservas.historial'))->assertOk()->assertSee($reserva->cod);
+    $this->actingAs($b)->get(route('reservas.historial'))->assertOk()->assertDontSee($reserva->cod);
+    $this->get(route('reservas.estado', $reserva))->assertForbidden();
+});
+
+test('cancelar audita cada boleto incluso cuando se modifica masivamente', function () {
+    $reserva = reservaConfirmada($this);
+    app(PagoService::class)->registrarEfectivo($reserva, (float) $reserva->pre_tot);
+    $ids = $reserva->boletos()->pluck('boletos.id');
+    app(ReservaService::class)->cancelar($reserva);
+    foreach ($ids as $id) {
+        expect(BitacoraAuditoria::where('nom_tbl', 'boletos')->where('id_reg', $id)
+            ->where('acc', 'UPDATE')->where('val_nvo->est', 'cancelado')->count())->toBe(1);
+    }
+});
+
+test('Markov ignora cancelaciones y reservas impagas aunque la salida haya terminado', function () {
+    $turista = User::factory()->rol(User::ROL_TURISTA)->create();
+    $reserva = reservaConfirmada($this);
+    $reserva->update(['usr_id' => $turista->id, 'est' => Reserva::EST_CANCELADA]);
+    $reserva->salida->update(['est' => SalidaTour::EST_COMPLETADA]);
+    $servicio = app(MarkovService::class);
+    $servicio->sincronizarDesdeReservas();
+    expect($servicio->estadosAl(now())[$turista->id])->toBe('prospecto');
+    $reserva->update(['est' => Reserva::EST_PENDIENTE]);
+    $reserva->salida->update(['est' => SalidaTour::EST_PROGRAMADA, 'fec_sal' => today()->addDay()]);
+    $servicio->sincronizarDesdeReservas();
+    expect($servicio->estadosAl(now())[$turista->id])->toBe('prospecto');
+});
+
+test('el wizard conserva inglés entre pasos', function () {
+    $this->get(route('reservas.salida', tourBajoRiesgo()).'?lang=en')->assertOk()->assertSee('When would you like to go?');
+    hastaParticipantes($this, tourBajoRiesgo());
+    $this->get(route('reservas.participantes'))->assertOk()->assertSee('Who is travelling?')->assertSee('Contact details');
+    $this->get(route('reservas.equipo'))->assertOk()->assertSee('Do you need equipment?');
 });

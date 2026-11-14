@@ -8,6 +8,7 @@
     <form method="GET" class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-wrap items-end gap-3">
         <label class="text-xs text-[#6B6F72]">Desde<input type="date" name="desde" value="{{ $filtros['desde'] }}" class="mt-1 block rounded-xl border border-gray-300 px-3 py-2 text-sm"></label>
         <label class="text-xs text-[#6B6F72]">Hasta<input type="date" name="hasta" value="{{ $filtros['hasta'] }}" class="mt-1 block rounded-xl border border-gray-300 px-3 py-2 text-sm"></label>
+        <label class="text-xs">Tour (demanda)<select name="tour" class="block rounded-xl border p-2"><option value="">Todos</option>@foreach ($toursFiltro as $t)<option value="{{ $t->id }}" @selected((int) $filtros['tour'] === $t->id)>{{ $t->nom }}</option>@endforeach</select></label>
         <button class="rounded-xl bg-[#1F5F8B] px-4 py-2 text-sm font-semibold text-white">Aplicar</button>
         <span class="text-xs text-[#6B6F72]">Fuente: vistas SQL del esquema v5 (vista_demanda_por_tour_mes, vista_turistas_por_nacionalidad, …).</span>
     </form>
@@ -106,4 +107,11 @@
     });
 </script>
 @endpush
+<div class="bg-white rounded-xl p-5 overflow-auto mt-6">
+<h2 class="font-bold">Proyección por tour</h2>
+<table class="w-full text-sm"><thead><tr><th>Tour</th><th>Mes</th><th>Reservas</th><th>Modelo</th><th>Generada</th></tr></thead><tbody>
+@forelse ($proyeccionesPorTour as $p)
+<tr><td>{{ $p->nom }}</td><td>{{ $p->ani_per }}-{{ sprintf('%02d', $p->mes_per) }}</td><td>{{ $p->rsv_pry }}</td><td>{{ $p->ver_mdl }}</td><td>{{ $p->gen_en }}</td></tr>
+@empty <tr><td colspan="5">Sin proyecciones. Ejecuta el proceso de generación con historial suficiente.</td></tr> @endforelse
+</tbody></table></div>
 @endsection

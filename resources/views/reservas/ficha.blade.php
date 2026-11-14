@@ -39,20 +39,20 @@
     @csrf
 
     <div>
-        <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">Ficha médica y consentimiento</h1>
-        <p class="mt-2 text-pipocas-texto-2">Cada participante debe completar y firmar su ficha. Esta información solo la ve el guía responsable de la salida.</p>
+        <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">{{ __('Ficha médica y consentimiento') }}</h1>
+        <p class="mt-2 text-pipocas-texto-2">{{ __('Cada participante debe completar y firmar su ficha. Esta información solo la ve el guía responsable de la salida.') }}</p>
     </div>
 
     @if ($altoRiesgo)
         <div class="flex gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm">
             <i class="fa-solid fa-triangle-exclamation mt-0.5 text-lg text-red-600"></i>
             <div>
-                <p class="font-bold text-red-700">Tour de alto riesgo: la ficha firmada es obligatoria</p>
-                <p class="text-red-700/80">Sin la ficha médica firmada de cada participante no se puede emitir su boleto.</p>
+                <p class="font-bold text-red-700">{{ __('Tour de alto riesgo: la ficha firmada es obligatoria') }}</p>
+                <p class="text-red-700/80">{{ __('Sin la ficha médica firmada de cada participante no se puede emitir su boleto.') }}</p>
             </div>
         </div>
     @else
-        <p class="rounded-2xl bg-pipocas-fondo p-4 text-sm text-pipocas-texto-2"><i class="fa-solid fa-circle-info mr-1 text-pipocas-complementario"></i> En este tour la ficha es opcional, pero te recomendamos completarla. Si alguien firma, debe aceptar ambas declaraciones.</p>
+        <p class="rounded-2xl bg-pipocas-fondo p-4 text-sm text-pipocas-texto-2"><i class="fa-solid fa-circle-info mr-1 text-pipocas-complementario"></i> {{ __('En este tour la ficha es opcional, pero te recomendamos completarla. Si alguien firma, debe aceptar ambas declaraciones.') }}</p>
     @endif
 
     @error('fichas') <p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{{ $message }}</p> @enderror
@@ -83,19 +83,19 @@
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
-                    <label for="con_med_{{ $id }}" class="rsv-etiqueta">Condiciones médicas, alergias o medicación</label>
+                    <label for="con_med_{{ $id }}" class="rsv-etiqueta">{{ __('Condiciones médicas, alergias o medicación') }}</label>
                     <textarea id="con_med_{{ $id }}" name="fichas[{{ $id }}][con_med]" rows="3" class="rsv-campo"
                               placeholder="Ej. asma leve, alergia a la penicilina. Escribe «Ninguna» si no aplica.">{{ old("fichas.$id.con_med", $f['con_med'] ?? '') }}</textarea>
                     @error("fichas.$id.con_med") <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="nom_ctc_eme_{{ $id }}" class="rsv-etiqueta">Contacto de emergencia</label>
+                    <label for="nom_ctc_eme_{{ $id }}" class="rsv-etiqueta">{{ __('Contacto de emergencia') }}</label>
                     <input id="nom_ctc_eme_{{ $id }}" name="fichas[{{ $id }}][nom_ctc_eme]" type="text" maxlength="150" class="rsv-campo"
                            value="{{ old("fichas.$id.nom_ctc_eme", $f['nom_ctc_eme'] ?? '') }}" placeholder="Nombre y parentesco">
                     @error("fichas.$id.nom_ctc_eme") <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="tel_ctc_eme_{{ $id }}" class="rsv-etiqueta">Teléfono de emergencia</label>
+                    <label for="tel_ctc_eme_{{ $id }}" class="rsv-etiqueta">{{ __('Teléfono de emergencia') }}</label>
                     <input id="tel_ctc_eme_{{ $id }}" name="fichas[{{ $id }}][tel_ctc_eme]" type="tel" maxlength="20" class="rsv-campo"
                            value="{{ old("fichas.$id.tel_ctc_eme", $f['tel_ctc_eme'] ?? '') }}" placeholder="+591 70000000">
                     @error("fichas.$id.tel_ctc_eme") <p class="rsv-error">{{ $message }}</p> @enderror
@@ -105,19 +105,19 @@
             <div class="mt-5 space-y-3 rounded-2xl bg-pipocas-fondo p-4 text-sm">
                 <label class="flex cursor-pointer items-start gap-3">
                     <input type="checkbox" name="fichas[{{ $id }}][acp_ver]" value="1" class="rsv-check mt-0.5" @checked(old("fichas.$id.acp_ver"))>
-                    <span>Declaro que la información médica es verdadera y que estoy en condiciones de realizar esta actividad a la altura indicada.</span>
+                    <span>{{ __('Declaro que la información médica es verdadera y que estoy en condiciones de realizar esta actividad a la altura indicada.') }}</span>
                 </label>
                 @error("fichas.$id.acp_ver") <p class="rsv-error pl-8">{{ $message }}</p> @enderror
                 <label class="flex cursor-pointer items-start gap-3">
                     <input type="checkbox" name="fichas[{{ $id }}][acp_rie]" value="1" class="rsv-check mt-0.5" @checked(old("fichas.$id.acp_rie"))>
-                    <span>Conozco los riesgos de la actividad (mal de altura, clima, terreno) y autorizo al guía a solicitar atención médica si fuera necesario.</span>
+                    <span>{{ __('Conozco los riesgos de la actividad (mal de altura, clima, terreno) y autorizo al guía a solicitar atención médica si fuera necesario.') }}</span>
                 </label>
                 @error("fichas.$id.acp_rie") <p class="rsv-error pl-8">{{ $message }}</p> @enderror
             </div>
 
             {{-- Firma digital --}}
             @if (! empty($f['rta_fir']))
-                <p class="mt-5 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"><i class="fa-solid fa-file-signature"></i> Ya firmaste esta ficha. Vuelve a firmar solo si quieres reemplazarla.</p>
+                <p class="mt-5 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"><i class="fa-solid fa-file-signature"></i> {{ __('Ya firmaste esta ficha. Vuelve a firmar solo si quieres reemplazarla.') }}</p>
             @endif
             <div class="mt-5" x-data="firmaPad(@js(old("fichas.$id.fir_b64", '')))">
                 <div class="mb-1.5 flex items-center justify-between">
@@ -131,20 +131,20 @@
                      :class="firmado ? 'border-pipocas-principal' : 'border-gray-300'">
                     <canvas x-ref="lienzo" class="block h-44 w-full cursor-crosshair touch-none sm:h-48" aria-label="Área para firmar"></canvas>
                     <div x-show="!firmado" class="pointer-events-none absolute inset-0 grid place-items-center text-sm text-gray-400">
-                        <span><i class="fa-solid fa-signature mr-1.5"></i> Firma aquí con el dedo o el mouse</span>
+                        <span><i class="fa-solid fa-signature mr-1.5"></i> {{ __('Firma aquí con el dedo o el mouse') }}</span>
                     </div>
                     <div class="pointer-events-none absolute inset-x-6 bottom-8 border-b border-gray-200"></div>
                 </div>
                 <input type="hidden" name="fichas[{{ $id }}][fir_b64]" x-ref="campo" :value="valor">
                 @error("fichas.$id.fir_b64") <p class="rsv-error">{{ $message }}</p> @enderror
-                <p class="mt-1.5 text-xs text-pipocas-texto-2">Se registrará la fecha, hora y dirección IP de la firma.</p>
+                <p class="mt-1.5 text-xs text-pipocas-texto-2">{{ __('Se registrará la fecha, hora y dirección IP de la firma.') }}</p>
             </div>
         </section>
     @endforeach
 
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        <a href="{{ $urlAnterior }}" class="rsv-btn-sec"><i class="fa-solid fa-arrow-left"></i> Equipo</a>
-        <button type="submit" class="rsv-btn">Revisar mi reserva <i class="fa-solid fa-arrow-right"></i></button>
+        <a href="{{ $urlAnterior }}" class="rsv-btn-sec"><i class="fa-solid fa-arrow-left"></i> {{ __('Equipo') }}</a>
+        <button type="submit" class="rsv-btn">{{ __('Revisar mi reserva') }} <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 </form>
 @endsection

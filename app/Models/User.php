@@ -24,9 +24,13 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     public const ROL_TURISTA = 'turista';
+
     public const ROL_GUIA = 'guia';
+
     public const ROL_CHOFER = 'chofer';
+
     public const ROL_OPERACIONES = 'operaciones';
+
     public const ROL_ADMIN = 'admin';
 
     protected $table = 'users';
@@ -139,6 +143,7 @@ class User extends Authenticatable
         return match ($this->nombreRol()) {
             self::ROL_ADMIN, self::ROL_OPERACIONES => route('admin.dashboard'),
             self::ROL_GUIA, self::ROL_CHOFER => route('guias.checkin'),
+            self::ROL_TURISTA => route('reservas.historial'),
             default => route('home'),
         };
     }

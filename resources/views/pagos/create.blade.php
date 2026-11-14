@@ -17,7 +17,7 @@
                 <i class="fa-solid fa-arrow-left"></i> Volver a la reserva
             </a>
             <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">Pago en línea</h1>
-            <p class="mt-2 text-pipocas-texto-2">Reserva <b class="font-mono text-pipocas-texto">{{ $reserva->cod }}</b> · {{ $tour->nom }} · {{ $salida->fec_sal->format('d/m/Y') }}</p>
+            <p class="mt-2 text-pipocas-texto-2">{{ __('Reserva') }} <b class="font-mono text-pipocas-texto">{{ $reserva->cod }}</b> · {{ $tour->nom }} · {{ $salida->fec_sal->format('d/m/Y') }}</p>
         </div>
 
         <section class="rsv-tarjeta">

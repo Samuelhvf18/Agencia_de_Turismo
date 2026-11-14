@@ -13,7 +13,7 @@ test('cada rol es redirigido a su inicio tras iniciar sesión', function (string
     'operaciones' => [User::ROL_OPERACIONES, 'admin.dashboard'],
     'guia' => [User::ROL_GUIA, 'guias.checkin'],
     'chofer' => [User::ROL_CHOFER, 'guias.checkin'],
-    'turista' => [User::ROL_TURISTA, 'home'],
+    'turista' => [User::ROL_TURISTA, 'reservas.historial'],
 ]);
 
 test('un invitado no puede entrar al panel administrativo', function () {
@@ -82,3 +82,11 @@ test('todas las pantallas del panel cargan para el administrador', function (str
     'admin.tours', 'admin.reservas', 'admin.finanzas', 'admin.analitica', 'admin.auditoria',
     'admin.io.colas', 'admin.io.ciclo-vida',
 ]);
+
+test('operaciones no recibe reportes ni cifras financieras del dashboard', function () {
+    $this->actingAs(User::factory()->rol(User::ROL_OPERACIONES)->create());
+    $this->get(route('admin.finanzas'))->assertForbidden();
+    $this->get(route('admin.analitica'))->assertForbidden();
+    $this->get(route('admin.dashboard'))->assertOk()->assertViewHas('ingresosHoy', null)
+        ->assertViewHas('ingresosMes', null)->assertViewHas('ventas30', []);
+});
