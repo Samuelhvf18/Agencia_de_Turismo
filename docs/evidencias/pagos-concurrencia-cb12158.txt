@@ -1,0 +1,9 @@
+Dos procesos PHP, conexiones PostgreSQL independientes, base desechable de QA.
+Un intento del saldo completo creado y otro rechazado; después, dos callbacks de intentos heredados.
+Resultado de preparación de cb12158; no es una prueba bancaria real.
+
+{"creado":1}
+{"rechazado":true}
+{"estado":"fallido"}
+{"estado":"completado"}
+{"completados":1,"total":100,"reserva":1}

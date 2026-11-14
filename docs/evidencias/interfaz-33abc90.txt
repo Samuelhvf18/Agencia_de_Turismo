@@ -1,0 +1,32 @@
+Chromium headless, base de QA y vistas de demostración identificadas.
+Recorridos ejecutados durante el rediseño de 33abc90; no sobre producción.
+
+filter 0 true
+dialog open 1
+assignment applied true
+menu after transition 0
+menu closed true
+tablet dashboard true
+tablet io/preview/colas true
+tablet io/eoq true
+tablet io/preview/ciclo-vida true
+tablet io/propuestas true
+tablet io/parametros true
+pageerrors []
+
+mobile dashboard 200 {"width":360,"doc":360}
+mobile io 200 {"width":360,"doc":360}
+mobile io/preview/colas 200 {"width":360,"doc":360}
+mobile io/eoq 200 {"width":360,"doc":360}
+mobile io/preview/ciclo-vida 200 {"width":360,"doc":360}
+mobile io/parametros 200 {"width":360,"doc":360}
+mobile io/propuestas 200 {"width":360,"doc":360}
+mobile inventario 200 {"width":360,"doc":360}
+mobile reservas 200 {"width":360,"doc":360}
+mobile operaciones 200 {"width":360,"doc":360}
+mobile tours 200 {"width":360,"doc":360}
+mobile personal 200 {"width":360,"doc":360}
+mobile transporte 200 {"width":360,"doc":360}
+mobile finanzas 200 {"width":360,"doc":360}
+mobile analitica 200 {"width":360,"doc":360}
+mobile auditoria 200 {"width":360,"doc":360}

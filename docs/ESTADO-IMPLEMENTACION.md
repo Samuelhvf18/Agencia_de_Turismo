@@ -1,6 +1,6 @@
 # Estado de implementación por requisito
 
-Rama `WAAAAAA`. La tabla describe implementación localizada; no acredita aceptación operativa. Ver [avance y pendientes del plan](AVANCE-PLAN-TRABAJO.md) y [verificación reproducible](CI-Y-PRUEBAS.md) para evidencia y límites.
+Rama `WAAAAAA`, código de referencia `33abc90`, actualización documental del 13/11/2026 (Bolivia). La tabla describe implementación localizada; no acredita aceptación operativa. Consultar primero el [plan vigente](../Plan_Trabajo_Agencia_Turismo.md). Ver también [avance y pendientes](AVANCE-PLAN-TRABAJO.md) y [verificación reproducible](CI-Y-PRUEBAS.md) para evidencia y límites.
 
 ## Requerimientos funcionales
 
@@ -8,7 +8,7 @@ Rama `WAAAAAA`. La tabla describe implementación localizada; no acredita acepta
 |---|---|---|---|
 | RF-01 | Filtros del catálogo | Categoría + dificultad + altitud sin recargar (`welcome.blade.php`) | CatalogoTest |
 | RF-02 | Mapa y perfil de elevación | Leaflet con `trz_geo`/`puntos_ruta` y Chart.js (`tours/show`) | CatalogoTest |
-| RF-03, RF-04 | Registro, login y roles | Fortify sobre `users`, `VerificarRol`, `RedirigirSegunRol` | RolesTest, RegistrationTest |
+| RF-03, RF-04 | Registro, login, roles e historial propio | Fortify sobre `users`, middleware y `/mis-reservas` por titular | RolesTest, RegistrationTest, ReservasTest |
 | RF-05 a RF-07 | Salida, participantes, equipo | `ReservaController`, `BorradorReserva`, FormRequests CI/pasaporte | ReservasTest |
 | RF-08 | Ficha médica con firma | Canvas → `FirmaDigital`; obligatoria en alto riesgo | ReservasTest |
 | RF-09, RF-36 | Cupo y código único | `ReservaService::confirmar` con `lockForUpdate`; `CodeGeneratorService` | ReservasTest |
@@ -24,30 +24,34 @@ Rama `WAAAAAA`. La tabla describe implementación localizada; no acredita acepta
 | RF-25 a RF-27 | EOQ y reposición | `EoqService`, `io:alertas-eoq` | OptimizacionTest, IoGestionTest |
 | RF-28 a RF-31 | Chatbot | `ChatbotService`, `AsistenteLocal`, flujo n8n `chatbot.json` | ChatbotTest |
 | RF-32 | Reseñas verificadas | `ResenaController` (solo reservas completadas) | AnaliticaResenasTest |
-| RF-33 a RF-35 | Dashboards y proyección | `DashboardController`, `ProyeccionDemandaService` | AnaliticaResenasTest |
-| RF-37 | Ruta amigable única | `SlugService` | CatalogoTest |
+| RF-33 a RF-35 | Dashboards y proyección | `DashboardController`, `ProyeccionDemandaService`, selector/desglose por tour | AnaliticaResenasTest |
+| RF-37 | Rutas amigables públicas | Tours, categorías y perfiles de guía; `SlugService` y backfill de slugs | CatalogoTest |
 | RF-38 | Notificaciones | `NotificacionService`, `NotificacionJob`, flujo n8n | NotificacionesAuditoriaTest |
 | RF-39 | Validación de formato | FormRequests (reservas, tours, vehículos, salidas) + CHECK | NoFuncionalesTest |
 | RF-40 | Parámetros de colas | Formulario con μ>0, c≥1, K≥c, un juego activo | IoGestionTest |
-| RF-41 a RF-43 | Colas M/M/c/K | `ColasService` conectado a confirmar/rechazar/cancelar | ColasServiceTest, ReservasTest |
+| RF-41 a RF-43 | Colas M/M/c/K | `ColasService`, ventana común de 30 días y comparación actual/escenario sin cambios persistentes | ColasServiceTest, ReservasTest, IoGestionTest |
 | RF-44, RF-45 | Cadena de Markov | `MarkovService` conectado a registro, pago y fin de tour | MarkovServiceTest, ReservasTest |
 
 ## Requerimientos no funcionales
 
 | RNF | Implementación |
 |---|---|
-| RNF-01 HTTPS | `ForzarHttps` (301 + HSTS en producción), Nginx con TLS |
+| RNF-01 HTTPS | Middleware/configuración de Nginx presentes; certificado y despliegue real pendientes |
 | RNF-02/03 Roles | Middleware `rol:` en todas las rutas del panel y del check-in |
 | RNF-04 Alertas de seguridad | `AlertasSeguridad`: cuenta nueva, 3 intentos fallidos, cambio de contraseña |
 | RNF-05 Lecturas sensibles | `AuditObserver::lectura` en participantes y fichas médicas |
 | RNF-06 Auditoría | Triggers PostgreSQL transaccionales; READ mediante AuditObserver; panel con antes/después |
 | RNF-07 Integridad | CHECK, UNIQUE y FK del esquema; transacciones con bloqueo |
 | RNF-08 a RNF-10 Rendimiento | Infraestructura prevista; mediciones de p95/4G/3× pendientes |
-| RNF-12 Respaldo | `respaldo:bd` diario con retención de 30 días |
-| RNF-13 Responsive | Diseño adaptable; pendiente recorrido completo a 360 px |
-| RNF-14 Idiomas | ES/EN con selector y detección del navegador |
-| RNF-15 Sin conexión | Check-in con IndexedDB y service worker |
+| RNF-12 Respaldo | Comando con retención configurada; restauración local pequeña comprobada; recuperación/retención operativas pendientes |
+| RNF-13 Responsive | 16 pantallas administrativas revisadas a 360 px en Chromium; completar flujos públicos/campo y otros navegadores |
+| RNF-14 Idiomas | ES/EN principal con selector y sesión; textos secundarios y recorrido integral pendientes |
+| RNF-15 Sin conexión | IndexedDB separado por sesión y caché privada retirada; reapertura desde cero sin red y aceptación integral pendientes |
 | RNF-20 Fallo controlado | Chatbot con respaldo local si la IA no responde |
+
+## Administración y planificación
+
+El [rediseño implementado](REDISENO-ADMIN.md) unifica administración e IO. La entrada `/admin/io` organiza las herramientas como demanda/capacidad, asignaciones, equipo, retención y ajustes. La suite local más reciente tiene **170 aprobadas, 4 omitidas y 0 fallidas**; ver [evidencia](evidencias/suite-33abc90.txt). Esto no sustituye aceptación externa ni certifica CI remoto.
 
 ## Cambios respecto al diseño original
 

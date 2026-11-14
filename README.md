@@ -30,10 +30,12 @@ composer install && npm install && npm run build
 cp .env.example .env && php artisan key:generate
 php artisan migrate:fresh --seed && php artisan storage:link
 php artisan serve
-php artisan test   # 160 pruebas (requiere la base agencia_turismo_test)
+php artisan test   # última suite local: 170 aprobadas, 4 omitidas; base agencia_turismo_test
 ```
 
 ## Verificación y avance
+
+- [Plan de trabajo vigente: avances y tareas pendientes](Plan_Trabajo_Agencia_Turismo.md)
 
 - [Instalación QA, CI y recuperación](docs/CI-Y-PRUEBAS.md)
 - [Avance del plan WAAAAAA y pendientes reales](docs/AVANCE-PLAN-TRABAJO.md)

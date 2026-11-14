@@ -1,367 +1,297 @@
-# Plan de trabajo: contraste de documentación y código de Agencia de Turismo
+# Plan de trabajo actualizado — Agencia de Turismo
 
-> Seguimiento de ejecución: [avance, pruebas y pendientes residuales](docs/AVANCE-PLAN-TRABAJO.md). Esta revisión histórica se conserva; no todos sus criterios de aceptación están cerrados.
+**Actualización:** 13 de noviembre de 2026, Bolivia.
 
+**Rama:** [WAAAAAA](https://github.com/Samuelhvf18/Agencia_de_Turismo/tree/WAAAAAA).
 
-Fecha de revisión: 12 de noviembre de 2026 (Bolivia).
-Repositorio: [Samuelhvf18/Agencia_de_Turismo](https://github.com/Samuelhvf18/Agencia_de_Turismo/tree/WAAAAAA).
-Rama real: **WAAAAAA**. Commit revisado: **2db08026fc752a125177738b58c1d346f6ea12ea**, del 20/10/2026.
+**Código contrastado:** [33abc90](https://github.com/Samuelhvf18/Agencia_de_Turismo/commit/33abc90a5bebdb1737707011d71c1458887dd7d8), que incorpora [cb12158](https://github.com/Samuelhvf18/Agencia_de_Turismo/commit/cb12158510ae43c3399f1db8fb40561426a78758).
 
-## 1. Resultado y alcance
+Este es el **plan vigente de lo que falta**. Conserva los identificadores T01–T18 y agrega T19 para el rediseño solicitado después. La [revisión original del 12/11](docs/historico/PLAN-TRABAJO-2026-11-12.md) conserva el diagnóstico, las ocho fuentes documentales y las estimaciones iniciales. Esas estimaciones **no son esfuerzo restante ni horas trabajadas**.
 
-Los diez módulos tienen estructura e implementación en el repositorio. El trabajo pendiente se concentra en corregir reglas de negocio, completar funciones puntuales, alinear documentos y demostrar los requisitos mediante pruebas. No corresponde reconstruir todos los módulos.
+Esta actualización revisa código, documentos del repositorio y evidencias de las ejecuciones anteriores. No vuelve a ejecutar la suite ni a consultar los PDF de Drive; tampoco acredita un despliegue de producción.
 
-Se consultaron en Google Drive los ocho PDF indicados en la captura. Se contrastaron sus requisitos, historias, planificación, modelo de datos y decisiones con rutas, controladores, servicios, modelos, migraciones, configuración, trabajos en cola y algunas pruebas del commit indicado.
+## 1. Qué ya existe y no hay que reconstruir
 
-Esta es una revisión estática orientada a elaborar el plan. **No se ejecutó la aplicación ni la suite de pruebas**: no hay ejecutables PHP ni Composer disponibles en esta sesión. La presencia de una prueba o de una función no demuestra por sí sola el cumplimiento. Tampoco se inspeccionó un despliegue real ni sus credenciales. Las integraciones figuran como pendientes de verificación, no como ausentes.
+- Georreferenciación de tours: mapa, puntos con coordenadas y altitud, trazado GeoJSON, perfil de elevación y editor administrativo. No incluye seguimiento GPS en tiempo real; este no se incorpora como nuevo requisito.
+- Motor de reservas, pagos **simulados**, PDF/QR, check-in, operaciones, reseñas y chatbot con respaldo local.
+- Protección de saldo ante intentos simultáneos y callbacks excedentes; corrección de notificaciones por webhook repetido en el flujo probado.
+- Reportes financieros exclusivos del administrador; manifiesto del chofer sin documentos ni condiciones médicas.
+- Auditoría de escrituras mediante triggers transaccionales, incluidos cambios masivos y pivotes.
+- Historial propio de reservas del turista, categorías y perfiles públicos de guía, y proyección de demanda con selector/desglose por tour.
+- Correcciones de Markov, ventana común de 30 días para colas y fuente anual de EOQ.
+- Panel administrativo unificado y **Planificación inteligente**, con explicaciones sencillas, detalles técnicos desplegables, simulación actual/escenario y revisión de asignaciones.
+- Entorno QA documentado, workflow CI y ensayo local de restauración.
 
-El PDF UML tiene gran parte de su contenido como imágenes: su extracción textual identifica los diagramas, pero no todos sus elementos. Se inspeccionó visualmente el diagrama CU-M07b de la copia adjunta (mismo nombre y tamaño que el PDF de Drive). Falta una validación visual completa de todas las láminas; no se declara que todos los diagramas coincidan con el código.
+Que exista una función no cierra automáticamente su aceptación funcional, operativa o documental.
 
-## 2. Fuentes documentales consultadas
+## 2. Evidencia disponible
 
-| Ref. | Documento actual de Drive | Uso en el contraste |
+| Evidencia | Resultado real | Límite |
 |---|---|---|
-| D1 | [Lista_de_Requerimientos_RF_RNF.pdf](https://drive.google.com/file/d/1ZGELTTU1WQlpW2QCHkGBst4CijeuuBX6/view) | 45 RF, 20 RNF y criterios de aceptación. Referencia principal del alcance. |
-| D2 | [Historia_de_Usuario.pdf](https://drive.google.com/file/d/1dBiTIwxngDrZpUIYL86DITjwwWL8Aia6/view) | 52 historias; criterios de valor y alcance por usuario. |
-| D3 | [Product_Backlog.pdf](https://drive.google.com/file/d/1SRg19kBhdX7iVLwXv1oYFSzf_zZcrOgw/view) | Prioridades, responsables originales, puntos y sprints. |
-| D4 | [Sprint_Backlog.pdf](https://drive.google.com/file/d/1bPNUZ9qmEPpDCMfWhNVSFqi85zDOJtIj/view) | Cronograma, horas estimadas y horas presentadas como reales. |
-| D5 | [Informe_Final.pdf](https://drive.google.com/file/d/120HBYWufEd4TdUVzcdYoXo-eAtSeXQQA/view) | Arquitectura, alcance, pruebas y despliegue declarado. |
-| D6 | [Informe_IO_Segundo_Avance.pdf](https://drive.google.com/file/d/1dn3Y4lqhEjraIVwLNHIIt4SSCfnXAWpt/view) | Supuestos y resultados esperados de EOQ, colas y Markov. |
-| D7 | [diccionario_datos_v5.pdf](https://drive.google.com/file/d/19bXjIqSSz-TpkwpfYnda85yGYQihpl51/view) | Campos, restricciones, datos sensibles y vistas. |
-| D8 | [Diagramas_UML_Sistema_Tours.pdf](https://drive.google.com/file/d/1XM7omEfx5eN4zQsdiS-elJOSWAYivG0C/view) | Inventario de diagramas y muestra visual de IO II. |
+| [Suite de la preparación de 33abc90](docs/evidencias/suite-33abc90.txt) | **170 aprobadas, 4 omitidas, 0 fallidas; 872 aserciones**, PHP 8.4/PostgreSQL 17 | Las omisiones son tres pruebas de 2FA desactivado y la de registro deshabilitado, porque el registro está habilitado |
+| Build frontend | `npm run build` correcto, Vite 6.4.3, 58 módulos | No demuestra rendimiento del navegador ni despliegue |
+| [Pagos concurrentes](docs/evidencias/pagos-concurrencia-cb12158.txt) | Dos procesos: un intento aceptado y otro rechazado; callbacks heredados contabilizan **Bs 100 de Bs 100** | No cubre aún carreras de reservas, asignaciones, cancelaciones ni una pasarela real |
+| [Revisión de interfaz](docs/evidencias/interfaz-33abc90.txt) | 16 pantallas a 360 px sin desbordamiento del documento; revisión de planificación a 768 px y escritorio a 1440 px; sin errores JS en esos recorridos | Chromium, datos de QA y demostración; no es matriz completa de navegadores ni validación con un administrador real |
+| Interacciones del nuevo panel | Comparación de escenarios, filtros, desplegables, menú móvil y apertura/cancelación/confirmación de asignación | La asignación se confirmó en base desechable, no en operación real |
+| Restauración local | `pg_dump` custom y `pg_restore --exit-on-error` en otra base PostgreSQL 17; 6 tours, 223 auditorías, 18 migraciones | La muestra no tenía reservas; faltan volumen, archivos adjuntos y recuperación del entorno de entrega |
+| CI remoto | [Workflow creado](.github/workflows/ci.yml) y subido | La consulta disponible devolvió estados vacíos y ninguna ejecución de PR; **no demuestra CI verde ni que el workflow de push no se ejecutó** |
 
-El diccionario v5 de Drive **sí incorpora propuestas_asignacion**, sección 8.9, y señala su correspondencia con el esquema v6. No debe abrirse una tarea para agregar otra vez esa tabla.
+Guías: [entorno y pruebas](docs/CI-Y-PRUEBAS.md), [rediseño y uso](docs/REDISENO-ADMIN.md), [matriz de implementación](docs/ESTADO-IMPLEMENTACION.md).
 
-## 3. Cómo interpretar el estado
+## 3. Estado general por tarea
 
-- **Brecha confirmada:** el código leído difiere del requisito o deja un escenario incorrecto.
-- **Decisión pendiente:** hay documentos contradictorios o una simplificación explícita; definir el alcance antes de programar.
-- **Por verificar:** existe una implementación, pero faltan ejecución y evidencia de aceptación.
-- P0: corregir antes de aceptar reservas/pagos o dar por cerrada seguridad.
-- P1: completar para la entrega y defensa.
-- P2: evidencia operativa, mantenimiento y cierre documental.
+**Implementado:** código disponible, con el alcance de evidencia indicado. **Parcial:** quedan subtareas concretas. **Pendiente externo:** necesita entorno, datos, credenciales o decisión. No se usa un porcentaje de terminación.
 
-## 4. Matriz de contraste funcional
-
-Esta matriz identifica evidencia y trabajo restante. “Por verificar” no significa que la función falte.
-
-| RF / historias relacionadas | Evidencia localizada | Estado y tarea |
+| ID | Estado actual | Lo que sigue |
 |---|---|---|
-| RF-01/02; HU-05/06 | CatalogoController, vistas welcome y tours/show; CatalogoTest | Por verificar filtros combinados sin recarga, mapa, elevación y fallos de teselas. T17. |
-| RF-03/04; HU-07/09 | Fortify, User, middleware de roles | Falta historial accesible de reservas del turista descrito en RF-03. T06. Login y registro: verificar. |
-| RF-05/06/07; HU-19/20/21 | Wizard, FormRequests, ReservaService con bloqueo | Implementación localizada; probar concurrencia real y correspondencia tipo/talla/equipo al confirmar. T01/T17. |
-| RF-08; HU-22 | FirmaDigital, FichaMedicaRequest, ReservaService, BoletoService | Flujo tiene validaciones; verificar que emisión y check-in exijan firma válida, no solo existencia de una ficha. T17. |
-| RF-09/10/11; HU-23/25 | Reservas invitadas, generador, BoletoService | Por verificar códigos irrepetibles y PDF/QR/correo real. T01/T11/T17. |
-| RF-12; HU-24 | ConsultaReservaController pide código + correo | Diferencia deliberada frente a consulta solo por código del documento. Registrar decisión y ajustar documentación, conservando protección del acceso. T15. |
-| RF-13/14; HU-27/28/29 | PagoService, PasarelaSimulada, EnviarBoletosReserva | Brechas de sobrepago, idempotencia y momento/canal de emisión. T02/T03/T11/T12. |
-| RF-15/16/19/20/21; HU-10 a 17 | Controladores de personal/flota/inventario, AsignacionService y SalidaService | Base implementada. Validar desactivación con salidas futuras, choques y capacidad bajo concurrencia. T17. |
-| RF-17/18; HU-18/26 | CheckinController, SalidaService, IndexedDB y service worker | Revisar privacidad por rol y aislamiento de caché entre usuarios. T04/T13; verificar fechas y sincronización. |
-| RF-22/23/24; HU-30/31 | OptimizadorService, MetodoHungaro, propuestas revisables | Implementación localizada, no ausente. Probar propuesta/aplicación concurrente y restricciones semanales. T17. |
-| RF-25/26/27; HU-42/43/44 | EoqService, panel y alertas | Fórmula presente; D se calcula con consulta mensual y no mediante el método de la vista anual. Alinear fuente y significado económico. T10. |
-| RF-28/29/30/31; HU-32/33/34 | ChatbotService, asistente local y herramientas/n8n | Por verificar IA real, cuatro categorías de FAQ, solo tours activos, consulta y derivación humana. T11/T17. |
-| RF-32; HU-35 | ResenaController, pruebas AnaliticaResenasTest | Por verificar reserva completada, propiedad y duplicados. T17. |
-| RF-33/34; HU-36/37 | DashboardController consulta vistas y fechas | Por verificar agregados y exclusión de canceladas. Permisos financieros: T04. |
-| RF-35; HU-38 | ProyeccionDemandaService y panel de analítica | El panel suma la proyección de todos los tours; falta desglose por tour descrito por HU-38. T14. |
-| RF-36 | Generador y restricciones de unicidad | Por verificar colisiones y concurrencia; una restricción debe impedir duplicados sin dejar errores sin gestionar. T17. |
-| RF-37 | SlugService y ruta pública de tours | Faltan páginas/rutas públicas de categorías y perfiles de guías. T07. |
-| RF-38; HU-39 | NotificacionService, jobs y recordatorios | Hay implementación; probar envío real y corregir repetición de notificaciones. T03/T11. |
-| RF-39 | FormRequests, validaciones y CHECK | Por verificar cobertura campo a campo. T17. |
-| RF-40; HU-45 | IoGestionController y cola_parametros_tour | Base implementada; comprobar propuesta de μ/K y un solo juego activo bajo concurrencia. T17. |
-| RF-41/42/43; HU-46 a 49 | Eventos, ColasService, controlador y simulador | Fórmulas presentes; inconsistencias entre fuentes/ventanas de λ y μ e histórico/panel. T09. |
-| RF-44/45; HU-50 a 52 | MarkovService, panel, cohortes y recalibración | Brechas al derivar estados reales de clientes; verificar precisión al persistir matriz. T08. |
+| T01 · Entorno y CI | Implementado local; cierre parcial | Acreditar CI remoto y comparar esquema/migraciones con diccionario y SQL de referencia |
+| T02 · Sobrepagos | Corregido y probado en simulación | Completar pago tardío/cancelación y, solo si se exige proveedor real, conciliación/reembolso |
+| T03 · Notificaciones idempotentes | Parcial | Recuperación durable entre pago confirmado y notificación; probar fallos/reintentos y límites de SMTP |
+| T04 · Permisos y datos sensibles | Correcciones principales implementadas | Revisar todos los accesos HTML/JSON/PDF/API y sus lecturas auditadas |
+| T05 · Auditoría | Mecanismo implementado y fallo cerrado probado | Revisar atribución, exclusiones, tablas futuras, privilegios y volumen en entrega |
+| T06 · Mis reservas | Implementado y probado localmente | Aceptación visual final; la vinculación automática de invitadas está excluida |
+| T07 · URL públicas | Implementado; validación parcial | Completar casos de slugs y verificar que cada acceso público limite los campos |
+| T08 · Markov | Reglas corregidas; validación parcial | Reconstrucción histórica, cohortes y matriz persistida con datos de meses completos |
+| T09 · Colas | Fuentes y simulador corregidos | Validar supuestos de solicitudes/cupos, trazabilidad histórica de parámetros y ejemplo contractual |
+| T10 · EOQ | Fuente y presentación corregidas | Acordar significado económico de demanda y tratamiento de desviación diaria |
+| T11 · n8n/SMTP/IA | Pendiente de integración real | Configurar, activar y demostrar servicios, callbacks y ejecución programada |
+| T12 · Alcance | Decisiones pendientes | Registrar aceptación de simulación, comprobantes/canal y 2FA/verificación de correo |
+| T13 · Offline | Aislamiento mejorado; función incompleta | Shell seguro para reapertura sin red, expiración y pruebas de cambio de cuenta/sincronización |
+| T14 · Proyección por tour | Selector y desglose implementados | Validar valores, meses sin ventas y presentación sin historial |
+| T15 · Documentación | Repositorio actualizado parcialmente | Matriz completa de trazabilidad, UML, diccionario/informe y aprobación de alcance |
+| T16 · Inglés | Traducción principal implementada | Cerrar textos secundarios, errores, placeholders, JS y recorrido público completo |
+| T17 · Aceptación | Suite y revisión visual parciales ejecutadas | Carga/p95, mapas 4G/fallos, navegadores, concurrencia restante y volumen |
+| T18 · Operación | Restauración pequeña local comprobada | TLS, workers, cron, restauración representativa, retención y disponibilidad real |
+| T19 · Panel/IO comprensible | Rediseño implementado y verificado localmente | Validación de usabilidad con administrador, accesibilidad y otros navegadores |
 
-Atención: docs/ESTADO-IMPLEMENTACION.md del repositorio intercambia referencias de RF-17 y RF-21 en su descripción de check-in/cancelación. Usar D1 como numeración canónica y reparar esa matriz en T15.
+## 4. Trabajo restante, con criterio de cierre
 
-## 5. Brechas y tareas ejecutables
+Las casillas marcadas describen trabajo acreditado dentro del alcance indicado; las demás son trabajo pendiente. **P0:** integridad/acceso antes de operación real. **P1:** entrega funcional y defensa. **P2:** operación y seguimiento. Responsables indicados por función, sin asignar personas ni inventar fechas.
 
-Las estimaciones son **horas-persona nuevas**, orientativas; no son horas ya trabajadas ni compromisos del equipo. Incluyen implementación y prueba específica de cada corrección.
+### T01. Entorno reproducible, esquema y CI — P1 · integración/QA
 
-### T01. Preparar entorno reproducible y línea base — P1 — 4 a 8 h
+- [x] Instalar dependencias bloqueadas, preparar PostgreSQL desechable y ejecutar suite/build.
+- [x] Documentar reproducción y crear workflow de GitHub Actions.
+- [ ] Obtener una ejecución CI exitosa vinculada al commit que se entregue y resolver cualquier diferencia con QA local.
+- [ ] Contrastar tablas, vistas, restricciones y las nuevas migraciones con D7 y el SQL del esquema; registrar diferencias, no solo éxito de `migrate`.
 
-- [ ] Crear una copia de trabajo del commit revisado, instalar versiones compatibles con composer.lock y package-lock.json y preparar PostgreSQL de pruebas.
-- [ ] Ejecutar migraciones en una base desechable y verificar restricciones/vistas contra D7 y el SQL v6.
-- [ ] Ejecutar la suite y build frontend; guardar comando, versiones, commit, resultado y fallos reales.
-- [ ] Configurar CI para repetirlo; el árbol consultado no contiene workflows de GitHub Actions.
+**Cierre:** instalación reproducida desde checkout limpio, CI identificado y contraste de esquema documentado. No usar `migrate:fresh` sobre datos del usuario.
 
-Aceptación: otra persona puede reproducir la instalación; informe real de suite y build. No ejecutar migrate:fresh sobre una base con datos del usuario.
-Dependencias: ninguna. Responsable sugerido: integración/QA.
+### T02. Pagos y cancelaciones — P0 · backend/pagos
 
-### T02. Impedir sobrepagos y ordenar bloqueos de pagos — P0 — 6 a 10 h
+- [x] Un único intento pendiente por reserva, también frente a efectivo; bloqueos reserva → comprobante → pago.
+- [x] Revalidar estado/saldo antes de aprobar; no contabilizar excedentes. Probar intentos y callbacks simultáneos en QA.
+- [ ] Añadir evidencia específica de callback tras cancelación/expiración y carrera pago–cancelación, no inferirla del nombre de una prueba de sobrepago.
+- [ ] Resolver, según T12, conciliación y devolución si un proveedor real ya cobró un pago tardío/excedente. El estado `reembolsado` del prototipo no acredita devolución bancaria.
 
-Brecha confirmada. iniciar() compara contra pagos completados, permite varios intentos pendientes por el saldo completo y procesarNotificacion() no vuelve a limitar el total aprobado contra el saldo. Una reserva de Bs 100 puede tener dos intentos pendientes de Bs 100, ambos aprobados.
+**Cierre:** total contabilizado coherente y resultado explícito para cada escenario; una devolución real necesita referencia de conciliación. Evidencia: `PagoService`, `ReservasTest`, script QA concurrente.
 
-- [ ] Definir si se permite un solo intento activo o varios con monto reservado.
-- [ ] Revalidar saldo/estado al recibir cada webhook, con bloqueo coherente de reserva, comprobante y pago.
-- [ ] Contemplar pago tardío, cancelación y una política explícita para excedentes/reembolsos.
+### T03. Recuperación de notificaciones y reintentos — P0 · backend/integración
 
-Aceptación: dos intentos del saldo completo, procesados secuencialmente y en paralelo, nunca contabilizan más de lo debido sin un registro explícito de excedente y resolución.
-RF-13; HU-27/29. Evidencia: [app/Services/Pagos/PagoService.php:75](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Services/Pagos/PagoService.php#L75).
-Dependencia: T01. Responsable: backend/pagos.
+- [x] Distinguir callback recién procesado de repetido; no repetir avisos en los casos de webhook probados.
+- [x] Usar trabajo único de boletos y reutilizar su registro de notificación; omitir registros ya enviados.
+- [ ] Resolver la ventana entre confirmar el pago en BD y registrar/despachar su aviso: caída del proceso o fallo de cola no debe dejar un pago sin notificación recuperable. Evaluar registro transaccional de evento pendiente y posterior envío.
+- [ ] Probar reintento del trabajo parcial/total, fallo de worker/cola y envío aceptado por SMTP seguido de caída antes de marcar `enviado`.
+- [ ] Registrar política de duplicados/conciliación con el canal externo. No prometer entrega “exactamente una vez” con SMTP sin una garantía adicional del proveedor.
 
-### T03. Idempotencia completa de los webhooks — P0 — 3 a 5 h
+**Cierre:** cada pago genera un evento durable, recuperable y trazable, con reintentos controlados y evidencia del número de envíos. Depende de T11 para comprobar correo real.
 
-Brecha confirmada. Si el pago ya fue procesado, la transacción retorna ese pago; después, la rama de notificación vuelve a ejecutarse para un pago completado. La protección de estado no cubre todos los efectos externos.
+### T04. Revisión completa de autorización y privacidad — P0 · backend/seguridad
 
-- [ ] Distinguir “pago procesado ahora” de “evento repetido”.
-- [ ] Despachar una sola notificación por evento y hacer que los reintentos del trabajo no dupliquen envíos.
-- [ ] Probar webhook repetido tanto para abono parcial como para pago total.
+- [x] Bloquear finanzas/analítica para operaciones y excluir sus importes del dashboard del servidor.
+- [x] Filtrar documentos/salud para chofer; probar JSON del manifiesto y auditar lecturas permitidas.
+- [ ] Inventariar accesos a participantes, fichas y documentos en HTML, JSON, PDF, APIs/herramientas y almacenamiento; probar cada rol y acceso directo.
+- [ ] Verificar que guía/chofer pierdan acceso al cambiar de asignación y que cada lectura sensible autorizada genere auditoría.
+- [ ] Incluir dispositivos compartidos y cambio de usuario junto a T13.
 
-Aceptación: repetir el mismo evento mantiene importes, estados, boletos y cantidad de notificaciones.
-RF-13/38. Evidencia: [app/Services/Pagos/PagoService.php:146](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Services/Pagos/PagoService.php#L146).
-Dependencia: T02. Responsable: backend/pagos.
+**Cierre:** matriz ruta × rol × campos × prueba, sin filtrar datos solo en la vista. Evidencia actual: `CheckinController`, `RolesTest`, `NotificacionesAuditoriaTest`.
 
-### T04. Ajustar permisos financieros y datos sensibles — P0 — 5 a 8 h
+### T05. Alcance operativo de auditoría — P0 · datos/seguridad
 
-Brechas confirmadas frente a RNF-03/05. La ruta de finanzas admite operaciones; FinanzasController::index no añade una restricción de administrador. Dashboard también entrega ingresos al rol operaciones. El manifiesto accesible al chofer asignado incluye documento y alerta médica, mientras RNF-05 restringe esos datos a operaciones, guía asignado y administrador.
+- [x] Triggers transaccionales para tablas de negocio existentes, incluidos SQL masivo y pivotes; evitar doble auditoría por observer.
+- [x] Probar auditoría de cada boleto cancelado y reversión de una escritura cuando falla la bitácora; excluir credenciales conocidas.
+- [ ] Revisar casos de atribución HTTP, API, autenticación, tareas CLI y cola; documentar cuándo el actor es el sistema.
+- [ ] Acordar las exclusiones técnicas de `CI-Y-PRUEBAS.md` con RNF-06 y verificar que tablas de negocio futuras instalen el trigger.
+- [ ] Configurar privilegios que impidan desactivar triggers y política de acceso/retención; medir volumen y costo de auditoría en T17/T18.
 
-- [ ] Separar cobro operativo autorizado de reportes financieros exclusivos del administrador.
-- [ ] Filtrar campos sensibles en el servidor según rol; no basta ocultarlos en una vista.
-- [ ] Auditar lecturas de participantes y fichas en todos los puntos de acceso.
-- [ ] Añadir casos negativos para cada rol y cada ruta JSON/PDF, incluyendo acceso directo.
+**Cierre:** inventario de escrituras y exclusiones aprobado, actor atribuible y auditoría obligatoria en el entorno de entrega. La existencia de triggers no acredita por sí sola ese entorno.
 
-Aceptación: operaciones no obtiene reportes financieros exclusivos; chofer no recibe salud/documentos restringidos; guía solo accede a su salida y cada lectura sensible permitida queda registrada.
-Evidencia: [routes/web.php:138](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/routes/web.php#L138) y [app/Http/Controllers/CheckinController.php:126](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Http/Controllers/CheckinController.php#L126).
-Dependencia: T01. Responsable: backend/seguridad.
+### T06. Historial del turista — P1 · frontend/QA
 
-### T05. Cerrar cobertura de auditoría — P0 — 6 a 10 h
+- [x] Historial autenticado, paginado y limitado a `usr_id`; enlace y redirección del turista.
+- [x] Probar separación entre titulares y acceso directo rechazado al estado de otra reserva.
+- [ ] Recorrer desde el historial los estados, boletos y comprobante con datos representativos, en móvil y escritorio.
 
-Brecha confirmada. Los observers solo cubren modelos registrados y eventos Eloquent individuales. Hay cambios masivos con where()->update() —por ejemplo cancelación de boletos— y modelos excluidos explícitamente en AppServiceProvider. Además AuditObserver registra un error y deja continuar el cambio si falla la bitácora. Esto difiere del “sin excepción” de RNF-06.
+**Cierre:** recorrido de aceptación registrado. **No queda como desarrollo obligatorio** asociar invitadas por correo: se mantiene acceso por código + correo; una futura vinculación requeriría verificación explícita de titularidad.
 
-- [ ] Inventariar escrituras ORM, masivas, pivotes, SQL y tareas programadas.
-- [ ] Elegir un mecanismo que cubra operaciones masivas y evite auditoría duplicada.
-- [ ] Resolver explícitamente qué hacer si falla la auditoría y cómo atribuir cambios del planificador.
-- [ ] Mantener credenciales fuera de valores anteriores/nuevos.
+### T07. Categorías y guías públicos — P1 · catálogo/QA
 
-Aceptación: cancelar una reserva deja auditoría de cada boleto alterado; las rutas masivas y programadas tienen cobertura y antes/después correctos. Toda excepción de alcance queda acordada y documentada.
-Evidencia: [app/Providers/AppServiceProvider.php:21](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Providers/AppServiceProvider.php#L21) y [app/Services/Reservas/ReservaService.php:193](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Services/Reservas/ReservaService.php#L193).
-Dependencia: T01. Responsable: backend/datos.
+- [x] Rutas públicas por slug; backfill compatible de slugs de guía; perfil con campos públicos explícitos.
+- [x] Prueba de respuesta pública, correo privado ausente y guía inactivo no disponible.
+- [ ] Completar pruebas específicas de nombres repetidos/caracteres especiales y correspondencia de cada slug existente.
+- [ ] Revisar contenido editorial, enlaces de navegación y ausencia de datos privados en cada página pública.
 
-### T06. Historial de reservas del turista — P1 — 4 a 6 h
+**Cierre:** URL única/legible y contenido seguro de tours, categorías y guías; evidencia de los casos anteriores. No crear nuevamente las rutas.
 
-Brecha confirmada respecto de la finalidad de RF-03. User tiene relación reservas(), pero las rutas revisadas no exponen “Mis reservas”; rutaInicio() del turista regresa al catálogo.
+### T08. Markov y reconstrucción histórica — P1 · IO/datos
 
-- [ ] Crear listado autenticado, paginado y limitado al usr_id actual.
-- [ ] Añadir enlace tras login y navegación a estado, boletos y comprobante autorizados.
-- [ ] Definir por separado la vinculación de reservas invitadas; no asociarlas automáticamente por correo sin verificación.
+- [x] Excluir canceladas del cómputo de completadas; no convertir impagas en reservado; dar precedencia a fidelizado.
+- [x] Considerar alta, pago aprobado y salida completada como actividad; ajustar redondeo para conservar suma de fila.
+- [x] Probar cancelación/impago y resultados algebraicos de la matriz inicial.
+- [ ] Contrastar reconstrucción de meses completos, dos tours completados más reserva futura, inactividad y conservación de estados absorbentes.
+- [ ] Leer la matriz **persistida** tras recalibraciones con datos variados y comprobar tolerancia ≤0,0001 y coherencia de cohortes/proyección, no solo la matriz en memoria.
 
-Aceptación: turista A ve su historial y no puede consultar el de B alterando URL o parámetros.
-Evidencia: [app/Models/User.php:142](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Models/User.php#L142). Dependencia: T01/T04. Responsable: frontend/backend.
+**Cierre:** resultados por mes comparados con registros reales y ejemplos reproducibles. La vista nueva explica el modelo, pero no sustituye esa validación.
 
-### T07. Completar rutas amigables públicas — P1 — 4 a 6 h
+### T09. Demanda y capacidad (colas) — P1 · IO/QA
 
-RF-37 incluye tours, categorías y perfiles públicos de guía. La ruta pública por slug está para tours; los modelos leídos de categoría y guía no incorporan una ruta pública equivalente.
+- [x] Unificar panel/proceso diario: ventana inclusiva de 30 días, μ configurado y cero eventos como λ=0.
+- [x] Separar situación actual del escenario; probar cambios solo de demanda y persistencia sin modificaciones.
+- [x] Validar relación guías/capacidad y normalizar probabilidades para simulaciones grandes; prueba con capacidad 200.
+- [ ] Reproducir explícitamente λ=5, μ=3,2, c=2, K=12 con la tolerancia contractual <0,001. Las pruebas existentes también usan otro ejemplo del informe.
+- [ ] Garantizar que un resultado histórico pueda reproducirse tras cambios de configuración: período, fuente y versión de parámetros identificables.
+- [ ] Acordar con docente/PO la unidad de K y equivalencia solicitud/pasajero/cupo para grupos; alinear informe y unidades de costo.
 
-- [ ] Agregar slugs únicos y migración compatible con datos existentes donde hagan falta.
-- [ ] Crear catálogo por categoría y perfil público de guía con campos expresamente públicos.
-- [ ] Probar nombres repetidos, caracteres especiales y recursos inactivos.
+**Cierre:** mismo período y parámetros producen los mismos resultados; unidades y supuestos aprobados. No asignar recursos automáticamente desde una simulación.
 
-Aceptación: categorías y guías tienen URL legible y única; no se exponen documentos, correo privado ni información médica.
-Evidencia: routes/web.php, SlugService.php, CategoriaTour.php y PerfilGuia.php.
-Dependencia: T01/T04. Responsable: catálogo.
+### T10. Planificación de equipo (EOQ) — P1 · IO/datos/PO
 
-### T08. Corregir estados derivados y persistencia de Markov — P1 — 6 a 10 h
+- [x] Usar `vista_demanda_equipo_anual` del año calendario actual y el mismo período para historial mensual.
+- [x] Mostrar insuficiencia de datos y explicar que las cantidades son referencias, no órdenes de compra.
+- [ ] Aprobar si D representa usos, consumo o reposición por desgaste. Si se quiere recomendar compras, incorporar/validar una tasa de reemplazo para equipo reutilizable.
+- [ ] Calcular desviación diaria desde datos diarios o aprobar/documentar la aproximación actual de medias mensuales.
+- [ ] Probar límites de año, meses sin alquileres y correspondencia de D/Q/R con base y documento económico final.
 
-Brechas confirmadas en sincronizarDesdeReservas():
-1. Cuenta una reserva cancelada como completada si terminó la salida.
-2. Cuenta una reserva pendiente impaga como estado reservado; D6 define ese estado a partir de una reserva pagada.
-3. Evalúa existencia de pendientes antes de reconocer dos tours completados, lo que puede demorar el reconocimiento de fidelización en una reconstrucción.
+**Cierre:** unidad económica y período inequívocos, ejemplos reproducibles y ningún alquiler interpretado automáticamente como una compra. Depende de T12/T15 para aprobación documental.
 
-- [ ] Derivar estados de hechos válidos de la reserva, no solo del estado general de la salida.
-- [ ] Establecer precedencia coherente y conservar absorbentes según el modelo acordado.
-- [ ] Revisar el criterio de última actividad: actualmente usa creación de reserva, no necesariamente pago o cierre.
-- [ ] Verificar que redondear probabilidades a cuatro decimales no supere tolerancia 0,0001; ajustar y validar antes de guardar.
-- [ ] Probar meses completos y que cohortes/proyección coincidan con los registros reales.
+### T11. Integración real n8n, correo e IA — P1 · integración
 
-Aceptación: una cancelación nunca añade un tour completado; una reserva sin pago no convierte al prospecto en reservado; matriz persistida tiene filas estocásticas y absorbentes correctos; resultados N/B/proyección contrastados.
-RF-44/45; HU-50 a 52. Evidencia: [app/Services/Io/MarkovService.php:285](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Services/Io/MarkovService.php#L285).
-Dependencia: T01/T02. Responsable: IO II/backend.
+- [x] Pruebas con HTTP/Mail simulados, token de callbacks y respaldo local del chatbot.
+- [ ] Importar/activar flujos en una instancia autorizada; configurar SMTP, IA y tokens por variables del entorno, sin secretos en GitHub.
+- [ ] Comprobar worker y planificador, callbacks autenticados, reintentos y frecuencia diaria/mensual.
+- [ ] Recibir correo controlado con PDF/QR y comprobante; guardar ejecución y registro de notificación correlacionados.
+- [ ] Probar recomendación, FAQ, consulta y derivación humana en ES/EN con IA real y con n8n caído.
 
-### T09. Unificar métricas de colas — P1 — 5 a 8 h
+**Cierre:** evidencia de servicios reales y del respaldo local. Si se acepta simulación, identificarla expresamente en entrega; un mock no acredita SMTP/IA/n8n activos. Depende de T03/T12.
 
-Brechas confirmadas frente a D6: el panel estima λ con los últimos 30 días, mientras generarMetricasDiarias() toma solo el día de cálculo. El panel usa μ configurado y el cálculo diario usa μ observado si lo encuentra. Así, panel e histórico pueden dar respuestas distintas sin explicarlo.
+### T12. Decisiones de alcance — P1, resolver primero · PO/docente
 
-- [ ] Definir y reutilizar la misma ventana y fuente de parámetros o rotular explícitamente métricas distintas.
-- [ ] Guardar/mostrar período observado, origen y unidades.
-- [ ] Distinguir cero llegadas reales de falta de historial: lambdaObservado() devuelve null con cero registros y puede sustituirlo por demanda configurada.
-- [ ] Validar resultados del caso λ=5, μ=3,2, c=2, K=12 y tolerancia menor a 0,001 de RF-42.
-- [ ] Documentar con el docente la equivalencia reserva/participante/cupo: el modelo cuenta solicitudes y K se expresa como cupos, y una solicitud puede contener varios participantes. Es una cuestión de supuestos del propio diseño, no solo un fallo de programación.
+- [x] Documentar el comportamiento actual: pasarela simulada, comprobante interno pendiente desde el primer intento, correo Laravel con cola y consulta por código + correo.
+- [ ] Aprobar simulación o exigir proveedor bancario real; en el segundo caso definir proveedor, acceso de prueba y conciliación.
+- [ ] Aprobar momento/canal de comprobante o requerir creación tras pago y envío obligatorio por n8n.
+- [ ] Resolver si 2FA y verificación efectiva de correo siguen siendo obligatorios. Actualmente no están acreditados; las pruebas omitidas no son cumplimiento.
+- [ ] Registrar decisiones sobre EOQ, colas y alcance de auditoría y alinear los documentos que discrepan.
 
-Aceptación: para la misma fecha, ventana y parámetros, panel, proceso diario e informe reproducen los mismos resultados; simulaciones no cambian parámetros persistentes.
-Evidencia: [app/Services/Io/ColasService.php:203](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Services/Io/ColasService.php#L203) y [app/Http/Controllers/Admin/AnalisisColasController.php:78](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Http/Controllers/Admin/AnalisisColasController.php#L78).
-Dependencia: T01. Responsable: IO II.
+**Cierre:** decisión escrita por requisito, responsable y evidencia de aprobación. No hay aprobación del PO/docente registrada en esta sesión. Passkeys y GPS en vivo no se agregan como obligaciones.
 
-### T10. Alinear EOQ con la fuente y el significado de D — P1 — 4 a 6 h
+### T13. Check-in offline completo — P1 · frontend/seguridad/QA
 
-RF-26 exige D desde vista_demanda_equipo_anual. analizar() usa la suma de demandaMensual(); existe demandaAnualVista(), pero esa ruta no se usa en el análisis. D6 además mezcla reposición por desgaste con conteo de alquileres. Alquilar una bicicleta muchas veces no equivale por sí mismo a necesitar tantas bicicletas nuevas.
+- [x] Retirar caché SW de HTML/JSON privados; separar IndexedDB por sesión/usuario; minimizar datos locales y añadir limpieza al logout/expiración.
+- [ ] Implementar shell offline seguro para abrir de nuevo la aplicación desde cero sin red. La página ya abierta y la reapertura no son el mismo escenario.
+- [ ] Probar caducidad por salida, cierre/cambio de cuenta, varias pestañas, cierre del navegador y contenido de almacenamiento en dispositivo compartido.
+- [ ] Probar cola de escaneos, sincronización automática, duplicados, cancelación durante la desconexión y conflictos visibles.
 
-- [ ] Acordar si D mide uso, reemplazos o consumo; documentar esa decisión en D1/D6/D7.
-- [ ] Unificar fuente y período del cálculo o actualizar el criterio acordado.
-- [ ] Mantener aviso de historial insuficiente; no mostrar una compra recomendada como resultado real cuando no hay datos.
-- [ ] Revisar estimación de desviación diaria, que hoy se aproxima desde promedios mensuales.
+**Cierre:** manifiesto válido solo para la sesión/salida autorizada y escaneo/sincronización recuperables sin exposición al siguiente usuario. No restaurar la caché global anterior para lograr reapertura.
 
-Aceptación: D tiene una unidad económica explícita, verificable con la base y consistente con Q/R. Los casos del informe se reproducen como ejemplos, separados de datos operativos.
-Evidencia: [app/Services/Io/EoqService.php:63](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Services/Io/EoqService.php#L63). Dependencia: T01. Responsable: IO II/datos.
+### T14. Demanda proyectada por tour — P1 · analítica/QA
 
-### T11. Probar integración real de n8n, correo e IA — P1 — 5 a 8 h
+- [x] Selector y desglose por tour/mes con versión y fecha de generación, además del total.
+- [ ] Comparar cada serie filtrada con `proyecciones_demanda`, incluyendo nombres de tour repetidos si los datos lo permiten.
+- [ ] Acreditar tratamiento de meses sin ventas y tour sin historial; evitar que un cero proyectado parezca una predicción respaldada por datos suficientes.
 
-Estado por verificar. El repositorio entrega flujos y configuración; no demuestra que estén importados/activos en una instancia. docs/ESTADO-IMPLEMENTACION.md los enumera como configuración pendiente.
+**Cierre:** selección inequívoca y valores/modelo/fecha correctos; estados sin historial comprendidos por el usuario. No queda pendiente construir nuevamente el selector.
 
-- [ ] Importar y activar notificaciones, chatbot y planificador; configurar token y credenciales en el entorno, sin escribir secretos en archivos del proyecto.
-- [ ] Verificar callbacks autenticados, SMTP, ejecución diaria/mensual, worker y reintentos.
-- [ ] Probar recomendación, FAQ, consulta y derivación en ES/EN con IA real y con n8n caído.
-- [ ] Guardar evidencias de ejecución y de registros_notificacion.
-- [ ] En RF-14, resolver la diferencia de canal: EnviarBoletosReserva manda el correo directamente por Laravel y no por n8n.
+### T15. Trazabilidad y documentación final — P1 · documentación/QA/PO
 
-Aceptación: un pago controlado genera comprobante, QR y correo recibido; la tarea programada corre sin intervención; el respaldo local del chatbot funciona al fallar la IA.
-Evidencia: [app/Jobs/EnviarBoletosReserva.php:42](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Jobs/EnviarBoletosReserva.php#L42) y docs/n8n/README.md.
-Dependencia: T02/T03. Responsable: integración.
+- [x] Corregir numeración RF-17/RF-21 del repositorio y documentar decisiones técnicas/limitaciones.
+- [x] Actualizar este plan con avances, pendientes y evidencia; conservar revisión histórica.
+- [ ] Completar RF/RNF → HU → caso de uso → archivo → prueba → evidencia → estado/aprobación, sin sustituir aceptación por “hay código”.
+- [ ] Alinear informe, diccionario y SQL con migraciones nuevas de auditoría y slugs, además del esquema que ya contiene `propuestas_asignacion`.
+- [ ] Revisar todas las láminas UML, relaciones y reglas; D4 debe separar horas reales de proyecciones de sprints aún no cerrados.
+- [ ] Actualizar documentos originales con las decisiones de T12 y afirmaciones de despliegue/pruebas verificables.
 
-### T12. Resolver alcance de pagos, comprobantes y 2FA — P1 — 2 a 4 h para decisión/documentación
+**Cierre:** documentos consistentes, enlaces de evidencia y excepciones aprobadas. Los PDF/Drive no se han modificado mediante esta actualización. UWE solo se agrega si existe consigna explícita.
 
-Decisiones pendientes, con posible desarrollo adicional:
-- RF-13/HU-27 habla de pago en línea; el repositorio declara pasarela simulada. El prototipo no prueba una integración bancaria real.
-- RF-14 sitúa creación del comprobante después del pago; el código lo crea pendiente al iniciar el primer intento.
-- D5 incluye 2FA y verificación de correo en el alcance; el estado del repositorio indica que 2FA se excluyó y User no implementa el contrato MustVerifyEmail. El middleware verified por sí solo no demuestra verificación efectiva.
+### T16. Inglés completo en el proceso público — P1 · frontend/QA
 
-- [ ] Registrar qué acepta el docente/PO como entrega: simulación o proveedor real, comprobante pendiente o creación tras pago, 2FA y verificación de correo.
-- [ ] Ajustar D5 y criterios o programar lo que siga siendo obligatorio.
-- [ ] Si se aprueba proveedor real, estimarlo en una tarea aparte; no está incluido en este esfuerzo.
-- [ ] No añadir passkeys como pendiente: no se identificó como obligación de estos ocho documentos.
+- [x] Externalizar textos principales y añadir traducciones; probar conservación de inglés entre pasos del wizard.
+- [ ] Revisar placeholders, validaciones personalizadas, JS, mensajes de pago, fechas, estado/cancelación, PDF/correo y chatbot durante el recorrido completo.
+- [ ] Probar errores con `lang=en`, mantener idioma al navegar y registrar cada literal residual corregido.
 
-Aceptación: decisiones trazables y un solo alcance coherente. Un comprobante de simulación no se presenta como facturación fiscal certificada.
-Dependencia: ninguna. Responsable: PO/docente y backend.
+**Cierre:** recorrido público de reserva a consulta en inglés, incluidos errores operativos, con evidencia. No confundir traducción principal con cobertura total.
 
-### T13. Aislar y limpiar datos del check-in offline — P1 — 4 a 7 h
+### T17. Aceptación funcional, mapas y rendimiento — P1/P2 · QA
 
-Riesgo identificado en implementación. El service worker cachea GET de /guias/ en una caché global y no contiene separación por usuario ni limpieza al cerrar sesión. Debe comprobarse el comportamiento real junto con IndexedDB.
+- [x] Suite automatizada de reservas, pagos, PDF/QR, operaciones, reseñas, IO, roles y chatbot; 170 pruebas aprobadas.
+- [x] Carrera de pagos entre procesos y revisión de 16 pantallas administrativas a 360 px; planificación también en tablet/escritorio Chromium.
+- [ ] Hacer un recorrido integrado de invitado y usuario: catálogo → reserva → equipo → firma → pago → correo recibido → QR/check-in → cierre → reseña, con servicios reales según T12.
+- [ ] Ampliar carreras a cupos/equipo, asignaciones/aprobación de propuestas, un solo juego activo de parámetros y colisión de códigos; comprobar errores gestionados.
+- [ ] Probar firma faltante/inválida/archivo no disponible, emisión/reemisión de boletos y validación en campo con casos negativos específicos.
+- [ ] **Mapas:** validar coordenadas/trazados reales, creación/movimiento/guardado de puntos, elevación sin datos, GeoJSON inválido y fallo de teselas/CDN. Completar avisos o respaldo cuando falte cobertura.
+- [ ] Medir RNF-08: p95 búsquedas <2 s y confirmación <3 s en carga normal definida; RNF-09: mapa completo <4 s con perfil 4G documentado.
+- [ ] Definir carga promedio y probar 3× con degradación ≤50 %; medir volumen representativo de JSONB, conversaciones y auditoría.
+- [ ] Completar recorrido público y de campo a 360 px y versiones objetivo de Chrome/Firefox/Safari/Edge, incluyendo mapas, chatbot y offline.
 
-- [ ] Particionar o purgar caché y manifiestos al logout/cambio de cuenta y al terminar su vigencia.
-- [ ] Minimizar documentos y datos médicos en almacenamiento local, conforme a T04.
-- [ ] Probar escaneo sin red, reapertura, sincronización automática, duplicados y reserva cancelada durante la desconexión.
-- [ ] Confirmar que otro usuario no puede leer el manifiesto previo del dispositivo.
+**Cierre:** informe de aceptación por requisito, entorno, datos, comandos/recorrido y mediciones. La carrera de pagos y las capturas del panel no acreditan todos los escenarios anteriores.
 
-Aceptación: datos offline restringidos al usuario autorizado y validaciones sincronizadas una sola vez, con resolución visible de conflictos.
-RNF-05/15. Evidencia: [public/sw-checkin.js:7](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/public/sw-checkin.js#L7).
-Dependencia: T04. Responsable: frontend/check-in.
+### T18. Operación, conservación y recuperación — P2 · integración/operación
 
-### T14. Mostrar proyección de demanda por tour — P1 — 3 a 5 h
+- [x] Ensayar dump/restauración local en otra base PostgreSQL y comprobar una muestra pequeña.
+- [ ] Verificar TLS/cookies, worker/cron, persistencia de volúmenes, secretos de despliegue y endpoints privados en el entorno de entrega.
+- [ ] Restaurar una muestra representativa con reservas, participantes, pagos, auditoría y archivos de firmas/boletos; contrastar integridad y disponibilidad de adjuntos.
+- [ ] Probar retención de respaldos de 30 días y conservación por estado de comprobantes/reservas, incluidos riesgos de borrado/cascada.
+- [ ] Configurar monitoreo y obtener evidencia mensual de disponibilidad ≥99 %; hasta completar el período, marcar **por medir**.
+- [ ] Demostrar incorporación de flujo n8n sin redesplegar Laravel, según RNF-18.
 
-El servicio guarda resultados por tur_id, pero DashboardController suma rsv_pry por mes entre todos los tours y muestra una versión agregada del modelo. HU-38 pide demanda esperada por tour.
+**Cierre:** procedimiento operativo ejecutado y evidencia del entorno real. El ensayo pequeño de QA no sustituye recuperación de la entrega.
 
-- [ ] Agregar selector/desglose por tour.
-- [ ] Mostrar versión y fecha de generación correspondientes a la serie.
-- [ ] Aclarar qué se muestra cuando no hay historial; verificar el tratamiento de meses sin ventas en el promedio móvil.
+### T19. Panel administrativo e IO comprensible — P1 · frontend/QA/administrador
 
-Aceptación: el valor de cada tour/mes coincide con proyecciones_demanda sin ocultarse dentro de un total.
-Evidencia: [app/Http/Controllers/Admin/DashboardController.php:91](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Http/Controllers/Admin/DashboardController.php#L91). Dependencia: T01. Responsable: analítica/frontend.
+- [x] Unificar diseño, navegación, tarjetas, tablas y formularios; entrada `/admin/io` por preguntas prácticas.
+- [x] Rediseñar capacidad, asignaciones, equipo, clientes y ajustes; dejar fórmulas en detalles y señalar datos de demostración.
+- [x] Comprobar controles, estados vacíos, confirmación de asignación y tamaños de pantalla descritos en la evidencia.
+- [ ] Validar con un administrador real tareas como comparar capacidad, interpretar reposición y confirmar una asignación; registrar dudas y corregirlas.
+- [ ] Completar revisión de teclado/lector de pantalla, contraste y otros navegadores, incluidos gráficos no disponibles.
 
-### T15. Reparar trazabilidad y cierre documental — P1 — 4 a 6 h
+**Cierre:** prueba de usabilidad y accesibilidad registrada. La implementación del rediseño está terminada; no queda reconstruir el módulo ni exigir conocimiento de EOQ/Markov para navegarlo.
 
-- [ ] Crear matriz RF/RNF → HU → caso de uso → archivo → prueba → evidencia → estado real.
-- [ ] Corregir referencias intercambiadas RF-17/RF-21 en docs/ESTADO-IMPLEMENTACION.md.
-- [ ] Alinear D5 con esquema v6 y D7, que ya contempla propuestas_asignacion.
-- [ ] Documentar consulta por código + correo, simulación de pagos, envío directo por Laravel y decisiones de T12.
-- [ ] El informe afirma despliegue, pruebas y 2FA; conservar afirmaciones de ejecución solo con evidencia verificable.
-- [ ] Revisar D4: presenta horas reales de cierre de S9/S10, aunque sus cierres figuran el 18/11 y 25/11, posteriores a esta revisión del 12/11. Distinguir proyección de registro real.
-- [ ] Validar todas las láminas UML y sus relaciones contra el alcance final. No convertir casos de uso en navegación UWE automáticamente; si el docente exige esa notación, preparar una tarea separada con la consigna exacta.
+## 5. Georreferenciación: alcance actual
 
-Aceptación: todos los estados “terminado” enlazan evidencia; documentos coinciden entre sí y con la versión entregada.
-Dependencia: T12 y cierre de correcciones. Responsable: documentación/QA.
+| Función | Estado |
+|---|---|
+| Mapa Leaflet/OpenStreetMap en detalle del tour | Implementado; falta aceptación ante red lenta/fallos y coordenadas operativas |
+| Puntos con latitud, longitud, altitud y tipo | Implementado; validación de rangos y persistencia cubierta por pruebas de catálogo |
+| Editor: agregar/mover puntos y guardar recorrido | Implementado; completar recorrido de navegador y casos extremos |
+| Importar GeoJSON o unir puntos | Implementado; ampliar validación de geometrías y errores de contenido |
+| Perfil de elevación y distancia acumulada | Implementado; validar ausencia de altitudes y exactitud con trazados de referencia |
+| Seguimiento GPS en vivo de guía/vehículo | Fuera del alcance actualmente solicitado; no pendiente obligatorio |
 
-### T16. Completar inglés en el proceso público — P1 — 4 a 6 h
+Evidencia: `CatalogoAdminController::guardarRuta`, `resources/views/admin/catalogo/form.blade.php`, `resources/views/tours/show.blade.php` y `CatalogoTest`. Lo pendiente pertenece a **T17**, no a construir otro módulo de mapas.
 
-Brecha confirmada en la vista de participantes: conserva títulos y etiquetas españolas literales (“¿Quiénes viajan?”, “Datos de contacto”, etc.). El test existente comprueba catálogo y un texto de detalle, no todo el wizard.
+## 6. Orden recomendado de continuación
 
-- [ ] Revisar catálogo, reserva, pago, estado y mensajes de validación.
-- [ ] Externalizar textos y mantener selector desde cualquier página.
-- [ ] Verificar chatbot bilingüe y respuestas de error.
+| Orden | Trabajo | Dependencia | Resultado para revisar |
+|---|---|---|---|
+| 1 | T12: fijar alcance; T01: acreditar CI/esquema | PO/docente y entorno | Acta de decisiones + enlace CI + diferencias de esquema |
+| 2 | T03, cierre T02, T04/T05 | Código QA; decisiones de pagos/canal | Recuperación de avisos, pruebas de fallos/cancelación y matriz de accesos |
+| 3 | T13 y T16 | T04 y datos de prueba | Reapertura offline segura y recorrido público completo en inglés |
+| 4 | T08/T09/T10/T14 | Datos de meses completos y aprobación de unidades | Casos de IO contrastados y fuente/versiones trazables |
+| 5 | T11, validación T06/T07/T19 y T17 | Credenciales/servicios autorizados | Recorrido real y mediciones; usabilidad del panel |
+| 6 | T18 y T15 | Entorno de entrega y resultados previos | Restauración representativa, monitoreo y documentación coherente |
 
-Aceptación: recorrido completo con lang=en tiene textos operativos en inglés y conserva el idioma entre pasos.
-RNF-14. Evidencia: [resources/views/reservas/participantes.blade.php:71](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/resources/views/reservas/participantes.blade.php#L71).
-Dependencia: T01. Responsable: frontend.
+No se vuelve a asignar el total original de **81–131 h-persona** como trabajo pendiente. El esfuerzo residual debe estimarse tras T12, especialmente si se exige banco real, 2FA o cambios del modelo económico.
 
-### T17. Ejecutar aceptación funcional y no funcional — P1/P2 — 8 a 12 h
+## 7. Criterio de entrega terminada
 
-- [ ] Recorrer catálogo → invitado/usuario → participantes → equipo → firma → pago parcial/total → boletos → check-in → cierre → reseña.
-- [ ] Probar cancelación/reprogramación, devolución de equipo, asignación simultánea, aprobación/rechazo de propuestas y alertas.
-- [ ] Medir RNF-08: p95 de búsquedas <2 s y confirmación <3 s en carga normal.
-- [ ] Medir RNF-09: mapa completo <4 s con perfil 4G definido.
-- [ ] Medir RNF-10: 3× carga promedio y degradación dentro del 50%; definir primero la carga promedio.
-- [ ] Validar 360 px y versiones objetivo de Chrome, Firefox, Safari y Edge; incluir fallo de mapas y chatbot.
-- [ ] Verificar RNF-16/17 con datos suficientes, JSONB, auditoría y conversaciones de volumen representativo.
+- [x] Correcciones de código y rediseño integrados en `WAAAAAA`, con suite y build locales disponibles.
+- [x] Registro de trabajo restante con responsables por función, criterios de cierre y límites de evidencia.
+- [ ] Cerrar P0 de notificaciones/escenarios de pago/accesos/auditoría con sus pruebas y decisiones.
+- [ ] Ejecutar CI sobre la versión final y enlazar su resultado.
+- [ ] Obtener aprobación del alcance y estados de cada RF/RNF, incluidas excepciones.
+- [ ] Demostrar integraciones reales o declarar y aprobar explícitamente el alcance simulado.
+- [ ] Completar offline, idiomas, aceptación funcional, mapas, navegadores y rendimiento comprometidos.
+- [ ] Validar modelos IO con unidades y datos acordados; documentación/UML/diccionario alineados.
+- [ ] Restaurar datos y archivos representativos del entorno de entrega; evidenciar operación y retención.
+- [ ] Acreditar disponibilidad mensual cuando exista el período medido; no anticipar esa evidencia.
 
-Aceptación: resultados medidos por requisito, con entorno y datos de prueba; no reemplazarlos por capturas ni afirmaciones de “hay Redis”.
-Dependencia: T01 y correcciones relevantes. Responsable: QA con equipo.
-
-### T18. Evidencia de operación y recuperación — P2 — 4 a 6 h
-
-- [ ] Verificar TLS, cookies, trabajadores y programadores en el entorno de entrega.
-- [ ] Restaurar un respaldo en otra base y verificar integridad y datos de muestra; no basta probar que pg_dump falla si no existe.
-- [ ] Verificar retención de 30 días, persistencia de almacenamiento y conservación de comprobantes por estado.
-- [ ] Configurar monitoreo e informe mensual de disponibilidad para RNF-11 (≥99%); no puede acreditarse por leer Docker.
-- [ ] Comprobar que agregar un flujo n8n no requiere redesplegar Laravel, como pide RNF-18.
-
-Aceptación: restauración documentada y reproducible, monitoreo activo y evidencia de operación. La disponibilidad mensual queda “por medir” hasta completar el período.
-Dependencia: T11/T17. Responsable: integración/operación.
-
-## 6. Cobertura de los RNF y evidencia que falta
-
-| RNF | Situación | Cierre |
-|---|---|---|
-| 01 HTTPS | Middleware/Docker presentes; certificado real no inspeccionado | T18 |
-| 02 autenticación | Middleware presente; confirmar todas las APIs privadas | T04/T17 |
-| 03 roles | Finanzas admite operaciones donde el documento reserva reportes al admin | T04 |
-| 04 alertas | Listener localizado; probar registro, 3 fallos y cambio/reset de contraseña | T11/T17 |
-| 05 sensibles | Chofer obtiene documento/salud; revisar todas las lecturas y caché | T04/T13 |
-| 06 auditoría | Cobertura incompleta para cambios masivos y modelos excluidos | T05 |
-| 07 unicidad | Restricciones presentes; falta evidencia concurrente | T01/T17 |
-| 08/09/10 rendimiento | Infraestructura presente; sin medición en esta revisión | T17 |
-| 11 disponibilidad | No demostrable desde código | T18 |
-| 12 respaldo | Comando presente; restauración real por demostrar | T18 |
-| 13 responsive | Revisar flujos completos desde 360 px | T17 |
-| 14 idiomas | Traducción parcial del proceso público | T16 |
-| 15 offline | Implementación presente; aislamiento y sincronización por verificar | T13 |
-| 16 integridad | Validaciones/CHECK; comprobar correspondencia con diccionario | T01/T17 |
-| 17 arquitectura/volumen | JSONB y Redis no demuestran ausencia de degradación | T17 |
-| 18 extensibilidad n8n | Flujos presentes; verificar activación sin redespliegue | T11/T18 |
-| 19 conservación | Anulación por estado presente; probar que no hay borrado físico/cascada indebida | T01/T18 |
-| 20 compatibilidad/fallos | Respaldo chatbot presente; matriz de navegadores y fallo de mapas pendientes | T17 |
-
-## 7. Secuencia de ejecución recomendada
-
-No se fijan fechas de entrega sin conocer la disponibilidad del equipo. Estas fases son nuevas y no sustituyen retrospectivamente los sprints históricos.
-
-| Fase | Tareas | Resultado de salida |
-|---|---|---|
-| A. Línea base y alcance | T01 + T12 | Entorno reproducible, resultados reales y decisiones de alcance. |
-| B. Integridad y acceso | T02, T03, T04, T05 | Pagos y datos protegidos; auditoría cubierta. |
-| C. Reglas de IO II | T08, T09, T10 | Datos reales y cálculos coherentes con informes. |
-| D. Funciones y experiencia | T06, T07, T13, T14, T16 | Historial, slugs, offline, demanda por tour e inglés completos. |
-| E. Integración y aceptación | T11, T17, T18 | Flujos reales, pruebas medibles y recuperación. |
-| F. Entrega | T15 y consolidación de evidencias | Documentación alineada y pendientes residuales declarados. |
-
-Estimación total orientativa: **81 a 131 horas-persona**, sin integración de pasarela bancaria real ni cambios de alcance como 2FA. Las tareas se pueden repartir entre backend/pagos, frontend, IO II y QA/integración; respetar sus dependencias.
-
-## 8. Decisiones que conviene resolver primero
-
-1. ¿La entrega acepta pasarela simulada o exige transacciones reales?
-2. ¿Se mantiene 2FA/verificación de correo del informe o se elimina esa afirmación del alcance?
-3. ¿Los comprobantes deben generarse y enviarse por n8n como RF-14 o se acepta Laravel con cola?
-4. ¿Qué unidad exacta representa D en EOQ y qué unidad representa K frente a reservas grupales?
-5. ¿Se conserva consulta por código + correo? Se recomienda mantener la protección y actualizar el requisito.
-
-Estas preguntas no bloquean la preparación ni las correcciones evidentes; sí cambian el esfuerzo de sus funciones dependientes.
-
-## 9. Criterio de entrega terminada
-
-- [ ] P0 resueltos y con pruebas de regresión.
-- [ ] Cada RF/RNF dispone de estado y evidencia, incluidas excepciones aprobadas.
-- [ ] Pruebas y build ejecutados sobre el commit de entrega.
-- [ ] Integraciones demostradas con ejecución real o rotuladas como simulación.
-- [ ] Ejemplos de IO II reproducibles y datos simulados identificados.
-- [ ] Base de datos, diccionario, diagramas e informe alineados.
-- [ ] Restauración y flujo completo de usuario demostrados.
-- [ ] Registro de pendientes residuales con responsable, impacto y decisión.
-
-Este plan no modifica código, documentos originales ni archivos de Drive. Describe el trabajo necesario a partir de evidencia estática y de los criterios documentales actuales.
-
+**Estado de entrega:** avance funcional con pruebas locales, aún con pendientes de aceptación e integración. Este archivo actualiza la planificación del repositorio; no modifica código de negocio, servicios externos ni documentos de Drive.

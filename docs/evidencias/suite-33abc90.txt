@@ -1,0 +1,235 @@
+Ejecución local durante la preparación del código integrado en 33abc90.
+PHP 8.4 / PostgreSQL 17 / base desechable agencia_turismo_test.
+Los últimos ajustes de texto de IO se comprobaron adicionalmente con IoGestionTest: 10 aprobadas, 147 aserciones.
+Esta actualización documental no reejecuta la suite ni acredita CI remoto.
+
+
+   PASS  Tests\Unit\ColasServiceTest
+  ✓ M/M/2/14 coincide con el ejemplo del informe                         0.01s  
+  ✓ W = Wq + 1/μ y λe = λ(1 − P_K)
+  ✓ el costo total recomienda tres guías en el ejemplo
+  ✓ con un servidor y K = 1 se reduce a M/M/1/1 (Erlang B)
+  ✓ sin llegadas el sistema está vacío
+  ✓ rechaza parámetros inválidos
+  ✓ clasifica el estado de la cola
+  ✓ la simulación con capacidad 200 y demanda alta mantiene probabilidades finitas
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true                                                    0.01s  
+
+   PASS  Tests\Unit\MarkovServiceTest
+  ✓ la matriz inicial es estocástica
+  ✓ probabilidades de absorción y tiempos coinciden con el informe
+  ✓ cada fila de B suma 1
+  ✓ la inversa por Gauss-Jordan es correcta
+  ✓ la proyección a 12 meses desde prospecto coincide con el informe
+  ✓ la estimación conserva la fila previa sin datos y fija los absorbentes
+
+   PASS  Tests\Unit\OptimizacionTest
+  ✓ el método húngaro encuentra la asignación de costo mínimo
+  ✓ resuelve matrices rectangulares (más salidas que guías)
+  ✓ evita las celdas prohibidas (costo M) cuando hay alternativa
+  ✓ EOQ: Q* = √(2DS/H) y punto de reorden R = d·L + SS
+  ✓ EOQ: el stock de seguridad usa z·σ·√L
+  ✓ EOQ rechaza parámetros inválidos
+
+   PASS  Tests\Feature\AnaliticaResenasTest
+  ✓ solo una reserva completada puede dejar una reseña, y una sola vez   1.37s  
+  ✓ sin acceso a la reserva no se puede reseñar                          0.78s  
+  ✓ la proyección usa regresión lineal con historial y promedio móvil s… 0.61s  
+  ✓ el comando proyecta la demanda por tour desde vista_demanda_por_tou… 0.74s  
+  ✓ el dashboard y la analítica muestran datos de las vistas SQL         0.94s  
+
+   PASS  Tests\Feature\ApiTokenPermissionsTest
+  ✓ api token permissions can be updated                                 0.10s  
+
+   PASS  Tests\Feature\AuthenticationTest
+  ✓ login screen can be rendered                                         0.03s  
+  ✓ users can authenticate using the login screen                        0.04s  
+  ✓ users cannot authenticate with invalid password                      0.03s  
+
+   PASS  Tests\Feature\BrowserSessionsTest
+  ✓ other browser sessions can be logged out                             0.04s  
+
+   PASS  Tests\Feature\CatalogoTest
+  ✓ el catálogo público tiene filtros combinados de categoría, dificult… 0.23s  
+  ✓ el detalle muestra el trazado GeoJSON, el perfil de elevación y los… 0.17s  
+  ✓ crea tours con código y ruta amigable únicos (RF-37)                 0.19s  
+  ✓ valida duración de un día y altitudes coherentes                     0.15s  
+  ✓ la ruta amigable se conserva al editar salvo que se pida regenerarl… 0.16s  
+  ✓ galería: subir, ordenar y eliminar fotos                             0.22s  
+  ✓ editor de ruta: guarda puntos, genera el trazado y actualiza las al… 0.16s  
+  ✓ la baja del tour es lógica y las categorías con tours no se elimina… 0.18s  
+  ✓ las pantallas de administración del catálogo cargan                  0.18s  
+  ✓ categorías y guías tienen rutas públicas sin documentos ni correo p… 0.76s  
+
+   PASS  Tests\Feature\ChatbotTest
+  ✓ la página del chatbot carga                                          0.80s  
+  ✓ sin n8n recomienda tours activos según tiempo, dificultad y presupu… 0.73s  
+  ✓ responde en el idioma del usuario                                    0.77s  
+  ✓ consulta una reserva en solo lectura con código y correo             0.77s  
+  ✓ derivar a una persona marca la conversación, avisa a operaciones y…  0.69s  
+  ✓ con n8n usa la respuesta de la IA y respeta la derivación que pida…  0.74s  
+  ✓ si la IA no responde, el chatbot sigue funcionando con el respaldo…  0.69s  
+  ✓ las herramientas del agente exigen el token de n8n                   0.64s  
+
+   PASS  Tests\Feature\CreateApiTokenTest
+  ✓ api tokens can be created                                            0.06s  
+
+   PASS  Tests\Feature\DeleteAccountTest
+  ✓ user accounts can be deleted                                         0.04s  
+  ✓ correct password must be provided before account can be deleted      0.04s  
+
+   PASS  Tests\Feature\DeleteApiTokenTest
+  ✓ api tokens can be deleted                                            0.06s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ it returns a successful response                                     0.03s  
+
+   PASS  Tests\Feature\IoGestionTest
+  ✓ las pantallas de IO II cargan                                        0.75s  
+  ✓ RF-40: valida μ > 0 y K ≥ c y deja un solo juego activo por tour     0.71s  
+  ✓ RF-22: el húngaro prefiere al guía con el idioma de los pasajeros y… 0.99s  
+  ✓ RF-24: confirmar aplica con validaciones, ajustar cambia el recurso… 0.83s  
+  ✓ RF-24: un ajuste que viola las reglas no se aplica                   0.97s  
+  ✓ RF-23: propone vehículos con asientos suficientes y menor costo      0.98s  
+  ✓ RF-25 a RF-27: EOQ avisa historial insuficiente y alerta la reposic… 0.86s  
+  ✓ el planificador n8n exige token y ejecuta las tareas                 0.75s  
+  ✓ las métricas diarias usan la misma ventana de 30 días del panel y c… 0.67s  
+  ✓ la simulación compara con la demanda actual y no cambia la configur… 0.79s  
+
+   PASS  Tests\Feature\NoFuncionalesTest
+  ✓ RNF-14: la interfaz pública está en español y cambia a inglés con ?… 0.13s  
+  ✓ RNF-14: el idioma del navegador se respeta si no hay preferencia gu… 0.09s  
+  ✓ RNF-14: los mensajes de validación salen en español                  0.12s  
+  ✓ RNF-01: con FORCE_HTTPS las peticiones HTTP se redirigen a HTTPS y…  0.11s  
+  ✓ RNF-01: sin FORCE_HTTPS (desarrollo) no se redirige y siempre hay c… 0.11s  
+  ✓ RNF-12: el comando de respaldo informa el error si pg_dump no está…  0.12s  
+  ✓ RNF-02: un turista no accede a ninguna pantalla administrativa with… 0.11s  
+  ✓ RNF-02: un turista no accede a ninguna pantalla administrativa with… 0.10s  
+  ✓ RNF-02: un turista no accede a ninguna pantalla administrativa with… 0.12s  
+  ✓ RNF-02: un turista no accede a ninguna pantalla administrativa with… 0.10s  
+  ✓ RNF-02: un turista no accede a ninguna pantalla administrativa with… 0.09s  
+  ✓ RNF-02: un turista no accede a ninguna pantalla administrativa with… 0.11s  
+  ✓ RNF-02: un turista no accede a ninguna pantalla administrativa with… 0.11s  
+  ✓ RNF-02: un turista no accede a ninguna pantalla administrativa with… 0.11s  
+  ✓ RF-39: los formularios validan formato de nombres, montos, placas y… 0.13s  
+
+   PASS  Tests\Feature\NotificacionesAuditoriaTest
+  ✓ NotificacionJob envía el evento al webhook de n8n con el token       0.69s  
+  ✓ sin n8n la notificación sale por correo; si falla queda como fallid… 0.72s  
+  ✓ un pago parcial avisa al cliente con el saldo                        0.78s  
+  ✓ el recordatorio de salida se programa una sola vez                   0.67s  
+  ✓ RNF-04: tres intentos fallidos, cuenta nueva y cambio de contraseña… 0.69s  
+  ✓ RNF-04: el cambio de contraseña desde el perfil alerta al administr… 0.70s  
+  ✓ el panel de auditoría filtra, muestra el antes/después y es solo pa… 0.75s  
+  ✓ el administrador gestiona roles pero no puede desactivarse a sí mis… 0.60s  
+  ✓ reintentar una notificación fallida la vuelve a encolar              0.71s  
+  ✓ ver el manifiesto del check-in audita la lectura de fichas médicas…  0.76s  
+  ✓ chofer asignado no recibe documentos ni condiciones médicas          0.70s  
+  ✓ si falla la bitácora se revierte una escritura masiva                0.65s  
+
+   PASS  Tests\Feature\OperacionesTest
+  ✓ las pantallas de operación cargan                                    0.82s  
+  ✓ programa una salida válida con guía, chofer y vehículo               0.72s  
+  ✓ rechaza el choque de horario del guía, del chofer y del vehículo     0.81s  
+  ✓ respeta el límite semanal de horas del guía                          0.79s  
+  ✓ valida licencia vigente, vehículo activo y asientos suficientes      0.80s  
+  ✓ no se desactiva personal ni vehículos con salidas futuras            0.85s  
+  ✓ registra un guía nuevo con sus idiomas y un chofer con licencia      0.79s  
+  ✓ el inventario por talla no permite quitar unidades alquiladas        0.77s  
+  ✓ reprogramar avisa a cada reserva y cancelar la salida cancela sus r… 0.71s  
+  ✓ el guía hace el check-in por QR, inicia y finaliza el recorrido      0.75s  
+  ✓ un guía no puede operar salidas que no le asignaron                  0.74s  
+
+   PASS  Tests\Feature\PasswordConfirmationTest
+  ✓ confirm password screen can be rendered                              0.04s  
+  ✓ password can be confirmed                                            0.03s  
+  ✓ password is not confirmed with invalid password                      0.03s  
+
+   PASS  Tests\Feature\PasswordResetTest
+  ✓ reset password link screen can be rendered                           0.03s  
+  ✓ reset password link can be requested                                 0.24s  
+  ✓ reset password screen can be rendered                                0.24s  
+  ✓ password can be reset with valid token                               0.25s  
+
+   PASS  Tests\Feature\ProfileInformationTest
+  ✓ current profile information is available                             0.04s  
+  ✓ profile information can be updated                                   0.05s  
+
+   WARN  Tests\Feature\RegistrationTest
+  ✓ registration screen can be rendered                                  0.03s  
+  - registration screen cannot be rendered if support is disabled → Reg… 0.02s  
+  ✓ new users can register as turista                                    0.04s  
+  ✓ registration rejects weak passwords                                  0.03s  
+
+   PASS  Tests\Feature\ReservasTest
+  ✓ las vistas del wizard cargan con datos reales                        0.84s  
+  ✓ un invitado completa una reserva con equipo y queda pendiente de pa… 0.78s  
+  ✓ no se sobrevende: sin cupos la solicitud se rechaza y se registra c… 0.72s  
+  ✓ si otra reserva ocupa los cupos antes de confirmar, la confirmación… 0.80s  
+  ✓ en un tour de alto riesgo la ficha médica firmada es obligatoria     0.74s  
+  ✓ una firma que no es PNG se rechaza                                   0.62s  
+  ✓ la regla CI/pasaporte se valida por participante                     0.73s  
+  ✓ pago parcial y luego total por webhook: confirma, emite boletos QR…  1.48s  
+  ✓ el monto del pago debe respetar el mínimo y el saldo                 0.84s  
+  ✓ el webhook rechaza firmas inválidas                                  0.72s  
+  ✓ cancelar libera cupos y equipo, cancela boletos y registra el aband… 0.76s  
+  ✓ solo quien tiene el código y el correo puede ver la reserva          0.77s  
+  ✓ las reservas impagas vencen y liberan su cupo                        0.86s  
+  ✓ los códigos generados son únicos y con el formato esperado           0.82s  
+  ✓ el personal ve la reserva, cobra en efectivo y la lectura de datos…  0.84s  
+  ✓ solo el administrador anula comprobantes; la anulación cancela sin…  0.81s  
+  ✓ el correo de confirmación adjunta boletos y comprobante y queda reg… 1.22s  
+  ✓ completar la reserva devuelve el equipo y lleva al turista a comple… 1.26s  
+  ✓ no admite dos intentos activos ni efectivo mientras exista uno pend… 1.30s  
+  ✓ un webhook parcial repetido no vuelve a notificar ni sumar el pago   0.75s  
+  ✓ el callback de un intento heredado no permite sobrepago ni pago tra… 0.72s  
+  ✓ mis reservas solo lista las propias y rechaza acceso directo de otr… 0.82s  
+  ✓ cancelar audita cada boleto incluso cuando se modifica masivamente   0.89s  
+  ✓ Markov ignora cancelaciones y reservas impagas aunque la salida hay… 0.95s  
+  ✓ el wizard conserva inglés entre pasos                                1.02s  
+
+   PASS  Tests\Feature\RolesTest
+  ✓ cada rol es redirigido a su inicio tras iniciar sesión with dataset… 0.09s  
+  ✓ cada rol es redirigido a su inicio tras iniciar sesión with dataset… 0.05s  
+  ✓ cada rol es redirigido a su inicio tras iniciar sesión with dataset… 0.06s  
+  ✓ cada rol es redirigido a su inicio tras iniciar sesión with dataset… 0.03s  
+  ✓ cada rol es redirigido a su inicio tras iniciar sesión with dataset… 0.06s  
+  ✓ un invitado no puede entrar al panel administrativo                  0.04s  
+  ✓ el panel administrativo es solo para admin y operaciones with datas… 0.09s  
+  ✓ el panel administrativo es solo para admin y operaciones with datas… 0.07s  
+  ✓ el panel administrativo es solo para admin y operaciones with datas… 0.05s  
+  ✓ el panel administrativo es solo para admin y operaciones with datas… 0.04s  
+  ✓ el panel administrativo es solo para admin y operaciones with datas… 0.04s  
+  ✓ la auditoría es solo para el administrador                           0.05s  
+  ✓ el check-in es para guías y choferes, no para turistas               0.05s  
+  ✓ una cuenta desactivada no puede iniciar sesión                       0.03s  
+  ✓ la bitácora registra los cambios sin copiar la contraseña            0.03s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.04s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.04s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.03s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.03s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.04s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.04s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.04s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.04s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.05s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.07s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.06s  
+  ✓ todas las pantallas del panel cargan para el administrador with ('a… 0.06s  
+  ✓ operaciones no recibe reportes ni cifras financieras del dashboard   0.09s  
+
+   WARN  Tests\Feature\TwoFactorAuthenticationSettingsTest
+  - two factor authentication can be enabled → Two factor authenticatio… 0.09s  
+  - recovery codes can be regenerated → Two factor authentication is no… 0.04s  
+  - two factor authentication can be disabled → Two factor authenticati… 0.07s  
+
+   PASS  Tests\Feature\UpdatePasswordTest
+  ✓ password can be updated                                              0.11s  
+  ✓ current password must be correct                                     0.08s  
+  ✓ new passwords must match                                             0.07s  
+
+  Tests:    4 skipped, 170 passed (872 assertions)
+  Duration: 65.28s
+
