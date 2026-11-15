@@ -23,5 +23,6 @@
         </div>
 
         @livewireScripts
-    </body>
+    @include('partials.consentimiento-cookies')
+</body>
 </html>

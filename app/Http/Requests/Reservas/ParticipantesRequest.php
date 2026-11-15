@@ -2,7 +2,12 @@
 
 namespace App\Http\Requests\Reservas;
 
+use App\Models\SalidaTour;
+use App\Services\Reservas\BorradorReserva;
+use App\Services\Reservas\SeguridadParticipantes;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 
 /**
@@ -12,7 +17,7 @@ use Illuminate\Validation\Validator;
  */
 class ParticipantesRequest extends FormRequest
 {
-    public const NOMBRE = "regex:/^[\pL\s'.-]+$/u";
+    public const NOMBRE = SeguridadParticipantes::NOMBRE;
 
     public function authorize(): bool
     {
@@ -36,8 +41,9 @@ class ParticipantesRequest extends FormRequest
 
         $this->merge([
             'participantes' => $participantes,
-            'cor_ctc' => strtolower(trim((string) $this->input('cor_ctc'))),
-            'nom_ctc' => trim(preg_replace('/\s+/', ' ', (string) $this->input('nom_ctc'))),
+            'cor_ctc' => $this->user()?->cor ?? strtolower(trim((string) $this->input('cor_ctc'))),
+            'nom_ctc' => $this->user()?->nom ?? trim(preg_replace('/\s+/', ' ', (string) $this->input('nom_ctc'))),
+            'tel_ctc' => $this->has('prefijo_ctc') ? (string) $this->input('prefijo_ctc').(string) $this->input('telefono_nacional') : preg_replace('/[ -]/', '', (string) $this->input('tel_ctc')),
         ]);
     }
 
@@ -46,14 +52,21 @@ class ParticipantesRequest extends FormRequest
         return [
             'nom_ctc' => ['required', 'string', 'max:150', self::NOMBRE],
             'cor_ctc' => ['required', 'email', 'max:150'],
-            'tel_ctc' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s-]{7,20}$/'],
+            'tel_ctc' => ['required', 'string', 'regex:/^\+[1-9][0-9]{6,14}$/'],
+            'prefijo_ctc' => ['sometimes', 'string', Rule::in(array_keys(config('turismo.prefijos')))],
+            'telefono_nacional' => ['required_with:prefijo_ctc', 'nullable', 'regex:/^[0-9]{4,14}$/'],
             'participantes' => ['required', 'array', 'min:1', 'max:50'],
             'participantes.*.nom_cpl' => ['required', 'string', 'max:150', self::NOMBRE],
             'participantes.*.tip_doc' => ['required', 'in:CI,PASAPORTE'],
             'participantes.*.num_doc' => ['required', 'string', 'max:15', 'regex:/^[A-Z0-9-]+$/'],
             'participantes.*.ci_cmp' => ['nullable', 'string', 'max:5', 'regex:/^[A-Z0-9]*$/'],
             'participantes.*.ci_dep_id' => ['nullable', 'required_if:participantes.*.tip_doc,CI', 'integer', 'exists:departamentos_bolivia,id'],
-            'participantes.*.eda' => ['required', 'integer', 'min:1', 'max:110'],
+            'participantes.*.fecha_nacimiento' => ['required', 'date_format:Y-m-d', 'before_or_equal:today', 'after:'.today()->subYears(111)->toDateString()],
+            'participantes.*.acompanante_indice' => ['nullable', 'integer', 'min:0'],
+            'participantes.*.responsable_nombre' => ['nullable', 'string', 'max:150', self::NOMBRE],
+            'participantes.*.responsable_documento' => ['nullable', 'string', 'max:20'],
+            'participantes.*.vinculo' => ['nullable', 'in:ambos_padres,un_progenitor,tutor,tercero'],
+            'participantes.*.consentimiento_menor' => ['nullable', 'boolean'],
             'participantes.*.pai_id' => ['required', 'integer', 'exists:paises,id'],
             'participantes.*.es_ctc_pri' => ['nullable', 'boolean'],
         ];
@@ -63,6 +76,18 @@ class ParticipantesRequest extends FormRequest
     {
         return [function (Validator $v) {
             $participantes = $this->input('participantes', []);
+            if (! $v->errors()->isNotEmpty()) {
+                $salida = SalidaTour::with('tour')->find(app(BorradorReserva::class)->get('sal_tur_id'));
+                if ($salida) {
+                    try {
+                        app(SeguridadParticipantes::class)->validar($salida, $participantes);
+                    } catch (ValidationException $e) {
+                        foreach ($e->errors() as $campo => $mensajes) {
+                            $v->errors()->add($campo, $mensajes[0]);
+                        }
+                    }
+                }
+            }
             foreach ($participantes as $i => $p) {
                 if (($p['tip_doc'] ?? null) === 'CI' && ! preg_match('/^[0-9]{5,10}$/', $p['num_doc'] ?? '')) {
                     $v->errors()->add("participantes.$i.num_doc", __('El CI debe tener solo números (5 a 10 dígitos).'));
@@ -84,7 +109,7 @@ class ParticipantesRequest extends FormRequest
     {
         return [
             'nom_ctc.regex' => __('El nombre solo puede contener letras.'),
-            'tel_ctc.regex' => __('Ingresa un teléfono válido (solo números, + y guiones).'),
+            'tel_ctc.regex' => __('Elige un prefijo e ingresa solo números (7 a 15 dígitos en total).'),
             'participantes.*.nom_cpl.required' => __('Ingresa el nombre completo.'),
             'participantes.*.nom_cpl.regex' => __('El nombre solo puede contener letras.'),
             'participantes.*.num_doc.required' => __('Ingresa el número de documento.'),

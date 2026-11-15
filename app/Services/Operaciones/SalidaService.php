@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\Notificaciones\NotificacionService;
 use App\Services\Reservas\FirmaDigital;
 use App\Services\Reservas\ReservaService;
+use App\Services\Reservas\SeguridadParticipantes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -150,8 +151,17 @@ class SalidaService
             if ($boleto->est === Boleto::EST_CANCELADO || $ptc->reserva->est !== Reserva::EST_CONFIRMADA) {
                 return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'El boleto está cancelado o la reserva no está confirmada.'];
             }
+            if ($bloqueo = app(SeguridadParticipantes::class)->bloqueo($ptc, $salida)) {
+                return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => $bloqueo];
+            }
             if ($salida->tour->esAltoRiesgo() && (! $ptc->fichaMedica?->fir_en || ! FirmaDigital::existe($ptc->fichaMedica?->rta_fir))) {
                 return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'Falta la ficha médica firmada (tour de alto riesgo).'];
+            }
+            $edadActual = $ptc->fecha_nacimiento
+                ? app(SeguridadParticipantes::class)->edad($ptc->fecha_nacimiento->toDateString(), $salida)
+                : $ptc->eda;
+            if ($edadActual < 18 && $ptc->acompanante?->boleto?->est !== Boleto::EST_VALIDADO) {
+                return ['ok' => false, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'Primero registra el embarque del adulto acompañante del menor.'];
             }
             if ($boleto->est === Boleto::EST_VALIDADO) {
                 return ['ok' => true, 'cod' => $codigo, 'participante' => $ptc->nom_cpl, 'mensaje' => 'Ya estaba validado ('.$boleto->vld_en->format('H:i').').', 'repetido' => true];

@@ -13,9 +13,12 @@ use App\Http\Controllers\Admin\IoGestionController;
 use App\Http\Controllers\Admin\PersonalController;
 use App\Http\Controllers\Admin\ReservasAdminController;
 use App\Http\Controllers\Admin\SalidasController;
+use App\Http\Controllers\Auth\CodigoCorreoController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CheckinController;
+use App\Http\Controllers\NovedadesController;
 use App\Http\Controllers\Pagos\PagoController;
 use App\Http\Controllers\Reservas\ConsultaReservaController;
 use App\Http\Controllers\Reservas\ResenaController;
@@ -30,6 +33,17 @@ use Illuminate\Support\Facades\Route;
 | Rutas públicas
 |--------------------------------------------------------------------------
 */
+
+Route::view('/recuperar-contrasena', 'auth.recuperar-codigo')->middleware('guest')->name('codigo.recuperar');
+Route::post('/recuperar-contrasena/codigo', [CodigoCorreoController::class, 'solicitar'])->middleware(['guest', 'throttle:5,1'])->name('codigo.solicitar');
+Route::post('/recuperar-contrasena', [CodigoCorreoController::class, 'restablecer'])->middleware(['guest', 'throttle:10,1'])->name('codigo.restablecer');
+Route::post('/email/verificar-codigo', [CodigoCorreoController::class, 'verificar'])->middleware(['auth', 'throttle:10,1'])->name('codigo.verificar');
+Route::get('/auth/google', [GoogleController::class, 'redirect'])->middleware(['guest', 'throttle:10,1'])->name('google.redirect');
+Route::get('/auth/google/vincular', [GoogleController::class, 'redirect'])->middleware(['auth', 'verified', 'password.confirm'])->name('google.vincular');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->middleware('throttle:10,1')->name('google.callback');
+Route::post('/novedades', [NovedadesController::class, 'store'])->middleware(['guest', 'throttle:3,1'])->name('novedades.store');
+Route::match(['get', 'post'], '/novedades/{id}/confirmar', [NovedadesController::class, 'confirmar'])->middleware(['signed', 'throttle:10,1'])->name('novedades.confirmar');
+Route::match(['get', 'post'], '/novedades/{id}/baja', [NovedadesController::class, 'baja'])->middleware(['signed', 'throttle:10,1'])->name('novedades.baja');
 
 Route::get('/', [CatalogoController::class, 'index'])->name('home');
 Route::get('/categorias/{categoria:rta_amg}', [CatalogoController::class, 'categoria'])->name('categorias.show');
@@ -137,6 +151,7 @@ Route::middleware([
         Route::post('/personal/{tipo}/{id}/estado', [PersonalController::class, 'estado'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.estado');
         Route::get('/reservas', [ReservasAdminController::class, 'index'])->name('reservas');
         Route::get('/reservas/{reserva}', [ReservasAdminController::class, 'show'])->name('reservas.show');
+        Route::post('/reservas/{reserva}/menores/{participante}/verificar', [ReservasAdminController::class, 'verificarMenor'])->name('reservas.menor.verificar');
         Route::post('/reservas/{reserva}/cancelar', [ReservasAdminController::class, 'cancelar'])->name('reservas.cancelar');
 
         Route::get('/finanzas', [FinanzasController::class, 'index'])->middleware('rol:'.User::ROL_ADMIN)->name('finanzas');

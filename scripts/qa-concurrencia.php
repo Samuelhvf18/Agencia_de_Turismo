@@ -40,7 +40,7 @@ if ($action === 'setup') {
 } elseif ($action === 'reservar') {
     try {
         $b = ['sal_tur_id' => (int) $argv[2], 'contacto' => ['nom_ctc' => 'QA concurrente', 'cor_ctc' => 'qa@example.test', 'tel_ctc' => '70000000'],
-            'participantes' => [['nom_cpl' => 'QA concurrente', 'tip_doc' => 'PASAPORTE', 'num_doc' => 'QA-'.bin2hex(random_bytes(6)), 'eda' => 30, 'pai_id' => null]]];
+            'participantes' => [['nom_cpl' => 'QA concurrente', 'tip_doc' => 'PASAPORTE', 'num_doc' => 'QA-'.bin2hex(random_bytes(6)), 'eda' => 30, 'fecha_nacimiento' => today()->subYears(30)->toDateString(), 'pai_id' => null]]];
         if (! empty($argv[3])) {
             $b['alquileres'] = [[(int) $argv[3] => (int) $argv[4]]];
         }

@@ -28,6 +28,9 @@
         </label>
         <label class="text-xs text-[#6B6F72]">Duración (h, 1–14)<input name="dur_hrs" type="number" step="0.25" min="1" max="14" required value="{{ old('dur_hrs', $tour->dur_hrs) }}" class="{{ $campo }}"></label>
         <label class="text-xs text-[#6B6F72]">Precio base (Bs.)<input name="pre_bas" type="number" step="0.01" min="0" required value="{{ old('pre_bas', $tour->pre_bas) }}" class="{{ $campo }}"></label>
+        <label><input name="alto_riesgo" type="checkbox" value="1" @checked(old('alto_riesgo', $tour->alto_riesgo))> Actividad de alto riesgo (solo adultos). La dificultad difícil/experto o altitud ≥ 4500 m también activa esta restricción.</label>
+        <label class="text-xs text-[#6B6F72]">Edad mínima al salir<input name="edad_minima" type="number" min="0" max="110" required value="{{ old('edad_minima', $tour->edad_minima ?? 0) }}" class="{{ $campo }}"></label>
+        <label><input name="admite_menores" type="checkbox" value="1" @checked(old('admite_menores', $tour->admite_menores ?? true))> Admite menores con adulto y autorización verificada. En alto riesgo se exige siempre 18 años.</label>
         <label class="text-xs text-[#6B6F72]">Capacidad máxima<input name="cap_max" type="number" min="1" max="60" required value="{{ old('cap_max', $tour->cap_max ?? 12) }}" class="{{ $campo }}"></label>
         <div class="grid grid-cols-2 gap-2">
             <label class="text-xs text-[#6B6F72]">Alt. mín. (m)<input name="alt_min_m" type="number" min="0" max="7000" value="{{ old('alt_min_m', $tour->alt_min_m) }}" class="{{ $campo }}"></label>

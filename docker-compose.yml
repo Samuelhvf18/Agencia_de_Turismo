@@ -46,6 +46,19 @@ services:
     depends_on: [db, redis]
     restart: unless-stopped
 
+  # Servicio interno de correo. Activar con --profile correo-spring.
+  notificaciones:
+    profiles: [correo-spring]
+    build: ./services/notificaciones
+    env_file: .env
+    environment:
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: pipocasprogra@gmail.com
+      BIND_ADDRESS: 0.0.0.0
+    volumes: [notificacionesdata:/app/data]
+    restart: unless-stopped
+
   db:
     image: postgres:17-alpine
     environment:
@@ -82,3 +95,4 @@ volumes:
   pgdata:
   redisdata:
   n8ndata:
+  notificacionesdata:

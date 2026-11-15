@@ -9,6 +9,7 @@ use App\Models\SalidaTour;
 use App\Models\User;
 use App\Observers\AuditObserver;
 use App\Services\Operaciones\SalidaService;
+use App\Services\Reservas\SeguridadParticipantes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -132,6 +133,7 @@ class CheckinController extends Controller
                 'nom_cpl' => $p->nom_cpl,
                 'documento' => ! $sensible ? null : trim($p->tip_doc.' '.$p->num_doc.($p->ci_cmp ? '-'.$p->ci_cmp : '')),
                 'boleto' => $p->boleto?->cod,
+                'requiere_validacion_online' => $salida->tour->esAltoRiesgo() || ($p->fecha_nacimiento ? app(SeguridadParticipantes::class)->edad($p->fecha_nacimiento->toDateString(), $salida) < 18 : $p->eda === null || $p->eda < 18),
                 'est' => $p->boleto?->est ?? 'sin_boleto',
                 'vld_en' => $p->boleto?->vld_en?->format('H:i'),
                 'ficha' => $sensible && (bool) $p->fichaMedica,

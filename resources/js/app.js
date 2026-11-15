@@ -32,3 +32,30 @@ try {
         localStorage.removeItem('pipocas-offline-activo');
     }
 } catch { localStorage.removeItem('pipocas-offline-activo'); }
+
+import { Passkeys } from '@laravel/passkeys';
+document.addEventListener('input', event => {
+    let clean = event.target.value;
+    if (event.target.matches('[data-letras]')) clean = clean.replace(/[^\p{L}\p{M} ]/gu, '');
+    if (event.target.matches('[data-numeros]')) clean = clean.replace(/[^0-9]/g, '');
+    if (clean !== event.target.value) { event.target.value = clean; event.target.dispatchEvent(new Event('input', {bubbles:true})); }
+});
+document.addEventListener('click', async event => {
+    const toggle = event.target.closest('[data-toggle-password]');
+    if (toggle) { const field = document.getElementById(toggle.dataset.togglePassword); field.type = field.type === 'password' ? 'text' : 'password'; toggle.textContent = field.type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña'; }
+    const button = event.target.closest('[data-passkey-login], [data-passkey-register]');
+    if (!button) return;
+    const status = document.querySelector('[data-passkey-status]');
+    if (!Passkeys.isSupported() || !window.isSecureContext) { status.textContent='Tu navegador necesita HTTPS (o localhost) y soporte para claves de acceso.'; return; }
+    button.disabled = true;
+    try {
+        if (button.hasAttribute('data-passkey-register')) {
+            await Passkeys.register({name: document.getElementById('passkey-name').value || 'Mi dispositivo'});
+            location.reload();
+        } else {
+            const result = await Passkeys.verify();
+            location.assign(result.redirect || '/dashboard');
+        }
+    } catch (error) { status.textContent = 'No se completó la operación. Si necesitas confirmar tu contraseña, hazlo desde el enlace del perfil. También puedes usar tu contraseña habitual.'; }
+    finally { button.disabled=false; }
+});

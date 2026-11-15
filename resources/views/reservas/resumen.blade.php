@@ -48,6 +48,7 @@
 @endsection
 
 @section('contenido')
+<p class="mb-4 rounded-xl bg-amber-50 p-4 text-sm">Si viajan menores, sus boletos requieren la verificación documental de la agencia, aunque el pago esté completo. Lleva los documentos y permisos originales. Los tours de alto riesgo son solo para adultos.</p>
 <form method="POST" action="{{ $accionForm }}" class="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start lg:gap-8">
     @csrf
 

@@ -84,6 +84,7 @@ class ReservaService
             $reserva = DB::transaction(function () use ($borrador, $usuario, $participantes, $cantidad) {
                 $salida = SalidaTour::with('tour')->lockForUpdate()->findOrFail($borrador['sal_tur_id']);
                 $this->validarSalidaAbierta($salida);
+                $participantes = app(SeguridadParticipantes::class)->validar($salida, $participantes);
 
                 $disponibles = $salida->cap_max - $this->cuposOcupados($salida->id);
                 if ($cantidad < 1 || $cantidad > $disponibles) {
@@ -109,8 +110,8 @@ class ReservaService
                     'idioma' => app()->getLocale(),
                     'sal_tur_id' => $salida->id,
                     'usr_id' => $usuario?->id,
-                    'nom_ctc' => $borrador['contacto']['nom_ctc'],
-                    'cor_ctc' => strtolower($borrador['contacto']['cor_ctc']),
+                    'nom_ctc' => $usuario?->nom ?? $borrador['contacto']['nom_ctc'],
+                    'cor_ctc' => strtolower($usuario?->cor ?? $borrador['contacto']['cor_ctc']),
                     'tel_ctc' => $borrador['contacto']['tel_ctc'],
                     'cnt_ptc' => $cantidad,
                     'est' => Reserva::EST_PENDIENTE,
@@ -118,6 +119,7 @@ class ReservaService
                     'est_pag' => Reserva::PAG_PENDIENTE,
                 ]);
 
+                $creados = [];
                 foreach ($participantes as $i => $p) {
                     $ptc = $reserva->participantes()->create([
                         'nom_cpl' => $p['nom_cpl'],
@@ -126,10 +128,12 @@ class ReservaService
                         'ci_cmp' => $p['tip_doc'] === 'CI' ? ($p['ci_cmp'] ?? '') : '',
                         'ci_dep_id' => $p['tip_doc'] === 'CI' ? ($p['ci_dep_id'] ?? null) : null,
                         'eda' => $p['eda'],
+                        'fecha_nacimiento' => $p['fecha_nacimiento'],
                         'pai_id' => $p['pai_id'] ?: null,
                         'es_ctc_pri' => ! empty($p['es_ctc_pri']),
                     ]);
 
+                    $creados[$i] = $ptc;
                     foreach ($borrador['alquileres'][$i] ?? [] as $tipId => $itemId) {
                         if ($itemId) {
                             AlquilerEquipoReserva::create([
@@ -150,6 +154,22 @@ class ReservaService
                             'rta_fir' => FirmaDigital::moverDefinitiva($ficha['rta_fir'], $reserva->cod, $ptc->id),
                             'fir_en' => $ficha['fir_en'],
                             'dir_ip' => $ficha['dir_ip'] ?? null,
+                        ]);
+                    }
+                }
+
+                foreach ($participantes as $i => $p) {
+                    if ($p['eda'] < 18) {
+                        $creados[$i]->update([
+                            'acompanante_id' => $creados[(int) $p['acompanante_indice']]->id,
+                            'autorizacion_menor' => [
+                                'responsable_nombre' => $p['responsable_nombre'],
+                                'responsable_documento' => $p['responsable_documento'],
+                                'vinculo' => $p['vinculo'], 'consentimiento' => true,
+                                'version' => SeguridadParticipantes::VERSION,
+                                'declarada_en' => now()->toIso8601String(),
+                                'ip' => request()->ip(),
+                            ],
                         ]);
                     }
                 }
@@ -258,7 +278,7 @@ class ReservaService
     private function validarSalidaAbierta(SalidaTour $salida): void
     {
         $abierta = $salida->est === SalidaTour::EST_PROGRAMADA
-            && $salida->fec_sal->gte(today())
+            && ($salida->fec_sal->gt(today()) || ($salida->fec_sal->isToday() && $salida->hra_sal > now()->format('H:i:s')))
             && $salida->tour->act
             && is_null($salida->tour->eli_en);
 

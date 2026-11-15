@@ -31,6 +31,9 @@ class BoletoService
         $emitidos = collect();
 
         foreach ($reserva->participantes as $ptc) {
+            if (app(SeguridadParticipantes::class)->bloqueo($ptc, $reserva->salida)) {
+                continue;
+            }
             if ($altoRiesgo && (! $ptc->fichaMedica?->fir_en || ! FirmaDigital::existe($ptc->fichaMedica?->rta_fir))) {
                 continue;
             }

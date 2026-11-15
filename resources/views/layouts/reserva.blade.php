@@ -91,5 +91,6 @@
     {{-- Los scripts de las vistas van antes de Livewire/Alpine para que sus funciones x-data existan al iniciar Alpine --}}
     @stack('scripts')
     @livewireScripts
+@include('partials.consentimiento-cookies')
 </body>
 </html>

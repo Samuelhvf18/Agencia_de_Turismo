@@ -6,7 +6,9 @@ use App\Models\MarkovEstadoCliente;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Io\MarkovService;
+use App\Services\Reservas\SeguridadParticipantes;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -24,11 +26,19 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        $input['cor'] = mb_strtolower(trim((string) ($input['cor'] ?? '')));
+        foreach (['nom', 'pat', 'mat'] as $campo) {
+            $input[$campo] = trim(preg_replace('/\s+/', ' ', (string) ($input[$campo] ?? '')));
+        }
         Validator::make($input, [
-            'nom' => ['required', 'string', 'max:60', "regex:/^[\pL\s'.-]+$/u"],
-            'pat' => ['required', 'string', 'max:45', "regex:/^[\pL\s'.-]+$/u"],
-            'mat' => ['nullable', 'string', 'max:45', "regex:/^[\pL\s'.-]+$/u"],
-            'cor' => ['required', 'string', 'email', 'max:150', 'unique:users,cor'],
+            'nom' => ['required', 'string', 'max:60', SeguridadParticipantes::NOMBRE],
+            'pat' => ['required', 'string', 'max:45', SeguridadParticipantes::NOMBRE],
+            'mat' => ['nullable', 'string', 'max:45', SeguridadParticipantes::NOMBRE],
+            'cor' => ['required', 'string', 'email', 'max:150', Rule::unique('users', 'cor'), function ($attribute, $value, $fail) {
+                if (User::whereRaw('LOWER(cor) = ?', [$value])->exists()) {
+                    $fail('Este correo electrónico ya está registrado.');
+                }
+            }],
             'tel' => ['nullable', 'string', 'max:20'],
             'pai_id' => ['nullable', 'exists:paises,id'],
             'tip_doc' => ['nullable', 'string', 'in:CI,PASAPORTE'],

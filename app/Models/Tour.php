@@ -10,11 +10,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Tour extends Model
 {
     protected $table = 'tours';
+
     const CREATED_AT = 'cre_en';
+
     const UPDATED_AT = 'mod_en';
 
     protected $fillable = [
-        'cat_id', 'cod', 'rta_amg', 'nom', 'des', 'niv_dif',
+        'alto_riesgo', 'edad_minima', 'admite_menores', 'cat_id', 'cod', 'rta_amg', 'nom', 'des', 'niv_dif',
         'alt_min_m', 'alt_max_m', 'dur_hrs', 'req_fis',
         'pre_bas', 'cap_max', 'trz_geo', 'act', 'eli_en',
     ];
@@ -23,7 +25,7 @@ class Tour extends Model
     {
         return [
             'trz_geo' => 'array',
-            'act' => 'boolean',
+            'act' => 'boolean', 'alto_riesgo' => 'boolean', 'admite_menores' => 'boolean', 'edad_minima' => 'integer',
             'eli_en' => 'datetime',
         ];
     }
@@ -37,8 +39,18 @@ class Tour extends Model
      */
     public function esAltoRiesgo(): bool
     {
-        return in_array($this->niv_dif, ['dificil', 'experto'], true)
+        return (bool) $this->alto_riesgo || in_array($this->niv_dif, ['dificil', 'experto'], true)
             || (int) $this->alt_max_m >= self::ALTITUD_ALTO_RIESGO;
+    }
+
+    public function edadMinimaEfectiva(): int
+    {
+        return max((int) $this->edad_minima, $this->esAltoRiesgo() || ! $this->admite_menores ? 18 : 0);
+    }
+
+    public function admiteMenores(): bool
+    {
+        return ! $this->esAltoRiesgo() && (bool) $this->admite_menores;
     }
 
     public function categoria(): BelongsTo

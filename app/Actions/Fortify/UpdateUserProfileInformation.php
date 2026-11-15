@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Services\Reservas\SeguridadParticipantes;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
@@ -16,9 +17,14 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input): void
     {
+        $input['email'] = mb_strtolower(trim((string) ($input['email'] ?? '')));
         Validator::make($input, [
-            'name' => ['required', 'string', 'max:150', "regex:/^[\pL\s'.-]+$/u"],
-            'email' => ['required', 'email', 'max:150', Rule::unique('users', 'cor')->ignore($user->id)],
+            'name' => ['required', 'string', 'max:150', SeguridadParticipantes::NOMBRE],
+            'email' => ['required', 'email', 'max:150', Rule::unique('users', 'cor')->ignore($user->id), function ($attribute, $value, $fail) use ($user) {
+                if (User::whereRaw('LOWER(cor) = ?', [$value])->whereKeyNot($user->id)->exists()) {
+                    $fail('Este correo electrónico ya está registrado.');
+                }
+            }],
             'photo' => ['nullable', 'mimes:jpg,jpeg,png', 'max:1024'],
         ])->validateWithBag('updateProfileInformation');
 

@@ -444,5 +444,22 @@
     "Consulta tu reserva al instante": "Check your booking instantly",
     "Sin necesidad de cuenta": "No account required",
     "Ticket QR descargable": "Downloadable QR ticket",
-    "Usar mis datos de contacto": "Use my contact details"
+    "Usar mis datos de contacto": "Use my contact details",
+    "País / prefijo": "Country / calling code",
+    "Solo números, sin prefijo ni espacios.": "Digits only, without country code or spaces.",
+    "Condiciones de participación": "Participation requirements",
+    "Fecha de nacimiento": "Date of birth",
+    "Complemento (opcional)": "ID suffix (optional)",
+    "Representante y acompañante del menor": "Minor’s representative and accompanying adult",
+    "Adulto que viaja con el menor": "Adult travelling with the minor",
+    "Seleccionar un adulto de esta reserva": "Choose an adult from this booking",
+    "Nombre del representante que autoriza": "Name of the authorizing representative",
+    "Documento del representante": "Representative’s identity document",
+    "¿Con quién viaja?": "Who is travelling with the minor?",
+    "Ambos progenitores": "Both parents",
+    "Un progenitor": "One parent",
+    "Tutor o guardador legal": "Legal guardian",
+    "Familiar o tercero": "Relative or third party",
+    "Usar el nombre del contacto": "Use the contact’s name",
+    "Seleccionar": "Select"
 }

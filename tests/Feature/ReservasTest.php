@@ -62,6 +62,7 @@ function participante(array $extra = []): array
     return $extra + [
         'nom_cpl' => 'Ana Quispe', 'tip_doc' => 'CI', 'num_doc' => (string) $n++, 'ci_cmp' => '',
         'ci_dep_id' => DepartamentoBolivia::where('cod', 'LP')->value('id'), 'eda' => 30,
+        'fecha_nacimiento' => today()->subYears(30)->toDateString(),
         'pai_id' => Pais::where('cod_iso', 'BO')->value('id'), 'es_ctc_pri' => 0,
     ];
 }

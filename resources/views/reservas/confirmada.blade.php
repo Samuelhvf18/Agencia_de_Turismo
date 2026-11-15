@@ -29,6 +29,7 @@
 @endsection
 
 @section('contenido')
+<p class="mb-4 rounded-xl bg-amber-50 p-4 text-sm">Si viajan menores, contacta con la agencia para verificar sus documentos y autorizaciones. Su boleto se habilita después de la revisión y el pago completo.</p>
 <div class="mx-auto max-w-2xl space-y-6">
     <section class="rsv-tarjeta overflow-hidden p-0 text-center sm:p-0">
         <div class="bg-gradient-to-br from-pipocas-principal to-pipocas-complementario px-5 pb-8 pt-10 text-white sm:px-10">

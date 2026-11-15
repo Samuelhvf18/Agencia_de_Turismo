@@ -17,6 +17,7 @@ use App\Services\Reservas\BorradorReserva;
 use App\Services\Reservas\CupoAgotadoException;
 use App\Services\Reservas\FirmaDigital;
 use App\Services\Reservas\ReservaService;
+use App\Services\Reservas\SeguridadParticipantes;
 use App\Support\PresentadorTour;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -96,7 +97,7 @@ class ReservaController extends Controller
 
         $participantes = $this->borrador->get('participantes') ?: array_map(fn ($i) => [
             'nom_cpl' => $i === 0 && $usuario ? $usuario->nom : '',
-            'tip_doc' => 'CI', 'num_doc' => '', 'ci_cmp' => '', 'ci_dep_id' => null, 'eda' => '', 'pai_id' => null,
+            'tip_doc' => 'CI', 'num_doc' => '', 'ci_cmp' => '', 'ci_dep_id' => null, 'eda' => '', 'fecha_nacimiento' => '', 'pai_id' => null,
             'es_ctc_pri' => $i === 0,
         ], range(0, $cantidad - 1));
 
@@ -122,7 +123,7 @@ class ReservaController extends Controller
         }
         [, $salida] = $this->contexto();
 
-        $participantes = array_values($request->validated('participantes'));
+        $participantes = app(SeguridadParticipantes::class)->validar($salida, array_values($request->validated('participantes')));
         $disponibles = $salida->cap_max - $this->reservas->cuposOcupados($salida->id);
         if (count($participantes) > $disponibles) {
             $this->reservas->registrarRechazo($salida, count($participantes));
@@ -137,17 +138,22 @@ class ReservaController extends Controller
             'ci_cmp' => $p['tip_doc'] === 'CI' ? ($p['ci_cmp'] ?? '') : '',
             'ci_dep_id' => $p['tip_doc'] === 'CI' ? (int) $p['ci_dep_id'] : null,
             'eda' => (int) $p['eda'],
+            'fecha_nacimiento' => $p['fecha_nacimiento'],
+            'acompanante_indice' => $p['acompanante_indice'] ?? null,
+            'responsable_nombre' => $p['responsable_nombre'] ?? null,
+            'responsable_documento' => $p['responsable_documento'] ?? null,
+            'vinculo' => $p['vinculo'] ?? null,
+            'consentimiento_menor' => ! empty($p['consentimiento_menor']),
             'pai_id' => (int) $p['pai_id'],
             'es_ctc_pri' => ! empty($p['es_ctc_pri']),
         ], $participantes);
 
-        $this->borrador->guardar('contacto', $request->only(['nom_ctc', 'cor_ctc', 'tel_ctc']));
+        $this->borrador->guardar('contacto', $request->safe()->only(['nom_ctc', 'cor_ctc', 'tel_ctc']));
         $this->borrador->guardar('participantes', $participantes);
         $this->borrador->guardar('cnt_ptc', count($participantes));
-        // Si se quitaron participantes, se descartan su equipo y su ficha.
-        $n = count($participantes);
-        $this->borrador->guardar('alquileres', array_slice($this->borrador->get('alquileres', []), 0, $n, true));
-        $this->borrador->guardar('fichas', array_slice($this->borrador->get('fichas', []), 0, $n, true));
+        // Cualquier edición de identidad invalida firmas y asignaciones por índice.
+        $this->borrador->guardar('alquileres', []);
+        $this->borrador->guardar('fichas', []);
 
         return redirect()->route('reservas.equipo');
     }
@@ -334,7 +340,7 @@ class ReservaController extends Controller
             return redirect()->route('reservas.salida', $tour)->withErrors(['sal_tur_id' => $e->getMessage().' Elige otra salida o reduce la cantidad de personas.']);
         } catch (ValidationException $e) {
             $destino = array_key_exists('fichas', $e->errors()) ? 'reservas.ficha'
-                : (array_key_exists('alquileres', $e->errors()) ? 'reservas.equipo' : 'reservas.resumen');
+                : (array_key_exists('alquileres', $e->errors()) ? 'reservas.equipo' : (collect(array_keys($e->errors()))->contains(fn ($k) => str_starts_with($k, 'participantes')) ? 'reservas.participantes' : 'reservas.resumen'));
 
             return redirect()->route($destino)->withErrors($e->errors());
         }

@@ -17,12 +17,17 @@ class TourRequest extends FormRequest
         $this->merge([
             'nom' => trim(preg_replace('/\s+/', ' ', (string) $this->input('nom'))),
             'act' => $this->boolean('act'),
+            'admite_menores' => $this->boolean('admite_menores'),
+            'alto_riesgo' => $this->boolean('alto_riesgo'),
         ]);
     }
 
     public function rules(): array
     {
         return [
+            'edad_minima' => ['sometimes', 'integer', 'between:0,110'],
+            'admite_menores' => ['boolean'],
+            'alto_riesgo' => ['boolean'],
             'cat_id' => ['required', 'integer', 'exists:categorias_tour,id'],
             'nom' => ['required', 'string', 'min:3', 'max:150', "regex:/^[\pL\pN\s&'.,()-]+$/u"],
             'des' => ['nullable', 'string', 'max:5000'],

@@ -16,3 +16,6 @@ work
 
 storage/app/*
 storage/framework/testing
+
+services/**/target
+services/**/data

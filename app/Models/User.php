@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Notificaciones\CodigoCorreo;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Passkeys\Contracts\PasskeyUser;
+use Laravel\Passkeys\PasskeyAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -20,9 +23,10 @@ use Laravel\Sanctum\HasApiTokens;
  * rol_id (roles). Se exponen los alias `name` y `email` para que las vistas
  * de Jetstream y Fortify sigan funcionando.
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     use HasApiTokens, HasFactory, \Laravel\Fortify\TwoFactorAuthenticatable, Notifiable;
+    use PasskeyAuthenticatable;
 
     public const ROL_TURISTA = 'turista';
 
@@ -85,6 +89,11 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function emailVerifiedAt(): Attribute
     {
         return Attribute::make(get: fn () => $this->cor_vrf_en, set: fn ($v) => ['cor_vrf_en' => $v]);
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        app(CodigoCorreo::class)->enviar($this->cor, 'verificar');
     }
 
     public function getEmailForVerification(): string

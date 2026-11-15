@@ -6,6 +6,7 @@ use App\Mail\AvisoMail;
 use App\Mail\BoletosReservaMail;
 use App\Models\RegistroNotificacion;
 use App\Models\Reserva;
+use App\Services\Notificaciones\CorreoTransaccional;
 use App\Services\Notificaciones\EntregaNotificacion;
 use App\Services\Notificaciones\NotificacionService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -42,6 +43,15 @@ class NotificacionJob implements ShouldQueue
 
                 return;
             }
+            if ($registro->can === 'email' && config('services.notificaciones.url') && ! empty($registro->cnd['destino'])) {
+                app(CorreoTransaccional::class)->enviar(
+                    $registro->cnd['destino'], NotificacionService::TIPOS[$registro->tip] ?? 'Aviso de Pipocas',
+                    $this->texto($registro),
+                    $registro->clave_evento ?? 'notificacion:'.$registro->id
+                );
+
+                return;
+            }
             $webhook = config('services.n8n.webhook_notificaciones');
             if ($webhook) {
                 Http::timeout(10)->withHeaders([
@@ -54,6 +64,17 @@ class NotificacionJob implements ShouldQueue
                 throw new \RuntimeException('No hay un canal configurado para entregar la notificación.');
             }
         });
+    }
+
+    private function texto(RegistroNotificacion $registro): string
+    {
+        $texto = $registro->cnd['mensaje'] ?? $registro->cnd['evento'] ?? (NotificacionService::TIPOS[$registro->tip] ?? 'Tienes una notificación de Pipocas.');
+        if ($reserva = $registro->reserva) {
+            $texto .= "\nReserva: {$reserva->cod}\nTour: {$reserva->salida->tour->nom}\nSalida: ".$reserva->salida->fec_sal->format('d/m/Y').' '.substr($reserva->salida->hra_sal, 0, 5);
+            $texto .= "\nConsulta tu reserva: ".route('reservas.consultar', ['cod' => $reserva->cod]);
+        }
+
+        return $texto;
     }
 
     /** Evento que recibe n8n. */

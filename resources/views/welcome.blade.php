@@ -553,7 +553,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <div class="cards" id="cards">
       @forelse ($tours as $tour)
       <article class="card reveal {{ ['', 'd1', 'd2'][$loop->index % 3] }}" data-cat="{{ $tour->categoria->rta_amg }}" data-dif="{{ $tour->niv_dif }}" data-alt="{{ (int) $tour->alt_max_m }}">
-        <div class="cimg"><a href="{{ route('tours.show', $tour) }}"><img src="{{ $tour->img }}" alt="{{ $tour->img_alt }}" loading="lazy"></a><span class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</span><button class="fav" aria-label="Favorito"><i class="fa-regular fa-heart"></i></button><span class="code">{{ $tour->cod }}</span></div>
+        <div class="cimg"><a href="{{ route('tours.show', $tour) }}"><img src="{{ $tour->img }}" alt="{{ $tour->img_alt }}" loading="lazy"></a><span class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</span><span class="code">{{ $tour->cod }}</span></div>
         <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>{{ $tour->dur_txt }} h</span>@if ($tour->alt_max_m)<span><i class="fa-solid fa-mountain"></i>{{ number_format($tour->alt_max_m, 0, ',', '.') }} m</span>@endif<span><i class="fa-solid fa-users"></i>Máx {{ $tour->cap_max }}</span></div>
           <h3><a href="{{ route('tours.show', $tour) }}">{{ $tour->nom }}</a></h3><p>{{ $tour->des }}</p>
           <div class="diff"><span class="bars">@for ($i = 1; $i <= 5; $i++)<i @class(['f' => $i <= $tour->dif_niv])></i>@endfor</span>{{ $tour->dif_txt }}</div>
@@ -665,7 +665,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <h2>¿Listo para tu próxima <em>aventura andina?</em></h2>
     <div class="btns">
       <a href="#catalogo" class="btn btn-blue"><i class="fa-solid fa-compass"></i> Reservar ahora</a>
-      <a href="#" class="btn btn-terra"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+      @if (isset(config('turismo.redes')['WhatsApp']))<a href="{{ config('turismo.redes.WhatsApp') }}" class="btn btn-terra" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>@endif
     </div>
   </div>
 </div>
@@ -677,15 +677,23 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <div class="fbrand">
         <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Pipocas<i>.</i></b></span></a>
         <p>Agencia de viajes y turismo de aventura en el corazón de La Paz, Bolivia.</p>
-        <div class="soc"><a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a><a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a><a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a><a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a></div>
+        <div class="soc">@foreach (config('turismo.redes') as $red => $url)<a href="{{ $url }}" aria-label="{{ $red }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands {{ ['WhatsApp'=>'fa-whatsapp','Facebook'=>'fa-facebook-f','Instagram'=>'fa-instagram','TikTok'=>'fa-tiktok'][$red] }}"></i></a>@endforeach</div>
       </div>
-      <div class="fl"><h5>{{ __('Tours') }}</h5><a href="#">Biking</a><a href="#">Hiking</a><a href="#">Trekking</a><a href="#">Climbing</a><a href="#">City Tour</a></div>
-      <div class="fl"><h5>Legal</h5><a href="#">Términos y condiciones</a><a href="#">Privacidad</a><a href="#">Cookies</a><a href="#">Reembolsos</a></div>
+      <div class="fl"><h5>Tours disponibles</h5>@foreach ($categorias as $cat)<a href="{{ route('home', ['categoria'=>$cat->rta_amg]) }}#catalogo">{{ $cat->nom }}</a>@endforeach</div>
+      <div class="fl"><h5>Legal</h5><a href="#m-terminos" data-modal="m-terminos">Términos y condiciones</a><a href="#m-privacidad" data-modal="m-privacidad">Privacidad</a><a href="#m-cookies" data-modal="m-cookies">Cookies</a><a href="#m-reembolso" data-modal="m-reembolso">Reembolsos</a><button type="button" data-consent-settings>Configurar cookies</button></div>
+      @guest
       <div>
-        <h5>Novedades</h5>
-        <form class="news" onsubmit="event.preventDefault()"><input type="email" placeholder="Tu correo"><button>Unirme</button></form>
-        <label class="consent"><input type="checkbox"> Acepto recibir novedades y he leído la Política de Privacidad.</label>
+        <h5 id="footer-novedades">Novedades</h5>
+        @if (session('novedades'))<p role="status">{{ session('novedades') }}</p>@endif
+        @error('novedades')<p role="alert">{{ $message }}</p>@enderror
+        <form class="news" method="POST" action="{{ route('novedades.store') }}">
+          @csrf
+          <div><label for="correo-novedades">Tu correo</label><input id="correo-novedades" name="correo" type="email" required maxlength="150" placeholder="Tu correo" autocomplete="email"><button type="submit">Unirme</button>
+          <label class="consent"><input name="consentimiento" type="checkbox" value="1" required> Acepto recibir novedades y he leído la <a href="#m-privacidad" data-modal="m-privacidad">Política de Privacidad</a>.</label></div>
+        </form>
+        <p>Confirma tu suscripción desde el correo. Puedes darte de baja cuando quieras.</p>
       </div>
+      @endguest
     </div>
     <div class="fbottom">
       <span>Calle Sagárnaga #234, Zona Central · La Paz, Bolivia</span>
@@ -784,7 +792,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <li><b>Mapas y contenido de terceros:</b> algunos mapas o videos incrustados pueden instalar cookies propias del proveedor.</li>
     </ul>
     <h5>Cómo gestionarlas</h5>
-    <p>Al entrar verás un banner con tres opciones: <b>Aceptar</b> todas, <b>{{ __('Rechazar') }}</b> las no esenciales o <b>Configurar</b> cada categoría. Puedes cambiar tu decisión cuando quieras borrando las cookies del navegador o desde el enlace de cookies al pie del sitio. Rechazarlas no te impide reservar.</p>
+    <p>Al entrar verás un banner con tres opciones: <b>Aceptar</b> todas, <b>{{ __('Rechazar') }}</b> las no esenciales o <b>Configurar</b> cada categoría. Puedes cambiar tu decisión cuando quieras desde «Configurar cookies» al pie del sitio. Rechazarlas no te impide reservar.</p>
     <p>No usamos cookies para publicidad personalizada ni compartimos la información con redes publicitarias.</p>
   </div>
   <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
@@ -872,11 +880,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
 </dialog>
 
-<div class="cookie" id="cookie">
-  <span class="ci"><i class="fa-solid fa-cookie-bite"></i></span>
-  <div class="ct"><b>{{ __('Tu privacidad importa') }}</b>{{ __('Usamos cookies esenciales para que el sitio funcione. Las de analítica solo con tu permiso.') }}<a href="#m-cookies" data-modal="m-cookies">{{ __('Política de cookies') }}</a></div>
-  <div class="ca"><button data-c>{{ __('Rechazar') }}</button><button data-c>Configurar</button><button class="acc" data-c>Aceptar</button></div>
-</div>
+@include('partials.consentimiento-cookies')
 <button class="totop" id="totop" aria-label="Volver arriba"><i class="fa-solid fa-arrow-up"></i></button>
 
 <script>
@@ -915,17 +919,11 @@ chips.forEach(c=>c.onclick=()=>filter(c.dataset.f));
 fDif.onchange=aplicar;fAlt.onchange=aplicar;
 fLimpiar.onclick=()=>{fDif.value='';fAlt.value='';filter('todos')};
 // La fecha consulta disponibilidad real en el servidor. Los filtros locales refinan el resultado.
-if(new URLSearchParams(location.search).has('fecha')) document.getElementById('catalogo').scrollIntoView();
+if(new URLSearchParams(location.search).has('categoria')) filter(new URLSearchParams(location.search).get('categoria'));
+if(new URLSearchParams(location.search).has('fecha') || new URLSearchParams(location.search).has('categoria')) document.getElementById('catalogo').scrollIntoView();
 aplicar();
 document.querySelectorAll('[data-go]').forEach(t=>t.onclick=()=>{filter(t.dataset.go);document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})});
 
-// favoritos
-document.querySelectorAll('.fav').forEach(b=>b.onclick=()=>{b.classList.toggle('on');b.querySelector('i').className=b.classList.contains('on')?'fa-solid fa-heart':'fa-regular fa-heart'});
-
-// cookies
-const ck=document.getElementById('cookie');
-setTimeout(()=>ck.classList.add('show'),1400);
-ck.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>ck.classList.remove('show'));
 // modales legales
 const openModal=id=>{const d=document.getElementById(id);if(!d||d.open)return;d.showModal();document.body.style.overflow='hidden';d.querySelector('.lm-body').scrollTop=0};
 document.querySelectorAll('[data-modal]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();openModal(a.dataset.modal)}));

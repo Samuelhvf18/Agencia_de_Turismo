@@ -155,7 +155,7 @@
                         </label>
                         @if (Route::has('password.request'))
                             <a
-                                href="{{ route('password.request') }}"
+                                href="{{ route('codigo.recuperar') }}"
                                 class="text-sm font-medium text-[#1F5F8B]
                                        hover:text-[#C96F4A] transition">
                                 ¿Has olvidado tu contraseña?
@@ -196,10 +196,11 @@
                         </span>
                     </div>
                 </div>
+                @if (config('services.google.client_id') && config('services.google.client_secret') && config('services.google.redirect'))
                 {{-- GOOGLE --}}
                 <button
                     type="button"
-                    onclick="alert('La conexión con Google será configurada próximamente.')"
+                    onclick="location.href='{{ route('google.redirect') }}'"
                     class="w-full flex items-center justify-center gap-3
                            rounded-xl border border-[#D9D4CA]
                            bg-white px-4 py-3
@@ -209,10 +210,11 @@
                     <i class="fa-brands fa-google text-[#DB4437]"></i>
                     Continuar con Google
                 </button>
+                @endif
                 {{-- CLAVE DE ACCESO --}}
                 <button
                     type="button"
-                    onclick="alert('El inicio de sesión con clave de acceso será configurado próximamente.')"
+                    data-passkey-login
                     class="mt-3 w-full flex items-center justify-center gap-3
                            rounded-xl border border-[#D9D4CA]
                            bg-white px-4 py-3
@@ -222,6 +224,8 @@
                     <i class="fa-solid fa-key text-[#1F5F8B]"></i>
                     Iniciar sesión con clave de acceso
                 </button>
+                <p data-passkey-status role="status" class="text-sm mt-3"></p>
+                <p class="text-xs mt-2">Primero registra tu clave de acceso desde tu perfil.</p>
                 {{-- REGISTRO --}}
                 @if (Route::has('register'))
                     <div class="mt-7 border-t border-[#E5E0D8] pt-6 text-center">

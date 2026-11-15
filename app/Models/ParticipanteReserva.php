@@ -11,14 +11,21 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class ParticipanteReserva extends Model
 {
     protected $table = 'participantes_reserva';
+
     public $timestamps = false;
+
     protected $fillable = [
-        'rsv_id', 'nom_cpl', 'tip_doc', 'num_doc', 'ci_cmp', 'ci_dep_id', 'eda', 'pai_id', 'es_ctc_pri',
+        'fecha_nacimiento', 'acompanante_id', 'autorizacion_menor', 'rsv_id', 'nom_cpl', 'tip_doc', 'num_doc', 'ci_cmp', 'ci_dep_id', 'eda', 'pai_id', 'es_ctc_pri',
     ];
 
     protected function casts(): array
     {
-        return ['eda' => 'integer', 'es_ctc_pri' => 'boolean'];
+        return ['fecha_nacimiento' => 'date', 'autorizacion_menor' => 'array', 'eda' => 'integer', 'es_ctc_pri' => 'boolean'];
+    }
+
+    public function acompanante(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'acompanante_id');
     }
 
     public function reserva(): BelongsTo

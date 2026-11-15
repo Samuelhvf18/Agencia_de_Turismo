@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ParticipanteReserva;
 use App\Models\Reserva;
 use App\Models\Tour;
 use App\Observers\AuditObserver;
 use App\Services\Pagos\PagoService;
+use App\Services\Reservas\BoletoService;
 use App\Services\Reservas\ReservaService;
+use App\Services\Reservas\SeguridadParticipantes;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -70,6 +73,30 @@ class ReservasAdminController extends Controller
             'saldo' => $pagos->saldo($reserva),
             'metodos' => PagoService::METODOS + ['efectivo' => 'Efectivo'],
         ]);
+    }
+
+    public function verificarMenor(Request $request, Reserva $reserva, ParticipanteReserva $participante)
+    {
+        abort_unless($participante->rsv_id === $reserva->id, 404);
+        $request->validate(['documentos_originales' => ['accepted']]);
+        abort_unless(in_array($reserva->est, [Reserva::EST_PENDIENTE, Reserva::EST_CONFIRMADA], true), 422);
+        $reserva->load('salida.tour');
+        $seguridad = app(SeguridadParticipantes::class);
+        $aut = $participante->autorizacion_menor;
+        abort_unless($aut && $participante->fecha_nacimiento && $seguridad->edad($participante->fecha_nacimiento->toDateString(), $reserva->salida) < 18, 422, 'No hay autorización de menor que verificar.');
+        // Aplicar las restricciones actuales, incluso si se reclasificó el tour.
+        abort_unless($reserva->salida->tour->admiteMenores() && $seguridad->edad($participante->fecha_nacimiento->toDateString(), $reserva->salida) >= $reserva->salida->tour->edadMinimaEfectiva(), 422, 'Este tour no admite al menor.');
+        $acompanante = $participante->acompanante;
+        abort_unless($acompanante && $acompanante->rsv_id === $reserva->id && $acompanante->fecha_nacimiento && $seguridad->edad($acompanante->fecha_nacimiento->toDateString(), $reserva->salida) >= 18, 422, 'Falta un acompañante adulto válido.');
+        $aut['verificada_en'] = now()->toIso8601String();
+        $aut['verificada_por'] = $request->user()->id;
+        $aut['huella'] = $seguridad->huella($participante, $reserva->salida);
+        $participante->update(['autorizacion_menor' => $aut]);
+        if ($reserva->est_pag === Reserva::PAG_PAGADO) {
+            app(BoletoService::class)->emitir($reserva);
+        }
+
+        return back()->with('estado', 'Documentación del menor verificada para esta salida.');
     }
 
     public function cancelar(Request $request, Reserva $reserva, ReservaService $servicio): RedirectResponse

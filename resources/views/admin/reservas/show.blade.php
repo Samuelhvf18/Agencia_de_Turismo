@@ -82,7 +82,13 @@
                                 —
                             @endforelse
                         </td>
-                        <td class="p-4 text-xs font-mono">{{ $p->boleto ? $p->boleto->cod.' · '.$p->boleto->est : '—' }}</td>
+                        <td class="p-4 text-xs font-mono">
+                            @if ($p->autorizacion_menor)
+                                <div class="font-sans space-y-2 mb-3"><b>Menor de edad</b><p>Representante: {{ $p->autorizacion_menor['responsable_nombre'] }} · {{ $p->autorizacion_menor['responsable_documento'] }}</p><p>Viaja con: {{ $p->acompanante?->nom_cpl }} · {{ $p->autorizacion_menor['vinculo'] }}</p>
+                                @php $bloqueo = app(\App\Services\Reservas\SeguridadParticipantes::class)->bloqueo($p, $reserva->salida); @endphp
+                                @if ($bloqueo)<p class="text-amber-800">{{ $bloqueo }}</p><form method="POST" action="{{ route('admin.reservas.menor.verificar', [$reserva, $p]) }}">@csrf<label class="flex gap-2"><input type="checkbox" name="documentos_originales" value="1" required> Verifiqué documentos originales de identidad, vínculo, adulto acompañante y permisos aplicables para esta salida.</label><button class="mt-2 underline">Registrar verificación</button></form>@else<p class="text-green-700">Documentación verificada para esta salida.</p>@endif</div>
+                            @endif
+                            {{ $p->boleto ? $p->boleto->cod.' · '.$p->boleto->est : '—' }}</td>
                     </tr>
                 @endforeach
             </tbody>

@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS entregas (
+    clave VARCHAR(150) PRIMARY KEY,
+    huella VARCHAR(64) NOT NULL,
+    enviada_en TIMESTAMP NULL
+);

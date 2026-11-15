@@ -43,3 +43,5 @@ php artisan test   # última suite local: 195 aprobadas, 1 omitida; base agencia
 - [Avance del plan WAAAAAA y pendientes reales](docs/AVANCE-PLAN-TRABAJO.md)
 
 - [Panel administrativo y planificación: diseño y uso](docs/REDISENO-ADMIN.md)
+
+La [revisión del rol de turista](docs/REVISION-TURISTA.md) detalla las 14 observaciones, la política de menores y cómo activar Gmail, Google y el servicio de notificaciones.

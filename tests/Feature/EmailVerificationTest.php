@@ -2,7 +2,7 @@
 
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 
@@ -16,10 +16,10 @@ test('el correo no verificado bloquea el historial y el enlace firmado verifica 
     $this->get(route('reservas.historial'))->assertOk();
 });
 
-test('cambiar el correo invalida la verificación y envía un nuevo enlace', function () {
+test('cambiar el correo invalida la verificación y envía un código', function () {
     Notification::fake();
     $u = User::factory()->create();
     app(UpdateUserProfileInformation::class)->update($u, ['name' => $u->nom, 'email' => 'nuevo@example.test']);
     expect($u->fresh()->hasVerifiedEmail())->toBeFalse();
-    Notification::assertSentTo($u, VerifyEmail::class);
+    expect(DB::table('codigos_correo')->where('correo', 'nuevo@example.test')->where('proposito', 'verificar')->exists())->toBeTrue();
 });

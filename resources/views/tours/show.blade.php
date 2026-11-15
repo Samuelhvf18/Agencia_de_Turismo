@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
 @php $hayRuta = $puntos->count() || ! empty($tour->trz_geo); @endphp
 @if ($hayRuta)
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+
 @endif
 <style>
 :root{
@@ -188,14 +188,18 @@ a{color:inherit;text-decoration:none}
       <li><i class="fa-solid fa-qrcode"></i> {{ __('Ticket con código QR') }}</li>
     </ul>
     {{-- Original: <a class="btn" href="{{ Route::has('login') ? route('login') : '#' }}"> --}}
+    <p>Edad mínima: {{ $tour->edadMinimaEfectiva() }} años. {{ $tour->admiteMenores() ? 'Menores con adulto y autorización verificada.' : 'Solo adultos; sin excepciones en alto riesgo.' }}</p>
     <a class="btn" href="{{ route('reservas.salida', $tour) }}"><i class="fa-solid fa-calendar-check"></i> {{ __('Reservar este tour') }}</a>
   </aside>
 </main>
 
 @if ($hayRuta)
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script>
+<p id="map-consent">Para mostrar el mapa, autoriza el contenido externo. <button type="button" data-consent-settings>Configurar cookies</button></p>
+<script type="text/plain" data-consent="external" data-src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script type="text/plain" data-consent="external" data-src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script type="text/plain" data-consent="external">
+document.getElementById("map-consent").hidden=true;
+const css=document.createElement("link");css.rel="stylesheet";css.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css";document.head.append(css);
 // Trazado: GeoJSON de tours.trz_geo si existe; si no, la polilínea de puntos_ruta.
 const puntos = @json($puntos);
 const trazado = @json($tour->trz_geo);
@@ -249,5 +253,6 @@ if (datos.length > 1 && typeof Chart !== 'undefined') {
 }
 </script>
 @endif
+@include('partials.consentimiento-cookies')
 </body>
 </html>

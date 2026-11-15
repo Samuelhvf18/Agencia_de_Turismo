@@ -58,7 +58,7 @@
                         <input
                             id="nom"
                             type="text"
-                            name="nom"
+                            name="nom" data-letras maxlength="60"
                             value="{{ old('nom') }}"
                             required
                             autofocus
@@ -77,7 +77,7 @@
                         <input
                             id="pat"
                             type="text"
-                            name="pat"
+                            name="pat" data-letras maxlength="45"
                             value="{{ old('pat') }}"
                             required
                             autocomplete="family-name"
@@ -98,7 +98,7 @@
                         <input
                             id="mat"
                             type="text"
-                            name="mat"
+                            name="mat" data-letras maxlength="45"
                             value="{{ old('mat') }}"
                             autocomplete="additional-name"
                             placeholder="Apellido materno"
@@ -141,14 +141,14 @@
                             required
                             autocomplete="new-password"
                             placeholder="Crea una contraseña"
-                            oninput="checkPasswordStrength(); checkPasswordMatch()"
+                            oninput="checkPasswordStrength(); checkPasswordMatch()" minlength="8"
                             class="w-full rounded-lg bg-[#F8F6F1] border border-[#D9D2C9]
                                    px-4 py-3 pr-12 text-[#343A40] placeholder:text-[#9A9A9A]
                                    focus:border-[#1F5F8B] focus:ring-2
                                    focus:ring-[#1F5F8B]/20 focus:outline-none">
                         <button
                             type="button"
-                            onclick="togglePassword('password', 'passwordIcon')"
+                            aria-label="Mostrar u ocultar contraseña" onclick="togglePassword('password', 'passwordIcon')"
                             class="absolute inset-y-0 right-0 flex items-center pr-4
                                    text-[#6B6F72] hover:text-[#1F5F8B]">
                             <i id="passwordIcon" class="fa-solid fa-eye"></i>
@@ -174,6 +174,7 @@
                         </p>
                     </div>
                 </div>
+                <ul aria-live="polite" class="text-sm text-[#6B6F72]"><li id="req-length">○ Al menos 8 caracteres</li><li id="req-letter">○ Al menos una letra</li><li id="req-number">○ Al menos un número</li></ul>
                 {{-- Confirmar contraseña --}}
                 <div>
                     <label for="password_confirmation"
@@ -195,7 +196,7 @@
                                    focus:ring-[#1F5F8B]/20 focus:outline-none">
                         <button
                             type="button"
-                            onclick="togglePassword('password_confirmation', 'confirmationIcon')"
+                            aria-label="Mostrar u ocultar contraseña" onclick="togglePassword('password_confirmation', 'confirmationIcon')"
                             class="absolute inset-y-0 right-0 flex items-center pr-4
                                    text-[#6B6F72] hover:text-[#1F5F8B]">
                             <i id="confirmationIcon" class="fa-solid fa-eye"></i>
@@ -233,10 +234,11 @@
                     </span>
                 </div>
             </div>
+            @if (config('services.google.client_id') && config('services.google.client_secret') && config('services.google.redirect'))
             {{-- Google --}}
             <button
                 type="button"
-                onclick="alert('La conexión con Google será configurada próximamente.')"
+                onclick="location.href='{{ route('google.redirect') }}'"
                 class="w-full flex items-center justify-center gap-3 rounded-lg
                        border border-[#D9D2C9] bg-white px-4 py-3
                        text-sm font-semibold text-[#343A40]
@@ -247,6 +249,7 @@
                 <i class="fa-brands fa-google text-[#4285F4] text-lg"></i>
                 Continuar con Google
             </button>
+            @endif
             {{-- Login --}}
             <div class="mt-6 text-center">
                 <p class="text-sm text-[#6B6F72]">
@@ -286,6 +289,9 @@ function togglePassword(inputId, iconId) {
 }
 function checkPasswordStrength() {
     const password = document.getElementById('password').value;
+    document.getElementById('req-length').textContent = (password.length >= 8 ? '✓ ' : '○ ') + 'Al menos 8 caracteres';
+    document.getElementById('req-letter').textContent = (/\p{L}/u.test(password) ? '✓ ' : '○ ') + 'Al menos una letra';
+    document.getElementById('req-number').textContent = (/[0-9]/.test(password) ? '✓ ' : '○ ') + 'Al menos un número';
     const text = document.getElementById('strengthText');
     const bars = [
         document.getElementById('bar1'),
@@ -301,7 +307,7 @@ function checkPasswordStrength() {
         return;
     }
     let strength = 0;
-    if (password.length >= 6) strength++;
+    if (password.length >= 8) strength++;
     if (password.length >= 10) strength++;
     if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
     if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength++;

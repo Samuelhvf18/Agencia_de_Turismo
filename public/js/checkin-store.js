@@ -40,6 +40,6 @@ export async function sync(vault,salida){
 }
 export async function scan(vault,salida,codigo){
  if(salida.vence<=Date.now())throw new Error('El manifiesto venció. Actualízalo con conexión.');
- const cod=codigo.trim().toUpperCase(),p=salida.pasajeros.find(p=>p.boleto===cod);if(!p)throw new Error('El boleto no está en el manifiesto de esta salida.');if(['validado','pendiente_sync'].includes(p.est))return 'Ya estaba registrado.';if(p.est!=='emitido')throw new Error('Boleto no válido. Revisa el conflicto con conexión.');
+ const cod=codigo.trim().toUpperCase(),p=salida.pasajeros.find(p=>p.boleto===cod);if(!p)throw new Error('El boleto no está en el manifiesto de esta salida.');if(p.requiere_validacion_online)throw new Error('Menores y tours de alto riesgo requieren validación con conexión antes del embarque.');if(['validado','pendiente_sync'].includes(p.est))return 'Ya estaba registrado.';if(p.est!=='emitido')throw new Error('Boleto no válido. Revisa el conflicto con conexión.');
  salida.cola.push({cod,vld_en:new Date().toISOString()});p.est='pendiente_sync';await vault.save();return 'Escaneo guardado. Se validará definitivamente al sincronizar.';
 }
