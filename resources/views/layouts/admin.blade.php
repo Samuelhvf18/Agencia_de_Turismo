@@ -97,7 +97,17 @@
             <div class="flex shrink-0 items-center gap-3"><span
                     class="hidden text-xs text-slate-500 md:block">{{ now('America/La_Paz')->locale('es')->translatedFormat('d M Y') }}</span><span
                     class="admin-avatar admin-avatar-light"
-                    title="{{ $nombre }}">{{ mb_substr($nombre, 0, 1) }}</span></div>
+                    title="{{ $nombre }}">{{ mb_substr($nombre, 0, 1) }}</span>
+                @auth
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">
+                            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                            <span>{{ __('Cerrar sesión') }}</span>
+                        </button>
+                    </form>
+                @endauth
+            </div>
         </header>
         <main id="contenido-admin" class="admin-main" tabindex="-1">
             <div class="admin-page-heading">
