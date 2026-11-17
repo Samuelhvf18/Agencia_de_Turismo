@@ -48,10 +48,15 @@
             </div>
             <template x-if="p.fecha_nacimiento && edad(p) < 18 && ! invalido(p)">
                 <fieldset class="space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-4">
-                    <legend class="font-bold">{{ __('Representante y acompañante del menor') }}</legend>
+                    <legend class="sr-only">{{ __('Representante y acompañante del menor') }}</legend>
+                    <h3 class="font-bold" aria-hidden="true">{{ __('Representante y acompañante del menor') }}</h3>
                     <label class="rsv-etiqueta" :for="`adulto_${i}`">{{ __('Adulto que viaja con el menor') }}</label><select class="rsv-campo" :id="`adulto_${i}`" :name="`participantes[${i}][acompanante_indice]`" x-model="p.acompanante_indice" required><option value="">{{ __('Seleccionar un adulto de esta reserva') }}</option><template x-for="(adulto, j) in lista" :key="adulto._k"><option :value="j" :disabled="j === i || ! adulto.fecha_nacimiento || edad(adulto) < 18" x-text="adulto.nom_cpl || 'Participante '+(j+1)"></option></template></select>
                     <label class="rsv-etiqueta" :for="`representante_${i}`">{{ __('Nombre del representante que autoriza') }}</label><input class="rsv-campo" :id="`representante_${i}`" :name="`participantes[${i}][responsable_nombre]`" x-model="p.responsable_nombre" data-letras required maxlength="150">
-                    <label class="rsv-etiqueta" :for="`doc_rep_${i}`">{{ __('Documento del representante') }}</label><input class="rsv-campo" :id="`doc_rep_${i}`" :name="`participantes[${i}][responsable_documento]`" x-model="p.responsable_documento" pattern="[A-Za-z0-9\-]{5,20}" maxlength="20" required>
+                    <div class="space-y-2">
+                        <label class="rsv-etiqueta" :for="`doc_rep_${i}`">{{ __('Número de documento del representante') }}</label>
+                        <input class="rsv-campo" :id="`doc_rep_${i}`" :aria-describedby="`doc_rep_ayuda_${i}`" :name="`participantes[${i}][responsable_documento]`" x-model="p.responsable_documento" pattern="[A-Za-z0-9\-]{5,20}" maxlength="20" placeholder="{{ __('Ej.: 1234567') }}" required>
+                        <p class="text-sm" :id="`doc_rep_ayuda_${i}`">Escribe el número de cédula de identidad o pasaporte del padre, madre o tutor legal que autoriza al menor. Debe corresponder al nombre indicado arriba; no es el documento del menor ni el permiso de viaje.</p>
+                    </div>
                     <label class="rsv-etiqueta" :for="`vinculo_${i}`">{{ __('¿Con quién viaja?') }}</label><select class="rsv-campo" :id="`vinculo_${i}`" :name="`participantes[${i}][vinculo]`" x-model="p.vinculo" required><option value="">{{ __('Seleccionar') }}</option><option value="ambos_padres">{{ __('Ambos progenitores') }}</option><option value="un_progenitor">{{ __('Un progenitor') }}</option><option value="tutor">{{ __('Tutor o guardador legal') }}</option><option value="tercero">{{ __('Familiar o tercero') }}</option></select>
                     <p class="text-sm" x-show="p.vinculo === 'ambos_padres'">Presentar documentos originales del menor y ambos progenitores, y acreditar el vínculo.</p>
                     <p class="text-sm" x-show="p.vinculo === 'un_progenitor'">Para viajes nacionales interdepartamentales: identidad del menor y adulto, autorización del progenitor que no viaja o documentación que justifique su ausencia, según verificación de la Defensoría.</p>
