@@ -24,6 +24,10 @@ class DatabaseSeeder extends Seeder
             // Catálogo de estados Markov, matriz de transición inicial y parámetros
             // iniciales M/M/c/K por tour.
             IoColasMarkovSeeder::class,
+
+            // Datos de demostración de IO: eventos y snapshots de colas, propuestas
+            // de asignación, historial de alquileres para EOQ y ciclo de vida Markov.
+            IoDemoSeeder::class,
         ]);
     }
 }
