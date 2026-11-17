@@ -26,10 +26,12 @@ class IoGestionController extends Controller
 {
     // ---- RF-40: parámetros M/M/c/K -------------------------------------------------------
 
-    public function parametros(ColasService $colas): View
+    public function parametros(Request $request, ColasService $colas): View
     {
+        $request->validate(['tour' => ['nullable', 'integer']]);
         $tours = Tour::where('act', true)->orderBy('nom')->get();
         $activos = ColaParametroTour::where('act', true)->get()->keyBy('tur_id');
+        $seleccionado = $tours->firstWhere('id', (int) old('_tour', $request->input('tour'))) ?? $tours->first();
 
         return view('admin.io.parametros', [
             'tours' => $tours->map(fn (Tour $t) => [
@@ -39,23 +41,51 @@ class IoGestionController extends Controller
                 'lambda_obs' => $colas->lambdaObservado($t->id, now()->subDays(29), now()),
             ]),
             'historial' => ColaParametroTour::with('tour')->orderByDesc('cre_en')->limit(15)->get(),
+            'seleccionado' => $seleccionado?->id,
         ]);
     }
 
-    public function guardarParametros(Request $request, Tour $tour): RedirectResponse
+    public function guardarParametros(Request $request, Tour $tour, ColasService $colas): RedirectResponse
     {
+        // El formulario guiado recibe horas comprensibles para operaciones.
+        // La conversión se hace también en servidor; no se confía en un mu oculto.
+        if ($request->input('modo') === 'guiado') {
+            $horas = $request->validate([
+                'tiempo_tour_horas' => ['required', 'numeric', 'min:0.0001', 'max:240000'],
+            ], [
+                'tiempo_tour_horas.required' => 'Indica cuántas horas dedica un guía a un tour.',
+                'tiempo_tour_horas.numeric' => 'Escribe el tiempo en horas; por ejemplo, 7 o 7.5.',
+                'tiempo_tour_horas.min' => 'El tiempo por tour debe ser mayor que cero.',
+            ]);
+            $horas = (float) $horas['tiempo_tour_horas'];
+            $actual = ColaParametroTour::where('tur_id', $tour->id)->where('act', true)->first();
+            // Mostrar horas con dos decimales no debe redondear una tasa histórica
+            // cuando el usuario solo cambia guías, costos u otro campo.
+            $sinCambio = $actual && abs($horas - max(0.0001, round(24 / $actual->mu, 2))) < 0.00000001;
+            $request->merge(['mu' => $sinCambio ? $actual->mu : $colas->muDesdeDuracion($horas)]);
+        }
+
         $datos = $request->validate([
             'lmb' => ['required', 'numeric', 'min:0', 'max:9999'],
             'mu' => ['required', 'numeric', 'gt:0', 'max:9999'],
             'c_srv' => ['required', 'integer', 'min:1', 'max:60'],
             'k_cap' => ['required', 'integer', 'gte:c_srv', 'max:200'],
-            'cos_esp' => ['nullable', 'numeric', 'min:0', 'max:999999'],
-            'cos_srv' => ['nullable', 'numeric', 'min:0', 'max:999999'],
+            'cos_esp' => [$request->input('modo') === 'guiado' ? 'required' : 'nullable', 'numeric', 'min:0', 'max:999999'],
+            'cos_srv' => [$request->input('modo') === 'guiado' ? 'required' : 'nullable', 'numeric', 'min:0', 'max:999999'],
             'obs' => ['nullable', 'string', 'max:500'],
         ], [
             'mu.gt' => 'La atención por guía debe ser mayor que cero.',
+            'mu.max' => 'El tiempo indicado es demasiado corto para este análisis. Revisa las horas del tour.',
             'c_srv.min' => 'Debes configurar al menos un guía.',
             'k_cap.gte' => 'La capacidad del modelo debe ser igual o mayor que el número de guías.',
+        ], [
+            'lmb' => 'solicitudes diarias de referencia',
+            'mu' => 'ritmo de atención calculado',
+            'c_srv' => 'cantidad de guías para la estimación',
+            'k_cap' => 'límite de solicitudes de la estimación',
+            'cos_esp' => 'costo estimado de la espera',
+            'cos_srv' => 'costo estimado de un guía sin actividad',
+            'obs' => 'motivo del cambio',
         ]);
 
         // Un solo juego activo por tour: el anterior queda como historial.
@@ -65,7 +95,8 @@ class IoGestionController extends Controller
             ColaParametroTour::create($datos + ['tur_id' => $tour->id, 'fec_cal' => today(), 'act' => true]);
         });
 
-        return back()->with('estado', "Configuración de {$tour->nom} guardada. El análisis usará estos valores; las asignaciones y los cupos de las salidas no cambiaron.");
+        return redirect()->route('admin.io.parametros', ['tour' => $tour->id])
+            ->with('estado', "Configuración de {$tour->nom} guardada. El análisis usará estos valores; las asignaciones y los cupos de las salidas no cambiaron.");
     }
 
     // ---- RF-22 a RF-24: propuestas de asignación ----------------------------------------------

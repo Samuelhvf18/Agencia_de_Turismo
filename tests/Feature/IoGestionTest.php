@@ -286,3 +286,53 @@ test('Markov recalibra solo meses completos y las cohortes conservan sus integra
     }
     $this->travelBack();
 });
+
+test('los ajustes guiados muestran solo el tour elegido y conservan el tour al guardar', function () {
+    $this->actingAs($this->admin);
+    $tour = Tour::where('act', true)->orderBy('nom')->skip(1)->firstOrFail();
+    $this->get(route('admin.io.parametros', ['tour' => $tour->id]))->assertOk()
+        ->assertViewHas('seleccionado', $tour->id)
+        ->assertSee('¿Cuántas horas dedica un guía a realizar un tour?')
+        ->assertSee('Las solicitudes se cuentan automáticamente');
+
+    $capacidadReal = $tour->cap_max;
+    $salidas = $tour->salidas()->get()->map->getAttributes()->all();
+    $this->post(route('admin.io.parametros.store', $tour), [
+        'modo' => 'guiado', 'tiempo_tour_horas' => 8, 'mu' => 9999,
+        'lmb' => 0, 'c_srv' => 2, 'k_cap' => 12, 'cos_esp' => 15, 'cos_srv' => 25,
+        'obs' => 'Dos guías y ocho horas por tour.',
+    ])->assertSessionHasNoErrors()->assertRedirect(route('admin.io.parametros', ['tour' => $tour->id]));
+
+    $activo = ColaParametroTour::where('tur_id', $tour->id)->where('act', true)->sole();
+    expect($activo->mu)->toBe(3.0)->and($activo->lmb)->toBe(0.0)
+        ->and($activo->obs)->toBe('Dos guías y ocho horas por tour.')
+        ->and($tour->fresh()->cap_max)->toBe($capacidadReal)
+        ->and($tour->salidas()->get()->map->getAttributes()->all())->toBe($salidas);
+});
+
+test('editar solo guías no redondea la tasa anterior al mostrar horas sencillas', function () {
+    $this->actingAs($this->admin);
+    $par = ColaParametroTour::where('act', true)->firstOrFail();
+    $par->update(['mu' => 3.5123]);
+    $this->post(route('admin.io.parametros.store', $par->tur_id), [
+        'modo' => 'guiado', 'tiempo_tour_horas' => round(24 / 3.5123, 2),
+        'lmb' => 2, 'c_srv' => 2, 'k_cap' => 12, 'cos_esp' => 0, 'cos_srv' => 0,
+    ])->assertSessionHasNoErrors();
+    expect(ColaParametroTour::where('tur_id', $par->tur_id)->where('act', true)->sole()->mu)->toBe(3.5123)
+        ->and($par->fresh()->act)->toBeFalse();
+});
+
+test('los ajustes guiados rechazan tiempos y límites inválidos sin cambiar el historial', function () {
+    $this->actingAs($this->admin);
+    $par = ColaParametroTour::where('act', true)->firstOrFail();
+    $cantidad = ColaParametroTour::count();
+    $base = ['modo' => 'guiado', '_tour' => $par->tur_id, 'lmb' => 2, 'c_srv' => 2, 'k_cap' => 12, 'cos_esp' => 15, 'cos_srv' => 25];
+    foreach ([null, 0, -1, 'texto', 240001] as $horas) {
+        $this->from(route('admin.io.parametros', ['tour' => $par->tur_id]))
+            ->post(route('admin.io.parametros.store', $par->tur_id), $base + ['tiempo_tour_horas' => $horas])
+            ->assertSessionHasErrors('tiempo_tour_horas');
+    }
+    $this->post(route('admin.io.parametros.store', $par->tur_id), array_replace($base, ['tiempo_tour_horas' => 8, 'k_cap' => 1]))
+        ->assertSessionHasErrors('k_cap');
+    expect(ColaParametroTour::count())->toBe($cantidad)->and($par->fresh()->act)->toBeTrue();
+});
