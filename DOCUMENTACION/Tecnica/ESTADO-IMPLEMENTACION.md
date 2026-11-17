@@ -59,13 +59,13 @@ El [rediseño implementado](REDISENO-ADMIN.md) unifica administración e IO. La 
 - La tabla de usuarios es `users` (decisión del equipo). El registro pide nombre y apellidos y los guarda juntos en `nom`. El inicio de sesión es por correo.
 - 2FA TOTP opcional con recuperación y verificación real de correo implementadas. No se agregan passkeys como requisito.
 - La pasarela de pago es una simulación propia con webhook firmado (decisión del equipo).
-- El planificador de IO II es n8n (`docs/n8n/planificador-io.json`); el cron de Laravel queda para la expiración de reservas, los recordatorios y el respaldo.
+- El planificador de IO II es n8n (`DOCUMENTACION/Tecnica/n8n/planificador-io.json`); el cron de Laravel queda para la expiración de reservas, los recordatorios y el respaldo.
 
 ## Configuración pendiente para producción y defensa
 
 | Qué | Dónde | Sin configurar… |
 |---|---|---|
-| n8n: importar flujos, credencial SMTP y API key de Anthropic | `docs/n8n/*.json` | Notificaciones por correo directo; chatbot con el asistente local |
+| n8n: importar flujos, credencial SMTP y API key de Anthropic | `DOCUMENTACION/Tecnica/n8n/*.json` | Notificaciones por correo directo; chatbot con el asistente local |
 | `N8N_TOKEN`, `N8N_WEBHOOK_NOTIFICACIONES`, `N8N_WEBHOOK_CHATBOT` | `.env` | Igual que arriba; el planificador no corre (tareas manuales o cron) |
 | SMTP real (`MAIL_*`) | `.env` | Los correos no salen |
 | `PASARELA_SECRETO`, `PASARELA_WEBHOOK_HTTP=true` | `.env` (producción) | Usa `APP_KEY` como secreto |

@@ -1,5 +1,5 @@
 # Despliegue completo: Nginx + PHP-FPM + PostgreSQL 17 + Redis + n8n,
-# con un worker de colas y el planificador de Laravel. Ver docs/DESPLIEGUE.md.
+# con un worker de colas y el planificador de Laravel. Ver DOCUMENTACION/Tecnica/DESPLIEGUE.md.
 services:
   app:
     build: { context: ., dockerfile: docker/Dockerfile, target: app }
@@ -75,7 +75,7 @@ services:
     volumes: [redisdata:/data]
     restart: unless-stopped
 
-  # Planificador de IO II, notificaciones y chatbot (flujos en docs/n8n).
+  # Planificador de IO II, notificaciones y chatbot (flujos en DOCUMENTACION/Tecnica/n8n).
   n8n:
     image: n8nio/n8n:1.80.0
     ports: ["5678:5678"]

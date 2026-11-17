@@ -4,7 +4,7 @@ Sistema para agencias de viajes y turismo de La Paz (Bolivia): catálogo georref
 
 **Stack:** Laravel 12 (MVC + capa de servicios), PostgreSQL 17 (JSONB, vistas y CHECK), Livewire/Alpine, Tailwind, Leaflet, Chart.js, n8n, Redis y Pest.
 
-[Entrega y pruebas del 14/11/2026](docs/ENTREGA-2026-11-14.md) · [Plan vigente](Plan_Trabajo_Agencia_Turismo.md)
+[Entrega y pruebas del 14/11/2026](DOCUMENTACION/Tecnica/ENTREGA-2026-11-14.md) · [Plan vigente](DOCUMENTACION/Plan_Trabajo_Agencia_Turismo.md)
 
 ## Módulos
 
@@ -21,11 +21,11 @@ Sistema para agencias de viajes y turismo de La Paz (Bolivia): catálogo georref
 | M09 Reseñas y dashboards | Dashboard, analítica con las 7 vistas SQL y proyección de demanda |
 | M10 Notificaciones y auditoría | Bitácora con antes/después, lecturas sensibles, notificaciones vía n8n o correo |
 
-El detalle por requisito está en [`docs/ESTADO-IMPLEMENTACION.md`](docs/ESTADO-IMPLEMENTACION.md).
+El detalle por requisito está en [`DOCUMENTACION/Tecnica/ESTADO-IMPLEMENTACION.md`](DOCUMENTACION/Tecnica/ESTADO-IMPLEMENTACION.md).
 
 ## Puesta en marcha
 
-Ver [`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md) (desarrollo local, Docker, respaldo) y [`docs/n8n/README.md`](docs/n8n/README.md) (flujos de n8n).
+Ver [`DOCUMENTACION/Tecnica/DESPLIEGUE.md`](DOCUMENTACION/Tecnica/DESPLIEGUE.md) (desarrollo local, Docker, respaldo) y [`DOCUMENTACION/Tecnica/n8n/README.md`](DOCUMENTACION/Tecnica/n8n/README.md) (flujos de n8n).
 
 ```bash
 composer install && npm install && npm run build
@@ -37,11 +37,11 @@ php artisan test   # última suite local: 195 aprobadas, 1 omitida; base agencia
 
 ## Verificación y avance
 
-- [Plan de trabajo vigente: avances y tareas pendientes](Plan_Trabajo_Agencia_Turismo.md)
+- [Plan de trabajo vigente: avances y tareas pendientes](DOCUMENTACION/Plan_Trabajo_Agencia_Turismo.md)
 
-- [Instalación QA, CI y recuperación](docs/CI-Y-PRUEBAS.md)
-- [Avance del plan WAAAAAA y pendientes reales](docs/AVANCE-PLAN-TRABAJO.md)
+- [Instalación QA, CI y recuperación](DOCUMENTACION/Tecnica/CI-Y-PRUEBAS.md)
+- [Avance del plan WAAAAAA y pendientes reales](DOCUMENTACION/Tecnica/AVANCE-PLAN-TRABAJO.md)
 
-- [Panel administrativo y planificación: diseño y uso](docs/REDISENO-ADMIN.md)
+- [Panel administrativo y planificación: diseño y uso](DOCUMENTACION/Tecnica/REDISENO-ADMIN.md)
 
-La [revisión del rol de turista](docs/REVISION-TURISTA.md) detalla las 14 observaciones, la política de menores y cómo activar Gmail, Google y el servicio de notificaciones.
+La [revisión del rol de turista](DOCUMENTACION/Tecnica/REVISION-TURISTA.md) detalla las 14 observaciones, la política de menores y cómo activar Gmail, Google y el servicio de notificaciones.

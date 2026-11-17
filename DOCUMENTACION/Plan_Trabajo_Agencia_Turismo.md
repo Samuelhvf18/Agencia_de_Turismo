@@ -1,6 +1,6 @@
 # Plan de trabajo — estado de entrega
 
-Actualizado el **14/11/2026 (UTC)**. Rama [WAAAAAA](https://github.com/Samuelhvf18/Agencia_de_Turismo/tree/WAAAAAA). Esta revisión incluye desarrollo y pruebas; reemplaza el [plan del 13/11](docs/historico/PLAN-TRABAJO-2026-11-13.md). La [revisión inicial](docs/historico/PLAN-TRABAJO-2026-11-12.md) conserva las fuentes originales. Sus estimaciones no son horas pendientes ni trabajadas.
+Actualizado el **14/11/2026 (UTC)**. Rama [WAAAAAA](https://github.com/Samuelhvf18/Agencia_de_Turismo/tree/WAAAAAA). Esta revisión incluye desarrollo y pruebas; reemplaza el [plan del 13/11](Tecnica/historico/PLAN-TRABAJO-2026-11-13.md). La [revisión inicial](Tecnica/historico/PLAN-TRABAJO-2026-11-12.md) conserva las fuentes originales. Sus estimaciones no son horas pendientes ni trabajadas.
 
 El proyecto dispone de una versión funcional de demostración, con pagos simulados. **No se acredita una operación de producción ni aprobación del PO/docente.** A continuación se separa lo implementado de las comprobaciones que necesitan servicios, datos, entorno o aceptación externa.
 
@@ -17,11 +17,11 @@ El proyecto dispone de una versión funcional de demostración, con pagos simula
 - Respaldo de BD y adjuntos privados con manifiesto SHA-256, permisos privados y retención. Restauración de relaciones y firmas comprobada. Instalador local conserva `.env` y datos existentes.
 - Imagen PHP con extensiones comprobables y estáticos Nginx del mismo build; se evita incluir firmas/archivos de QA y servir assets de un volumen antiguo. Consultar la validación concreta del build en el informe.
 
-El rediseño administrativo y **Planificación inteligente** ya estaban implementados en `33abc90`; continúan disponibles. [Guía del panel](docs/REDISENO-ADMIN.md).
+El rediseño administrativo y **Planificación inteligente** ya estaban implementados en `33abc90`; continúan disponibles. [Guía del panel](Tecnica/REDISENO-ADMIN.md).
 
 ## Evidencia y reproducción
 
-Consultar [informe de entrega](docs/ENTREGA-2026-11-14.md), [salida de la suite](docs/evidencias/suite-2026-11-14.txt), [comprobaciones de integración](docs/evidencias/aceptacion-2026-11-14.txt), [entorno QA](docs/CI-Y-PRUEBAS.md), [diccionario verificado](docs/DICCIONARIO-ACTUAL.md), [arquitectura](docs/ARQUITECTURA-ACTUAL.md) y [operación](docs/OPERACION.md).
+Consultar [informe de entrega](Tecnica/ENTREGA-2026-11-14.md), [salida de la suite](Tecnica/evidencias/suite-2026-11-14.txt), [comprobaciones de integración](Tecnica/evidencias/aceptacion-2026-11-14.txt), [entorno QA](Tecnica/CI-Y-PRUEBAS.md), [diccionario verificado](Tecnica/DICCIONARIO-ACTUAL.md), [arquitectura](Tecnica/ARQUITECTURA-ACTUAL.md) y [operación](Tecnica/OPERACION.md).
 
 Las pruebas usan datos artificiales y bases desechables. La medición 4G es una ejecución en Chromium; no equivale a una campaña sobre redes móviles reales. El ensayo de carga identifica sus condiciones y cualquier umbral incumplido.
 
@@ -32,7 +32,7 @@ Las pruebas usan datos artificiales y bases desechables. La medición 4G es una 
 | T01 · Entorno/CI | Dependencias, suite, build, [CI aprobado](https://github.com/Samuelhvf18/Agencia_de_Turismo/actions/runs/43554908984) para `8240366` y diccionario físico generado | Cotejo formal con D7/SQL externo; repetir instalación en el equipo de entrega |
 | T02 · Pagos | Saldo protegido, webhook repetido/tardío tras cancelación y carrera pago–cancelación | Aceptar la simulación o aportar proveedor real, conciliación y devolución bancaria |
 | T03 · Avisos | Outbox transaccional, recuperación, lease, backoff, fallos y SMTP capturado con dos PDF | Configurar correo real, revisar mensajes no entregables y acordar política de duplicados del proveedor |
-| T04 · Permisos | Roles, titularidad, documentos/salud filtrados y revocación de guía/chofer; PDF auditado | Revisar la [matriz de accesos](docs/OPERACION.md) con responsables y repetirla sobre el despliegue |
+| T04 · Permisos | Roles, titularidad, documentos/salud filtrados y revocación de guía/chofer; PDF auditado | Revisar la [matriz de accesos](Tecnica/OPERACION.md) con responsables y repetirla sobre el despliegue |
 | T05 · Auditoría | 39 tablas de negocio con trigger; SQL masivo, pivotes y lecturas sensibles | Privilegios de SQL de producción, conservación/volumen y aceptación de exclusiones técnicas |
 | T06 · Historial | Consulta propia, separación de titulares, enlaces a estados y documentos | Recorrido de aceptación del titular en el entorno final; no se vinculan reservas invitadas automáticamente |
 | T07 · URL públicas | Slugs únicos, nombres repetidos/acentos de tours, guía inactivo y campos públicos | Revisión editorial de categorías/guías y sus datos operativos |

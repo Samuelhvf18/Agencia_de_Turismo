@@ -72,7 +72,7 @@ Pasos:
    docker compose exec app php artisan config:cache && docker compose exec app php artisan route:cache && docker compose exec app php artisan view:cache
    ```
 
-5. En n8n (`:5678`), importar los flujos de `docs/n8n/` y configurar las credenciales SMTP y de Anthropic (ver `docs/n8n/README.md`).
+5. En n8n (`:5678`), importar los flujos de `DOCUMENTACION/Tecnica/n8n/` y configurar las credenciales SMTP y de Anthropic (ver `DOCUMENTACION/Tecnica/n8n/README.md`).
 
 ## Respaldo (RNF-12)
 

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Artisan;
  * cálculos de IO II los programa n8n, no el cron de Laravel). Cada tarea es
  * un comando de Artisan, así también se puede correr a mano.
  *
- * Flujo exportado en docs/n8n/planificador-io.json.
+ * Flujo exportado en DOCUMENTACION/Tecnica/n8n/planificador-io.json.
  */
 class N8nPlanificadorController extends Controller
 {

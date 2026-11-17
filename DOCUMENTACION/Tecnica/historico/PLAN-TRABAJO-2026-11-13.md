@@ -6,7 +6,7 @@
 
 **Código contrastado:** [33abc90](https://github.com/Samuelhvf18/Agencia_de_Turismo/commit/33abc90a5bebdb1737707011d71c1458887dd7d8), que incorpora [cb12158](https://github.com/Samuelhvf18/Agencia_de_Turismo/commit/cb12158510ae43c3399f1db8fb40561426a78758).
 
-Este es el **plan vigente de lo que falta**. Conserva los identificadores T01–T18 y agrega T19 para el rediseño solicitado después. La [revisión original del 12/11](../../docs/historico/PLAN-TRABAJO-2026-11-12.md) conserva el diagnóstico, las ocho fuentes documentales y las estimaciones iniciales. Esas estimaciones **no son esfuerzo restante ni horas trabajadas**.
+Este es el **plan vigente de lo que falta**. Conserva los identificadores T01–T18 y agrega T19 para el rediseño solicitado después. La [revisión original del 12/11](../historico/PLAN-TRABAJO-2026-11-12.md) conserva el diagnóstico, las ocho fuentes documentales y las estimaciones iniciales. Esas estimaciones **no son esfuerzo restante ni horas trabajadas**.
 
 Esta actualización revisa código, documentos del repositorio y evidencias de las ejecuciones anteriores. No vuelve a ejecutar la suite ni a consultar los PDF de Drive; tampoco acredita un despliegue de producción.
 
@@ -28,15 +28,15 @@ Que exista una función no cierra automáticamente su aceptación funcional, ope
 
 | Evidencia | Resultado real | Límite |
 |---|---|---|
-| [Suite de la preparación de 33abc90](../../docs/evidencias/suite-33abc90.txt) | **170 aprobadas, 4 omitidas, 0 fallidas; 872 aserciones**, PHP 8.4/PostgreSQL 17 | Las omisiones son tres pruebas de 2FA desactivado y la de registro deshabilitado, porque el registro está habilitado |
+| [Suite de la preparación de 33abc90](../evidencias/suite-33abc90.txt) | **170 aprobadas, 4 omitidas, 0 fallidas; 872 aserciones**, PHP 8.4/PostgreSQL 17 | Las omisiones son tres pruebas de 2FA desactivado y la de registro deshabilitado, porque el registro está habilitado |
 | Build frontend | `npm run build` correcto, Vite 6.4.3, 58 módulos | No demuestra rendimiento del navegador ni despliegue |
-| [Pagos concurrentes](../../docs/evidencias/pagos-concurrencia-cb12158.txt) | Dos procesos: un intento aceptado y otro rechazado; callbacks heredados contabilizan **Bs 100 de Bs 100** | No cubre aún carreras de reservas, asignaciones, cancelaciones ni una pasarela real |
-| [Revisión de interfaz](../../docs/evidencias/interfaz-33abc90.txt) | 16 pantallas a 360 px sin desbordamiento del documento; revisión de planificación a 768 px y escritorio a 1440 px; sin errores JS en esos recorridos | Chromium, datos de QA y demostración; no es matriz completa de navegadores ni validación con un administrador real |
+| [Pagos concurrentes](../evidencias/pagos-concurrencia-cb12158.txt) | Dos procesos: un intento aceptado y otro rechazado; callbacks heredados contabilizan **Bs 100 de Bs 100** | No cubre aún carreras de reservas, asignaciones, cancelaciones ni una pasarela real |
+| [Revisión de interfaz](../evidencias/interfaz-33abc90.txt) | 16 pantallas a 360 px sin desbordamiento del documento; revisión de planificación a 768 px y escritorio a 1440 px; sin errores JS en esos recorridos | Chromium, datos de QA y demostración; no es matriz completa de navegadores ni validación con un administrador real |
 | Interacciones del nuevo panel | Comparación de escenarios, filtros, desplegables, menú móvil y apertura/cancelación/confirmación de asignación | La asignación se confirmó en base desechable, no en operación real |
 | Restauración local | `pg_dump` custom y `pg_restore --exit-on-error` en otra base PostgreSQL 17; 6 tours, 223 auditorías, 18 migraciones | La muestra no tenía reservas; faltan volumen, archivos adjuntos y recuperación del entorno de entrega |
-| CI remoto | [Workflow creado](../../.github/workflows/ci.yml) y subido | La consulta disponible devolvió estados vacíos y ninguna ejecución de PR; **no demuestra CI verde ni que el workflow de push no se ejecutó** |
+| CI remoto | [Workflow creado](../../../.github/workflows/ci.yml) y subido | La consulta disponible devolvió estados vacíos y ninguna ejecución de PR; **no demuestra CI verde ni que el workflow de push no se ejecutó** |
 
-Guías: [entorno y pruebas](../../docs/CI-Y-PRUEBAS.md), [rediseño y uso](../../docs/REDISENO-ADMIN.md), [matriz de implementación](../../docs/ESTADO-IMPLEMENTACION.md).
+Guías: [entorno y pruebas](../CI-Y-PRUEBAS.md), [rediseño y uso](../REDISENO-ADMIN.md), [matriz de implementación](../ESTADO-IMPLEMENTACION.md).
 
 ## 3. Estado general por tarea
 

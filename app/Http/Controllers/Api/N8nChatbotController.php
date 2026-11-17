@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Herramientas que usa el agente de IA de n8n (flujo docs/n8n/chatbot.json).
+ * Herramientas que usa el agente de IA de n8n (flujo DOCUMENTACION/Tecnica/n8n/chatbot.json).
  * Todas son de solo lectura salvo la derivación a una persona.
  */
 class N8nChatbotController extends Controller

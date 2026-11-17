@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 use Symfony\Component\Process\Process;
 use ZipArchive;
 
-/** Respaldo privado de BD, adjuntos y manifiesto SHA-256. Ver docs/OPERACION.md. */
+/** Respaldo privado de BD, adjuntos y manifiesto SHA-256. Ver DOCUMENTACION/Tecnica/OPERACION.md. */
 class RespaldarBaseDatos extends Command
 {
     protected $signature = 'respaldo:bd {--dias=30 : Días de respaldos a conservar} {--pg-dump= : Ruta de pg_dump} {--sin-archivos : Excluir adjuntos privados explícitamente}';

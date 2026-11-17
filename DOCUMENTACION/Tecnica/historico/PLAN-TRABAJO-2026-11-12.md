@@ -72,7 +72,7 @@ Esta matriz identifica evidencia y trabajo restante. “Por verificar” no sign
 | RF-41/42/43; HU-46 a 49 | Eventos, ColasService, controlador y simulador | Fórmulas presentes; inconsistencias entre fuentes/ventanas de λ y μ e histórico/panel. T09. |
 | RF-44/45; HU-50 a 52 | MarkovService, panel, cohortes y recalibración | Brechas al derivar estados reales de clientes; verificar precisión al persistir matriz. T08. |
 
-Atención: docs/ESTADO-IMPLEMENTACION.md del repositorio intercambia referencias de RF-17 y RF-21 en su descripción de check-in/cancelación. Usar D1 como numeración canónica y reparar esa matriz en T15.
+Atención: DOCUMENTACION/Tecnica/ESTADO-IMPLEMENTACION.md del repositorio intercambia referencias de RF-17 y RF-21 en su descripción de check-in/cancelación. Usar D1 como numeración canónica y reparar esa matriz en T15.
 
 ## 5. Brechas y tareas ejecutables
 
@@ -206,7 +206,7 @@ Evidencia: [app/Services/Io/EoqService.php:63](https://github.com/Samuelhvf18/Ag
 
 ### T11. Probar integración real de n8n, correo e IA — P1 — 5 a 8 h
 
-Estado por verificar. El repositorio entrega flujos y configuración; no demuestra que estén importados/activos en una instancia. docs/ESTADO-IMPLEMENTACION.md los enumera como configuración pendiente.
+Estado por verificar. El repositorio entrega flujos y configuración; no demuestra que estén importados/activos en una instancia. DOCUMENTACION/Tecnica/ESTADO-IMPLEMENTACION.md los enumera como configuración pendiente.
 
 - [ ] Importar y activar notificaciones, chatbot y planificador; configurar token y credenciales en el entorno, sin escribir secretos en archivos del proyecto.
 - [ ] Verificar callbacks autenticados, SMTP, ejecución diaria/mensual, worker y reintentos.
@@ -215,7 +215,7 @@ Estado por verificar. El repositorio entrega flujos y configuración; no demuest
 - [ ] En RF-14, resolver la diferencia de canal: EnviarBoletosReserva manda el correo directamente por Laravel y no por n8n.
 
 Aceptación: un pago controlado genera comprobante, QR y correo recibido; la tarea programada corre sin intervención; el respaldo local del chatbot funciona al fallar la IA.
-Evidencia: [app/Jobs/EnviarBoletosReserva.php:42](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Jobs/EnviarBoletosReserva.php#L42) y docs/n8n/README.md.
+Evidencia: [app/Jobs/EnviarBoletosReserva.php:42](https://github.com/Samuelhvf18/Agencia_de_Turismo/blob/2db08026fc752a125177738b58c1d346f6ea12ea/app/Jobs/EnviarBoletosReserva.php#L42) y DOCUMENTACION/Tecnica/n8n/README.md.
 Dependencia: T02/T03. Responsable: integración.
 
 ### T12. Resolver alcance de pagos, comprobantes y 2FA — P1 — 2 a 4 h para decisión/documentación
@@ -260,7 +260,7 @@ Evidencia: [app/Http/Controllers/Admin/DashboardController.php:91](https://githu
 ### T15. Reparar trazabilidad y cierre documental — P1 — 4 a 6 h
 
 - [ ] Crear matriz RF/RNF → HU → caso de uso → archivo → prueba → evidencia → estado real.
-- [ ] Corregir referencias intercambiadas RF-17/RF-21 en docs/ESTADO-IMPLEMENTACION.md.
+- [ ] Corregir referencias intercambiadas RF-17/RF-21 en DOCUMENTACION/Tecnica/ESTADO-IMPLEMENTACION.md.
 - [ ] Alinear D5 con esquema v6 y D7, que ya contempla propuestas_asignacion.
 - [ ] Documentar consulta por código + correo, simulación de pagos, envío directo por Laravel y decisiones de T12.
 - [ ] El informe afirma despliegue, pruebas y 2FA; conservar afirmaciones de ejecución solo con evidencia verificable.

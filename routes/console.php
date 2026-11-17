@@ -9,7 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Módulo 07 — Investigación Operativa II: los cálculos los programa n8n (decisión del equipo)
-// llamando a POST /api/n8n/tareas/{tarea}; ver docs/n8n/planificador-io.json. Para correrlos
+// llamando a POST /api/n8n/tareas/{tarea}; ver DOCUMENTACION/Tecnica/n8n/planificador-io.json. Para correrlos
 // sin n8n basta descomentar estas líneas y usar `php artisan schedule:work`.
 // Schedule::command('io:metricas-colas')->dailyAt('23:55');
 // Schedule::command('io:recalibrar-markov --sincronizar')->monthlyOn(1, '02:00');

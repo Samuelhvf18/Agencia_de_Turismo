@@ -14,7 +14,7 @@ task_entorno_nuevo=1
 if [ -f .env ]; then
     task_entorno_nuevo=0
     if ! sed -n 's/^APP_ENV=//p' .env | tr -d '\"\r' | grep -Eq '^(local|testing)$'; then
-        echo "El instalador automático solo admite APP_ENV=local/testing. Consulte docs/DESPLIEGUE.md."
+        echo "El instalador automático solo admite APP_ENV=local/testing. Consulte DOCUMENTACION/Tecnica/DESPLIEGUE.md."
         exit 1
     fi
 fi
