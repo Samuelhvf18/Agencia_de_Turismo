@@ -168,7 +168,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return match ($this->nombreRol()) {
             self::ROL_ADMIN, self::ROL_OPERACIONES => route('admin.dashboard'),
             self::ROL_GUIA, self::ROL_CHOFER => route('guias.checkin'),
-            self::ROL_TURISTA => route('reservas.historial'),
+            self::ROL_TURISTA => route('home'),
             default => route('home'),
         };
     }

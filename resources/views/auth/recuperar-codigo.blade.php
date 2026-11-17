@@ -1,25 +1,33 @@
 <x-guest-layout>
-<div class="mx-auto my-10 max-w-lg rounded-2xl bg-white p-6 shadow">
-    <h1 class="text-2xl font-bold">Recuperar contraseña</h1>
-    <p class="my-3">Solicita un código y escríbelo aquí. Puedes leer el correo desde cualquier dispositivo. El código vence en 10 minutos.</p>
-    @if (session('status'))<p role="status" class="text-green-700">{{ session('status') }}</p>@endif
-    <x-validation-errors class="my-4" />
-    <form method="POST" action="{{ route('codigo.solicitar') }}" class="space-y-3">
-        @csrf
-        <label class="block" for="solicitar-correo">Correo de la cuenta</label><input id="solicitar-correo" type="email" name="cor" required maxlength="150" autocomplete="email" value="{{ old('cor') }}" class="w-full rounded-lg border-gray-300">
-        <x-button>Enviar código</x-button>
-    </form>
-    <hr class="my-6">
-    <form method="POST" action="{{ route('codigo.restablecer') }}" class="space-y-3">
-        @csrf
-        <label class="block" for="reset-correo">Correo de la cuenta</label><input id="reset-correo" type="email" name="cor" required maxlength="150" autocomplete="email" value="{{ old('cor') }}" class="w-full rounded-lg border-gray-300">
-        <label class="block" for="codigo">Código de 6 dígitos</label><input id="codigo" name="codigo" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required class="w-full rounded-lg border-gray-300">
-        <label class="block" for="password">Nueva contraseña</label><input id="password" name="password" type="password" minlength="8" required autocomplete="new-password" class="w-full rounded-lg border-gray-300">
-        <button type="button" data-toggle-password="password" class="text-sm underline">Mostrar contraseña</button>
-        <p class="text-sm">Al menos 8 caracteres, una letra y un número.</p>
-        <label class="block" for="password_confirmation">Confirmar contraseña</label><input id="password_confirmation" name="password_confirmation" type="password" minlength="8" required autocomplete="new-password" class="w-full rounded-lg border-gray-300">
-        <x-button>Guardar nueva contraseña</x-button>
-    </form>
-    <a class="mt-5 block underline" href="{{ route('login') }}">Volver al inicio de sesión</a>
-</div>
+@php
+    $correo = old('cor', session('recuperacion.correo', ''));
+    $pasoCodigo = session('recuperacion.correo') || old('_paso') === 'codigo' || request('paso') === 'codigo';
+@endphp
+<main class="relative flex min-h-screen items-center justify-center bg-pipocas-fondo px-4 py-10 font-cuerpo text-pipocas-texto">
+    <div class="w-full max-w-lg">
+        <a href="{{ route('home') }}" class="mb-7 flex items-center justify-center gap-3 text-2xl font-extrabold text-pipocas-principal"><span class="grid h-12 w-12 place-items-center rounded-2xl bg-pipocas-acento" aria-hidden="true">P</span> Pipocas</a>
+        <section class="rounded-3xl border border-stone-200 bg-white p-6 shadow-xl shadow-stone-200/50 sm:p-9" aria-labelledby="recuperar-titulo">
+            <p class="mb-3 text-xs font-bold uppercase tracking-widest text-pipocas-secundario">{{ __('Vuelve a tu próxima aventura') }}</p>
+            <h1 id="recuperar-titulo" class="font-titulo text-3xl text-pipocas-principal">{{ __('Recuperar contraseña') }}</h1>
+            <ol class="my-6 flex gap-4 text-sm" aria-label="{{ __('Pasos de recuperación') }}">
+                <li class="flex items-center gap-2"><span class="grid h-7 w-7 place-items-center rounded-full bg-pipocas-principal text-white">1</span> {{ __('Tu correo') }}</li>
+                <li class="flex items-center gap-2"><span @class(['grid h-7 w-7 place-items-center rounded-full', 'bg-pipocas-principal text-white' => $pasoCodigo, 'bg-stone-100 text-stone-500' => ! $pasoCodigo])>2</span> {{ __('Nueva contraseña') }}</li>
+            </ol>
+            @if (session('status'))<p role="status" class="mb-5 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">{{ session('status') }}</p>@endif
+            @if ($errors->any())<div role="alert" class="mb-5 rounded-xl bg-red-50 p-4 text-sm text-red-700"><x-validation-errors /></div>@endif
+            @if (! $pasoCodigo)
+                <p class="mb-5 text-sm text-pipocas-texto-2">{{ __('Escribe el correo de tu cuenta. Te enviaremos un código de 6 dígitos para crear una nueva contraseña.') }}</p>
+                <form method="POST" action="{{ route('codigo.solicitar') }}" class="space-y-5">
+                    @csrf
+                    <div><label class="rsv-etiqueta" for="solicitar-correo">{{ __('Correo de la cuenta') }}</label><input id="solicitar-correo" type="email" name="cor" required maxlength="150" autocomplete="email" value="{{ $correo }}" class="rsv-campo" placeholder="nombre@correo.com" autofocus></div>
+                    <button type="submit" class="rsv-btn w-full">{{ __('Enviar código de recuperación') }} →</button>
+                </form>
+                <a href="{{ route('codigo.recuperar', ['paso' => 'codigo']) }}" class="mt-5 block text-center text-sm font-semibold text-pipocas-principal">{{ __('Ya tengo un código') }}</a>
+            @else
+                @include('auth.partials.nueva-clave', ['correo' => $correo])
+            @endif
+        </section>
+        <a href="{{ route('login') }}" class="mt-6 block text-center text-sm font-semibold text-pipocas-principal">← {{ __('Volver al inicio de sesión') }}</a>
+    </div>
+</main>
 </x-guest-layout>

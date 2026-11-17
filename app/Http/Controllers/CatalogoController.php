@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CategoriaTour;
 use App\Models\PerfilGuia;
 use App\Models\Tour;
+use App\Services\Catalogo\RecomendadorTours;
 use App\Support\PresentadorTour;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +37,9 @@ class CatalogoController extends Controller
 
         $categorias = CategoriaTour::whereHas('tours', fn ($q) => $q->where('act', true)->whereNull('eli_en'))->orderBy('nom')->get();
 
-        return view('welcome', compact('tours', 'categorias'));
+        $recomendaciones = app(RecomendadorTours::class)->para(request());
+
+        return view('welcome', compact('tours', 'categorias', 'recomendaciones'));
     }
 
     public function categoria(CategoriaTour $categoria)
@@ -59,6 +62,10 @@ class CatalogoController extends Controller
     public function show(Tour $tour)
     {
         abort_unless($tour->act && is_null($tour->eli_en), 404);
+
+        $vistos = array_values(array_diff((array) session('catalogo.vistos', []), [$tour->id]));
+        $vistos[] = $tour->id;
+        session(['catalogo.vistos' => array_slice($vistos, -20)]);
 
         $tour->load(['categoria', 'fotos' => fn ($q) => $q->orderBy('ord_vis')]);
         PresentadorTour::presentar($tour);

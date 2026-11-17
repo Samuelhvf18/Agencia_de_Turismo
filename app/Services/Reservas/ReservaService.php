@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\CodeGeneratorService;
 use App\Services\Io\ColasService;
 use App\Services\Io\MarkovService;
+use App\Services\Notificaciones\NotificacionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -176,6 +177,10 @@ class ReservaService
 
                 // IO II · colas: llegada admitida al sistema M/M/c/K.
                 $this->colas->registrarLlegada($salida->tur_id, $salida->id, $reserva->id, $cantidad, 'admitido');
+
+                app(NotificacionService::class)->aReserva($reserva, 'reserva_creada', [
+                    'mensaje' => 'Guarda tu código de reserva. Los tickets QR estarán disponibles al completar el pago y las verificaciones necesarias.',
+                ], clave: 'reserva-creada:'.$reserva->id);
 
                 return $reserva;
             });

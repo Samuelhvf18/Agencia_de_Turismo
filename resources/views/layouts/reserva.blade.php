@@ -48,9 +48,9 @@
                 </a>
                 @auth
                     <a href="{{ route('reservas.historial') }}">{{ __('Mis reservas') }}</a>
-                    <span class="hidden items-center gap-2 rounded-xl bg-pipocas-fondo px-3 py-2 text-pipocas-texto md:inline-flex">
-                        <i class="fa-regular fa-user"></i> {{ auth()->user()->name }}
-                    </span>
+                    <a href="{{ auth()->user()->tieneRol('turista') ? route('turista.cuenta') : route('profile.show') }}" class="inline-flex items-center gap-2 rounded-xl bg-pipocas-fondo px-3 py-2 text-pipocas-texto">
+                        <i class="fa-regular fa-user"></i> {{ __('Mi cuenta') }}
+                    </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-red-700 transition hover:bg-red-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">

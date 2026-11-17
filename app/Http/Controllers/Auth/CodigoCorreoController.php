@@ -26,7 +26,8 @@ class CodigoCorreoController extends Controller
             $codigos->enviar($correo, 'recuperar');
         }
 
-        return back()->with('status', 'Si existe una cuenta activa con ese correo, recibirás un código. Revisa también spam.')->withInput(['cor' => $correo]);
+        return redirect()->route('codigo.recuperar')->with('status', 'Si existe una cuenta activa con ese correo, recibirás un código. Revisa también spam.')
+            ->with('recuperacion.correo', $correo)->withInput(['cor' => $correo]);
     }
 
     public function restablecer(Request $request, CodigoCorreo $codigos)
@@ -54,7 +55,7 @@ class CodigoCorreoController extends Controller
         $request->validate(['codigo' => ['required', 'digits:6']]);
         $usuario = $request->user();
         if ($usuario->hasVerifiedEmail()) {
-            return redirect()->to($usuario->rutaInicio());
+            return redirect()->intended($usuario->rutaInicio());
         }
         if (! $codigos->comprobar($usuario->cor, 'verificar', $request->string('codigo')->toString(), function () use ($usuario) {
             $usuario->markEmailAsVerified();

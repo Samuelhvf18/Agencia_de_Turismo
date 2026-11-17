@@ -19,6 +19,11 @@ class RedirigirSegunRol implements LoginResponse, RegisterResponse
             return new JsonResponse(['two_factor' => false], 200);
         }
 
+        if (! $request->user()->hasVerifiedEmail()) {
+            // La verificación consume el destino después, no durante el registro.
+            return redirect()->route('verification.notice');
+        }
+
         return redirect()->intended($request->user()->rutaInicio());
     }
 }

@@ -397,7 +397,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" @if (app()->getLocale() === 'en') style="text-decoration:underline" @endif>EN</a>
       </span>
       @auth
-        <a href="{{ url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ __('Panel') }}</a>
+        <a href="{{ auth()->user()->tieneRol('turista') ? route('reservas.historial') : url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ auth()->user()->tieneRol('turista') ? __('Mis reservas') : __('Panel') }}</a>
       @else
         @if (Route::has('login'))
           <a href="{{ route('login') }}" class="login">{{ __('Iniciar sesión') }}</a>
@@ -425,7 +425,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   </nav>
   <div class="mm-btns">
     @auth
-      <a href="{{ url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ __('Ir a mi panel') }}</a>
+      <a href="{{ auth()->user()->tieneRol('turista') ? route('reservas.historial') : url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ auth()->user()->tieneRol('turista') ? __('Mis reservas') : __('Ir a mi panel') }}</a>
     @else
       @if (Route::has('login'))
         <a href="{{ route('login') }}" class="btn btn-glass">{{ __('Iniciar sesión') }}</a>
@@ -514,6 +514,10 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 </section>
 
 <!-- ================= CATÁLOGO ================= -->
+<div class="wrap" style="padding-bottom:64px">
+  @include('tours.partials.para-ti')
+</div>
+
 <section class="s" id="catalogo" style="padding-top:0">
   <div class="wrap">
     <div class="head-row">

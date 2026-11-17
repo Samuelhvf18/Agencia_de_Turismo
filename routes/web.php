@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CheckinController;
+use App\Http\Controllers\CuentaTuristaController;
 use App\Http\Controllers\NovedadesController;
 use App\Http\Controllers\Pagos\PagoController;
 use App\Http\Controllers\Reservas\ConsultaReservaController;
@@ -108,6 +109,10 @@ Route::middleware([
 ])->group(function () {
     // Inicio genérico: cada rol va a su propia pantalla.
     Route::get('/mis-reservas', [ConsultaReservaController::class, 'historial'])->name('reservas.historial');
+    Route::middleware('rol:'.User::ROL_TURISTA)->group(function () {
+        Route::get('/mi-cuenta', [CuentaTuristaController::class, 'show'])->name('turista.cuenta');
+        Route::put('/mi-cuenta', [CuentaTuristaController::class, 'update'])->name('turista.cuenta.update');
+    });
     Route::get('/dashboard', fn (Request $request) => redirect($request->user()->rutaInicio()))->name('dashboard');
 
     // Panel administrativo: administrador y personal de operaciones.

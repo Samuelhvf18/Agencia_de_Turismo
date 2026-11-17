@@ -39,7 +39,11 @@ class NotificacionJob implements ShouldQueue
                 if (! $registro->reserva || $registro->reserva->est_pag !== Reserva::PAG_PAGADO) {
                     throw new \RuntimeException('La reserva ya no está pagada; revisar antes de enviar boletos.');
                 }
-                Mail::to($registro->cnd['destino'])->send((new BoletosReservaMail($registro->reserva))->locale($registro->cnd['idioma'] ?? 'es'));
+                if (config('services.notificaciones.url')) {
+                    app(CorreoTransaccional::class)->boletos($registro->reserva, $registro->clave_evento ?? 'notificacion:'.$registro->id, $registro);
+                } else {
+                    Mail::to($registro->cnd['destino'])->send((new BoletosReservaMail($registro->reserva))->locale($registro->cnd['idioma'] ?? 'es'));
+                }
 
                 return;
             }
