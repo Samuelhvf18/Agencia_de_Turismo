@@ -47,6 +47,7 @@ Route::match(['get', 'post'], '/novedades/{id}/confirmar', [NovedadesController:
 Route::match(['get', 'post'], '/novedades/{id}/baja', [NovedadesController::class, 'baja'])->middleware(['signed', 'throttle:10,1'])->name('novedades.baja');
 
 Route::get('/', [CatalogoController::class, 'index'])->name('home');
+Route::get('/creditos-imagenes', fn () => view('tours.creditos', ['creditos' => json_decode(file_get_contents(public_path('images/tours/creditos.json')), true, flags: JSON_THROW_ON_ERROR)]))->name('imagenes.creditos');
 Route::get('/categorias/{categoria:rta_amg}', [CatalogoController::class, 'categoria'])->name('categorias.show');
 Route::get('/guias/perfil/{guia:rta_amg}', [CatalogoController::class, 'guia'])->name('guias.perfil');
 Route::get('/tours/{tour:rta_amg}', [CatalogoController::class, 'show'])->name('tours.show');
@@ -134,7 +135,7 @@ Route::middleware([
         Route::post('/inventario/tipos/{tipo}/items', [InventarioController::class, 'guardarItem'])->name('inventario.item');
         Route::post('/inventario/tours/{tour}', [InventarioController::class, 'equipoTour'])->name('inventario.tour');
         Route::get('/transporte', [FlotaController::class, 'index'])->name('transporte');
-        Route::post('/transporte', [FlotaController::class, 'store'])->name('transporte.store');
+        Route::post('/transporte', [FlotaController::class, 'store'])->middleware('rol:'.User::ROL_ADMIN)->name('transporte.store');
         Route::put('/transporte/{vehiculo}', [FlotaController::class, 'update'])->name('transporte.update');
         // Catálogo (M02): tours, categorías, galería y trazado
         Route::get('/tours', [CatalogoAdminController::class, 'index'])->name('tours');
@@ -150,7 +151,7 @@ Route::middleware([
         Route::post('/catalogo/categorias/{categoria?}', [CatalogoAdminController::class, 'guardarCategoria'])->name('catalogo.categoria');
         Route::delete('/catalogo/categorias/{categoria}', [CatalogoAdminController::class, 'eliminarCategoria'])->name('catalogo.categoria.eliminar');
         Route::get('/personal', [PersonalController::class, 'index'])->name('personal');
-        Route::post('/personal/{tipo}', [PersonalController::class, 'store'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.store');
+        Route::post('/personal/{tipo}', [PersonalController::class, 'store'])->middleware('rol:'.User::ROL_ADMIN)->whereIn('tipo', ['guia', 'chofer'])->name('personal.store');
         Route::get('/personal/{tipo}/{id}', [PersonalController::class, 'edit'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.edit');
         Route::put('/personal/{tipo}/{id}', [PersonalController::class, 'update'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.update');
         Route::post('/personal/{tipo}/{id}/estado', [PersonalController::class, 'estado'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.estado');

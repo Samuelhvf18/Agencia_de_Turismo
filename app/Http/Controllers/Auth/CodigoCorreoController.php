@@ -19,7 +19,7 @@ class CodigoCorreoController extends Controller
 
     public function solicitar(Request $request, CodigoCorreo $codigos)
     {
-        $datos = $request->validate(['cor' => ['required', 'email', 'max:150']]);
+        $datos = $request->validate(['cor' => ['required', 'email:rfc', 'max:150']]);
         $correo = Str::lower(trim($datos['cor']));
         $usuario = User::whereRaw('LOWER(cor) = ?', [$correo])->where('act', true)->whereNull('eli_en')->first();
         if ($usuario) {
@@ -33,7 +33,7 @@ class CodigoCorreoController extends Controller
     public function restablecer(Request $request, CodigoCorreo $codigos)
     {
         $datos = $request->validate([
-            'cor' => ['required', 'email', 'max:150'], 'codigo' => ['required', 'digits:6'], 'password' => $this->passwordRules(),
+            'cor' => ['required', 'email:rfc', 'max:150'], 'codigo' => ['required', 'digits:6'], 'password' => $this->passwordRules(),
         ]);
         $correo = Str::lower(trim($datos['cor']));
         $usuario = User::whereRaw('LOWER(cor) = ?', [$correo])->where('act', true)->whereNull('eli_en')->first();

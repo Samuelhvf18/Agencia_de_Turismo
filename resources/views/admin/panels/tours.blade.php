@@ -60,7 +60,7 @@
                     </div>
                     <form method="POST" action="{{ route('admin.catalogo.categoria', $c) }}" x-show="cat === {{ $c->id }}" x-cloak class="mt-3 grid gap-2">
                         @csrf
-                        <input name="nom" value="{{ $c->nom }}" required class="{{ $campo }}">
+                        <input name="nom" data-letras value="{{ $c->nom }}" required class="{{ $campo }}">
                         <input name="ico" value="{{ $c->ico }}" placeholder="fa-solid fa-person-hiking" class="{{ $campo }}">
                         <input name="des" value="{{ $c->des }}" placeholder="Descripción" class="{{ $campo }}">
                         <button class="rounded-xl bg-[#1F5F8B] px-3 py-2 text-xs font-semibold text-white">Guardar</button>
@@ -70,7 +70,7 @@
         </div>
         <form method="POST" action="{{ route('admin.catalogo.categoria') }}" class="mt-4 flex flex-wrap gap-2">
             @csrf
-            <input name="nom" required placeholder="Nueva categoría" class="{{ $campo }}">
+            <input name="nom" data-letras required placeholder="Nueva categoría" class="{{ $campo }}">
             <input name="ico" placeholder="fa-solid fa-route" class="{{ $campo }}">
             <input name="des" placeholder="Descripción" class="flex-1 {{ $campo }}">
             <button class="rounded-xl bg-[#C96F4A] px-4 py-2 text-xs font-semibold text-white">Agregar categoría</button>

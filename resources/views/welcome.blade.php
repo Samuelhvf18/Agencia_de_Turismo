@@ -6,9 +6,11 @@
 <title>Pipocas -Agencia de Viajes y Turismo | Sagárnaga, La Paz</title>
 <meta name="description" content="Tours de aventura georreferenciados en La Paz, Bolivia: Biking, Hiking, Trekking, Climbing y City Tours. Reserva en línea y paga con QR.">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
+@livewireStyles
+@vite(['resources/js/app.js'])
 <style>
 :root{
   --principal:#1F5F8B; --secundario:#C96F4A; --acento:#F4C95D; --complementario:#457699;
@@ -518,58 +520,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   @include('tours.partials.para-ti')
 </div>
 
-<section class="s" id="catalogo" style="padding-top:0">
-  <div class="wrap">
-    <div class="head-row">
-      <div class="reveal">
-        <span class="eyebrow">{{ __('Catálogo oficial') }}</span>
-        <h2 class="h2">{{ __('Tours') }} <em>{{ __('destacados') }}</em></h2>
-      </div>
-      <div class="filters reveal d1" id="filters">
-        <button class="chip on" data-f="todos">{{ __('Todos') }}</button>
-        @foreach ($categorias as $cat)
-          <button class="chip" data-f="{{ $cat->rta_amg }}"><i class="{{ $cat->ico ?: 'fa-solid fa-route' }}"></i> {{ $cat->nom }}</button>
-        @endforeach
-      </div>
-    </div>
-
-    <div class="filtros2 reveal d2" role="group" aria-label="Filtrar por dificultad y altitud">
-      <label class="sr-only" for="f-dif">{{ __('Dificultad') }}</label>
-      <select id="f-dif" class="fsel">
-        <option value="">{{ __('Toda dificultad') }}</option>
-        <option value="facil">{{ __('Fácil') }}</option>
-        <option value="moderado">{{ __('Moderado') }}</option>
-        <option value="dificil">{{ __('Difícil') }}</option>
-        <option value="experto">{{ __('Experto') }}</option>
-      </select>
-      <label class="sr-only" for="f-alt">{{ __('Altitud máxima') }}</label>
-      <select id="f-alt" class="fsel">
-        <option value="">{{ __('Cualquier altitud') }}</option>
-        <option value="0-3000">{{ __('Hasta 3.000 m') }}</option>
-        <option value="3000-4000">3.000 – 4.000 m</option>
-        <option value="4000-5000">4.000 – 5.000 m</option>
-        <option value="5000-9000">{{ __('Más de 5.000 m') }}</option>
-      </select>
-      <span class="fcount" id="f-count" aria-live="polite"></span>
-      <button type="button" class="flimpiar" id="f-limpiar" hidden>{{ __('Quitar filtros') }}</button>
-    </div>
-
-    <div class="cards" id="cards">
-      @forelse ($tours as $tour)
-      <article class="card reveal {{ ['', 'd1', 'd2'][$loop->index % 3] }}" data-cat="{{ $tour->categoria->rta_amg }}" data-dif="{{ $tour->niv_dif }}" data-alt="{{ (int) $tour->alt_max_m }}">
-        <div class="cimg"><a href="{{ route('tours.show', $tour) }}"><img src="{{ $tour->img }}" alt="{{ $tour->img_alt }}" loading="lazy"></a><span class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</span><span class="code">{{ $tour->cod }}</span></div>
-        <div class="cbody"><div class="meta"><span><i class="fa-regular fa-clock"></i>{{ $tour->dur_txt }} h</span>@if ($tour->alt_max_m)<span><i class="fa-solid fa-mountain"></i>{{ number_format($tour->alt_max_m, 0, ',', '.') }} m</span>@endif<span><i class="fa-solid fa-users"></i>Máx {{ $tour->cap_max }}</span></div>
-          <h3><a href="{{ route('tours.show', $tour) }}">{{ $tour->nom }}</a></h3><p>{{ $tour->des }}</p>
-          <div class="diff"><span class="bars">@for ($i = 1; $i <= 5; $i++)<i @class(['f' => $i <= $tour->dif_niv])></i>@endfor</span>{{ $tour->dif_txt }}</div>
-          <div class="cfoot"><div class="price"><small>{{ __('Desde') }}</small><b>Bs. {{ number_format($tour->pre_bas, 0, ',', '.') }} <span>/ {{ __('pers') }}</span></b></div><a class="cbtn" href="{{ route('tours.show', $tour) }}">{{ __('Reservar') }} <i class="fa-solid fa-arrow-right"></i></a></div></div>
-      </article>
-      @empty
-      <p class="sub">{{ __('Pronto publicaremos nuevos tours.') }}</p>
-      @endforelse
-      <p class="vacio" id="f-vacio" hidden><i class="fa-solid fa-mountain-sun"></i> {{ __('Ningún tour coincide con esos filtros. Prueba con otra combinación.') }}</p>
-    </div>
-  </div>
-</section>
+<livewire:catalogo-tours />
 
 <!-- ================= CÓMO RESERVAR ================= -->
 <section class="s how" id="como">
@@ -683,7 +634,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <p>Agencia de viajes y turismo de aventura en el corazón de La Paz, Bolivia.</p>
         <div class="soc">@foreach (config('turismo.redes') as $red => $url)<a href="{{ $url }}" aria-label="{{ $red }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands {{ ['WhatsApp'=>'fa-whatsapp','Facebook'=>'fa-facebook-f','Instagram'=>'fa-instagram','TikTok'=>'fa-tiktok'][$red] }}"></i></a>@endforeach</div>
       </div>
-      <div class="fl"><h5>Tours disponibles</h5>@foreach ($categorias as $cat)<a href="{{ route('home', ['categoria'=>$cat->rta_amg]) }}#catalogo">{{ $cat->nom }}</a>@endforeach</div>
+      <div class="fl"><h5>Tours disponibles</h5><a href="{{ route('imagenes.creditos') }}">Créditos de imágenes</a>@foreach ($categorias as $cat)<a href="{{ route('home', ['categoria'=>$cat->rta_amg]) }}#catalogo">{{ $cat->nom }}</a>@endforeach</div>
       <div class="fl"><h5>Legal</h5><a href="#m-terminos" data-modal="m-terminos">Términos y condiciones</a><a href="#m-privacidad" data-modal="m-privacidad">Privacidad</a><a href="#m-cookies" data-modal="m-cookies">Cookies</a><a href="#m-reembolso" data-modal="m-reembolso">Reembolsos</a><button type="button" data-consent-settings>Configurar cookies</button></div>
       @guest
       <div>
@@ -908,25 +859,8 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return
   e.target.querySelectorAll('[data-count]').forEach(countUp);io.unobserve(e.target)}),{threshold:.15});
 document.querySelectorAll('.reveal,#mapbox').forEach(el=>io.observe(el));
 
-// filtros combinados del catálogo (RF-01): categoría + dificultad + altitud, sin recargar
-const chips=document.querySelectorAll('.chip'),cards=document.querySelectorAll('.card');
-const fDif=document.getElementById('f-dif'),fAlt=document.getElementById('f-alt'),fCount=document.getElementById('f-count'),
-  fVacio=document.getElementById('f-vacio'),fLimpiar=document.getElementById('f-limpiar');
-let fCat='todos';
-const aplicar=()=>{const dif=fDif.value,[aMin,aMax]=(fAlt.value||'0-99999').split('-').map(Number);let n=0;
-  cards.forEach(c=>{const alt=+c.dataset.alt;
-    const show=(fCat==='todos'||c.dataset.cat===fCat)&&(!dif||c.dataset.dif===dif)&&(!fAlt.value||(alt>aMin&&alt<=aMax)||(aMin===0&&alt<=aMax));
-    c.classList.toggle('hide',!show);if(show){n++;c.classList.remove('in');void c.offsetWidth;c.classList.add('in')}});
-  fCount.textContent=n+(n===1?' tour':' tours');fVacio.hidden=n>0;fLimpiar.hidden=fCat==='todos'&&!dif&&!fAlt.value};
-const filter=f=>{fCat=f;chips.forEach(c=>c.classList.toggle('on',c.dataset.f===f));aplicar()};
-chips.forEach(c=>c.onclick=()=>filter(c.dataset.f));
-fDif.onchange=aplicar;fAlt.onchange=aplicar;
-fLimpiar.onclick=()=>{fDif.value='';fAlt.value='';filter('todos')};
-// La fecha consulta disponibilidad real en el servidor. Los filtros locales refinan el resultado.
-if(new URLSearchParams(location.search).has('categoria')) filter(new URLSearchParams(location.search).get('categoria'));
-if(new URLSearchParams(location.search).has('fecha') || new URLSearchParams(location.search).has('categoria')) document.getElementById('catalogo').scrollIntoView();
-aplicar();
-document.querySelectorAll('[data-go]').forEach(t=>t.onclick=()=>{filter(t.dataset.go);document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})});
+// Las categorías rápidas actualizan el componente sin recargar la página.
+document.querySelectorAll('[data-go]').forEach(t=>t.onclick=()=>{Livewire.dispatch('filtrar-categoria',{categoria:t.dataset.go});document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})});
 
 // modales legales
 const openModal=id=>{const d=document.getElementById(id);if(!d||d.open)return;d.showModal();document.body.style.overflow='hidden';d.querySelector('.lm-body').scrollTop=0};
@@ -937,5 +871,6 @@ document.querySelectorAll('.lmodal').forEach(d=>{
   d.addEventListener('close',()=>{document.body.style.overflow=''});
 });
 </script>
+@livewireScripts
 </body>
 </html>

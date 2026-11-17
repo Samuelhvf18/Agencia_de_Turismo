@@ -11,7 +11,7 @@
     <div class="interes-grid">
         @foreach ($recomendaciones['tours'] as $recomendado)
             <article class="interes-card">
-                <a href="{{ route('tours.show', $recomendado) }}"><img src="{{ $recomendado->img }}" alt="{{ $recomendado->img_alt }}" class="interes-imagen" loading="lazy"></a>
+                <a href="{{ route('tours.show', $recomendado) }}"><img data-imagen-tour src="{{ $recomendado->img }}" alt="{{ $recomendado->img_alt }}" class="interes-imagen" loading="lazy"></a>
                 <div class="interes-cuerpo"><p class="interes-categoria">{{ $recomendado->categoria->nom }} · {{ __($recomendado->dif_txt) }}</p><h3 class="interes-nombre"><a href="{{ route('tours.show', $recomendado) }}">{{ $recomendado->nom }}</a></h3><p class="interes-motivo">{{ __($recomendado->motivo_recomendacion) }}</p><div class="interes-pie"><strong>Bs {{ number_format($recomendado->pre_bas, 0, ',', '.') }}</strong><a href="{{ route('tours.show', $recomendado) }}" class="interes-enlace">{{ __('Ver tour') }} →</a></div></div>
             </article>
         @endforeach

@@ -79,7 +79,7 @@ function hastaParticipantes($test, Tour $tour, int $cantidad = 2): SalidaTour
         $participantes[] = participante(['nom_cpl' => 'Persona '.['Uno', 'Dos', 'Tres', 'Cuatro', 'Cinco'][$i], 'es_ctc_pri' => $i === 0 ? 1 : 0]);
     }
     $test->post(route('reservas.participantes.store'), [
-        'nom_ctc' => 'Ana Quispe', 'cor_ctc' => 'Ana@Example.com', 'tel_ctc' => '+591 70000000',
+        'nom_ctc' => 'Ana Quispe', 'cor_ctc' => 'Ana@Example.com', 'tel_ctc' => '+59170000000',
         'participantes' => $participantes,
     ])->assertSessionHasNoErrors()->assertRedirect(route('reservas.equipo'));
 

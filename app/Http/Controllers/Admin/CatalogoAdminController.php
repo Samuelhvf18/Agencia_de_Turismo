@@ -8,14 +8,15 @@ use App\Models\CategoriaTour;
 use App\Models\FotoTour;
 use App\Models\PuntoRuta;
 use App\Models\Tour;
+use App\Services\Catalogo\GaleriaTours;
 use App\Services\Catalogo\SlugService;
 use App\Services\CodeGeneratorService;
 use App\Support\GeoJsonRuta;
 use App\Support\PresentadorTour;
+use App\Support\ReglasEntrada;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -92,7 +93,7 @@ class CatalogoAdminController extends Controller
     public function guardarCategoria(Request $request, ?CategoriaTour $categoria = null): RedirectResponse
     {
         $datos = $request->validate([
-            'nom' => ['required', 'string', 'max:80', Rule::unique('categorias_tour', 'nom')->ignore($categoria?->id)],
+            'nom' => ['required', 'string', 'max:80', ReglasEntrada::NOMBRE, Rule::unique('categorias_tour', 'nom')->ignore($categoria?->id)],
             'des' => ['nullable', 'string', 'max:500'],
             'ico' => ['nullable', 'string', 'max:255', 'regex:/^fa-[a-z]+ fa-[a-z0-9-]+$/'],
         ], ['ico.regex' => 'El ícono debe ser una clase de Font Awesome, p. ej. «fa-solid fa-person-hiking».']);
@@ -120,20 +121,7 @@ class CatalogoAdminController extends Controller
 
     public function subirFotos(Request $request, Tour $tour): RedirectResponse
     {
-        $request->validate([
-            'fotos' => ['required', 'array', 'max:10'],
-            'fotos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'txt_atv' => ['nullable', 'string', 'max:150'],
-        ]);
-
-        $orden = (int) $tour->fotos()->max('ord_vis');
-        foreach ($request->file('fotos') as $archivo) {
-            $tour->fotos()->create([
-                'rta_arc' => $archivo->store("tours/{$tour->id}", 'public'),
-                'ord_vis' => ++$orden,
-                'txt_atv' => $request->input('txt_atv') ?: $tour->nom,
-            ]);
-        }
+        app(GaleriaTours::class)->agregar($tour, (array) $request->file('fotos', []), $request->input('txt_atv'));
 
         return back()->with('estado', 'Fotos agregadas a la galería.');
     }
@@ -143,27 +131,19 @@ class CatalogoAdminController extends Controller
     {
         $datos = $request->validate([
             'orden' => ['required', 'array'],
-            'orden.*' => ['integer', Rule::exists('fotos_tour', 'id')->where('tur_id', $tour->id)],
+            'orden.*' => ['integer', 'distinct', Rule::exists('fotos_tour', 'id')->where('tur_id', $tour->id)],
             'txt' => ['nullable', 'array'],
             'txt.*' => ['nullable', 'string', 'max:150'],
         ]);
 
-        DB::transaction(function () use ($datos, $tour) {
-            foreach (array_values($datos['orden']) as $i => $id) {
-                $tour->fotos()->whereKey($id)->update(['ord_vis' => $i + 1] + (isset($datos['txt'][$id]) ? ['txt_atv' => $datos['txt'][$id]] : []));
-            }
-        });
+        app(GaleriaTours::class)->ordenar($tour, $datos['orden'], $datos['txt'] ?? []);
 
         return back()->with('estado', 'Galería actualizada; la primera foto es la portada.');
     }
 
     public function eliminarFoto(Tour $tour, FotoTour $foto): RedirectResponse
     {
-        abort_unless($foto->tur_id === $tour->id, 404);
-        if (! preg_match('#^(https?://|images/)#', $foto->rta_arc)) {
-            Storage::disk('public')->delete($foto->rta_arc);
-        }
-        $foto->delete();
+        app(GaleriaTours::class)->eliminar($tour, $foto);
 
         return back()->with('estado', 'Foto eliminada.');
     }
@@ -178,7 +158,7 @@ class CatalogoAdminController extends Controller
     {
         $datos = $request->validate([
             'puntos' => ['present', 'array', 'max:200'],
-            'puntos.*.nom' => ['nullable', 'string', 'max:120'],
+            'puntos.*.nom' => ['nullable', 'string', 'max:120', ReglasEntrada::NOMBRE],
             'puntos.*.lat' => ['required', 'numeric', 'between:-90,90'],
             'puntos.*.lon' => ['required', 'numeric', 'between:-180,180'],
             'puntos.*.alt_m' => ['nullable', 'integer', 'between:0,7000'],

@@ -2,8 +2,8 @@
 
 namespace App\Actions\Fortify;
 
+use App\Support\ReglasEntrada;
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 trait PasswordValidationRules
 {
@@ -14,6 +14,6 @@ trait PasswordValidationRules
      */
     protected function passwordRules(): array
     {
-        return ['required', 'string', Password::min(8)->letters()->numbers(), 'confirmed'];
+        return ReglasEntrada::clave();
     }
 }

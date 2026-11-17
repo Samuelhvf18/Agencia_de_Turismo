@@ -10,9 +10,9 @@
 
     <form method="POST" action="{{ route('admin.personal.update', [$tipo, $perfil->id]) }}" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm grid gap-4 md:grid-cols-2">
         @csrf @method('PUT')
-        <label class="text-xs text-[#6B6F72]">Nombre completo<input name="nom" required value="{{ old('nom', $perfil->usuario->nom) }}" class="{{ $campo }}"></label>
+        <label class="text-xs text-[#6B6F72]">Nombre completo<input name="nom" data-letras maxlength="150" required value="{{ old('nom', $perfil->usuario->nom) }}" class="{{ $campo }}"></label>
         <label class="text-xs text-[#6B6F72]">Correo<input name="cor" type="email" required value="{{ old('cor', $perfil->usuario->cor) }}" class="{{ $campo }}"></label>
-        <label class="text-xs text-[#6B6F72]">Teléfono<input name="tel" value="{{ old('tel', $perfil->usuario->tel) }}" class="{{ $campo }}"></label>
+        <x-telefono name="tel" :value="$perfil->usuario->tel" class="md:col-span-2" />
 
         @if ($tipo === 'guia')
             <label class="text-xs text-[#6B6F72]">Años de experiencia<input name="ani_exp" type="number" min="0" max="60" value="{{ old('ani_exp', $perfil->ani_exp) }}" class="{{ $campo }}"></label>

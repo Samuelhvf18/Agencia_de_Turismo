@@ -3,6 +3,7 @@
 use App\Http\Middleware\ContextoAuditoria;
 use App\Http\Middleware\EstablecerIdioma;
 use App\Http\Middleware\ForzarHttps;
+use App\Http\Middleware\NormalizarCorreos;
 use App\Http\Middleware\RecordarPaginaPublica;
 use App\Http\Middleware\TokenN8n;
 use App\Http\Middleware\VerificarRol;
@@ -26,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         // RNF-14: idioma de la interfaz (español / inglés).
-        $middleware->web(append: [EstablecerIdioma::class, ContextoAuditoria::class, RecordarPaginaPublica::class]);
+        $middleware->web(append: [NormalizarCorreos::class, EstablecerIdioma::class, ContextoAuditoria::class, RecordarPaginaPublica::class]);
 
         $middleware->alias([
             'rol' => VerificarRol::class,

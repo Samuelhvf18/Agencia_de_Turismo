@@ -45,7 +45,7 @@ class ConsultaReservaController extends Controller
     {
         $datos = $request->validate([
             'cod' => ['required', 'string', 'max:20'],
-            'cor_ctc' => ['required', 'email', 'max:150'],
+            'cor_ctc' => ['required', 'email:rfc', 'max:150'],
         ]);
 
         $reserva = Reserva::where('cod', strtoupper(trim($datos['cod'])))

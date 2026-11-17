@@ -8,10 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class MensajeChatbot extends Model
 {
     protected $table = 'mensajes_chatbot';
+
     const CREATED_AT = 'cre_en';
+
     const UPDATED_AT = null;
 
-    protected $fillable = ['cnv_id', 'rem', 'txt_msj', 'int_det'];
+    protected $fillable = ['cnv_id', 'rem', 'txt_msj', 'int_det', 'tours_ids'];
+
+    protected function casts(): array
+    {
+        return ['tours_ids' => 'array'];
+    }
 
     public function conversacion(): BelongsTo
     {

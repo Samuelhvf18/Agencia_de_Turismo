@@ -29,5 +29,6 @@
             <button class="rsv-btn" type="submit">{{ __('Guardar teléfono') }}</button>
         </form>
     </details>
+    <section class="rsv-tarjeta flex flex-wrap items-center gap-4"><img src="{{ $usuario->profile_photo_url }}" alt="{{ $usuario->nom }}" class="h-14 w-14 rounded-full object-cover"><div><h2 class="font-bold text-pipocas-principal">Foto y seguridad</h2><a href="{{ route('profile.show') }}" class="mt-1 inline-block text-sm text-pipocas-principal underline">Cambiar mi foto, nombre, correo o contraseña</a></div></section>
 </div>
 @endsection

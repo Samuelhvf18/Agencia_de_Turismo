@@ -128,7 +128,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     {
         return Attribute::get(fn () => $this->fot_prf
             ? Storage::disk('public')->url($this->fot_prf)
-            : 'https://ui-avatars.com/api/?name='.urlencode($this->nom ?? '').'&color=1F5F8B&background=F4C95D');
+            : asset('images/perfil-sin-foto.svg'));
     }
 
     public function deleteProfilePhoto(): void

@@ -37,7 +37,7 @@ class N8nChatbotController extends Controller
 
     public function reserva(Request $request): JsonResponse
     {
-        $d = $request->validate(['codigo' => ['required', 'string', 'max:20'], 'correo' => ['required', 'email']]);
+        $d = $request->validate(['codigo' => ['required', 'string', 'max:20'], 'correo' => ['required', 'email:rfc']]);
         $reserva = $this->herramientas->consultarReserva($d['codigo'], $d['correo']);
 
         return response()->json(['encontrada' => (bool) $reserva, 'reserva' => $reserva]);

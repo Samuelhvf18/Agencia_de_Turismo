@@ -19,7 +19,7 @@
         <h3 class="md:col-span-4 font-bold text-[#343A40]">Datos del tour
             @if ($tour->exists)<span class="ml-2 font-mono text-xs font-normal text-[#6B6F72]">{{ $tour->cod }} · /tours/{{ $tour->rta_amg }}</span>@endif
         </h3>
-        <label class="md:col-span-2 text-xs text-[#6B6F72]">Nombre<input name="nom" required maxlength="150" value="{{ old('nom', $tour->nom) }}" class="{{ $campo }}"></label>
+        <label class="md:col-span-2 text-xs text-[#6B6F72]">Nombre<input name="nom" data-letras required maxlength="150" value="{{ old('nom', $tour->nom) }}" class="{{ $campo }}"></label>
         <label class="text-xs text-[#6B6F72]">Categoría
             <select name="cat_id" class="{{ $campo }}">@foreach ($categorias as $c)<option value="{{ $c->id }}" @selected((int) old('cat_id', $tour->cat_id) === $c->id)>{{ $c->nom }}</option>@endforeach</select>
         </label>
@@ -48,45 +48,8 @@
     </form>
 
     @if ($tour->exists)
-        {{-- Galería --}}
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
-            <h3 class="font-bold text-[#343A40]">Galería <span class="text-xs font-normal text-[#6B6F72]">(la primera foto es la portada del catálogo)</span></h3>
-            @if ($fotos->isNotEmpty())
-                <form method="POST" action="{{ route('admin.catalogo.fotos.orden', $tour) }}" x-data="{ orden: @js($fotos->pluck('foto.id')) }">
-                    @csrf
-                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <template x-for="(id, i) in orden" :key="id">
-                            <input type="hidden" name="orden[]" :value="id">
-                        </template>
-                        @foreach ($fotos as $f)
-                            <div class="rounded-xl border border-gray-200 p-2" :style="'order:' + orden.indexOf({{ $f['foto']->id }})">
-                                @if ($f['url'])<img src="{{ $f['url'] }}" alt="{{ $f['foto']->txt_atv }}" class="h-32 w-full rounded-lg object-cover">@else<div class="grid h-32 place-items-center rounded-lg bg-gray-100 text-xs text-[#6B6F72]">Archivo no encontrado</div>@endif
-                                <input name="txt[{{ $f['foto']->id }}]" value="{{ $f['foto']->txt_atv }}" maxlength="150" placeholder="Texto alternativo" class="mt-2 w-full rounded-lg border border-gray-300 px-2 py-1 text-xs">
-                                <div class="mt-2 flex items-center justify-between text-xs font-bold">
-                                    <span class="flex gap-1">
-                                        <button type="button" class="rounded bg-gray-100 px-2" @click="let i = orden.indexOf({{ $f['foto']->id }}); if (i > 0) { orden.splice(i, 1); orden.splice(i - 1, 0, {{ $f['foto']->id }}) }">←</button>
-                                        <button type="button" class="rounded bg-gray-100 px-2" @click="let i = orden.indexOf({{ $f['foto']->id }}); if (i < orden.length - 1) { orden.splice(i, 1); orden.splice(i + 1, 0, {{ $f['foto']->id }}) }">→</button>
-                                    </span>
-                                    <button type="submit" form="eliminar-foto-{{ $f['foto']->id }}" class="text-red-600">Eliminar</button>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                    <button class="mt-3 rounded-xl bg-[#1F5F8B] px-4 py-2 text-xs font-semibold text-white">Guardar orden y textos</button>
-                </form>
-                @foreach ($fotos as $f)
-                    <form id="eliminar-foto-{{ $f['foto']->id }}" method="POST" action="{{ route('admin.catalogo.fotos.eliminar', [$tour, $f['foto']]) }}" onsubmit="return confirm('¿Eliminar la foto?')">@csrf @method('DELETE')</form>
-                @endforeach
-            @endif
-            <form method="POST" action="{{ route('admin.catalogo.fotos', $tour) }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-3">
-                @csrf
-                <input type="file" name="fotos[]" multiple accept="image/jpeg,image/png,image/webp" required class="text-sm">
-                <input name="txt_atv" maxlength="150" placeholder="Texto alternativo (opcional)" class="rounded-xl border border-gray-300 px-3 py-2 text-sm">
-                <button class="rounded-xl bg-[#C96F4A] px-4 py-2 text-xs font-semibold text-white">Subir fotos (máx. 4 MB c/u)</button>
-            </form>
-        </div>
+        <livewire:galeria-tour :tour="$tour" />
 
-        {{-- Editor de trazado y puntos de interés --}}
         <form method="POST" action="{{ route('admin.catalogo.ruta', $tour) }}" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4"
               x-data="editorRuta(@js($tour->puntosRuta->map->only(['nom', 'lat', 'lon', 'alt_m', 'tip_pun'])->values()), @js($tour->trz_geo))">
             @csrf
@@ -101,7 +64,7 @@
                 <template x-for="(p, i) in puntos" :key="i">
                     <div class="grid grid-cols-2 gap-2 rounded-xl bg-gray-50 p-2 text-xs md:grid-cols-7 md:items-center">
                         <span class="font-bold text-[#1F5F8B]" x-text="'#' + (i + 1)"></span>
-                        <input :name="`puntos[${i}][nom]`" x-model="p.nom" placeholder="Nombre" class="md:col-span-2 rounded-lg border border-gray-300 px-2 py-1">
+                        <input :name="`puntos[${i}][nom]`" data-letras x-model="p.nom" placeholder="Nombre" class="md:col-span-2 rounded-lg border border-gray-300 px-2 py-1">
                         <select :name="`puntos[${i}][tip_pun]`" x-model="p.tip_pun" class="rounded-lg border border-gray-300 px-2 py-1">
                             <option value="inicio">Inicio</option><option value="checkpoint">Checkpoint</option><option value="mirador">Mirador</option><option value="fin">Fin</option>
                         </select>

@@ -22,22 +22,12 @@ class CatalogosBaseSeeder extends Seeder
             DB::table('departamentos_bolivia')->updateOrInsert(['cod' => $cod], ['nom' => $nom]);
         }
 
-        $paises = [
-            'BO' => 'Bolivia', 'AR' => 'Argentina', 'BR' => 'Brasil', 'CL' => 'Chile', 'PE' => 'Perú',
-            'CO' => 'Colombia', 'EC' => 'Ecuador', 'PY' => 'Paraguay', 'UY' => 'Uruguay', 'VE' => 'Venezuela',
-            'MX' => 'México', 'US' => 'Estados Unidos', 'CA' => 'Canadá', 'ES' => 'España', 'FR' => 'Francia',
-            'DE' => 'Alemania', 'IT' => 'Italia', 'GB' => 'Reino Unido', 'NL' => 'Países Bajos', 'CH' => 'Suiza',
-            'BE' => 'Bélgica', 'SE' => 'Suecia', 'IL' => 'Israel', 'AU' => 'Australia', 'NZ' => 'Nueva Zelanda',
-            'JP' => 'Japón', 'KR' => 'Corea del Sur', 'CN' => 'China', 'IN' => 'India', 'RU' => 'Rusia',
-        ];
+        $paises = config('catalogos.paises');
         foreach ($paises as $iso => $nom) {
             DB::table('paises')->updateOrInsert(['cod_iso' => $iso], ['nom' => $nom]);
         }
 
-        $idiomas = [
-            'es' => 'Español', 'en' => 'Inglés', 'pt' => 'Portugués', 'fr' => 'Francés',
-            'de' => 'Alemán', 'it' => 'Italiano', 'qu' => 'Quechua', 'ay' => 'Aymara',
-        ];
+        $idiomas = config('catalogos.idiomas');
         foreach ($idiomas as $iso => $nom) {
             DB::table('idiomas')->updateOrInsert(['cod_iso' => $iso], ['nom' => $nom]);
         }

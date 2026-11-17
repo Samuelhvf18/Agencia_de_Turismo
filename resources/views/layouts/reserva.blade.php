@@ -16,7 +16,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('titulo', 'Reserva') | Pipocas - Agencia de Viajes y Turismo</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
@@ -87,7 +87,7 @@
     {{-- Footer --}}
     <footer class="border-t border-gray-200 bg-white">
         <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-pipocas-texto-2 sm:flex-row sm:px-6 lg:px-8">
-            <p>&copy; {{ date('Y') }} Pipocas · {{ __('Agencia de Viajes y Turismo · La Paz, Bolivia') }}</p>
+            <p>&copy; {{ date('Y') }} Pipocas · {{ __('Agencia de Viajes y Turismo · La Paz, Bolivia') }}<a class="mt-2 block text-xs underline" href="{{ route('imagenes.creditos') }}">Créditos de imágenes</a></p>
             <p class="flex items-center gap-4">
                 <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-lock text-pipocas-complementario"></i> {{ __('Pago seguro') }}</span>
                 <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-qrcode text-pipocas-secundario"></i> {{ __('Ticket QR') }}</span>

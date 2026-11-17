@@ -81,7 +81,7 @@ test('la ruta amigable se conserva al editar salvo que se pida regenerarla', fun
 
 test('galería: subir, ordenar y eliminar fotos', function () {
     $tour = Tour::first();
-    $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+    $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gAIDAAAAtUlEQVR4nO3QQQkAIADAQJsYzUCWtoIfGcLBAowbc21dNvKDj4IFC1YeLFiw8mDBgpUHCxasPFiwYOXBggUrDxYsWHmwYMHKgwULVh4sWLDyYMGClQcLFqw8WLBg5cGCBSsPFixYebBgwcqDBQtWHixYsPJgwYKVBwsWrDxYsGDlwYIFKw8WLFh5sGDByoMFC1YeLFiw8mDBgpUHCxasPFiwYOXBggUrDxYsWHmwYMHKgwXrTQfzW3HpRRHPNQAAAABJRU5ErkJggg==');
 
     $this->post(route('admin.catalogo.fotos', $tour), [
         'fotos' => [UploadedFile::fake()->createWithContent('a.png', $png), UploadedFile::fake()->createWithContent('b.png', $png)],

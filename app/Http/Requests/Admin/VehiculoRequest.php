@@ -10,17 +10,24 @@ class VehiculoRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->esAdmin() || ($this->route('vehiculo') && $this->user()?->tieneRol('operaciones'));
     }
 
     protected function prepareForValidation(): void
     {
-        $this->merge(['pla' => strtoupper(trim((string) $this->input('pla')))]);
+        if ($this->user()?->esAdmin()) {
+            $this->merge(['pla' => strtoupper(trim((string) $this->input('pla')))]);
+        }
     }
 
     public function rules(): array
     {
         $vehiculo = $this->route('vehiculo');
+
+        if (! $this->user()?->esAdmin()) {
+            return ['cap_asi' => ['required', 'integer', 'min:1', 'max:60']] +
+                array_fill_keys(['pla', 'mar', 'mdl', 'tip', 'tip_cmb', 'est'], ['prohibited']);
+        }
 
         return [
             'pla' => ['required', 'string', 'max:15', 'regex:/^[0-9]{3,4}-?[A-Z]{3}$/', Rule::unique('vehiculos', 'pla')->ignore($vehiculo?->id)],
