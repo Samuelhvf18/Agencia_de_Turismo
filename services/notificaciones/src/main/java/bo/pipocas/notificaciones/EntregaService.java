@@ -5,6 +5,13 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.GeneralSecurityException;
 import java.util.HexFormat;
+import java.util.Base64;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mail.MailPreparationException;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.SimpleMailMessage;
@@ -28,18 +35,48 @@ class EntregaService {
 
     @Transactional
     public void enviar(String clave, NotificacionController.Mensaje mensaje) {
-        String huella = huella(mensaje.correo() + "\n" + mensaje.asunto() + "\n" + mensaje.texto());
+        List<byte[]> archivos = new ArrayList<>();
+        StringBuilder contenido = new StringBuilder(mensaje.correo()).append('\n').append(mensaje.asunto()).append('\n').append(mensaje.texto());
+        int total = 0;
+        for (var adjunto : mensaje.adjuntos()) {
+            byte[] bytes = Base64.getDecoder().decode(adjunto.contenido());
+            total += bytes.length;
+            if (bytes.length > 5_000_000 || total > 10_000_000 || bytes.length < 5
+                    || !new String(bytes, 0, 5, StandardCharsets.US_ASCII).equals("%PDF-")) {
+                throw new IllegalArgumentException("Adjunto PDF inválido o demasiado grande.");
+            }
+            archivos.add(bytes);
+            contenido.append('\n').append(adjunto.nombre()).append(':').append(adjunto.contenido());
+        }
+        String huella = huella(contenido.toString());
         // Solo recibos: no persistir códigos OTP, destinatarios ni el contenido del correo.
         db.update("INSERT INTO entregas (clave, huella) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM entregas WHERE clave = ?)", clave, huella, clave);
         var recibo = db.queryForMap("SELECT huella, enviada_en FROM entregas WHERE clave = ? FOR UPDATE", clave);
         if (!huella.equals(recibo.get("HUELLA"))) throw new IllegalArgumentException("Clave reutilizada para otro mensaje.");
         if (recibo.get("ENVIADA_EN") != null) return;
-        var correo = new SimpleMailMessage();
-        correo.setFrom(from);
-        correo.setTo(mensaje.correo());
-        correo.setSubject(mensaje.asunto());
-        correo.setText(mensaje.texto());
-        mail.send(correo);
+        if (archivos.isEmpty()) {
+            var correo = new SimpleMailMessage();
+            correo.setFrom(from);
+            correo.setTo(mensaje.correo());
+            correo.setSubject(mensaje.asunto());
+            correo.setText(mensaje.texto());
+            mail.send(correo);
+        } else {
+            try {
+                var correo = mail.createMimeMessage();
+                var helper = new MimeMessageHelper(correo, true, StandardCharsets.UTF_8.name());
+                helper.setFrom(from);
+                helper.setTo(mensaje.correo());
+                helper.setSubject(mensaje.asunto());
+                helper.setText(mensaje.texto());
+                for (int i = 0; i < archivos.size(); i++) {
+                    helper.addAttachment(mensaje.adjuntos().get(i).nombre(), new ByteArrayResource(archivos.get(i)), "application/pdf");
+                }
+                mail.send(correo);
+            } catch (MessagingException e) {
+                throw new MailPreparationException(e);
+            }
+        }
         db.update("UPDATE entregas SET enviada_en = CURRENT_TIMESTAMP WHERE clave = ?", clave);
     }
 

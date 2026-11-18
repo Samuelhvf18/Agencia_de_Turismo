@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CategoriaTour;
 use App\Models\PerfilGuia;
 use App\Models\Tour;
+use App\Services\Catalogo\ConsultaCatalogo;
+use App\Services\Catalogo\RecomendadorTours;
 use App\Support\PresentadorTour;
 use Illuminate\Support\Facades\DB;
 
@@ -18,30 +20,18 @@ class CatalogoController extends Controller
             'fecha' => ['nullable', 'date_format:Y-m-d'],
             'categoria' => ['nullable', 'string', 'max:100'],
         ]);
-        $tours = Tour::with(['categoria', 'fotos' => fn ($q) => $q->orderBy('ord_vis')])
-            ->where('act', true)
-            ->whereNull('eli_en')
-            ->when($filtros['q'] ?? null, fn ($q, $texto) => $q->where(function ($q) use ($texto) {
-                $q->where('nom', 'ILIKE', '%'.$texto.'%')->orWhere('cod', 'ILIKE', '%'.$texto.'%');
-            }))
-            ->when(($filtros['categoria'] ?? 'todos') !== 'todos', fn ($q) => $q->whereHas('categoria', fn ($c) => $c->where('rta_amg', $filtros['categoria'])))
-            ->when($filtros['fecha'] ?? null, fn ($q, $fecha) => $q->whereHas('salidas', fn ($s) => $s
-                ->whereDate('fec_sal', $fecha)->whereDate('fec_sal', '>=', today())->where('est', 'programada')
-                ->whereRaw("cap_max > (SELECT COALESCE(SUM(cnt_ptc), 0) FROM reservas WHERE sal_tur_id = salidas_tour.id AND est <> 'cancelada')")))
-            ->orderBy('cod')
-            ->get()
-            ->map(fn (Tour $tour) => PresentadorTour::presentar($tour))
-            ->filter(fn (Tour $tour) => $tour->img)
-            ->values();
+        $tours = app(ConsultaCatalogo::class)->buscar($filtros);
 
         $categorias = CategoriaTour::whereHas('tours', fn ($q) => $q->where('act', true)->whereNull('eli_en'))->orderBy('nom')->get();
 
-        return view('welcome', compact('tours', 'categorias'));
+        $recomendaciones = app(RecomendadorTours::class)->para(request());
+
+        return view('welcome', compact('tours', 'categorias', 'recomendaciones'));
     }
 
     public function categoria(CategoriaTour $categoria)
     {
-        $tours = $categoria->tours()->where('act', true)->whereNull('eli_en')->get();
+        $tours = $categoria->tours()->with('categoria', 'fotos')->where('act', true)->whereNull('eli_en')->get()->map(fn (Tour $t) => PresentadorTour::presentar($t));
 
         return view('tours.categoria', compact('categoria', 'tours'));
     }
@@ -59,6 +49,10 @@ class CatalogoController extends Controller
     public function show(Tour $tour)
     {
         abort_unless($tour->act && is_null($tour->eli_en), 404);
+
+        $vistos = array_values(array_diff((array) session('catalogo.vistos', []), [$tour->id]));
+        $vistos[] = $tour->id;
+        session(['catalogo.vistos' => array_slice($vistos, -20)]);
 
         $tour->load(['categoria', 'fotos' => fn ($q) => $q->orderBy('ord_vis')]);
         PresentadorTour::presentar($tour);

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'zona_horaria' => env('TURISMO_TIMEZONE', 'America/La_Paz'),
     'redes' => array_filter([
         'WhatsApp' => env('SOCIAL_WHATSAPP_URL'),
         'Facebook' => env('SOCIAL_FACEBOOK_URL'),

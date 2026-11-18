@@ -7,6 +7,7 @@ use App\Models\EquipoPorTour;
 use App\Models\ItemEquipo;
 use App\Models\TipoEquipo;
 use App\Models\Tour;
+use App\Support\ReglasEntrada;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -31,7 +32,7 @@ class InventarioController extends Controller
     public function guardarTipo(Request $request, ?TipoEquipo $tipo = null): RedirectResponse
     {
         $datos = $request->validate([
-            'nom' => ['required', 'string', 'max:80', Rule::unique('tipos_equipo', 'nom')->ignore($tipo?->id)],
+            'nom' => ['required', 'string', 'max:80', ReglasEntrada::NOMBRE, Rule::unique('tipos_equipo', 'nom')->ignore($tipo?->id)],
             'des' => ['nullable', 'string', 'max:500'],
             'pre_alq_bas' => ['required', 'numeric', 'min:0', 'max:99999.99'],
             'cos_ord' => ['nullable', 'numeric', 'gt:0', 'max:9999999.99'],

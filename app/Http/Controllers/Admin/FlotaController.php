@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\VehiculoRequest;
 use App\Models\SalidaTour;
 use App\Models\Vehiculo;
+use App\Services\Operaciones\AsignacionService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /** Flota de transporte (M03, RF-19): vehículos con estados activo, mantenimiento e inactivo. */
@@ -33,17 +35,26 @@ class FlotaController extends Controller
 
     public function update(VehiculoRequest $request, Vehiculo $vehiculo): RedirectResponse
     {
-        $datos = $request->validated();
+        return DB::transaction(function () use ($request, $vehiculo) {
+            app(AsignacionService::class)->bloquearAgenda();
+            $vehiculo = Vehiculo::lockForUpdate()->findOrFail($vehiculo->id);
+            $datos = $request->validated();
 
-        if ($datos['est'] !== Vehiculo::EST_ACTIVO) {
-            $futuras = $vehiculo->salidas()->where('est', SalidaTour::EST_PROGRAMADA)->whereDate('fec_sal', '>=', today())->count();
-            if ($futuras > 0) {
-                return back()->withErrors(['flota' => "El vehículo {$vehiculo->pla} tiene {$futuras} salida(s) futura(s). Reasígnalas antes de pasarlo a {$datos['est']}."]);
+            if (isset($datos['est']) && $datos['est'] !== Vehiculo::EST_ACTIVO) {
+                $futuras = $vehiculo->salidas()->where('est', SalidaTour::EST_PROGRAMADA)->whereDate('fec_sal', '>=', today())->count();
+                if ($futuras > 0) {
+                    return back()->withErrors(['flota' => "El vehículo {$vehiculo->pla} tiene {$futuras} salida(s) futura(s). Reasígnalas antes de pasarlo a {$datos['est']}."]);
+                }
             }
-        }
 
-        $vehiculo->update($datos);
+            if ($vehiculo->salidas()->where('est', SalidaTour::EST_PROGRAMADA)->whereDate('fec_sal', '>=', today())
+                ->where('cap_max', '>', $datos['cap_asi'])->exists()) {
+                return back()->withErrors(['cap_asi' => 'No puedes reducir los asientos por debajo del cupo de una salida futura asignada. Revisa o reasigna esas salidas primero.']);
+            }
 
-        return back()->with('estado', "Vehículo {$vehiculo->pla} actualizado.");
+            $vehiculo->update($datos);
+
+            return back()->with('estado', "Vehículo {$vehiculo->pla} actualizado.");
+        });
     }
 }

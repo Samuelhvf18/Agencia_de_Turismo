@@ -115,12 +115,14 @@ test('no se desactiva personal ni vehículos con salidas futuras', function () {
     expect($this->guia->fresh()->act)->toBeTrue();
 
     $vehiculo = SalidaTour::whereNotNull('veh_id')->first()->vehiculo;
+    $this->flushSession();
+    $this->actingAs(User::factory()->rol(User::ROL_ADMIN)->create());
     $this->put(route('admin.transporte.update', $vehiculo), $vehiculo->only(['pla', 'mar', 'mdl', 'tip', 'cap_asi', 'tip_cmb']) + ['est' => 'mantenimiento'])
         ->assertSessionHasErrors('flota');
 });
 
-test('registra un guía nuevo con sus idiomas y un chofer con licencia', function () {
-    $this->actingAs($this->operaciones);
+test('el administrador registra un guía nuevo con sus idiomas y un chofer con licencia', function () {
+    $this->actingAs(User::factory()->rol(User::ROL_ADMIN)->create());
     $idiomas = Idioma::whereIn('cod_iso', ['es', 'fr'])->pluck('id')->all();
 
     $this->post(route('admin.personal.store', 'guia'), [

@@ -7,6 +7,7 @@ use App\Models\Boleto;
 use App\Models\Reserva;
 use App\Models\SalidaTour;
 use App\Observers\AuditObserver;
+use App\Services\Catalogo\RecomendadorTours;
 use App\Services\Pagos\ComprobanteService;
 use App\Services\Pagos\PagoService;
 use App\Services\Reservas\BoletoService;
@@ -31,7 +32,8 @@ class ConsultaReservaController extends Controller
     public function historial(Request $request): View
     {
         return view('reservas.historial', ['reservas' => $request->user()->reservas()
-            ->with('salida.tour')->orderByDesc('cre_en')->paginate(10)]);
+            ->with('salida.tour')->orderByDesc('cre_en')->paginate(10),
+            'recomendaciones' => app(RecomendadorTours::class)->para($request)]);
     }
 
     public function consultar(): View
@@ -43,7 +45,7 @@ class ConsultaReservaController extends Controller
     {
         $datos = $request->validate([
             'cod' => ['required', 'string', 'max:20'],
-            'cor_ctc' => ['required', 'email', 'max:150'],
+            'cor_ctc' => ['required', 'email:rfc', 'max:150'],
         ]);
 
         $reserva = Reserva::where('cod', strtoupper(trim($datos['cod'])))

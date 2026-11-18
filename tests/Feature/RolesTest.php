@@ -13,7 +13,7 @@ test('cada rol es redirigido a su inicio tras iniciar sesión', function (string
     'operaciones' => [User::ROL_OPERACIONES, 'admin.dashboard'],
     'guia' => [User::ROL_GUIA, 'guias.checkin'],
     'chofer' => [User::ROL_CHOFER, 'guias.checkin'],
-    'turista' => [User::ROL_TURISTA, 'reservas.historial'],
+    'turista' => [User::ROL_TURISTA, 'home'],
 ]);
 
 test('un invitado no puede entrar al panel administrativo', function () {

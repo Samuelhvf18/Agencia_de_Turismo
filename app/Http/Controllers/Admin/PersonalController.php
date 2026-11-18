@@ -10,12 +10,12 @@ use App\Models\PerfilGuia;
 use App\Models\Role;
 use App\Models\SalidaTour;
 use App\Models\User;
+use App\Rules\CorreoDisponible;
+use App\Support\ReglasEntrada;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 /**
@@ -54,9 +54,10 @@ class PersonalController extends Controller
     public function store(Request $request, string $tipo): RedirectResponse
     {
         abort_unless(in_array($tipo, ['guia', 'chofer'], true), 404);
+        $request->merge(ReglasEntrada::componerTelefono($request->all()));
         $datos = $request->validate($this->reglas($tipo) + [
-            'cor' => ['required', 'email', 'max:150', 'unique:users,cor'],
-            'password' => ['required', Password::min(8)->letters()->numbers()],
+            'cor' => [...ReglasEntrada::correo(), new CorreoDisponible],
+            'password' => ReglasEntrada::clave(false),
         ]);
 
         DB::transaction(function () use ($datos, $tipo) {
@@ -78,12 +79,18 @@ class PersonalController extends Controller
     public function update(Request $request, string $tipo, int $id): RedirectResponse
     {
         $perfil = $this->perfil($tipo, $id);
+        $request->merge(ReglasEntrada::componerTelefono($request->all()));
         $datos = $request->validate($this->reglas($tipo) + [
-            'cor' => ['required', 'email', 'max:150', Rule::unique('users', 'cor')->ignore($perfil->usr_id)],
+            'cor' => [...ReglasEntrada::correo(), new CorreoDisponible($perfil->usr_id)],
         ]);
 
         DB::transaction(function () use ($perfil, $datos, $tipo) {
-            $perfil->usuario->update(['nom' => $datos['nom'], 'cor' => strtolower($datos['cor']), 'tel' => $datos['tel'] ?? null]);
+            $usuario = $perfil->usuario;
+            $cambioCorreo = mb_strtolower($usuario->cor) !== mb_strtolower($datos['cor']);
+            $usuario->forceFill(['nom' => $datos['nom'], 'cor' => strtolower($datos['cor']), 'tel' => $datos['tel'] ?? null, 'cor_vrf_en' => $cambioCorreo ? null : $usuario->cor_vrf_en])->save();
+            if ($cambioCorreo) {
+                DB::afterCommit(fn () => $usuario->sendEmailVerificationNotification());
+            }
             $this->guardarPerfil($tipo, $perfil->usuario, $datos);
         });
 
@@ -112,7 +119,7 @@ class PersonalController extends Controller
     {
         $comunes = [
             'nom' => ['required', 'string', 'max:150', ParticipantesRequest::NOMBRE],
-            'tel' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9\s-]{7,20}$/'],
+            ...ReglasEntrada::telefono(),
         ];
 
         return $comunes + ($tipo === 'guia' ? [

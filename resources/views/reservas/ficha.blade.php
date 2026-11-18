@@ -71,6 +71,9 @@
         @php
             $id = $p['id'];
             $f = $fichas[$id] ?? [];
+            $telefono = $f['tel_ctc_eme'] ?? '';
+            $prefijo = collect(array_keys(config('turismo.prefijos')))->sortByDesc(fn ($p) => strlen($p))
+                ->first(fn ($p) => str_starts_with($telefono, $p)) ?? '+591';
         @endphp
         <section class="rsv-tarjeta">
             <header class="mb-5 flex items-center gap-3">
@@ -90,14 +93,23 @@
                 </div>
                 <div>
                     <label for="nom_ctc_eme_{{ $id }}" class="rsv-etiqueta">{{ __('Contacto de emergencia') }}</label>
-                    <input id="nom_ctc_eme_{{ $id }}" name="fichas[{{ $id }}][nom_ctc_eme]" type="text" maxlength="150" class="rsv-campo"
-                           value="{{ old("fichas.$id.nom_ctc_eme", $f['nom_ctc_eme'] ?? '') }}" placeholder="{{ __('Nombre y parentesco') }}">
+                    <input id="nom_ctc_eme_{{ $id }}" name="fichas[{{ $id }}][nom_ctc_eme]" type="text" maxlength="150" data-letras class="rsv-campo"
+                           value="{{ old("fichas.$id.nom_ctc_eme", $f['nom_ctc_eme'] ?? '') }}" placeholder="{{ __('Nombre completo del contacto') }}">
                     @error("fichas.$id.nom_ctc_eme") <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
+                    <label for="prefijo_eme_{{ $id }}" class="rsv-etiqueta">{{ __('País / prefijo') }}</label>
+                    <select id="prefijo_eme_{{ $id }}" name="fichas[{{ $id }}][prefijo_eme]" class="rsv-campo mb-3" autocomplete="tel-country-code">
+                        @foreach (config('turismo.prefijos') as $codigo => $nombre)
+                            <option value="{{ $codigo }}" @selected(old("fichas.$id.prefijo_eme", $prefijo) === $codigo)>{{ $nombre }}</option>
+                        @endforeach
+                    </select>
+                    @error("fichas.$id.prefijo_eme") <p class="rsv-error">{{ $message }}</p> @enderror
                     <label for="tel_ctc_eme_{{ $id }}" class="rsv-etiqueta">{{ __('Teléfono de emergencia') }}</label>
-                    <input id="tel_ctc_eme_{{ $id }}" name="fichas[{{ $id }}][tel_ctc_eme]" type="tel" maxlength="20" class="rsv-campo"
-                           value="{{ old("fichas.$id.tel_ctc_eme", $f['tel_ctc_eme'] ?? '') }}" placeholder="+591 70000000">
+                    <input id="tel_ctc_eme_{{ $id }}" name="fichas[{{ $id }}][telefono_eme]" type="tel" inputmode="numeric" pattern="[0-9]{4,14}" maxlength="14" data-numeros class="rsv-campo"
+                           value="{{ old("fichas.$id.telefono_eme", str_starts_with($telefono, $prefijo) ? substr($telefono, strlen($prefijo)) : $telefono) }}" placeholder="70000000" aria-describedby="ayuda_tel_{{ $id }}">
+                    <p id="ayuda_tel_{{ $id }}" class="mt-1 text-xs text-pipocas-texto-2">{{ __('Solo números, sin prefijo ni espacios.') }}</p>
+                    @error("fichas.$id.telefono_eme") <p class="rsv-error">{{ $message }}</p> @enderror
                     @error("fichas.$id.tel_ctc_eme") <p class="rsv-error">{{ $message }}</p> @enderror
                 </div>
             </div>

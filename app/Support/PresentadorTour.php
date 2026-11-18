@@ -13,19 +13,19 @@ class PresentadorTour
 {
     // Clase de color de la etiqueta por categoría (slug)
     private const TAGS = [
-        'biking'   => 't-bike',
+        'biking' => 't-bike',
         'climbing' => 't-climb',
-        'city'     => 't-city',
+        'city' => 't-city',
         'trekking' => 't-trek',
-        'hiking'   => 't-hike',
+        'hiking' => 't-hike',
     ];
 
     // Texto y número de barras (de 5) por nivel de dificultad
     private const DIFICULTAD = [
-        'facil'    => ['Fácil', 1],    'baja'  => ['Fácil', 1],
+        'facil' => ['Fácil', 1],    'baja' => ['Fácil', 1],
         'moderado' => ['Moderado', 3], 'media' => ['Moderado', 3],
-        'dificil'  => ['Difícil', 4],  'alta'  => ['Difícil', 4],
-        'experto'  => ['Experto', 5],
+        'dificil' => ['Difícil', 4],  'alta' => ['Difícil', 4],
+        'experto' => ['Experto', 5],
     ];
 
     // Agrega al tour los datos ya listos para la vista
@@ -47,18 +47,22 @@ class PresentadorTour
     // Acepta URL absolutas, archivos en public/ o en el disco "public" de storage
     public static function urlFoto(?string $ruta): ?string
     {
-        if (!$ruta) {
+        if (! $ruta) {
             return null;
         }
         if (preg_match('#^https?://#', $ruta)) {
-            return $ruta;
+            return filter_var($ruta, FILTER_VALIDATE_URL) && ! parse_url($ruta, PHP_URL_USER) ? $ruta : null;
+        }
+        if (str_starts_with($ruta, '/') || str_contains($ruta, '..') || str_contains($ruta, '\\') || str_contains($ruta, ':')) {
+            return null;
         }
         if (file_exists(public_path($ruta))) {
             return asset($ruta);
         }
         if (Storage::disk('public')->exists($ruta)) {
-            return asset('storage/' . $ruta);
+            return asset('storage/'.$ruta);
         }
+
         return null;
     }
 }

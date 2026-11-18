@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\Io\MarkovService;
 use App\Services\Reservas\SeguridadParticipantes;
+use App\Support\ReglasEntrada;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -26,6 +27,7 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        $input = ReglasEntrada::componerTelefono($input);
         $input['cor'] = mb_strtolower(trim((string) ($input['cor'] ?? '')));
         foreach (['nom', 'pat', 'mat'] as $campo) {
             $input[$campo] = trim(preg_replace('/\s+/', ' ', (string) ($input[$campo] ?? '')));
@@ -34,12 +36,12 @@ class CreateNewUser implements CreatesNewUsers
             'nom' => ['required', 'string', 'max:60', SeguridadParticipantes::NOMBRE],
             'pat' => ['required', 'string', 'max:45', SeguridadParticipantes::NOMBRE],
             'mat' => ['nullable', 'string', 'max:45', SeguridadParticipantes::NOMBRE],
-            'cor' => ['required', 'string', 'email', 'max:150', Rule::unique('users', 'cor'), function ($attribute, $value, $fail) {
+            'cor' => ['required', 'string', 'email:rfc', 'max:150', Rule::unique('users', 'cor'), function ($attribute, $value, $fail) {
                 if (User::whereRaw('LOWER(cor) = ?', [$value])->exists()) {
                     $fail('Este correo electrónico ya está registrado.');
                 }
             }],
-            'tel' => ['nullable', 'string', 'max:20'],
+            ...ReglasEntrada::telefono(),
             'pai_id' => ['nullable', 'exists:paises,id'],
             'tip_doc' => ['nullable', 'string', 'in:CI,PASAPORTE'],
             'num_doc' => ['nullable', 'string', 'max:15'],

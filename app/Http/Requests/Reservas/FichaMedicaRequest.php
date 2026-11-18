@@ -5,6 +5,7 @@ namespace App\Http\Requests\Reservas;
 use App\Models\SalidaTour;
 use App\Services\Reservas\BorradorReserva;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 /**
@@ -16,6 +17,25 @@ use Illuminate\Validation\Validator;
  */
 class FichaMedicaRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $fichas = $this->input('fichas', []);
+        if (! is_array($fichas)) {
+            return;
+        }
+        foreach ($fichas as &$ficha) {
+            if (! is_array($ficha)) {
+                continue;
+            }
+            // Se valida el original, sin borrar caracteres que podrían ocultar errores.
+            if (array_key_exists('prefijo_eme', $ficha)) {
+                $ficha['tel_ctc_eme'] = ($ficha['telefono_eme'] ?? '') === '' ? null
+                    : (string) $ficha['prefijo_eme'].(string) $ficha['telefono_eme'];
+            }
+        }
+        $this->merge(['fichas' => $fichas]);
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -27,7 +47,9 @@ class FichaMedicaRequest extends FormRequest
             'fichas' => ['nullable', 'array'],
             'fichas.*.con_med' => ['nullable', 'string', 'max:1000'],
             'fichas.*.nom_ctc_eme' => ['nullable', 'string', 'max:150', ParticipantesRequest::NOMBRE],
-            'fichas.*.tel_ctc_eme' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9\s-]{7,20}$/'],
+            'fichas.*.prefijo_eme' => ['sometimes', 'required', 'string', Rule::in(array_keys(config('turismo.prefijos')))],
+            'fichas.*.telefono_eme' => ['nullable', 'string', 'regex:/^[0-9]{4,14}$/'],
+            'fichas.*.tel_ctc_eme' => ['nullable', 'string', 'regex:/^\+[1-9][0-9]{6,14}$/'],
             'fichas.*.fir_b64' => ['nullable', 'string', 'max:420000'],
         ];
     }
@@ -75,6 +97,8 @@ class FichaMedicaRequest extends FormRequest
         return [
             'fichas.*.nom_ctc_eme.regex' => __('El nombre solo puede contener letras.'),
             'fichas.*.tel_ctc_eme.regex' => __('Ingresa un teléfono válido.'),
+            'fichas.*.telefono_eme.regex' => __('Escribe solo números, sin prefijo, espacios ni signos.'),
+            'fichas.*.prefijo_eme.in' => __('Elige un país de la lista.'),
         ];
     }
 }

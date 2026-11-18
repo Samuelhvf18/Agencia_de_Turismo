@@ -12,7 +12,7 @@ class NovedadesController extends Controller
 {
     public function store(Request $request, CorreoTransaccional $correo)
     {
-        $datos = $request->validate(['correo' => ['required', 'email', 'max:150'], 'consentimiento' => ['accepted']]);
+        $datos = $request->validate(['correo' => ['required', 'email:rfc', 'max:150'], 'consentimiento' => ['accepted']]);
         $direccion = Str::lower(trim($datos['correo']));
         $subs = DB::table('suscripciones_novedades')->where('correo', $direccion)->first();
         if (! $subs || $subs->baja_en || ! $subs->confirmada_en) {

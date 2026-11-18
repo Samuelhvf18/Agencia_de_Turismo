@@ -16,7 +16,7 @@
 
     <form method="POST" action="{{ route('admin.inventario.tipo') }}" x-show="nuevoTipo" x-cloak class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm grid gap-3 md:grid-cols-6">
         @csrf
-        <input name="nom" required placeholder="Nombre" class="md:col-span-2 {{ $campo }}">
+        <input name="nom" data-letras required placeholder="Nombre" class="md:col-span-2 {{ $campo }}">
         <input name="pre_alq_bas" type="number" step="0.01" min="0" required placeholder="Precio alquiler (Bs.)" class="{{ $campo }}">
         <input name="cos_ord" type="number" step="0.01" min="0.01" placeholder="Costo por pedido (Bs.)" class="{{ $campo }}">
         <input name="cos_mnt_anu" type="number" step="0.01" min="0.01" placeholder="Mantenimiento anual (Bs./u)" class="{{ $campo }}">
@@ -67,7 +67,7 @@
                     <summary class="cursor-pointer text-xs font-bold text-[#1F5F8B]">Editar tipo</summary>
                     <form method="POST" action="{{ route('admin.inventario.tipo', $t) }}" class="mt-3 grid gap-2 md:grid-cols-2">
                         @csrf
-                        <input name="nom" value="{{ $t->nom }}" required class="{{ $campo }}">
+                        <input name="nom" data-letras value="{{ $t->nom }}" required class="{{ $campo }}">
                         <input name="pre_alq_bas" type="number" step="0.01" min="0" value="{{ $t->pre_alq_bas }}" class="{{ $campo }}">
                         <input name="cos_ord" type="number" step="0.01" min="0.01" value="{{ $t->cos_ord }}" placeholder="Costo por pedido" class="{{ $campo }}">
                         <input name="cos_mnt_anu" type="number" step="0.01" min="0.01" value="{{ $t->cos_mnt_anu }}" placeholder="Mantenimiento anual" class="{{ $campo }}">

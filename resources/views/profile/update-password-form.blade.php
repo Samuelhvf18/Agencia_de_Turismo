@@ -16,13 +16,13 @@
 
         <div class="col-span-6 sm:col-span-4">
             <x-label for="password" value="{{ __('New Password') }}" />
-            <x-input id="password" type="password" class="mt-1 block w-full" wire:model="state.password" autocomplete="new-password" />
+            <x-input id="password" data-clave-nueva minlength="8" maxlength="128" type="password" class="mt-1 block w-full" wire:model="state.password" autocomplete="new-password" />
             <x-input-error for="password" class="mt-2" />
         </div>
 
         <div class="col-span-6 sm:col-span-4">
             <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
-            <x-input id="password_confirmation" type="password" class="mt-1 block w-full" wire:model="state.password_confirmation" autocomplete="new-password" />
+            <x-input id="password_confirmation" data-clave-confirmacion maxlength="128" type="password" class="mt-1 block w-full" wire:model="state.password_confirmation" autocomplete="new-password" />
             <x-input-error for="password_confirmation" class="mt-2" />
         </div>
     </x-slot>

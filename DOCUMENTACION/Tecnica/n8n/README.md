@@ -61,7 +61,7 @@ Cuerpo que recibe n8n:
 
 Tipos: `reserva_confirmada`, `pago_recibido`, `comprobante_emitido`, `recordatorio_salida`, `salida_reprogramada`, `salida_cancelada`, `alerta_reposicion`, `alerta_seguridad` y `derivacion_chatbot`.
 
-Sin `N8N_WEBHOOK_NOTIFICACIONES`, Laravel envía el correo directamente (`AvisoMail`). Los boletos y el comprobante en PDF siempre los adjunta Laravel (`EnviarBoletosReserva`).
+Sin `N8N_WEBHOOK_NOTIFICACIONES`, Laravel envía el correo directamente (`AvisoMail`). Laravel genera los boletos y el comprobante en PDF. Con `NOTIFICACIONES_URL` configurado los entrega al microservicio Spring Boot como adjuntos; de lo contrario utiliza su transporte de correo (`EnviarBoletosReserva`).
 
 ## Chatbot (`chatbot.json`)
 

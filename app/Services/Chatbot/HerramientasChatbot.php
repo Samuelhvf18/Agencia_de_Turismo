@@ -6,6 +6,8 @@ use App\Models\ConversacionChatbot;
 use App\Models\Reserva;
 use App\Models\Tour;
 use App\Services\Notificaciones\NotificacionService;
+use App\Support\PresentadorTour;
+use Illuminate\Support\Str;
 
 /**
  * Herramientas del chatbot (RF-28 a RF-31). Las usa el agente de n8n a
@@ -51,7 +53,7 @@ class HerramientasChatbot
     {
         $orden = ['facil' => 1, 'moderado' => 2, 'dificil' => 3, 'experto' => 4];
 
-        return Tour::with('categoria')
+        return Tour::with(['categoria', 'fotos' => fn ($q) => $q->orderBy('ord_vis'), 'salidas' => fn ($q) => $q->where('est', 'programada')->whereDate('fec_sal', '>=', today())->orderBy('fec_sal')])
             ->where('act', true)->whereNull('eli_en')
             ->when($horasMax, fn ($q, $h) => $q->where('dur_hrs', '<=', $h))
             ->when($presupuesto, fn ($q, $p) => $q->where('pre_bas', '<=', $p))
@@ -60,18 +62,47 @@ class HerramientasChatbot
             ->filter(fn (Tour $t) => ! $dificultad || ($orden[$t->niv_dif] ?? 9) <= ($orden[$dificultad] ?? 9))
             ->sortBy([['pre_bas', 'asc']])
             ->take($limite)
-            ->map(fn (Tour $t) => [
-                'nombre' => $t->nom,
-                'categoria' => $t->categoria->nom,
-                'duracion_horas' => (float) $t->dur_hrs,
-                'dificultad' => $t->niv_dif,
-                'altitud_max_m' => $t->alt_max_m,
-                'precio_bs' => (float) $t->pre_bas,
-                'url' => route('tours.show', $t),
-                'proxima_salida' => $t->salidas()->where('est', 'programada')->whereDate('fec_sal', '>=', today())->orderBy('fec_sal')->value('fec_sal')?->format('d/m/Y'),
-            ])
+            ->map(fn (Tour $t) => $this->tarjeta($t))
             ->values()
             ->all();
+    }
+
+    /** Tarjetas siempre reconstruidas con el catálogo; nunca aceptar HTML o URL de la IA. */
+    public function tarjetas(array $ids, int $limite = 3): array
+    {
+        $ids = array_slice(array_values(array_unique(array_filter($ids, fn ($id) => is_int($id) && $id > 0))), 0, max(1, min(100, $limite)));
+        $tours = Tour::with(['categoria', 'fotos' => fn ($q) => $q->orderBy('ord_vis'), 'salidas' => fn ($q) => $q->where('est', 'programada')->whereDate('fec_sal', '>=', today())->orderBy('fec_sal')])
+            ->whereIn('id', $ids)->where('act', true)->whereNull('eli_en')->get()->keyBy('id');
+
+        return collect($ids)->filter(fn ($id) => isset($tours[$id]))->map(fn ($id) => $this->tarjeta($tours[$id]))->values()->all();
+    }
+
+    public function mencionados(string $texto): array
+    {
+        $normal = ' '.Str::ascii(mb_strtolower($texto)).' ';
+        $genericas = ['tour', 'tours', 'descenso', 'glaciar', 'laguna', 'valle', 'telefericos', 'camino', 'paseo', 'visita', 'trekking'];
+
+        return Tour::where('act', true)->whereNull('eli_en')->get(['id', 'nom'])->map(function ($tour) use ($normal, $genericas) {
+            $tokens = preg_split('/[^a-z0-9]+/', Str::ascii(mb_strtolower($tour->nom)), -1, PREG_SPLIT_NO_EMPTY);
+            $tokens = array_unique(array_filter($tokens, fn ($t) => strlen($t) >= 4 && ! in_array($t, $genericas, true)));
+            $coinciden = array_filter($tokens, fn ($t) => preg_match('/\b'.preg_quote($t, '/').'\b/', $normal));
+
+            return ['id' => $tour->id, 'puntos' => count($coinciden)];
+        })->filter(fn ($t) => $t['puntos'] > 0)->sortByDesc('puntos')->take(3)->pluck('id')->all();
+    }
+
+    private function tarjeta(Tour $tour): array
+    {
+        PresentadorTour::presentar($tour);
+
+        return [
+            'id' => $tour->id, 'nombre' => $tour->nom, 'categoria' => $tour->categoria->nom,
+            'duracion_horas' => (float) $tour->dur_hrs, 'dificultad' => $tour->niv_dif,
+            'altitud_max_m' => $tour->alt_max_m, 'precio_bs' => (float) $tour->pre_bas,
+            'imagen' => $tour->img ?: asset('images/tour-sin-imagen.svg'), 'imagen_alt' => $tour->img_alt,
+            'url' => route('tours.show', $tour),
+            'proxima_salida' => $tour->salidas->first()?->fec_sal?->format('d/m/Y'),
+        ];
     }
 
     /** Estado de una reserva en solo lectura (requiere código y correo del contacto). */
