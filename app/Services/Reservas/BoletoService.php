@@ -72,7 +72,8 @@ class BoletoService
     public function pdf(Reserva $reserva, Collection $boletos): \Barryvdh\DomPDF\PDF
     {
         $reserva->loadMissing('salida.tour.categoria', 'salida.guia.usuario');
-        $boletos->loadMissing('participante.pais');
+        // La descarga individual también admite una colección Support de collect().
+        $boletos->each(fn (Boleto $boleto) => $boleto->loadMissing('participante.pais'));
         $boletos->each(fn ($boleto) => AuditObserver::lectura($boleto->participante));
 
         $items = $boletos->map(fn (Boleto $b) => [

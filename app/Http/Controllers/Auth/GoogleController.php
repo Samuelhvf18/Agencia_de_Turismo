@@ -21,7 +21,7 @@ class GoogleController extends Controller
             $request->session()->forget('google.vincular');
         }
 
-        return Socialite::driver('google')->scopes(['openid', 'email', 'profile'])->redirect();
+        return Socialite::driver('google')->scopes(['openid', 'email:rfc', 'profile'])->redirect();
     }
 
     public function callback(Request $request)
@@ -52,7 +52,9 @@ class GoogleController extends Controller
         }
         if (! $usuario) {
             $rol = Role::where('nom', User::ROL_TURISTA)->firstOrFail();
-            $usuario = User::create(['nom' => $google->getName() ?: 'Turista', 'cor' => $correo, 'rol_id' => $rol->id, 'clv' => Str::random(64)]);
+            $nombre = trim(preg_replace('/[^\p{L}\p{M} ]/u', '', (string) $google->getName()));
+            $nombre = preg_replace('/ +/', ' ', $nombre);
+            $usuario = User::create(['nom' => $nombre ?: 'Turista', 'cor' => $correo, 'rol_id' => $rol->id, 'clv' => Str::random(64)]);
             $usuario->forceFill(['google_id' => $google->getId(), 'cor_vrf_en' => now()])->save();
         }
         abort_unless($usuario->act && ! $usuario->eli_en, 403, 'La cuenta no está activa.');

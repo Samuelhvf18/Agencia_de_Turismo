@@ -2,6 +2,8 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
 <meta charset="utf-8">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@vite(['resources/js/app.js'])
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ $tour->nom }} | Pipocas - Agencia de Viajes y Turismo</title>
 <meta name="description" content="{{ \Illuminate\Support\Str::limit($tour->des, 155) }}">
@@ -9,7 +11,7 @@
 <meta property="og:title" content="{{ $tour->nom }}">
 <meta property="og:description" content="{{ \Illuminate\Support\Str::limit($tour->des, 155) }}">
 @if ($tour->img)<meta property="og:image" content="{{ $tour->img }}">@endif
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
 @php $hayRuta = $puntos->count() || ! empty($tour->trz_geo); @endphp
@@ -101,7 +103,7 @@ a{color:inherit;text-decoration:none}
 </header>
 
 <section class="hero">
-  @if ($tour->img)<img src="{{ $tour->img }}" alt="{{ $tour->img_alt }}">@endif
+  @if ($tour->img)<img data-imagen-tour src="{{ $tour->img }}" alt="{{ $tour->img_alt }}">@endif
   <div class="wrap">
     <nav class="crumbs" aria-label="Ruta de navegación"><a href="{{ route('home') }}">{{ __('Inicio') }}</a> / <a href="{{ route('home') }}#catalogo">{{ __('Tours') }}</a> / {{ $tour->nom }}</nav>
     <a href="{{ route('categorias.show', $tour->categoria) }}" class="tag {{ $tour->tag }}"><i class="{{ $tour->categoria->ico ?: 'fa-solid fa-route' }}"></i> {{ $tour->categoria->nom }}</a><span class="code">{{ $tour->cod }}</span>
@@ -173,7 +175,7 @@ a{color:inherit;text-decoration:none}
       <h2>{{ __('Galería') }}</h2>
       <div class="gal">
         @foreach ($tour->galeria as $foto)
-          <img src="{{ $foto['url'] }}" alt="{{ $foto['alt'] }}" loading="lazy">
+          <img data-imagen-tour src="{{ $foto['url'] }}" alt="{{ $foto['alt'] }}" loading="lazy">
         @endforeach
       </div>
     </div>
@@ -254,5 +256,6 @@ if (datos.length > 1 && typeof Chart !== 'undefined') {
 </script>
 @endif
 @include('partials.consentimiento-cookies')
+<p style="text-align:center;font-size:12px;padding:12px"><a href="{{ route('imagenes.creditos') }}">Créditos de las fotografías</a></p>
 </body>
 </html>

@@ -17,6 +17,7 @@ class NotificacionService
 {
     /** Tipos de aviso y su asunto por defecto. */
     public const TIPOS = [
+        'reserva_creada' => 'Recibimos tu reserva',
         'reserva_confirmada' => 'Tu reserva está confirmada',
         'pago_recibido' => 'Recibimos tu pago',
         'comprobante_emitido' => 'Tu comprobante de pago',

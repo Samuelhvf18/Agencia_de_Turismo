@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Support\ReglasEntrada;
 use Illuminate\Foundation\Http\FormRequest;
 
 /** Datos de un tour (RF-39): formatos de nombre, montos, duración de un día y altitudes coherentes. */
@@ -29,7 +30,7 @@ class TourRequest extends FormRequest
             'admite_menores' => ['boolean'],
             'alto_riesgo' => ['boolean'],
             'cat_id' => ['required', 'integer', 'exists:categorias_tour,id'],
-            'nom' => ['required', 'string', 'min:3', 'max:150', "regex:/^[\pL\pN\s&'.,()-]+$/u"],
+            'nom' => ['required', 'string', 'min:3', 'max:150', ReglasEntrada::NOMBRE],
             'des' => ['nullable', 'string', 'max:5000'],
             'niv_dif' => ['required', 'in:facil,moderado,dificil,experto'],
             'alt_min_m' => ['nullable', 'integer', 'between:0,7000'],
@@ -45,7 +46,7 @@ class TourRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nom.regex' => 'El nombre solo puede tener letras, números y signos básicos.',
+            'nom.regex' => 'El nombre solo puede contener letras y espacios.',
             'dur_hrs.between' => 'Los tours son de un solo día: entre 1 y 14 horas.',
             'pre_bas.regex' => 'El precio admite hasta 2 decimales.',
             'alt_max_m.gte' => 'La altitud máxima no puede ser menor que la mínima.',

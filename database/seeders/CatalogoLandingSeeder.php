@@ -16,11 +16,11 @@ class CatalogoLandingSeeder extends Seeder
     public function run(): void
     {
         $categorias = [
-            'biking'   => ['nom' => 'Biking',    'ico' => 'fa-solid fa-person-biking', 'des' => 'Descensos de adrenalina en bicicleta.'],
-            'hiking'   => ['nom' => 'Hiking',    'ico' => 'fa-solid fa-person-hiking', 'des' => 'Caminos prehispánicos.'],
+            'biking' => ['nom' => 'Biking',    'ico' => 'fa-solid fa-person-biking', 'des' => 'Descensos de adrenalina en bicicleta.'],
+            'hiking' => ['nom' => 'Hiking',    'ico' => 'fa-solid fa-person-hiking', 'des' => 'Caminos prehispánicos.'],
             'trekking' => ['nom' => 'Trekking',  'ico' => 'fa-solid fa-mountain-sun',  'des' => 'Lagunas glaciares y picos nevados.'],
             'climbing' => ['nom' => 'Climbing',  'ico' => 'fa-solid fa-mountain',      'des' => 'Glaciares y cumbres de la Cordillera Real.'],
-            'city'     => ['nom' => 'City Tour', 'ico' => 'fa-solid fa-landmark',      'des' => 'Cultura y patrimonio de La Paz.'],
+            'city' => ['nom' => 'City Tour', 'ico' => 'fa-solid fa-landmark',      'des' => 'Cultura y patrimonio de La Paz.'],
         ];
 
         foreach ($categorias as $slug => $cat) {
@@ -47,7 +47,7 @@ class CatalogoLandingSeeder extends Seeder
             ],
             [
                 'cod' => 'TUR-2026-LPZ03', 'cat' => 'city', 'rta_amg' => 'valle-de-la-luna-y-telefericos',
-                'nom' => 'Valle de la Luna & Teleféricos',
+                'nom' => 'Valle de la Luna y Teleféricos',
                 'des' => 'Formaciones lunares y vista panorámica desde el teleférico urbano más alto del mundo.',
                 'niv_dif' => 'facil', 'alt_min_m' => 3300, 'alt_max_m' => 3600, 'dur_hrs' => 4,
                 'req_fis' => 'Apto para todo público.',
@@ -71,7 +71,7 @@ class CatalogoLandingSeeder extends Seeder
             ],
             [
                 'cod' => 'TUR-2026-LPZ06', 'cat' => 'city', 'rta_amg' => 'tiwanaku-y-puma-punku',
-                'nom' => 'Tiwanaku & Puma Punku',
+                'nom' => 'Tiwanaku y Puma Punku',
                 'des' => 'La cuna de la civilización andina con guía arqueológico y la Puerta del Sol.',
                 'niv_dif' => 'facil', 'alt_min_m' => 3800, 'alt_max_m' => 3850, 'dur_hrs' => 6,
                 'req_fis' => 'Apto para todo público.',
@@ -81,25 +81,25 @@ class CatalogoLandingSeeder extends Seeder
 
         foreach ($tours as $t) {
             DB::table('tours')->updateOrInsert(['cod' => $t['cod']], [
-                'cat_id'    => $catId[$t['cat']],
-                'rta_amg'   => $t['rta_amg'],
-                'nom'       => $t['nom'],
-                'des'       => $t['des'],
-                'niv_dif'   => $t['niv_dif'],
+                'cat_id' => $catId[$t['cat']],
+                'rta_amg' => $t['rta_amg'],
+                'nom' => $t['nom'],
+                'des' => $t['des'],
+                'niv_dif' => $t['niv_dif'],
                 'alt_min_m' => $t['alt_min_m'],
                 'alt_max_m' => $t['alt_max_m'],
-                'dur_hrs'   => $t['dur_hrs'],
-                'req_fis'   => $t['req_fis'],
-                'pre_bas'   => $t['pre_bas'],
-                'cap_max'   => $t['cap_max'],
-                'act'       => true,
-                'eli_en'    => null,
+                'dur_hrs' => $t['dur_hrs'],
+                'req_fis' => $t['req_fis'],
+                'pre_bas' => $t['pre_bas'],
+                'cap_max' => $t['cap_max'],
+                'act' => true,
+                'eli_en' => null,
             ]);
 
             $turId = DB::table('tours')->where('cod', $t['cod'])->value('id');
             DB::table('fotos_tour')->updateOrInsert(
                 ['tur_id' => $turId, 'ord_vis' => 1],
-                ['rta_arc' => 'images/tours/' . $t['foto'], 'txt_atv' => $t['alt']]
+                ['rta_arc' => 'images/tours/'.$t['foto'], 'txt_atv' => $t['alt']]
             );
         }
     }

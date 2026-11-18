@@ -11,11 +11,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+    @livewireStyles
     @stack('styles')
 </head>
 
@@ -92,8 +92,8 @@
     </aside>
     <div class="admin-workarea">
         <header class="admin-topbar">
-            <div class="flex min-w-0 items-center gap-3"><button type="button" @click="menu = !menu"
-                    class="admin-icon-button lg:hidden" :aria-expanded="menu" aria-label="Abrir menú"><i aria-hidden="true" class="fa-solid fa-bars"></i></button><span class="admin-breadcrumb">Administración <i aria-hidden="true" class="fa-solid fa-chevron-right"></i> <strong>@yield('header-title', 'Vista general')</strong></span></div>
+            <div class="flex min-w-0 flex-1 items-center gap-3"><button type="button" @click="menu = !menu"
+                    class="admin-icon-button lg:hidden" :aria-expanded="menu" aria-label="Abrir menú"><i aria-hidden="true" class="fa-solid fa-bars"></i></button><span class="admin-breadcrumb"><span class="hidden sm:inline">Administración</span> <i aria-hidden="true" class="fa-solid fa-chevron-right hidden sm:inline"></i> <strong>@yield('header-title', 'Vista general')</strong></span></div>
             <div class="flex shrink-0 items-center gap-3"><span
                     class="hidden text-xs text-slate-500 md:block">{{ now('America/La_Paz')->locale('es')->translatedFormat('d M Y') }}</span><span
                     class="admin-avatar admin-avatar-light"
@@ -125,6 +125,7 @@
         </main>
     </div>
     @stack('scripts')
+    @livewireScripts
 </body>
 
 </html>

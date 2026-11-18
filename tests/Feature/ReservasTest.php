@@ -79,7 +79,7 @@ function hastaParticipantes($test, Tour $tour, int $cantidad = 2): SalidaTour
         $participantes[] = participante(['nom_cpl' => 'Persona '.['Uno', 'Dos', 'Tres', 'Cuatro', 'Cinco'][$i], 'es_ctc_pri' => $i === 0 ? 1 : 0]);
     }
     $test->post(route('reservas.participantes.store'), [
-        'nom_ctc' => 'Ana Quispe', 'cor_ctc' => 'Ana@Example.com', 'tel_ctc' => '+591 70000000',
+        'nom_ctc' => 'Ana Quispe', 'cor_ctc' => 'Ana@Example.com', 'tel_ctc' => '+59170000000',
         'participantes' => $participantes,
     ])->assertSessionHasNoErrors()->assertRedirect(route('reservas.equipo'));
 
@@ -185,7 +185,7 @@ test('en un tour de alto riesgo la ficha médica firmada es obligatoria', functi
     $this->post(route('reservas.ficha.store'), ['fichas' => []])->assertSessionHasErrors('fichas.0.fir_b64');
 
     $this->post(route('reservas.ficha.store'), ['fichas' => [0 => [
-        'con_med' => 'Ninguna', 'nom_ctc_eme' => 'Luis Quispe', 'tel_ctc_eme' => '71111111',
+        'con_med' => 'Ninguna', 'nom_ctc_eme' => 'Luis Quispe', 'prefijo_eme' => '+591', 'telefono_eme' => '71111111',
         'acp_ver' => 1, 'acp_rie' => 1, 'fir_b64' => FIRMA_PNG,
     ]]])->assertSessionHasNoErrors()->assertRedirect(route('reservas.resumen'));
 
@@ -203,7 +203,7 @@ test('una firma que no es PNG se rechaza', function () {
     hastaParticipantes($this, tourAltoRiesgo(), 1);
 
     $this->post(route('reservas.ficha.store'), ['fichas' => [0 => [
-        'con_med' => 'Ninguna', 'nom_ctc_eme' => 'Luis Quispe', 'tel_ctc_eme' => '71111111',
+        'con_med' => 'Ninguna', 'nom_ctc_eme' => 'Luis Quispe', 'prefijo_eme' => '+591', 'telefono_eme' => '71111111',
         'acp_ver' => 1, 'acp_rie' => 1, 'fir_b64' => 'data:image/png;base64,'.base64_encode('<svg/>'),
     ]]])->assertSessionHasErrors('fichas.0.fir_b64');
 });
@@ -509,7 +509,7 @@ test('un encabezado PNG truncado y una firma borrada antes de confirmar se recha
     hastaParticipantes($this, tourAltoRiesgo(), 1);
     $this->post(route('reservas.equipo.store'), ['alquileres' => []]);
     $this->post(route('reservas.ficha.store'), ['fichas' => [0 => [
-        'con_med' => 'Ninguna', 'nom_ctc_eme' => 'Luis Quispe', 'tel_ctc_eme' => '71111111', 'acp_ver' => 1, 'acp_rie' => 1, 'fir_b64' => FIRMA_PNG,
+        'con_med' => 'Ninguna', 'nom_ctc_eme' => 'Luis Quispe', 'prefijo_eme' => '+591', 'telefono_eme' => '71111111', 'acp_ver' => 1, 'acp_rie' => 1, 'fir_b64' => FIRMA_PNG,
     ]]])->assertSessionHasNoErrors();
     Storage::disk('local')->deleteDirectory('firmas');
     $this->post(route('reservas.confirmar'), ['acp_ter' => 1])->assertSessionHasErrors();

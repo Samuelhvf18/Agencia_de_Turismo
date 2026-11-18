@@ -1,3 +1,4 @@
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import './bootstrap';
 
 // Drop field data before logging out on shared devices.
@@ -34,12 +35,7 @@ try {
 } catch { localStorage.removeItem('pipocas-offline-activo'); }
 
 import { Passkeys } from '@laravel/passkeys';
-document.addEventListener('input', event => {
-    let clean = event.target.value;
-    if (event.target.matches('[data-letras]')) clean = clean.replace(/[^\p{L}\p{M} ]/gu, '');
-    if (event.target.matches('[data-numeros]')) clean = clean.replace(/[^0-9]/g, '');
-    if (clean !== event.target.value) { event.target.value = clean; event.target.dispatchEvent(new Event('input', {bubbles:true})); }
-});
+import './validacion-formularios';
 document.addEventListener('click', async event => {
     const toggle = event.target.closest('[data-toggle-password]');
     if (toggle) { const field = document.getElementById(toggle.dataset.togglePassword); field.type = field.type === 'password' ? 'text' : 'password'; toggle.textContent = field.type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña'; }

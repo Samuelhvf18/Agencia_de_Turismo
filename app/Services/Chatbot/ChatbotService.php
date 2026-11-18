@@ -61,6 +61,7 @@ class ChatbotService
             'rem' => 'bot',
             'txt_msj' => $resultado['respuesta'],
             'int_det' => mb_substr((string) ($resultado['intencion'] ?? $modo), 0, 50),
+            'tours_ids' => array_column($this->herramientas->tarjetas($resultado['tours_ids'] ?? []), 'id'),
         ]);
 
         return [
@@ -75,9 +76,15 @@ class ChatbotService
     /** Mensajes nuevos de la conversación (para el sondeo del widget). */
     public function mensajesDesde(ConversacionChatbot $conversacion, int $ultimoId): array
     {
-        return $conversacion->mensajes()->where('id', '>', $ultimoId)->orderBy('id')->get()
-            ->map(fn (MensajeChatbot $m) => ['id' => $m->id, 'rem' => $m->rem, 'txt' => $m->txt_msj, 'humano' => $m->int_det === 'humano', 'hora' => $m->cre_en?->format('H:i')])
-            ->all();
+        $mensajes = $conversacion->mensajes()->where('id', '>', max(0, $ultimoId))->orderByDesc('id')->limit(100)->get()->reverse()->values();
+        $ids = $mensajes->flatMap(fn ($m) => $m->tours_ids ?? [])->unique()->values()->all();
+        $tarjetas = collect($this->herramientas->tarjetas($ids, 100))->keyBy('id');
+
+        return $mensajes->map(fn (MensajeChatbot $m) => [
+            'id' => $m->id, 'rem' => $m->rem, 'txt' => $m->txt_msj, 'humano' => $m->int_det === 'humano',
+            'hora' => $m->cre_en?->copy()->timezone(config('turismo.zona_horaria'))->format('H:i'),
+            'tours' => collect($m->tours_ids ?? [])->take(3)->filter(fn ($id) => isset($tarjetas[$id]))->map(fn ($id) => $tarjetas[$id])->values()->all(),
+        ])->all();
     }
 
     private function consultarN8n(ConversacionChatbot $conversacion, string $texto, string $idioma): ?array
@@ -106,10 +113,17 @@ class ChatbotService
                 throw new \RuntimeException('Respuesta vacía de n8n');
             }
 
+            $ids = is_array($respuesta['tours_ids'] ?? null) ? $respuesta['tours_ids']
+                : $this->herramientas->mencionados($texto.' '.(string) $respuesta['respuesta']);
+            if (! $ids && empty($respuesta['derivar']) && preg_match('/(recomiend|recommend|tour|excursi)/iu', $texto)) {
+                $ids = $this->local->responder($conversacion, $texto, $idioma)['tours_ids'] ?? [];
+            }
+
             return [
                 'respuesta' => mb_substr((string) $respuesta['respuesta'], 0, 4000),
                 'intencion' => $respuesta['intencion'] ?? null,
                 'derivar' => (bool) ($respuesta['derivar'] ?? false),
+                'tours_ids' => $ids,
             ];
         } catch (Throwable $e) {
             Log::warning('Chatbot: n8n no respondió, se usa el asistente local', ['error' => $e->getMessage()]);

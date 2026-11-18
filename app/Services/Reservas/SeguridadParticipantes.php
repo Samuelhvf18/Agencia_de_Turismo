@@ -4,6 +4,7 @@ namespace App\Services\Reservas;
 
 use App\Models\ParticipanteReserva;
 use App\Models\SalidaTour;
+use App\Support\ReglasEntrada;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -13,7 +14,7 @@ class SeguridadParticipantes
 {
     public const VERSION = 'menores-2026-11-v1';
 
-    public const NOMBRE = 'regex:/^[\p{L}\p{M}]+(?: +[\p{L}\p{M}]+)*$/u';
+    public const NOMBRE = ReglasEntrada::NOMBRE;
 
     public function validar(SalidaTour $salida, array $participantes): array
     {

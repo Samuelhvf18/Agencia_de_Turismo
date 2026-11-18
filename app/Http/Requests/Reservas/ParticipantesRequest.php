@@ -43,7 +43,7 @@ class ParticipantesRequest extends FormRequest
             'participantes' => $participantes,
             'cor_ctc' => $this->user()?->cor ?? strtolower(trim((string) $this->input('cor_ctc'))),
             'nom_ctc' => $this->user()?->nom ?? trim(preg_replace('/\s+/', ' ', (string) $this->input('nom_ctc'))),
-            'tel_ctc' => $this->has('prefijo_ctc') ? (string) $this->input('prefijo_ctc').(string) $this->input('telefono_nacional') : preg_replace('/[ -]/', '', (string) $this->input('tel_ctc')),
+            'tel_ctc' => $this->has('prefijo_ctc') ? (string) $this->input('prefijo_ctc').(string) $this->input('telefono_nacional') : (string) $this->input('tel_ctc'),
         ]);
     }
 
@@ -51,7 +51,7 @@ class ParticipantesRequest extends FormRequest
     {
         return [
             'nom_ctc' => ['required', 'string', 'max:150', self::NOMBRE],
-            'cor_ctc' => ['required', 'email', 'max:150'],
+            'cor_ctc' => ['required', 'email:rfc', 'max:150'],
             'tel_ctc' => ['required', 'string', 'regex:/^\+[1-9][0-9]{6,14}$/'],
             'prefijo_ctc' => ['sometimes', 'string', Rule::in(array_keys(config('turismo.prefijos')))],
             'telefono_nacional' => ['required_with:prefijo_ctc', 'nullable', 'regex:/^[0-9]{4,14}$/'],

@@ -12,7 +12,7 @@
         @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
             <div x-data="{photoName: null, photoPreview: null}" class="col-span-6 sm:col-span-4">
                 <!-- Profile Photo File Input -->
-                <input type="file" id="photo" class="hidden"
+                <input type="file" id="photo" accept="image/jpeg,image/png,image/webp" data-imagenes data-max-kb="2048" data-max-files="1" class="hidden"
                             wire:model.live="photo"
                             x-ref="photo"
                             x-on:change="
@@ -42,7 +42,7 @@
                     {{ __('Select A New Photo') }}
                 </x-secondary-button>
 
-                @if ($this->user->profile_photo_path)
+                @if ($this->user->fot_prf)
                     <x-secondary-button type="button" class="mt-2" wire:click="deleteProfilePhoto">
                         {{ __('Remove Photo') }}
                     </x-secondary-button>
@@ -55,7 +55,7 @@
         <!-- Name -->
         <div class="col-span-6 sm:col-span-4">
             <x-label for="name" value="{{ __('Name') }}" />
-            <x-input id="name" type="text" class="mt-1 block w-full" wire:model="state.name" required autocomplete="name" />
+            <x-input id="name" type="text" data-letras maxlength="150" class="mt-1 block w-full" wire:model="state.name" required autocomplete="name" />
             <x-input-error for="name" class="mt-2" />
         </div>
 

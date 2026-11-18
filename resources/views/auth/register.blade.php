@@ -127,7 +127,8 @@
                                focus:border-[#1F5F8B] focus:ring-2
                                focus:ring-[#1F5F8B]/20 focus:outline-none">
                 </div>
-                {{-- Contraseña --}}
+                <x-telefono name="tel" class="mb-5" />
+            {{-- Contraseña --}}
                 <div>
                     <label for="password"
                            class="block mb-2 text-sm font-medium text-[#343A40]">
@@ -135,13 +136,13 @@
                     </label>
                     <div class="relative">
                         <input
-                            id="password"
+                            id="password" data-clave-nueva minlength="8" maxlength="128"
                             type="password"
                             name="password"
                             required
                             autocomplete="new-password"
                             placeholder="Crea una contraseña"
-                            oninput="checkPasswordStrength(); checkPasswordMatch()" minlength="8"
+                            oninput="checkPasswordStrength(); checkPasswordMatch()"
                             class="w-full rounded-lg bg-[#F8F6F1] border border-[#D9D2C9]
                                    px-4 py-3 pr-12 text-[#343A40] placeholder:text-[#9A9A9A]
                                    focus:border-[#1F5F8B] focus:ring-2
@@ -183,7 +184,7 @@
                     </label>
                     <div class="relative">
                         <input
-                            id="password_confirmation"
+                            id="password_confirmation" data-clave-confirmacion maxlength="128"
                             type="password"
                             name="password_confirmation"
                             required
@@ -291,7 +292,7 @@ function checkPasswordStrength() {
     const password = document.getElementById('password').value;
     document.getElementById('req-length').textContent = (password.length >= 8 ? '✓ ' : '○ ') + 'Al menos 8 caracteres';
     document.getElementById('req-letter').textContent = (/\p{L}/u.test(password) ? '✓ ' : '○ ') + 'Al menos una letra';
-    document.getElementById('req-number').textContent = (/[0-9]/.test(password) ? '✓ ' : '○ ') + 'Al menos un número';
+    document.getElementById('req-number').textContent = (/\p{N}/u.test(password) ? '✓ ' : '○ ') + 'Al menos un número';
     const text = document.getElementById('strengthText');
     const bars = [
         document.getElementById('bar1'),
