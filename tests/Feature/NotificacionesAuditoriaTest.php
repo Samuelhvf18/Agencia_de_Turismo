@@ -128,9 +128,15 @@ test('el panel de auditoría filtra, muestra el antes/después y es solo para el
 
     $this->flushSession();
     $this->actingAs($this->admin);
-    $this->get(route('admin.auditoria', ['tabla' => 'reservas', 'acc' => 'UPDATE']))->assertOk()->assertSee('reservas #'.$reserva->id);
+    $filtros = ['tabla' => 'reservas', 'acc' => 'UPDATE', 'hasta' => today()->toDateString()];
+    $this->get(route('admin.auditoria', $filtros))->assertOk()
+        ->assertSee('Modificación')->assertSee('Teléfono de contacto')
+        ->assertSee(route('admin.auditoria.show', ['registro' => $registro] + $filtros + ['page' => 1]));
     $this->get(route('admin.auditoria', ['tabla' => 'users', 'acc' => 'UPDATE', 'id_reg' => 999999]))->assertOk()->assertSee('Sin registros');
-    $this->get(route('admin.auditoria.show', $registro))->assertOk()->assertSee('+591 70000000')->assertSee('71111111');
+    $this->get(route('admin.auditoria.show', ['registro' => $registro] + $filtros))->assertOk()
+        ->assertSee(route('admin.auditoria', $filtros))
+        ->assertSee('Teléfono de contacto')->assertSee('+591 70000000')->assertSee('71111111')
+        ->assertDontSee('Correo de contacto')->assertDontSee('Nombre de contacto');
     $this->get(route('admin.auditoria.notificaciones'))->assertOk();
 });
 

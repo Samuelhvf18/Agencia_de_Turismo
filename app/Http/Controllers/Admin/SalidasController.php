@@ -10,7 +10,6 @@ use App\Models\Reserva;
 use App\Models\SalidaTour;
 use App\Models\Tour;
 use App\Models\Vehiculo;
-use App\Services\Operaciones\AsignacionService;
 use App\Services\Operaciones\SalidaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,12 +20,13 @@ class SalidasController extends Controller
 {
     public function __construct(private SalidaService $salidas) {}
 
-    public function index(Request $request, AsignacionService $asignacion): View
+    public function index(Request $request): View
     {
         $filtros = $request->validate([
             'desde' => ['nullable', 'date'],
             'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
             'tur_id' => ['nullable', 'integer'],
+            'programar' => ['nullable', 'integer', 'exists:tours,id'],
             'est' => ['nullable', 'in:programada,en_curso,completada,cancelada'],
         ]);
         $desde = $filtros['desde'] ?? today()->toDateString();
@@ -40,10 +40,14 @@ class SalidasController extends Controller
             ->orderBy('fec_sal')->orderBy('hra_sal')
             ->get();
 
+        $opciones = $this->opciones();
+        $tourParaProgramar = $opciones['tours']->firstWhere('id', (int) ($filtros['programar'] ?? 0));
+
         return view('admin.panels.operaciones', [
+            'tourParaProgramar' => $tourParaProgramar,
             'salidas' => $salidas->groupBy(fn ($s) => $s->fec_sal->toDateString()),
             'filtros' => $filtros + ['desde' => $desde, 'hasta' => $hasta],
-        ] + $this->opciones());
+        ] + $opciones);
     }
 
     public function store(SalidaRequest $request): RedirectResponse
@@ -51,7 +55,7 @@ class SalidasController extends Controller
         $datos = $request->datos();
         $salida = $this->salidas->programar($datos);
 
-        return back()->with('estado', "Salida de {$salida->tour->nom} programada para el {$salida->fec_sal->format('d/m/Y')}.");
+        return redirect()->route('admin.salidas.edit', $salida)->with('estado', "Salida de {$salida->tour->nom} programada para el {$salida->fec_sal->format('d/m/Y')}.");
     }
 
     public function edit(SalidaTour $salida): View

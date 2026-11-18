@@ -34,17 +34,27 @@ class CheckinController extends Controller
     public function index(Request $request): View
     {
         $usuario = $request->user();
+        $pendientes = $request->query('vista') === 'pendientes';
+        $fecha = today()->toDateString();
+        $filtros = $request->validate(['tour' => ['nullable', 'string', 'max:120']]);
+        $busqueda = trim($filtros['tour'] ?? '');
 
-        $salidas = SalidaTour::with('tour', 'guia.usuario', 'vehiculo')
+        $salidas = SalidaTour::with('tour', 'guia.usuario', 'chofer.usuario', 'vehiculo')
             ->withSum(['reservas as pasajeros' => fn ($q) => $q->where('est', Reserva::EST_CONFIRMADA)], 'cnt_ptc')
-            ->whereBetween('fec_sal', [today()->subDay()->toDateString(), today()->addDays(7)->toDateString()])
-            ->whereIn('est', [SalidaTour::EST_PROGRAMADA, SalidaTour::EST_EN_CURSO])
             ->when($usuario->tieneRol(User::ROL_GUIA), fn ($q) => $q->where('prf_gui_id', $usuario->perfilGuia?->id ?? 0))
             ->when($usuario->tieneRol(User::ROL_CHOFER), fn ($q) => $q->where('prf_cho_id', $usuario->perfilChofer?->id ?? 0))
-            ->orderBy('fec_sal')->orderBy('hra_sal')
-            ->get();
+            ->when($busqueda !== '', fn ($q) => $q->whereHas('tour',
+                fn ($tour) => $tour->whereRaw('LOWER(nom) LIKE ?', ['%'.mb_strtolower($busqueda).'%'])))
+            ->when($pendientes, fn ($q) => $q->where('est', SalidaTour::EST_PROGRAMADA)->where('fec_sal', '<', $fecha),
+                fn ($q) => $q->where(fn ($activas) => $activas
+                    ->where('est', SalidaTour::EST_EN_CURSO)
+                    ->orWhere(fn ($proximas) => $proximas->where('est', SalidaTour::EST_PROGRAMADA)->where('fec_sal', '>=', $fecha))))
+            ->orderByRaw('CASE WHEN est = ? THEN 0 ELSE 1 END', [SalidaTour::EST_EN_CURSO])
+            ->orderBy('fec_sal', $pendientes ? 'desc' : 'asc')
+            ->orderBy('hra_sal')->orderBy('id')
+            ->paginate(15)->withQueryString();
 
-        return view('guias.index', ['salidas' => $salidas]);
+        return view('guias.index', ['salidas' => $salidas, 'pendientes' => $pendientes, 'busqueda' => $busqueda]);
     }
 
     public function show(Request $request, SalidaTour $salida): View

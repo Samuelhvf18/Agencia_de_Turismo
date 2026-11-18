@@ -12,6 +12,13 @@
     <a href="{{ route('admin.tours') }}" class="text-sm font-semibold text-[#1F5F8B]">← Volver al catálogo</a>
     @include('admin.partials.mensajes')
 
+    @if ($tour->exists && $tour->act && ! $tour->eli_en)
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4">
+            <p class="text-sm text-[#343A40]">Programa una fecha para este tour y asigna al guía, chofer y vehículo de la salida.</p>
+            <a href="{{ route('admin.operaciones', ['programar' => $tour->id]) }}" class="rounded-xl bg-[#1F5F8B] px-4 py-2 text-sm font-semibold text-white">Programar salida</a>
+        </div>
+    @endif
+
     {{-- Datos del tour --}}
     <form method="POST" action="{{ $tour->exists ? route('admin.catalogo.update', $tour) : route('admin.catalogo.store') }}" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm grid gap-4 md:grid-cols-4">
         @csrf

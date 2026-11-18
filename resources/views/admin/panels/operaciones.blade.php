@@ -9,7 +9,7 @@
     $campo = 'rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 text-sm';
     $colores = ['programada' => 'bg-[#1F5F8B]/10 text-[#1F5F8B]', 'en_curso' => 'bg-[#F4C95D]/30 text-[#6B4F3A]', 'completada' => 'bg-emerald-100 text-emerald-800', 'cancelada' => 'bg-red-100 text-red-700'];
 @endphp
-<div class="space-y-6" x-data="{ nueva: {{ $errors->any() ? 'true' : 'false' }} }">
+<div class="space-y-6" x-data="{ nueva: {{ ($errors->any() || $tourParaProgramar) ? 'true' : 'false' }} }">
     @include('admin.partials.mensajes')
 
     <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between md:items-end gap-4">
@@ -35,15 +35,18 @@
 
     <form method="POST" action="{{ route('admin.salidas.store') }}" x-show="nueva" x-cloak class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm grid gap-3 md:grid-cols-4">
         @csrf
-        <h3 class="md:col-span-4 font-bold text-[#343A40]">Nueva salida</h3>
+        <div class="md:col-span-4">
+            <h3 class="font-bold text-[#343A40]">Nueva salida</h3>
+            <p class="mt-1 text-sm text-[#6B6F72]">Cada persona verá la salida en «Mis salidas» cuando la asignes aquí.</p>
+        </div>
         <label class="text-xs text-[#6B6F72] md:col-span-2">Tour
             <select name="tur_id" required class="mt-1 w-full {{ $campo }}">
-                @foreach ($tours as $t)<option value="{{ $t->id }}" @selected((int) old('tur_id') === $t->id)>{{ $t->nom }} ({{ (float) $t->dur_hrs }} h, cap. {{ $t->cap_max }})</option>@endforeach
+                @foreach ($tours as $t)<option value="{{ $t->id }}" @selected((int) old('tur_id', $tourParaProgramar?->id) === $t->id)>{{ $t->nom }} ({{ (float) $t->dur_hrs }} h, cap. {{ $t->cap_max }})</option>@endforeach
             </select>
         </label>
         <label class="text-xs text-[#6B6F72]">Fecha<input type="date" name="fec_sal" required min="{{ today()->toDateString() }}" value="{{ old('fec_sal') }}" class="mt-1 w-full {{ $campo }}"></label>
         <label class="text-xs text-[#6B6F72]">Hora<input type="time" name="hra_sal" required value="{{ old('hra_sal', '08:00') }}" class="mt-1 w-full {{ $campo }}"></label>
-        <label class="text-xs text-[#6B6F72]">Capacidad<input type="number" name="cap_max" min="1" max="60" required value="{{ old('cap_max', 12) }}" class="mt-1 w-full {{ $campo }}"></label>
+        <label class="text-xs text-[#6B6F72]">Capacidad<input type="number" name="cap_max" min="1" max="60" required value="{{ old('cap_max', $tourParaProgramar?->cap_max ?? 12) }}" class="mt-1 w-full {{ $campo }}"></label>
         <label class="text-xs text-[#6B6F72]">Guía
             <select name="prf_gui_id" class="mt-1 w-full {{ $campo }}">
                 <option value="">Sin asignar</option>

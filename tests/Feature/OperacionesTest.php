@@ -69,10 +69,44 @@ test('las pantallas de operación cargan', function () {
     $this->get(route('admin.inventario'))->assertOk()->assertSee('Casco de seguridad');
 });
 
-test('programa una salida válida con guía, chofer y vehículo', function () {
-    $this->actingAs($this->operaciones)->post(route('admin.salidas.store'), datosSalida())->assertSessionHasNoErrors();
+test('una salida futura programada aparece para el guía y el chofer asignados', function () {
+    $tour = $this->tour->replicate();
+    $tour->fill(['nom' => 'Circuito Mirador del Valle', 'cod' => 'TUR-MIRADOR', 'rta_amg' => 'circuito-mirador-del-valle'])->save();
+    $datos = datosSalida(['tur_id' => $tour->id]);
+    $agenda = route('guias.checkin', ['tour' => 'Mirador del Valle']);
+    $this->actingAs($this->operaciones)
+        ->get(route('admin.catalogo.edit', $tour))
+        ->assertOk()
+        ->assertSee(route('admin.operaciones', ['programar' => $tour->id]));
 
-    expect(SalidaTour::where('fec_sal', today()->addDays(40)->toDateString())->where('prf_gui_id', $this->guia->id)->exists())->toBeTrue();
+    $this->get(route('admin.operaciones', ['programar' => $tour->id]))
+        ->assertOk()
+        ->assertViewHas('tourParaProgramar', fn ($seleccionado) => $seleccionado->is($tour));
+
+    $respuesta = $this->post(route('admin.salidas.store'), $datos)->assertSessionHasNoErrors();
+    $salida = SalidaTour::where('fec_sal', $datos['fec_sal'])->where('tur_id', $tour->id)->firstOrFail();
+    $respuesta->assertRedirect(route('admin.salidas.edit', $salida));
+
+    foreach ([$this->guia, $this->chofer] as $perfil) {
+        $this->actingAs($perfil->usuario, 'web')->get($agenda)
+            ->assertOk()->assertSee(route('guias.salida', $salida));
+        $this->get(route('guias.salida', $salida))->assertOk();
+    }
+
+    $otroGuia = User::factory()->rol(User::ROL_GUIA)->create();
+    $this->actingAs($otroGuia, 'web')->get($agenda)
+        ->assertOk()->assertDontSee(route('guias.salida', $salida));
+});
+
+test('separar las fechas pasadas conserva las salidas en curso visibles', function () {
+    $datos = datosSalida(['fec_sal' => today()->subDays(12)->toDateString(), 'hra_sal' => '09:00:00']);
+    $pendiente = SalidaTour::create($datos + ['est' => SalidaTour::EST_PROGRAMADA]);
+    $enCurso = SalidaTour::create(['hra_sal' => '15:00:00', 'est' => SalidaTour::EST_EN_CURSO] + $datos);
+
+    $this->actingAs($this->chofer->usuario)->get(route('guias.checkin'))
+        ->assertOk()->assertSee(route('guias.salida', $enCurso))->assertDontSee(route('guias.salida', $pendiente));
+    $this->get(route('guias.checkin', ['vista' => 'pendientes']))
+        ->assertOk()->assertSee(route('guias.salida', $pendiente))->assertDontSee(route('guias.salida', $enCurso));
 });
 
 test('rechaza el choque de horario del guía, del chofer y del vehículo', function () {

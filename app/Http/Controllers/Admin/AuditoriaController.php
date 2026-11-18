@@ -9,9 +9,11 @@ use App\Models\RegistroNotificacion;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Notificaciones\NotificacionService;
+use App\Support\PresentadorAuditoria;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -29,8 +31,8 @@ class AuditoriaController extends Controller
             'usuario' => ['nullable', 'string', 'max:150'],
             'id_reg' => ['nullable', 'integer'],
             'ip' => ['nullable', 'string', 'max:45'],
-            'desde' => ['nullable', 'date'],
-            'hasta' => ['nullable', 'date', 'after_or_equal:desde'],
+            'desde' => ['nullable', 'date_format:Y-m-d'],
+            'hasta' => ['nullable', 'date_format:Y-m-d', Rule::when($request->filled('desde'), ['after_or_equal:desde'])],
         ]);
 
         $registros = BitacoraAuditoria::with('usuario')
@@ -46,7 +48,7 @@ class AuditoriaController extends Controller
 
         return view('admin.panels.auditoria', [
             'registros' => $registros,
-            'tablas' => BitacoraAuditoria::select('nom_tbl')->distinct()->orderBy('nom_tbl')->pluck('nom_tbl'),
+            'tablas' => BitacoraAuditoria::select('nom_tbl')->distinct()->orderBy('nom_tbl')->pluck('nom_tbl')->sortBy(fn ($tabla) => PresentadorAuditoria::recurso($tabla)),
             'resumen' => BitacoraAuditoria::where('cre_en', '>=', now()->subDays(7))->selectRaw('acc, COUNT(*) AS n')->groupBy('acc')->pluck('n', 'acc'),
             'filtros' => $f,
         ]);
@@ -54,19 +56,9 @@ class AuditoriaController extends Controller
 
     public function show(BitacoraAuditoria $registro): View
     {
-        $antes = $registro->val_ant ?? [];
-        $despues = $registro->val_nvo ?? [];
-        $campos = array_unique(array_merge(array_keys($antes), array_keys($despues)));
-        sort($campos);
-
         return view('admin.auditoria.show', [
             'r' => $registro->load('usuario'),
-            'cambios' => array_map(fn ($c) => [
-                'campo' => $c,
-                'antes' => $antes[$c] ?? null,
-                'despues' => $despues[$c] ?? null,
-                'cambio' => ($antes[$c] ?? null) !== ($despues[$c] ?? null),
-            ], $campos),
+            'cambios' => PresentadorAuditoria::cambios($registro),
             'historial' => BitacoraAuditoria::with('usuario')->where('nom_tbl', $registro->nom_tbl)->where('id_reg', $registro->id_reg)->orderByDesc('id')->limit(30)->get(),
         ]);
     }
