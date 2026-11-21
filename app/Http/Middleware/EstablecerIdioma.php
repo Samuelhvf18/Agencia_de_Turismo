@@ -7,10 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * RNF-14: idioma de la interfaz. Se elige con ?lang=es|en (queda en la
- * sesión); si no, se usa la preferencia del navegador; por defecto español.
- */
+/** Idioma persistente por sesión. */
 class EstablecerIdioma
 {
     public const IDIOMAS = ['es', 'en'];

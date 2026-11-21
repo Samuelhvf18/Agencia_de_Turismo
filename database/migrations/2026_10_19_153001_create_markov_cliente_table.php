@@ -4,18 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Módulo 07 — Investigación Operativa II (complemento)
- * Cadenas de Markov aplicadas al ciclo de vida del cliente.
- *
- * Estados: prospecto → reservado → completado → fidelizado / perdido
- * Matriz P: probabilidades de transición entre estados por período.
- */
+/** Tablas del modelo Markov. */
 return new class extends Migration
 {
     public function up(): void
     {
-        // Catálogo de estados del cliente dentro de la cadena.
+        // Catálogo de estados del cliente.
         Schema::create('markov_estados_cliente', function (Blueprint $table) {
             $table->id();
             $table->string('cod', 20)->unique()->comment('prospecto | reservado | completado | fidelizado | perdido');
@@ -27,7 +21,7 @@ return new class extends Migration
             $table->timestamp('cre_en')->useCurrent();
         });
 
-        // Matriz de transición P[i,j] por período.
+        // Matriz de transición por período.
         Schema::create('markov_transiciones', function (Blueprint $table) {
             $table->id();
             $table->foreignId('est_ori_id')->constrained('markov_estados_cliente')->cascadeOnDelete();
@@ -42,7 +36,7 @@ return new class extends Migration
             $table->index(['per', 'act']);
         });
 
-        // Historial de estado por cliente (una fila por cambio de estado).
+        // Historial de cambios por cliente.
         Schema::create('markov_cliente_estado', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usr_id')->constrained('users')->cascadeOnDelete();
@@ -56,7 +50,7 @@ return new class extends Migration
             $table->index('est_id');
         });
 
-        // Cohorts: grupos de clientes captados en un mismo período para análisis de retención.
+        // Cohortes por período de captación.
         Schema::create('markov_cohorts', function (Blueprint $table) {
             $table->id();
             $table->string('nom', 80);
@@ -69,7 +63,7 @@ return new class extends Migration
             $table->unique('per_cap');
         });
 
-        // Distribución de un cohort en cada período (período relativo desde captación).
+        // Distribución por período relativo.
         Schema::create('markov_cohort_distribucion', function (Blueprint $table) {
             $table->id();
             $table->foreignId('coh_id')->constrained('markov_cohorts')->cascadeOnDelete();

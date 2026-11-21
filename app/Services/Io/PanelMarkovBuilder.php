@@ -5,13 +5,10 @@ namespace App\Services\Io;
 use App\Models\MarkovEstadoCliente;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Arma las variables de la vista admin/io/ciclo-vida: estados, matriz P, absorción (N, B, t),
- * proyección v(0)·P^n y cohortes. Lo usan el controlador y la vista previa.
- */
+/** Variables del panel Markov. */
 class PanelMarkovBuilder
 {
-    /** Nombres y colores por defecto (los mismos que carga IoColasMarkovSeeder). */
+    /** Nombres y colores del seeder. */
     public const ESTILO = [
         'prospecto' => ['Prospecto', '#6B6F72'],
         'reservado' => ['Reservado', '#F4C95D'],
@@ -25,7 +22,7 @@ class PanelMarkovBuilder
         try {
             $catalogo = Schema::hasTable('markov_estados_cliente') ? MarkovEstadoCliente::orderBy('ord_vis')->get()->keyBy('cod') : collect();
         } catch (\Throwable) {
-            $catalogo = collect(); // vista previa sin base de datos
+            $catalogo = collect(); // Maqueta sin base de datos.
         }
 
         $estados = [];

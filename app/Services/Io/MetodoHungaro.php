@@ -2,18 +2,12 @@
 
 namespace App\Services\Io;
 
-/**
- * Método húngaro (Kuhn–Munkres) para el problema de asignación de costo
- * mínimo, O(n³). Admite matrices rectangulares: se completan con filas o
- * columnas ficticias de costo 0, y esas asignaciones se descartan.
- *
- * min Σ c_ij · x_ij   s.a.   Σ_j x_ij ≤ 1,  Σ_i x_ij ≤ 1,  x_ij ∈ {0, 1}
- */
+/** Asignación húngara de costo mínimo. */
 class MetodoHungaro
 {
     /**
-     * @param  array<int, array<int, float>>  $costos  matriz filas × columnas (índices 0..n-1)
-     * @return array<int, int> fila => columna asignada (solo pares reales)
+     * @param  array<int, array<int, float>>  $costos  Matriz con índices desde cero.
+     * @return array<int, int> Asignaciones sin pares ficticios.
      */
     public function resolver(array $costos): array
     {
@@ -24,7 +18,7 @@ class MetodoHungaro
         }
 
         $n = max($filas, $columnas);
-        // Matriz cuadrada 1-indexada con ceros en las celdas ficticias.
+        // Rellena celdas ficticias con ceros.
         $a = [];
         for ($i = 1; $i <= $n; $i++) {
             for ($j = 1; $j <= $n; $j++) {
@@ -32,7 +26,7 @@ class MetodoHungaro
             }
         }
 
-        // Potenciales u (filas), v (columnas); p[j] = fila asignada a la columna j.
+        // Potenciales y asignación por columna.
         $u = array_fill(0, $n + 1, 0.0);
         $v = array_fill(0, $n + 1, 0.0);
         $p = array_fill(0, $n + 1, 0);

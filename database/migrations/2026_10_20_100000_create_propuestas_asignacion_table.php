@@ -5,12 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Módulo 07 — IO II, RF-24: propuestas de asignación generadas por los
- * modelos (método húngaro para guías, costo de combustible para vehículos).
- * Nunca se aplican solas: el personal las revisa, ajusta, confirma o rechaza.
- * Tabla nueva respecto al esquema v5 (no tenía dónde guardar las propuestas).
- */
+/** Propuestas de asignación de recursos. */
 return new class extends Migration
 {
     public function up(): void

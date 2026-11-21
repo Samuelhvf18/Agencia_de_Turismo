@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
 
-/** Durable delivery lease, shared by queued jobs and recovery. SMTP is at-least-once. */
+/** Bloqueo persistente compartido para entregas. */
 class EntregaNotificacion
 {
     public const MAX_INTENTOS = 10;

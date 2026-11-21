@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Parámetros del modelo de colas M/M/c/K de un tour (Módulo 07). */
+/** Parámetros de colas por tour. */
 class ColaParametroTour extends Model
 {
     protected $table = 'cola_parametros_tour';

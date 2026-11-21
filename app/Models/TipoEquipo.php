@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** Tipo de equipo de alquiler. cos_ord y cos_mnt_anu alimentan el modelo EOQ. */
+/** Tipo de equipo para EOQ. */
 class TipoEquipo extends Model
 {
     protected $table = 'tipos_equipo';

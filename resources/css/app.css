@@ -6,7 +6,7 @@
     display: none;
 }
 
-/* Piezas reutilizables del motor de reservas (layouts/reserva.blade.php) */
+/* Componentes reutilizables de reservas. */
 @layer components {
     .rsv-tarjeta {
         @apply rounded-3xl bg-white p-5 shadow-tarjeta sm:p-7;
@@ -34,7 +34,7 @@
     }
 }
 
-/* Administration: one visual language for the management and planning screens. */
+/* Estilos de administración. */
 .admin-shell { --admin-ink: #142d3e; --admin-muted: #697887; background: #f4f6f9; color: var(--admin-ink); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.6; }
 .admin-shell [x-cloak] { display: none !important; }
 .admin-shell :focus-visible { outline: 3px solid #478fb3; outline-offset: 3px; }

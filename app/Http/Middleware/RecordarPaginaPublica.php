@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-/** Conserva la navegación de invitados sin aceptar destinos de otros sitios. */
+/** Recuerda destinos públicos locales. */
 class RecordarPaginaPublica
 {
     private const PAGINAS = ['home', 'categorias.show', 'guias.perfil', 'tours.show',
@@ -24,7 +24,7 @@ class RecordarPaginaPublica
         $response = $next($request);
         if (! $request->user() && $request->isMethod('GET') && $response->getStatusCode() === 200
             && ! $request->expectsJson() && in_array($request->route()?->getName(), self::PAGINAS, true)) {
-            // getRequestUri devuelve una ruta local; nunca se usa Referer ni un redirect del cliente.
+            // Usa solo rutas locales.
             $request->session()->put('auth.pagina_anterior', '/'.ltrim($request->getRequestUri(), '/'));
         }
 

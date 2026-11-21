@@ -38,7 +38,7 @@ test('sin n8n recomienda tours activos según tiempo, dificultad y presupuesto (
         ->and($r->json('respuesta'))->toContain('Valle de la Luna')
         ->and($r->json('respuesta'))->not->toContain('Huayna');
 
-    // Se guardan el mensaje del usuario y la respuesta.
+    // Persiste ambos mensajes.
     expect(MensajeChatbot::where('rem', 'usuario')->count())->toBe(1)
         ->and(MensajeChatbot::where('rem', 'bot')->value('int_det'))->toBe('recomendacion');
 });
@@ -68,12 +68,12 @@ test('derivar a una persona marca la conversación, avisa a operaciones y el ase
     expect($conversacion->der_hum)->toBeTrue()
         ->and(RegistroNotificacion::where('tip', 'derivacion_chatbot')->exists())->toBeTrue();
 
-    // Mientras está derivada, el bot no contesta.
+    // Pausa respuestas tras derivación.
     $antes = MensajeChatbot::where('rem', 'bot')->count();
     preguntar($this, '¿Siguen ahí?');
     expect(MensajeChatbot::where('rem', 'bot')->count())->toBe($antes);
 
-    // El asesor responde desde el panel y el cliente lo recibe por sondeo.
+    // Respuesta del asesor por sondeo.
     $ultimo = MensajeChatbot::max('id');
     $sesion = session('chatbot.sesion');
     $this->actingAs(User::where('cor', 'operaciones@pipocas.test')->first())

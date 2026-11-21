@@ -6,7 +6,7 @@ use App\Models\ComprobantePago;
 use App\Observers\AuditObserver;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-/** Comprobante de pago en PDF (RF-14). */
+/** Comprobante PDF de pago. */
 class ComprobanteService
 {
     public function pdf(ComprobantePago $comprobante): \Barryvdh\DomPDF\PDF

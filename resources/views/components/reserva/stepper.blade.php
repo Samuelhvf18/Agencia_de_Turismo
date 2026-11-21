@@ -1,10 +1,4 @@
-{{--
-    Stepper del flujo de reserva.
-    Uso: <x-reserva.stepper :actual="2" />
-         <x-reserva.stepper :actual="3" :pasos="['Salida', 'Datos', ...]" />   (pasos personalizados)
-    Un paso ya completado se muestra con check; si se pasa :enlaces (mismo orden que los pasos)
-    los pasos completados se vuelven enlaces para regresar.
---}}
+{{-- Pasos del flujo de reserva. --}}
 @props([
     'actual' => 1,
     'pasos' => null,

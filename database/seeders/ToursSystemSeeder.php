@@ -56,7 +56,7 @@ class ToursSystemSeeder extends Seeder
             'act' => true
         ]);
 
-        // 3. Crear Fotos (Aquí guardamos las rutas en la BD)
+        // Guarda rutas de fotos.
         FotoTour::create([
             'tur_id' => $tourMuerte->id,
             'rta_arc' => 'https://images.unsplash.com/photo-1544198365-f5d60b6d8190?q=80&w=800&auto=format&fit=crop',

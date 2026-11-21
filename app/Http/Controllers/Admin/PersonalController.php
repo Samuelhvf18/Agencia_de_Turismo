@@ -18,11 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-/**
- * Personal de campo (M03, RF-15): guías con idiomas, experiencia y límite
- * semanal de horas, y choferes con licencia. No se desactiva a quien tiene
- * salidas futuras asignadas.
- */
+/** Gestión del personal de campo. */
 class PersonalController extends Controller
 {
     public function index(): View
@@ -97,7 +93,7 @@ class PersonalController extends Controller
         return redirect()->route('admin.personal')->with('estado', 'Datos actualizados.');
     }
 
-    /** Activa o desactiva; la regla de negocio impide desactivar con salidas futuras. */
+    /** Protege las asignaciones futuras. */
     public function estado(string $tipo, int $id): RedirectResponse
     {
         $perfil = $this->perfil($tipo, $id);

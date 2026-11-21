@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-/** Correo genérico para los avisos de registros_notificacion cuando no se usa n8n. */
+/** Correo sin n8n. */
 class AvisoMail extends Mailable
 {
     use Queueable, SerializesModels;

@@ -16,13 +16,7 @@ use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Passkeys\PasskeyAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
-/**
- * Usuario del sistema (tabla `users`, diccionario de datos v4).
- *
- * Columnas propias: nom (nombre completo), cor (correo), clv (contraseña),
- * rol_id (roles). Se exponen los alias `name` y `email` para que las vistas
- * de Jetstream y Fortify sigan funcionando.
- */
+/** Usuario con alias de autenticación. */
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     use HasApiTokens, HasFactory, \Laravel\Fortify\TwoFactorAuthenticatable, Notifiable;
@@ -118,7 +112,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return Attribute::get(fn () => $this->cor);
     }
 
-    /** Hash de la contraseña; Jetstream lo lee como `password` al confirmar acciones. */
+    /** Hash compatible con Jetstream. */
     protected function password(): Attribute
     {
         return Attribute::get(fn () => $this->clv);
@@ -162,7 +156,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->tieneRol(self::ROL_ADMIN);
     }
 
-    /** Ruta de inicio según el rol (redirección tras iniciar sesión). */
+    /** Inicio según rol. */
     public function rutaInicio(): string
     {
         return match ($this->nombreRol()) {

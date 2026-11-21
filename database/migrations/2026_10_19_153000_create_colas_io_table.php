@@ -4,20 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Módulo 07 — Investigación Operativa II
- * Teoría de Colas (modelo M/M/c/K) aplicada al motor de reservas.
- *
- * c = guías disponibles para el tour
- * K = capacidad del sistema (cupos por salida)
- * λ = tasa de llegada de reservas
- * μ = tasa de servicio (1 / duración promedio del tour en días)
- */
+/** Tablas del modelo de colas. */
 return new class extends Migration
 {
     public function up(): void
     {
-        // Parámetros del modelo de colas por tour (configurables por el admin).
+        // Parámetros de colas por tour.
         Schema::create('cola_parametros_tour', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tur_id')->constrained('tours')->cascadeOnDelete();
@@ -36,7 +28,7 @@ return new class extends Migration
             $table->index(['tur_id', 'act']);
         });
 
-        // Log de eventos de llegada (reservas) para calcular λ observado y validar el modelo.
+        // Registra llegadas para estimar λ.
         Schema::create('cola_eventos_llegada', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tur_id')->constrained('tours')->cascadeOnDelete();
@@ -51,7 +43,7 @@ return new class extends Migration
             $table->index('est');
         });
 
-        // Snapshots diarios de las métricas calculadas (ρ, Lq, Wq, P0, Prechazo, etc.).
+        // Métricas diarias de colas.
         Schema::create('cola_metricas_diarias', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tur_id')->constrained('tours')->cascadeOnDelete();

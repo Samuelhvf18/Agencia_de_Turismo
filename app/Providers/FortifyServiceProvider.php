@@ -26,7 +26,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Tras iniciar sesión o registrarse, cada rol va a su propio inicio.
+        // Inicio según rol.
         $this->app->singleton(LoginResponse::class, RedirigirSegunRol::class);
         $this->app->singleton(RegisterResponse::class, RedirigirSegunRol::class);
     }
@@ -43,8 +43,8 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
-        // Inicio de sesión con el correo (users.cor) y la contraseña (users.clv).
-        // Las cuentas desactivadas o eliminadas lógicamente no pueden entrar.
+        // Acceso con correo y contraseña.
+        // Rechaza cuentas inactivas o eliminadas.
         Fortify::authenticateUsing(function (Request $request) {
             $user = User::where('cor', Str::lower((string) $request->input(Fortify::username())))
                 ->where('act', true)
@@ -54,7 +54,7 @@ class FortifyServiceProvider extends ServiceProvider
             return $user && Hash::check((string) $request->input('password'), $user->clv) ? $user : null;
         });
 
-        // Confirmar la contraseña antes de acciones sensibles (perfil, tokens, borrar cuenta).
+        // Confirma contraseña en acciones sensibles.
         Fortify::confirmPasswordsUsing(fn (User $user, ?string $password) => Hash::check((string) $password, $user->clv));
 
         RateLimiter::for('login', function (Request $request) {

@@ -5,11 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Catálogos generales: departamentos de Bolivia (complemento del CI),
- * países (nacionalidad de los turistas) e idiomas (guías y chatbot).
- * Es idempotente.
- */
+/** Catálogos generales de referencia. */
 class CatalogosBaseSeeder extends Seeder
 {
     public function run(): void

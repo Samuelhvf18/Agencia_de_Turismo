@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Ficha médica firmada digitalmente (rta_fir = ruta de la imagen de la firma). */
+/** Ficha médica con firma digital. */
 class FichaMedica extends Model
 {
     protected $table = 'fichas_medicas';

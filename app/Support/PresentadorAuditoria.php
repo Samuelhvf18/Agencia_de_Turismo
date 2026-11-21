@@ -83,7 +83,7 @@ class PresentadorAuditoria
         return self::CAMPOS[$campo] ?? Str::ucfirst(str_replace('_', ' ', $campo));
     }
 
-    /** PostgreSQL guarda la fila completa y la bitácora anterior puede contener solo los cambios. */
+    /** Acepta auditoría completa o parcial. */
     public static function cambios(BitacoraAuditoria $registro): array
     {
         $antes = $registro->val_ant ?? [];

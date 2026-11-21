@@ -8,23 +8,14 @@ use App\Models\ColaParametroTour;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Módulo 07 — Teoría de colas M/M/c/K aplicada al motor de reservas.
- *
- *  λ = tasa de llegada de solicitudes de reserva (reservas/día)
- *  μ = tasa de servicio de un guía (tours/día) = 24 / dur_hrs
- *  c = servidores (guías disponibles) · K = capacidad del sistema (cupos por salida)
- */
+/** Modelo de colas de reservas. */
 class ColasService
 {
-    /** Umbral de probabilidad de rechazo a partir del cual el tour se considera saturado. */
+    /** Umbral de rechazo para saturación. */
     public const UMBRAL_RECHAZO = 0.05;
 
     /**
-     * Métricas de estado estable del modelo M/M/c/K.
-     *
-     * Pn = (r^n / n!)·P0 para n ≤ c;  Pn = r^n / (c!·c^(n−c))·P0 para c < n ≤ K,  con r = λ/μ.
-     * Los términos se calculan de forma recursiva (t_n = t_{n−1}·r / min(n, c)) para evitar factoriales grandes.
+     * Métricas de estado estable.
      *
      * @return array{rho: float, p0: float, pn: float[], lq: float, l: float, lambda_e: float,
      *               wq_hrs: float, w_hrs: float, pq: float, p_rec: float}
@@ -36,8 +27,7 @@ class ColasService
         }
 
         $rho = $lambda / ($c * $mu);
-        // Normalize in log space so high-demand, large-capacity simulations
-        // cannot overflow before the probabilities are computed.
+        // Normalización logarítmica evita desbordamientos.
         $logR = $lambda > 0 ? log($lambda) - log($mu) : -INF;
         $logTerminos = [0.0];
         for ($n = 1; $n <= $k; $n++) {
@@ -65,7 +55,7 @@ class ColasService
         $pRec = $pn[$k];
         $lambdaE = $lambda * (1 - $pRec);
 
-        // Ley de Little con la tasa efectiva; λ en reservas/día → tiempos en horas.
+        // Ley de Little en horas.
         $wq = $lambdaE > 0 ? $lq / $lambdaE * 24 : 0.0;
         $w = $lambdaE > 0 ? $l / $lambdaE * 24 : 0.0;
 
@@ -83,10 +73,7 @@ class ColasService
         ];
     }
 
-    /**
-     * Costo total esperado por hora: CT = Ce·Lq + Cs·(c − (L − Lq)).
-     * L − Lq es el número promedio de guías ocupados; c − (L − Lq), el de guías ociosos.
-     */
+    /** Costo de espera y ocio. */
     public function costoTotal(array $m, int $c, float $cosEsp, float $cosSrv): float
     {
         $ocupados = $m['l'] - $m['lq'];
@@ -94,7 +81,7 @@ class ColasService
         return $cosEsp * $m['lq'] + $cosSrv * max(0.0, $c - $ocupados);
     }
 
-    /** Clasificación para el panel: saturado (ρ ≥ 1 o P(rechazo) > 5 %), atención (ρ ≥ 0,8) o estable. */
+    /** Clasificación de saturación. */
     public function estado(array $m): string
     {
         if ($m['rho'] >= 1 || $m['p_rec'] > self::UMBRAL_RECHAZO) {
@@ -105,7 +92,7 @@ class ColasService
     }
 
     /**
-     * Escenarios c = 1..cMax con su costo total; marca el de menor costo.
+     * Compara escenarios por costo.
      *
      * @return array<int, array{c: int, rho: float, lq: float, wq_hrs: float, p_rec: float, ct: float, optimo: bool}>
      */
@@ -137,16 +124,13 @@ class ColasService
         return $filas;
     }
 
-    /** μ inicial a partir de la duración del tour: un guía atiende 24/dur_hrs tours por día. */
+    /** Servicio estimado según duración. */
     public function muDesdeDuracion(float $durHrs): float
     {
         return $durHrs > 0 ? round(24 / $durHrs, 4) : 1.0;
     }
 
-    /**
-     * λ observado: llegadas (admitidas + rechazadas) por día en el intervalo, a partir de cola_eventos_llegada.
-     * Devuelve null si no hay eventos registrados.
-     */
+    /** Llegadas observadas por día. */
     public function lambdaObservado(int $turId, Carbon $desde, Carbon $hasta): ?float
     {
         $llegadas = ColaEventoLlegada::where('tur_id', $turId)
@@ -159,10 +143,7 @@ class ColasService
         return $llegadas / $dias;
     }
 
-    /**
-     * μ observado: 24 / duración real promedio de las salidas completadas del tour (hra_ini_rea → hra_fin_rea).
-     * Devuelve null si no hay salidas con hora real de inicio y fin.
-     */
+    /** Servicio observado según duración real. */
     public function muObservado(int $turId, Carbon $desde, Carbon $hasta): ?float
     {
         $horas = DB::table('salidas_tour')
@@ -175,10 +156,7 @@ class ColasService
         return $horas && $horas > 0 ? 24 / (float) $horas : null;
     }
 
-    /**
-     * Registra una llegada al sistema de colas. Debe llamarse desde el motor de reservas
-     * al confirmar (admitido), rechazar por falta de cupo (rechazado) o cancelar una solicitud.
-     */
+    /** Registra llegadas a la cola. */
     public function registrarLlegada(int $turId, ?int $salTurId, ?int $rsvId, int $cupos, string $estado = 'admitido'): ColaEventoLlegada
     {
         return ColaEventoLlegada::create([
@@ -192,8 +170,7 @@ class ColasService
     }
 
     /**
-     * Cálculo diario (lo ejecuta el planificador / n8n): guarda una fila por tour activo en cola_metricas_diarias.
-     * Usa λ y μ observados cuando existen datos y, si no, los parámetros configurados.
+     * Prioriza tasas observadas diariamente.
      *
      * @return int cantidad de tours procesados
      */

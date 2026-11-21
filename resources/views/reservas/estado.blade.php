@@ -1,16 +1,7 @@
 @extends('layouts.reserva')
 
 @php
-    /*
-     | DATOS DE EJEMPLO (solo frontend).
-     | El controlador debe pasar:
-     |   $reserva       -> reservas encontrada (cod, nom_ctc, cor_ctc, tel_ctc, cnt_ptc, est, pre_tot, est_pag, cre_en)
-     |   $tour          -> Tour presentado (nom, cod, img, img_alt, categoria->nom)
-     |   $salida        -> salidas_tour (fec_sal, hra_sal, est) + 'gui_nom' (opcional) + 'pun_enc' (punto de encuentro, opcional)
-     |   $participantes -> participantes_reserva (nom_cpl, tip_doc, num_doc, es_ctc_pri) + 'boleto' => boletos (cod, est) o null
-     |   $urlPago       -> ruta al pago (solo si est_pag = 'pendiente')
-     | En la preview se puede probar otro estado con ?est=pendiente|confirmada|cancelada
-     */
+    /* Datos de ejemplo. */
     $reserva ??= [
         'cod' => 'PIP-2610-4F7K', 'nom_ctc' => 'Ana Quispe Mamani', 'cor_ctc' => 'ana.quispe@ejemplo.com', 'tel_ctc' => '+591 71234567',
         'cnt_ptc' => 2, 'est' => in_array(request('est'), ['pendiente', 'confirmada', 'cancelada']) ? request('est') : 'confirmada',
@@ -39,7 +30,7 @@
     $metodos ??= [];
     $saldo ??= 0;
 
-    // Colores y textos de los estados (reservas.est y reservas.est_pag)
+    // Colores y textos por estado.
     $estados = [
         'pendiente'  => ['Pendiente de pago', 'bg-andinist-acento/30 text-andinist-calido', 'fa-regular fa-clock'],
         'confirmada' => ['Confirmada', 'bg-emerald-100 text-emerald-800', 'fa-solid fa-circle-check'],
@@ -168,7 +159,7 @@
         <ul class="grid gap-4 sm:grid-cols-2">
             @foreach ($participantes as $p)
                 <li class="flex gap-4 rounded-2xl border border-gray-200 p-4">
-                    {{-- Espacio para el QR (el backend generará la imagen a partir de boletos.cod) --}}
+                    {{-- Código QR del boleto. --}}
                     <div @class([
                         'grid h-24 w-24 shrink-0 place-items-center rounded-xl text-center',
                         'border-2 border-andinist-principal/20 bg-andinist-fondo text-andinist-principal' => $p['boleto'],
@@ -206,7 +197,7 @@
         </ul>
     </section>
 
-    {{-- Reseña verificada (RF-32): solo para reservas completadas --}}
+    {{-- Reseña tras completar la reserva. --}}
     @if ($resena)
         <section class="rsv-tarjeta">
             <h2 class="rsv-titulo mb-2">{{ __('Tu reseña') }}</h2>

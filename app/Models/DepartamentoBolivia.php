@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/** Departamento de expedición del CI boliviano. */
+/** Departamento emisor del CI. */
 class DepartamentoBolivia extends Model
 {
     protected $table = 'departamentos_bolivia';

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Boleto con código QR de un participante: emitido, validado o cancelado. */
+/** Boleto QR del participante. */
 class Boleto extends Model
 {
     public const EST_EMITIDO = 'emitido';
@@ -18,7 +18,7 @@ class Boleto extends Model
 
     protected $fillable = ['cod', 'ptc_rsv_id', 'est', 'emt_en', 'vld_en', 'vld_por'];
 
-    /** En las URL públicas se usa el código, no el id. */
+    /** URL pública por código. */
     public function getRouteKeyName(): string
     {
         return 'cod';

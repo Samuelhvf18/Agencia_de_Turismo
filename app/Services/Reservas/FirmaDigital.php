@@ -6,18 +6,14 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Guarda la firma dibujada en el canvas (PNG en base64) en el disco privado.
- * Primero en firmas/tmp mientras dura el wizard y, al confirmar, en
- * firmas/{codigo de reserva}/.
- */
+/** Firma en almacenamiento privado. */
 class FirmaDigital
 {
     private const DISCO = 'local';
 
     private const MAX_BYTES = 300_000;
 
-    /** @return string ruta relativa en el disco privado */
+    /** @return string Ruta privada relativa. */
     public static function guardarTemporal(string $dataUri, string $campo): string
     {
         if (! preg_match('#^data:image/png;base64,([A-Za-z0-9+/=]+)$#', $dataUri, $m)) {

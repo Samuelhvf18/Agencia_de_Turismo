@@ -13,12 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/**
- * Inventario de equipo de alquiler (M03, RF-20): tipos (con costos para el
- * EOQ), existencias por talla y equipo ofrecido en cada tour. El descuento
- * y la devolución de stock son automáticos al confirmar, cancelar o
- * completar una reserva.
- */
+/** Inventario de equipo para alquiler. */
 class InventarioController extends Controller
 {
     public function index(): View
@@ -46,7 +41,7 @@ class InventarioController extends Controller
         return back()->with('estado', 'Tipo de equipo guardado.');
     }
 
-    /** Agrega una talla o ajusta su total; las unidades alquiladas no se pueden quitar. */
+    /** Protege las unidades alquiladas. */
     public function guardarItem(Request $request, TipoEquipo $tipo): RedirectResponse
     {
         $datos = $request->validate([
@@ -70,7 +65,7 @@ class InventarioController extends Controller
         return back()->with('estado', "Talla {$item->tal} de {$tipo->nom}: {$item->cnt_tot} en total, {$item->cnt_dis} disponibles.");
     }
 
-    /** Habilita o deshabilita un equipo en un tour, con precio especial opcional. */
+    /** Configura el alquiler por tour. */
     public function equipoTour(Request $request, Tour $tour): RedirectResponse
     {
         $datos = $request->validate([

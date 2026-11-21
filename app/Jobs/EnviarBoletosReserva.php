@@ -8,10 +8,7 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-/**
- * Envía al contacto de la reserva los boletos QR y el comprobante, y deja el
- * resultado en registros_notificacion (RF-38).
- */
+/** Envío de boletos y comprobante. */
 class EnviarBoletosReserva implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;

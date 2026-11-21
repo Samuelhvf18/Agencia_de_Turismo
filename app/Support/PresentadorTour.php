@@ -5,13 +5,10 @@ namespace App\Support;
 use App\Models\Tour;
 use Illuminate\Support\Facades\Storage;
 
-/**
- * Prepara un Tour para las vistas públicas (catálogo y motor de reservas):
- * galería, imagen principal, etiqueta de color y textos de duración y dificultad.
- */
+/** Prepara tours para vistas públicas. */
 class PresentadorTour
 {
-    // Clase de color de la etiqueta por categoría (slug)
+    // Colores por categoría.
     private const TAGS = [
         'biking' => 't-bike',
         'climbing' => 't-climb',
@@ -20,7 +17,7 @@ class PresentadorTour
         'hiking' => 't-hike',
     ];
 
-    // Texto y número de barras (de 5) por nivel de dificultad
+    // Barras según dificultad.
     private const DIFICULTAD = [
         'facil' => ['Fácil', 1],    'baja' => ['Fácil', 1],
         'moderado' => ['Moderado', 3], 'media' => ['Moderado', 3],
@@ -28,7 +25,7 @@ class PresentadorTour
         'experto' => ['Experto', 5],
     ];
 
-    // Agrega al tour los datos ya listos para la vista
+    // Enriquece datos para la vista.
     public static function presentar(Tour $tour): Tour
     {
         $tour->galeria = $tour->fotos
@@ -44,7 +41,7 @@ class PresentadorTour
         return $tour;
     }
 
-    // Acepta URL absolutas, archivos en public/ o en el disco "public" de storage
+    // Resuelve imágenes públicas o externas.
     public static function urlFoto(?string $ruta): ?string
     {
         if (! $ruta) {

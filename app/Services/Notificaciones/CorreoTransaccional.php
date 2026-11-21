@@ -35,8 +35,7 @@ class CorreoTransaccional
 
     public function boletos(Reserva $reserva, string $clave, RegistroNotificacion $registro): void
     {
-        // Congelar el mensaje antes de enviarlo: los PDFs regenerados incluyen IDs
-        // aleatorios y provocarían conflictos de idempotencia después de un timeout.
+        // Congela PDFs para reintentos idénticos.
         if ($preparado = $registro->cnd['correo_preparado'] ?? null) {
             $payload = json_decode(Crypt::decryptString($preparado), true, flags: JSON_THROW_ON_ERROR);
             $this->enviar($payload['correo'], $payload['asunto'], $payload['texto'], $clave, $payload['adjuntos']);

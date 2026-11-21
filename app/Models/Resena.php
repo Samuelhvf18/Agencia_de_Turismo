@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Reseña verificada de un tour (cal 1–5), ligada a una reserva completada. */
+/** Reseña de una reserva completada. */
 class Resena extends Model
 {
     protected $table = 'resenas';

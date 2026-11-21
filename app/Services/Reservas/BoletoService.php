@@ -12,15 +12,11 @@ use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 use Illuminate\Support\Collection;
 
-/**
- * Boletos con código QR por participante (RF-10, RF-11). El QR contiene el
- * código del boleto; el guía lo escanea en el check-in.
- */
+/** Un boleto QR por participante. */
 class BoletoService
 {
     /**
-     * Emite el boleto de cada participante que aún no lo tiene. En tours de
-     * alto riesgo, quien no tiene ficha médica firmada queda sin boleto.
+     * Exige ficha en alto riesgo.
      *
      * @return Collection<int, Boleto> boletos emitidos ahora
      */
@@ -55,7 +51,7 @@ class BoletoService
         return $emitidos;
     }
 
-    /** QR del boleto como data URI SVG (no requiere la extensión GD). */
+    /** QR SVG sin extensión GD. */
     public function qrDataUri(string $codigo): string
     {
         $opciones = new QROptions([
@@ -68,11 +64,11 @@ class BoletoService
         return (new QRCode($opciones))->render($codigo);
     }
 
-    /** PDF con los boletos indicados (uno por página). */
+    /** Un boleto por página. */
     public function pdf(Reserva $reserva, Collection $boletos): \Barryvdh\DomPDF\PDF
     {
         $reserva->loadMissing('salida.tour.categoria', 'salida.guia.usuario');
-        // La descarga individual también admite una colección Support de collect().
+        // Acepta también colecciones Support.
         $boletos->each(fn (Boleto $boleto) => $boleto->loadMissing('participante.pais'));
         $boletos->each(fn ($boleto) => AuditObserver::lectura($boleto->participante));
 

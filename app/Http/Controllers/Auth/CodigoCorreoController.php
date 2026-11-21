@@ -39,7 +39,7 @@ class CodigoCorreoController extends Controller
         $usuario = User::whereRaw('LOWER(cor) = ?', [$correo])->where('act', true)->whereNull('eli_en')->first();
         if (! $usuario || ! $codigos->comprobar($correo, 'recuperar', $datos['codigo'], function () use ($usuario, $datos) {
             $usuario->forceFill(['clv' => $datos['password'], 'remember_token' => Str::random(60)])->save();
-            // Revocar sesiones previas, también las persistentes, tras la recuperación.
+            // Revoca incluso sesiones persistentes.
             DB::table('sessions')->where('user_id', $usuario->id)->delete();
             $usuario->tokens()->delete();
             event(new PasswordReset($usuario));

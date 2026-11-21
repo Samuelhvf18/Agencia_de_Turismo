@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** Salida programada de un tour con su guía, chofer y vehículo. */
+/** Salida con recursos asignados. */
 class SalidaTour extends Model
 {
     public const EST_PROGRAMADA = 'programada';
@@ -44,7 +44,7 @@ class SalidaTour extends Model
             return parent::resolveRouteBindingQuery($query, $value, $field);
         }
 
-        // El ID mantiene válido el enlace aunque cambie la fecha de la salida.
+        // ID estable tras reprogramar.
         if (preg_match('/^\d{4}-\d{2}-\d{2}-([0-9]+)$/D', (string) $value, $partes)) {
             $value = $partes[1];
         }
@@ -84,7 +84,7 @@ class SalidaTour extends Model
         return $this->hasMany(BitacoraViajeVehiculo::class, 'sal_tur_id');
     }
 
-    /** Cupos ocupados por reservas que no están canceladas. */
+    /** Cupos de reservas vigentes. */
     public function cuposOcupados(): int
     {
         return (int) $this->reservas()->where('est', '<>', Reserva::EST_CANCELADA)->sum('cnt_ptc');

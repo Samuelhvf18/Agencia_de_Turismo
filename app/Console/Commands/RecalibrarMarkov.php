@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Services\Io\MarkovService;
 use Illuminate\Console\Command;
 
-/** Recalibración mensual de la cadena de Markov del ciclo de vida del cliente. */
+/** Recalibración mensual de Markov. */
 class RecalibrarMarkov extends Command
 {
     protected $signature = 'io:recalibrar-markov

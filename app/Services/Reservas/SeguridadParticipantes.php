@@ -9,7 +9,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-/** Política de la agencia v1. No sustituye permisos de viaje emitidos por la autoridad. */
+/** Política interna de acompañamiento. */
 class SeguridadParticipantes
 {
     public const VERSION = 'menores-2026-11-v1';
@@ -66,7 +66,7 @@ class SeguridadParticipantes
         return (int) CarbonImmutable::createFromFormat('!Y-m-d', $nacimiento)->diffInYears($salida->fec_sal->startOfDay());
     }
 
-    /** Invalida la revisión si cambia la salida, el tour o la identidad del acompañante. */
+    /** Invalida revisión ante cambios. */
     public function huella(ParticipanteReserva $p, SalidaTour $salida): string
     {
         return hash('sha256', json_encode([
@@ -78,7 +78,7 @@ class SeguridadParticipantes
         ], JSON_THROW_ON_ERROR));
     }
 
-    /** Retorna el motivo del bloqueo. También se aplica a boletos ya emitidos. */
+    /** Bloqueo incluso con boleto emitido. */
     public function bloqueo(ParticipanteReserva $p, SalidaTour $salida): ?string
     {
         $edad = $p->fecha_nacimiento ? $this->edad($p->fecha_nacimiento->toDateString(), $salida) : $p->eda;

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Métricas diarias del modelo M/M/c/K por tour. */
+/** Métricas diarias por tour. */
 class ColaMetricaDiaria extends Model
 {
     protected $table = 'cola_metricas_diarias';

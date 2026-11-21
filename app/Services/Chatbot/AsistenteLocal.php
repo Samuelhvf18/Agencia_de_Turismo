@@ -4,16 +4,12 @@ namespace App\Services\Chatbot;
 
 use App\Models\ConversacionChatbot;
 
-/**
- * Respaldo del chatbot cuando la IA de n8n no responde (RNF-20): reconoce
- * las intenciones principales con reglas y usa las mismas herramientas.
- * Responde en el idioma del usuario (español o inglés).
- */
+/** Respaldo local del chatbot. */
 class AsistenteLocal
 {
     public function __construct(private HerramientasChatbot $herramientas) {}
 
-    /** Idioma del mensaje: 'en' si predominan palabras en inglés, si no 'es'. */
+    /** Detecta inglés por palabras. */
     public static function idioma(string $texto): string
     {
         $t = ' '.mb_strtolower($texto).' ';
@@ -96,7 +92,7 @@ class AsistenteLocal
             : '¡Hola! Soy el asistente de Andinist Bolivia. Puedo recomendarte tours según tu tiempo, condición física y presupuesto, responder dudas (altura, qué llevar, pagos, cancelaciones) y consultar tu reserva con su código y correo. También puedes pedir hablar con una persona.'];
     }
 
-    /** @return array{0: ?float, 1: ?string, 2: ?float} horas máximas, dificultad máxima y presupuesto */
+    /** @return array{0: ?float, 1: ?string, 2: ?float} Duración, dificultad y presupuesto. */
     private function criterios(string $t): array
     {
         $horas = null;

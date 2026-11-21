@@ -29,9 +29,7 @@ class JetstreamServiceProvider extends ServiceProvider
         Vite::prefetch(concurrency: 3);
     }
 
-    /**
-     * Configure the permissions that are available within the application.
-     */
+    /** Permisos de la aplicación. */
     protected function configurePermissions(): void
     {
         Jetstream::defaultApiTokenPermissions(['read']);

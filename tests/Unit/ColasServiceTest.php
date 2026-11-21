@@ -2,8 +2,8 @@
 
 use App\Services\Io\ColasService;
 
-// Valores de referencia del marco teórico (Informe, sección 3.5.1):
-// tour de 5 h (μ = 4,8), λ = 8 reservas/día, K = 14, Ce = Bs 15/h, Cs = Bs 25/h.
+// Valores de referencia teóricos.
+// Tour de cinco horas.
 
 test('M/M/2/14 coincide con el ejemplo del informe', function () {
     $m = (new ColasService)->metricas(8, 4.8, 2, 14);

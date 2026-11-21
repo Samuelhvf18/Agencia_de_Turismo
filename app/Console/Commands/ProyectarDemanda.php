@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Services\Analitica\ProyeccionDemandaService;
 use Illuminate\Console\Command;
 
-/** Genera proyecciones_demanda para los próximos meses (RF-35); lo dispara n8n cada mes. */
+/** Proyección mensual de demanda. */
 class ProyectarDemanda extends Command
 {
     protected $signature = 'io:proyectar-demanda {--meses=3 : Meses a proyectar desde el actual}';

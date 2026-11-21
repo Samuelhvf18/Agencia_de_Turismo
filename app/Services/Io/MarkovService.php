@@ -11,17 +11,12 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Módulo 07 — Cadena de Markov absorbente del ciclo de vida del cliente.
- *
- * Estados: prospecto → reservado → completado → fidelizado / perdido (los dos últimos absorbentes).
- * Forma canónica: P = [Q R; 0 I], N = (I − Q)^−1, B = N·R, t = N·1.
- */
+/** Cadena absorbente del cliente. */
 class MarkovService
 {
     public const ORDEN = ['prospecto', 'reservado', 'completado', 'fidelizado', 'perdido'];
 
-    /** Matriz mensual inicial de referencia (la misma que carga IoColasMarkovSeeder). */
+    /** Matriz mensual inicial. */
     public const MATRIZ_INICIAL = [
         'prospecto' => ['prospecto' => 0.60, 'reservado' => 0.25, 'perdido' => 0.15],
         'reservado' => ['reservado' => 0.10, 'completado' => 0.80, 'perdido' => 0.10],
@@ -32,12 +27,12 @@ class MarkovService
 
     public const ABSORBENTES = ['fidelizado', 'perdido'];
 
-    /** Meses sin actividad a partir de los cuales un cliente se considera perdido. */
+    /** Inactividad para marcar pérdida. */
     public const MESES_INACTIVIDAD = 12;
 
     // ------------------------------------------------------------------ álgebra
 
-    /** Completa la matriz con ceros para todos los pares de estados. */
+    /** Completa transiciones faltantes con ceros. */
     public function normalizar(array $p, array $orden = self::ORDEN): array
     {
         $out = [];
@@ -50,7 +45,7 @@ class MarkovService
         return $out;
     }
 
-    /** Verifica que cada fila sume 1 (con tolerancia). */
+    /** Valida sumas de filas. */
     public function esEstocastica(array $p, float $tol = 1e-4): bool
     {
         foreach ($p as $fila) {
@@ -62,7 +57,7 @@ class MarkovService
         return true;
     }
 
-    /** Inversa de una matriz cuadrada por eliminación de Gauss-Jordan con pivoteo parcial. */
+    /** Inversa con pivoteo parcial. */
     public function inversa(array $a): array
     {
         $n = count($a);
@@ -139,7 +134,7 @@ class MarkovService
     }
 
     /**
-     * Proyección v(n) = v(0)·P^n para n = 0..meses, partiendo de un estado.
+     * Proyección mensual por estado.
      *
      * @return array{inicio: string, meses: int[], series: array<string, float[]>}
      */
@@ -166,11 +161,7 @@ class MarkovService
         return ['inicio' => $inicio, 'meses' => range(0, $meses), 'series' => $series];
     }
 
-    /**
-     * Estima P contando transiciones mes a mes: para cada par de meses consecutivos
-     * se compara el estado de cada cliente al cierre de ambos meses. Las filas sin datos
-     * conservan la probabilidad previa y los estados absorbentes quedan con pii = 1.
-     */
+    /** Estima transiciones de meses consecutivos. */
     public function estimarMatriz(array $conteos, array $previa): array
     {
         $p = [];
@@ -192,7 +183,7 @@ class MarkovService
 
     // ------------------------------------------------------------------ datos
 
-    /** Matriz vigente (última calibración activa del período) o la matriz inicial si aún no hay datos. */
+    /** Matriz vigente o inicial. */
     public function matrizVigente(string $per = 'mensual'): array
     {
         $estados = MarkovEstadoCliente::orderBy('ord_vis')->get()->keyBy('id');
@@ -211,7 +202,7 @@ class MarkovService
         return ['P' => $this->normalizar($p), 'fec_cal' => Carbon::parse($fec)->toDateString()];
     }
 
-    /** Estado de cada cliente a una fecha de corte: [usr_id => cod]. */
+    /** Estados en fecha de corte. */
     public function estadosAl(Carbon $corte): array
     {
         $codigos = MarkovEstadoCliente::pluck('cod', 'id');
@@ -228,7 +219,7 @@ class MarkovService
         return $res;
     }
 
-    /** Clientes por estado según su último registro. */
+    /** Último estado de cada cliente. */
     public function conteoActual(): array
     {
         $c = array_fill_keys(self::ORDEN, 0);
@@ -239,7 +230,7 @@ class MarkovService
         return $c;
     }
 
-    /** Registra un cambio de estado si difiere del estado actual del cliente. */
+    /** Registra solo cambios de estado. */
     public function registrarCambio(int $usrId, string $cod, ?string $obs = null, ?Carbon $fecha = null): ?MarkovClienteEstado
     {
         $nuevo = MarkovEstadoCliente::where('cod', $cod)->firstOrFail();
@@ -249,7 +240,7 @@ class MarkovService
             return null;
         }
         if ($actual && in_array(optional($actual->estado)->cod, self::ABSORBENTES, true)) {
-            return null; // los estados absorbentes (fidelizado, perdido) no se abandonan
+            return null; // Los estados absorbentes son finales.
         }
 
         return MarkovClienteEstado::create([
@@ -262,9 +253,7 @@ class MarkovService
     }
 
     /**
-     * Deriva el estado de cada turista a partir de sus reservas y registra los cambios:
-     * reserva confirmada con salida futura → reservado; ≥ 2 tours completados → fidelizado;
-     * 1 tour completado → completado; sin reservas → prospecto; sin actividad en 12 meses → perdido.
+     * Deduce estados desde reservas.
      *
      * @return int cambios registrados
      */
@@ -309,8 +298,7 @@ class MarkovService
     }
 
     /**
-     * Recalibra la matriz mensual con las transiciones observadas en los últimos $meses meses
-     * y la guarda como la nueva matriz activa (fec_cal = hoy).
+     * Recalibra y activa matriz mensual.
      *
      * @return array{P: array, transiciones: int}
      */
@@ -359,8 +347,7 @@ class MarkovService
     }
 
     /**
-     * Construye o actualiza las cohortes mensuales de captación (mes de alta del primer registro de estado)
-     * y su distribución por estado en cada mes relativo.
+     * Actualiza cohortes mensuales.
      *
      * @return int cohortes procesadas
      */
@@ -392,9 +379,7 @@ class MarkovService
         return $grupos->count();
     }
 
-    /**
-     * Cohortes para el panel: proporción de activos, fidelizados y perdidos por mes relativo.
-     */
+    /** Distribución por estado y mes. */
     public function cohortesParaPanel(int $limite = 12): Collection
     {
         $codigos = MarkovEstadoCliente::pluck('cod', 'id');

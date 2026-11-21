@@ -2,7 +2,7 @@
 
 use App\Services\Io\MarkovService;
 
-// Matriz mensual inicial del seeder; resultados de referencia en el Informe, sección 3.5.2.
+// Matriz inicial de referencia.
 
 function matrizInicial(): array
 {

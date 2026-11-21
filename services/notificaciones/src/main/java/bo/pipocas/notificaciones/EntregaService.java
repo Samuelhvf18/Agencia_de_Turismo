@@ -49,7 +49,7 @@ class EntregaService {
             contenido.append('\n').append(adjunto.nombre()).append(':').append(adjunto.contenido());
         }
         String huella = huella(contenido.toString());
-        // Solo recibos: no persistir códigos OTP, destinatarios ni el contenido del correo.
+        // Persiste solo recibos de entrega.
         db.update("INSERT INTO entregas (clave, huella) SELECT ?, ? WHERE NOT EXISTS (SELECT 1 FROM entregas WHERE clave = ?)", clave, huella, clave);
         var recibo = db.queryForMap("SELECT huella, enviada_en FROM entregas WHERE clave = ? FOR UPDATE", clave);
         if (!huella.equals(recibo.get("HUELLA"))) throw new IllegalArgumentException("Clave reutilizada para otro mensaje.");

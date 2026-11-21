@@ -20,9 +20,9 @@ class DatabaseSeeder extends Seeder
             RutasCatalogoSeeder::class,
             OperacionDemoSeeder::class,
 
-            // Módulo 07 — Investigación Operativa II (Colas + Cadenas de Markov).
-            // Catálogo de estados Markov, matriz de transición inicial y parámetros
-            // iniciales M/M/c/K por tour.
+            // Investigación Operativa II.
+            // Estados y transiciones Markov.
+            // Parámetros iniciales de colas.
             IoColasMarkovSeeder::class,
         ]);
     }

@@ -15,7 +15,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                // Tipografía de Andinist Bolivia (igual que tours/show.blade.php)
+                // Tipografía de Andinist Bolivia.
                 titulo: ['Fraunces', 'Georgia', ...defaultTheme.fontFamily.serif],
                 cuerpo: ['"Plus Jakarta Sans"', 'system-ui', ...defaultTheme.fontFamily.sans],
             },

@@ -5,7 +5,7 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/** Vehículo de la flota (RF-19, RF-39): placa boliviana única, tipo, asientos y estado. */
+/** Validación de vehículos. */
 class VehiculoRequest extends FormRequest
 {
     public function authorize(): bool

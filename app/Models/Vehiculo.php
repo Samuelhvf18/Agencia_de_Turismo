@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** Vehículo de la flota. Estados: activo, mantenimiento o inactivo. */
+/** Vehículo y estado operativo. */
 class Vehiculo extends Model
 {
     use Concerns\ResuelveRutaPorClaveLegible;

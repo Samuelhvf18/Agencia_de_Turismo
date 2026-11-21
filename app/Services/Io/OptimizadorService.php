@@ -16,33 +16,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Optimización de recursos (Módulo 07, RF-22 a RF-24).
- *
- * Guías (RF-22): problema de asignación binaria resuelto con el método
- * húngaro, un día a la vez (un guía hace a lo sumo una salida por día). El
- * costo c_ij combina carga horaria (vista_carga_horaria_guia), experiencia
- * —con más peso en tours de alto riesgo— e idiomas que piden los pasajeros.
- * Las celdas que violan restricciones (choque de horario, límite semanal)
- * tienen costo M y nunca se proponen.
- *
- * Vehículos (RF-23): mismo esquema, minimizando el costo estimado de
- * combustible del viaje (costo por km observado en vista_ocupacion_transporte)
- * más una penalización por asientos vacíos.
- *
- * Las propuestas (RF-24) se guardan como pendientes y nunca se aplican solas.
- */
+/** Optimización de recursos operativos. */
 class OptimizadorService
 {
     public const M = 1_000_000.0;
 
-    /** Idioma principal por país de los pasajeros (código ISO). */
+    /** Idioma principal por país. */
     private const IDIOMA_PAIS = [
         'BO' => 'es', 'AR' => 'es', 'CL' => 'es', 'PE' => 'es', 'CO' => 'es', 'EC' => 'es', 'PY' => 'es', 'UY' => 'es',
         'VE' => 'es', 'MX' => 'es', 'ES' => 'es', 'BR' => 'pt', 'FR' => 'fr', 'BE' => 'fr', 'DE' => 'de', 'CH' => 'de', 'IT' => 'it',
     ];
 
-    /** Costo por km por tipo de combustible cuando no hay historial (Bs/km). */
+    /** Costo estimado por combustible. */
     private const COSTO_KM_DEFECTO = ['diesel' => 0.90, 'gasolina' => 1.10, 'gnv' => 0.60, 'electrico' => 0.30];
 
     public function __construct(
@@ -59,7 +44,7 @@ class OptimizadorService
         $lote = (string) Str::uuid();
         $guias = PerfilGuia::with('usuario', 'idiomas')->where('act', true)->whereHas('usuario', fn ($q) => $q->where('act', true))->get()->values();
         $salidasPorDia = $this->salidasAbiertas($desde, $hasta, $soloSinAsignar ? 'prf_gui_id' : null)->groupBy(fn ($s) => $s->fec_sal->toDateString());
-        $extra = []; // horas propuestas en este lote: [prf_gui_id][semana] => horas
+        $extra = []; // Horas propuestas por semana.
         $creadas = 0;
         $sinSolucion = 0;
 
@@ -86,7 +71,7 @@ class OptimizadorService
                 $extra[$guia->id][$semana] = ($extra[$guia->id][$semana] ?? 0) + (float) $salida->tour->dur_hrs;
 
                 if ($salida->prf_gui_id === $guia->id) {
-                    continue; // el modelo confirma la asignación actual
+                    continue; // Mantiene la asignación existente.
                 }
                 PropuestaAsignacion::create([
                     'lote' => $lote, 'tip' => 'guia', 'sal_tur_id' => $salida->id,
@@ -130,7 +115,7 @@ class OptimizadorService
         ]];
     }
 
-    /** Idiomas que piden los pasajeros según su nacionalidad (siempre incluye español). */
+    /** Idiomas requeridos por nacionalidad. */
     public function idiomasRequeridos(SalidaTour $salida): array
     {
         $paises = DB::table('participantes_reserva as p')
@@ -143,7 +128,7 @@ class OptimizadorService
         return $paises->map(fn ($iso) => self::IDIOMA_PAIS[$iso] ?? 'en')->push('es')->unique()->values()->all();
     }
 
-    /** Horas de la semana según vista_carga_horaria_guia, sin contar la propia salida. */
+    /** Excluye la salida del cálculo. */
     private function horasSemanaVista(int $prfGuiId, string $semana, SalidaTour $salida): float
     {
         $horas = (float) DB::table('vista_carga_horaria_guia')->where('prf_gui_id', $prfGuiId)->where('semana', $semana)->value('horas_asignadas');
@@ -224,7 +209,7 @@ class OptimizadorService
         ]];
     }
 
-    /** Costo por km observado de cada vehículo (Bs/km) según vista_ocupacion_transporte. */
+    /** Costo observado por kilómetro. */
     public function costoKmPorVehiculo(): array
     {
         return DB::table('vista_ocupacion_transporte')
@@ -236,7 +221,7 @@ class OptimizadorService
             ->all();
     }
 
-    /** Km promedio de las salidas anteriores del tour; sin historial, 25 km por hora de tour. */
+    /** Distancia histórica o estimada. */
     private function kmEstimados(SalidaTour $salida): float
     {
         $promedio = DB::table('bitacora_viajes_vehiculo as b')
@@ -250,10 +235,7 @@ class OptimizadorService
 
     // ---- RF-24: revisión de propuestas ----------------------------------------------------
 
-    /**
-     * Aplica una propuesta (o un recurso ajustado a mano) pasando por las mismas
-     * validaciones que la asignación manual.
-     */
+    /** Valida propuestas como asignación manual. */
     public function aplicar(PropuestaAsignacion $propuesta, User $usuario, ?int $recursoAjustado = null): PropuestaAsignacion
     {
         return DB::transaction(function () use ($propuesta, $usuario, $recursoAjustado) {

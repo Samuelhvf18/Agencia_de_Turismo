@@ -1,5 +1,4 @@
-# Despliegue completo: Nginx + PHP-FPM + PostgreSQL 17 + Redis + n8n,
-# con un worker de colas y el planificador de Laravel. Ver DOCUMENTACION/Tecnica/DESPLIEGUE.md.
+# Servicios del despliegue.
 services:
   app:
     build: { context: ., dockerfile: docker/Dockerfile, target: app }
@@ -26,7 +25,7 @@ services:
     depends_on: [app]
     restart: unless-stopped
 
-  # Envío de correos, notificaciones y boletos (colas de Laravel).
+  # Cola de notificaciones y boletos.
   queue:
     build: { context: ., dockerfile: docker/Dockerfile, target: app }
     env_file: .env
@@ -36,7 +35,7 @@ services:
     depends_on: [db, redis]
     restart: unless-stopped
 
-  # Cron de Laravel: reservas:expirar (cada hora), recordatorios y respaldo:bd (diario).
+  # Tareas programadas de Laravel.
   scheduler:
     build: { context: ., dockerfile: docker/Dockerfile, target: app }
     env_file: .env
@@ -46,7 +45,7 @@ services:
     depends_on: [db, redis]
     restart: unless-stopped
 
-  # Servicio interno de correo. Activar con --profile correo-spring.
+  # Servicio opcional correo-spring.
   notificaciones:
     profiles: [correo-spring]
     build: ./services/notificaciones
@@ -74,7 +73,7 @@ services:
     volumes: [redisdata:/data]
     restart: unless-stopped
 
-  # Planificador de IO II, notificaciones y chatbot (flujos en DOCUMENTACION/Tecnica/n8n).
+  # Flujos de n8n.
   n8n:
     image: n8nio/n8n:1.80.0
     ports: ["5678:5678"]

@@ -11,7 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-/** Flota de transporte (M03, RF-19): vehículos con estados activo, mantenimiento e inactivo. */
+/** Gestión de flota. */
 class FlotaController extends Controller
 {
     public function index(): View

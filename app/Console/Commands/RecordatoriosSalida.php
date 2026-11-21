@@ -7,7 +7,7 @@ use App\Models\Reserva;
 use App\Services\Notificaciones\NotificacionService;
 use Illuminate\Console\Command;
 
-/** Recordatorio del día anterior a la salida para cada reserva confirmada (una sola vez). */
+/** Recordatorio único antes del tour. */
 class RecordatoriosSalida extends Command
 {
     protected $signature = 'reservas:recordatorios {--dias=1 : Días de anticipación}';

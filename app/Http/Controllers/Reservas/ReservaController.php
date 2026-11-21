@@ -24,11 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
-/**
- * Motor de reservas (Módulo 05, RF-05 a RF-12): wizard de 5 pasos sobre un
- * borrador en sesión (salida → participantes → equipo → ficha médica →
- * resumen). La reserva se crea al confirmar, con control transaccional de cupo.
- */
+/** Flujo de reserva en sesión. */
 class ReservaController extends Controller
 {
     public function __construct(
@@ -50,7 +46,7 @@ class ReservaController extends Controller
             ->withSum(['reservas as cup_ocu' => fn ($q) => $q->where('est', '<>', Reserva::EST_CANCELADA)], 'cnt_ptc')
             ->orderBy('fec_sal')->orderBy('hra_sal')
             ->get()
-            // Salidas de hoy cuya hora ya pasó no se ofrecen.
+            // Excluye horas ya pasadas.
             ->reject(fn ($s) => $s->fec_sal->isToday() && $s->hra_sal <= now()->format('H:i:s'))
             ->map(fn (SalidaTour $s) => $this->salidaArray($s) + ['est' => $s->est, 'cup_ocu' => (int) $s->cup_ocu])
             ->values()
@@ -151,7 +147,7 @@ class ReservaController extends Controller
         $this->borrador->guardar('contacto', $request->safe()->only(['nom_ctc', 'cor_ctc', 'tel_ctc']));
         $this->borrador->guardar('participantes', $participantes);
         $this->borrador->guardar('cnt_ptc', count($participantes));
-        // Cualquier edición de identidad invalida firmas y asignaciones por índice.
+        // Cambios invalidan firmas y asignaciones.
         $this->borrador->guardar('alquileres', []);
         $this->borrador->guardar('fichas', []);
 

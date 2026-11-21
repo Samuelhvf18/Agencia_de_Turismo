@@ -1,13 +1,4 @@
-{{--
-    Tarjeta lateral con el resumen del tour (y de la salida elegida, si existe).
-    Uso: <x-reserva.resumen-tour :tour="$tour" :salida="$salida" :cnt="$cnt_ptc" :extra="$subtotalEquipo" />
-    - $tour: modelo Tour "presentado" por el controlador (nom, cod, img, img_alt, dur_txt, dif_txt, pre_bas, categoria->nom)
-    - $salida: fila de salidas_tour (fec_sal, hra_sal) o null
-    - $cnt: cantidad de participantes; $extra: monto adicional (equipo) en Bs.
-    - $cntExpr / $extraExpr (opcionales): expresiones Alpine con la cantidad y el monto de equipo,
-      para que los totales se actualicen en vivo (p. ej. cnt-expr="cnt", extra-expr="total()").
-    El slot permite agregar contenido al final (p. ej. el botón de continuar en escritorio).
---}}
+{{-- Resumen del tour y salida. --}}
 @props(['tour', 'salida' => null, 'cnt' => 1, 'extra' => 0, 'cntExpr' => null, 'extraExpr' => null])
 
 @php

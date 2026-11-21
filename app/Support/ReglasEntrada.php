@@ -5,7 +5,7 @@ namespace App\Support;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
-/** Reglas compartidas por controladores, Fortify y componentes Livewire. */
+/** Reglas de entrada compartidas. */
 class ReglasEntrada
 {
     public const NOMBRE = 'regex:/^[\p{L}\p{M}]+(?: +[\p{L}\p{M}]+)*$/u';

@@ -9,9 +9,7 @@ use App\Services\Io\MarkovService;
 use App\Services\Io\PanelMarkovBuilder;
 use Illuminate\Http\Request;
 
-/**
- * Panel «Ciclo de vida del cliente» (Módulo 07 — Cadena de Markov absorbente).
- */
+/** Ciclo de vida del cliente. */
 class CicloVidaClienteController extends Controller
 {
     public function __construct(private MarkovService $markov) {}

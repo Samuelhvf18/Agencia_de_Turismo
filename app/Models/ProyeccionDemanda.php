@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Reservas proyectadas por tour y mes, con la versión del modelo que las generó. */
+/** Demanda mensual proyectada. */
 class ProyeccionDemanda extends Model
 {
     protected $table = 'proyecciones_demanda';

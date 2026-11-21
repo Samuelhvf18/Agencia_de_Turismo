@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/** Autentica las llamadas del planificador n8n con el token compartido N8N_TOKEN. */
+/** Token compartido de n8n. */
 class TokenN8n
 {
     public function handle(Request $request, Closure $next): Response

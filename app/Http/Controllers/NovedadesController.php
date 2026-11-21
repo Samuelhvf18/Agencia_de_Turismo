@@ -16,7 +16,7 @@ class NovedadesController extends Controller
         $direccion = Str::lower(trim($datos['correo']));
         $subs = DB::table('suscripciones_novedades')->where('correo', $direccion)->first();
         if (! $subs || $subs->baja_en || ! $subs->confirmada_en) {
-            // Un reintento no revoca una suscripción activa ni permite envíos masivos.
+            // Conserva suscripciones activas.
             if (! $subs || now()->diffInSeconds($subs->updated_at, absolute: true) >= 60) {
                 DB::table('suscripciones_novedades')->updateOrInsert(['correo' => $direccion], [
                     'consentimiento_en' => now(), 'version_politica' => 'privacidad-2026-11',
@@ -49,7 +49,7 @@ class NovedadesController extends Controller
         return view('novedades.confirmar', ['confirmada' => $request->isMethod('post') || (bool) $subs->confirmada_en]);
     }
 
-    /** La baja requiere POST para que un escáner de enlaces no la ejecute. */
+    /** Evita bajas por escáneres. */
     public function baja(Request $request, int $id)
     {
         abort_unless(DB::table('suscripciones_novedades')->where('id', $id)->exists(), 404);

@@ -6,7 +6,7 @@ use App\Services\Io\EoqService;
 use App\Services\Notificaciones\NotificacionService;
 use Illuminate\Console\Command;
 
-/** Revisa el equipo crítico contra su punto de reorden y registra alertas de reposición (RF-27). */
+/** Alertas de reposición EOQ. */
 class AlertasEoq extends Command
 {
     protected $signature = 'io:alertas-eoq';

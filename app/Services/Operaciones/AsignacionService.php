@@ -11,17 +11,10 @@ use App\Models\Vehiculo;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Reglas de asignación de recursos a una salida (RF-16, RF-17, M04):
- * - guía activo, sin choque de horario y sin superar su límite semanal de horas;
- * - chofer activo, sin choque de horario y con licencia vigente el día de la salida;
- * - vehículo en estado activo, sin choque de horario y con asientos suficientes;
- * - la capacidad no puede quedar por debajo de los cupos ya reservados.
- * La usan la programación manual y la aplicación de propuestas de IO II.
- */
+/** Reglas de asignación de recursos. */
 class AsignacionService
 {
-    /** Serializa decisiones que comparten guía, chofer o vehículo (incluye propuestas IO). */
+    /** Serializa decisiones con recursos compartidos. */
     public function bloquearAgenda(): void
     {
         DB::select('SELECT pg_advisory_xact_lock(64026, 1)');
@@ -29,7 +22,7 @@ class AsignacionService
 
     /**
      * @param  array{tur_id:int, fec_sal:string, hra_sal:string, cap_max:int, prf_gui_id?:?int, prf_cho_id?:?int, veh_id?:?int}  $d
-     * @return array<string, string> errores por campo (vacío si es válida)
+     * @return array<string, string> Errores por campo.
      */
     public function validar(array $d, ?SalidaTour $actual = null): array
     {
@@ -95,7 +88,7 @@ class AsignacionService
         return [$inicio, $inicio->copy()->addMinutes((int) round($durHrs * 60))];
     }
 
-    /** Horas ya asignadas al guía en la semana (lunes a domingo) de la fecha dada. */
+    /** Horas asignadas por semana. */
     public function horasSemana(int $prfGuiId, Carbon $fecha, ?SalidaTour $excluir = null): float
     {
         return (float) SalidaTour::join('tours', 'tours.id', '=', 'salidas_tour.tur_id')
@@ -106,13 +99,13 @@ class AsignacionService
             ->sum('tours.dur_hrs');
     }
 
-    /** Devuelve una descripción de la salida que choca, o null. */
+    /** Detecta choques de horario. */
     private function choque(string $campo, int $id, Carbon $inicio, Carbon $fin, ?SalidaTour $excluir): ?string
     {
         $candidatas = SalidaTour::with('tour')
             ->where($campo, $id)
             ->where('est', '<>', SalidaTour::EST_CANCELADA)
-            // Un tour dura como máximo 14 h: basta revisar el día anterior, el mismo y el siguiente.
+            // Revisa tres días por duración.
             ->whereBetween('fec_sal', [$inicio->copy()->subDay()->toDateString(), $fin->copy()->addDay()->toDateString()])
             ->when($excluir, fn ($q) => $q->where('id', '<>', $excluir->id))
             ->get();

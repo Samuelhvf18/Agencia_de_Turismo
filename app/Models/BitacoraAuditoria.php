@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Registro de auditoría (CREATE, UPDATE, DELETE o READ). Solo se inserta. */
+/** Bitácora de solo inserción. */
 class BitacoraAuditoria extends Model
 {
     protected $table = 'bitacora_auditoria';

@@ -18,10 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-/**
- * Consulta pública de reservas por código + correo (RF-12), estado con
- * boletos QR, descarga de boletos y comprobante en PDF y cancelación.
- */
+/** Consulta y gestión de reservas. */
 class ConsultaReservaController extends Controller
 {
     public function __construct(
@@ -67,7 +64,7 @@ class ConsultaReservaController extends Controller
         $reserva->load('salida.tour.categoria', 'salida.tour.fotos', 'salida.guia.usuario', 'participantes.boleto', 'participantes.fichaMedica', 'comprobante.pagos');
         $tour = PresentadorTour::presentar($reserva->salida->tour);
 
-        // RNF-05: la consulta de datos personales de participantes queda en la bitácora.
+        // Audita datos de pasajeros.
         foreach ($reserva->participantes as $p) {
             AuditObserver::lectura($p);
         }
@@ -143,7 +140,7 @@ class ConsultaReservaController extends Controller
         return $comprobantes->pdf($reserva->comprobante)->download("comprobante-{$reserva->comprobante->cod}.pdf");
     }
 
-    /** Se puede cancelar mientras no esté cancelada/completada y la salida sea a partir de mañana. */
+    /** Cancela solo salidas futuras. */
     private function cancelable(Reserva $reserva): bool
     {
         return in_array($reserva->est, [Reserva::EST_PENDIENTE, Reserva::EST_CONFIRMADA], true)

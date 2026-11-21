@@ -21,10 +21,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
-/**
- * Administración del catálogo (M02, HU 1 a 4, RF-37): categorías, tours con
- * ruta amigable única, galería de fotos y editor de trazado y puntos de interés.
- */
+/** Gestión del catálogo. */
 class CatalogoAdminController extends Controller
 {
     // ---- Tours --------------------------------------------------------------------
@@ -67,7 +64,7 @@ class CatalogoAdminController extends Controller
     public function update(TourRequest $request, Tour $tour): RedirectResponse
     {
         $datos = $request->validated();
-        // La ruta amigable se conserva para no romper enlaces; se regenera solo si se pide.
+        // Conserva el enlace publicado.
         if ($request->boolean('regenerar_ruta')) {
             $datos['rta_amg'] = SlugService::unico($datos['nom'], 'tours', $tour->id);
         }
@@ -76,7 +73,7 @@ class CatalogoAdminController extends Controller
         return back()->with('estado', 'Tour actualizado.');
     }
 
-    /** Baja lógica: el tour deja de publicarse, pero se conserva su historial de reservas. */
+    /** Baja lógica del tour. */
     public function destroy(Tour $tour): RedirectResponse
     {
         $futuras = $tour->salidas()->where('est', 'programada')->whereDate('fec_sal', '>=', today())->whereHas('reservas', fn ($q) => $q->whereIn('est', ['pendiente', 'confirmada']))->count();
@@ -126,7 +123,7 @@ class CatalogoAdminController extends Controller
         return back()->with('estado', 'Fotos agregadas a la galería.');
     }
 
-    /** Recibe el nuevo orden: fotos[] = ids en el orden deseado; también actualiza el texto alternativo. */
+    /** Orden y texto de fotos. */
     public function ordenarFotos(Request $request, Tour $tour): RedirectResponse
     {
         $datos = $request->validate([
@@ -150,10 +147,7 @@ class CatalogoAdminController extends Controller
 
     // ---- Trazado y puntos de interés ---------------------------------------------------------
 
-    /**
-     * Guarda los puntos del editor de mapa (reemplaza el conjunto) y el
-     * trazado GeoJSON (pegado o generado desde los puntos).
-     */
+    /** Guarda puntos y trazado. */
     public function guardarRuta(Request $request, Tour $tour): RedirectResponse
     {
         $datos = $request->validate([
@@ -189,7 +183,7 @@ class CatalogoAdminController extends Controller
             if ($trazado !== null || $request->boolean('quitar_trazado')) {
                 $tour->update(['trz_geo' => $trazado]);
             }
-            // Altitudes del tour a partir de los puntos, si se registraron.
+            // Altitud derivada del trazado.
             $alts = array_filter(array_column($datos['puntos'], 'alt_m'), fn ($a) => $a !== null);
             if ($alts) {
                 $tour->update(['alt_min_m' => min($alts), 'alt_max_m' => max($alts)]);

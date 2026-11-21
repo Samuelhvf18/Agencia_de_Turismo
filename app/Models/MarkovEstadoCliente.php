@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/** Estado de la cadena de Markov del ciclo de vida del cliente. */
+/** Estado del ciclo del cliente. */
 class MarkovEstadoCliente extends Model
 {
     protected $table = 'markov_estados_cliente';

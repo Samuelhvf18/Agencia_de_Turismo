@@ -107,7 +107,7 @@ test('crear reserva genera aviso con código y al pagar Spring recibe el PDF', f
     Http::assertSent(fn ($req) => count($req['adjuntos']) === 1 && str_starts_with(base64_decode($req['adjuntos'][0]['contenido']), '%PDF-')
         && $req->hasHeader('Authorization', 'Bearer '.str_repeat('t', 32)));
     expect($pago->fresh()->est)->toBe('enviado');
-    // Ante un timeout se reenvía exactamente el mismo PDF, aunque la reserva cambie.
+    // Reenvía el PDF original.
     $primero = Http::recorded()->last()[0]->data();
     $pago->refresh()->update(['est' => 'fallido']);
     $r->update(['nom_ctc' => 'Nombre Cambiado']);

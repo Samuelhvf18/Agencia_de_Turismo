@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** Cohorte de clientes captados en un mismo mes. */
+/** Clientes captados en un mes. */
 class MarkovCohort extends Model
 {
     protected $table = 'markov_cohorts';

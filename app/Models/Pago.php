@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Intento de pago (tarjeta, qr, transferencia o efectivo). */
+/** Intento de pago. */
 class Pago extends Model
 {
     public const EST_COMPLETADO = 'completado';

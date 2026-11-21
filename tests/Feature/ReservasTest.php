@@ -67,7 +67,7 @@ function participante(array $extra = []): array
     ];
 }
 
-/** Recorre los pasos 1 y 2 del wizard y devuelve la salida elegida. */
+/** Completa los primeros dos pasos. */
 function hastaParticipantes($test, Tour $tour, int $cantidad = 2): SalidaTour
 {
     $salida = $tour->salidas()->orderBy('fec_sal')->firstOrFail();
@@ -140,7 +140,7 @@ test('un invitado completa una reserva con equipo y queda pendiente de pago', fu
         ->and($reserva->participantes)->toHaveCount(2)
         ->and($item->fresh()->cnt_dis)->toBe($stock - 1);
 
-    // IO II: la llegada admitida queda registrada para el modelo de colas.
+    // Registra la llegada admitida.
     expect(ColaEventoLlegada::where('rsv_id', $reserva->id)->where('est', 'admitido')->where('cnt_sol', 2)->exists())->toBeTrue();
 
     $this->get(route('reservas.confirmada', $reserva))->assertOk()->assertSee($reserva->cod);
@@ -245,7 +245,7 @@ test('pago parcial y luego total por webhook: confirma, emite boletos QR y enví
         ->and($reserva->fresh()->est)->toBe(Reserva::EST_PENDIENTE)
         ->and(Boleto::count())->toBe(0);
 
-    // Saldo pagado por el webhook firmado.
+    // Webhook liquida el saldo.
     $this->post(route('pagos.store', $reserva), ['mtd' => 'transferencia', 'mto' => round($total - $anticipo, 2)]);
     $pago2 = Pago::latest('id')->first();
     webhook($this, ['ref_trx' => $pago2->ref_trx, 'est' => 'completado', 'mto' => (float) $pago2->mto])->assertOk();
@@ -260,14 +260,14 @@ test('pago parcial y luego total por webhook: confirma, emite boletos QR y enví
 
     Queue::assertPushed(EnviarBoletosReserva::class, fn ($job) => $job->reservaId === $reserva->id);
 
-    // IO II · Markov: el turista pasa a "reservado".
+    // Markov pasa a reservado.
     expect(MarkovClienteEstado::where('usr_id', $turista->id)->latest('id')->first()->estado->cod)->toBe('reservado');
 
     // El webhook es idempotente.
     webhook($this, ['ref_trx' => $pago2->ref_trx, 'est' => 'completado', 'mto' => (float) $pago2->mto])->assertOk();
     expect($reserva->boletos()->count())->toBe(2);
 
-    // Estado con QR y descargas en PDF.
+    // Estado, QR y PDF.
     $this->get(route('reservas.estado', $reserva))->assertOk()->assertSee('data:image/svg+xml;base64', false);
     $this->get(route('reservas.boletos', $reserva))->assertOk()->assertHeader('content-type', 'application/pdf');
     $this->get(route('reservas.comprobante', $reserva))->assertOk()->assertHeader('content-type', 'application/pdf');
@@ -307,7 +307,7 @@ test('cancelar libera cupos y equipo, cancela boletos y registra el abandono', f
 test('solo quien tiene el código y el correo puede ver la reserva', function () {
     $reserva = reservaConfirmada($this);
 
-    // Otra sesión (otro navegador) sin acceso.
+    // Sesión ajena sin acceso.
     $this->flushSession();
     $this->get(route('reservas.estado', $reserva))->assertForbidden();
 
@@ -362,7 +362,7 @@ test('solo el administrador anula comprobantes; la anulación cancela sin borrar
     $this->actingAs(User::where('cor', 'operaciones@pipocas.test')->first())
         ->post(route('admin.finanzas.anular', $comprobante), ['motivo' => 'Prueba'])->assertForbidden();
 
-    // Otra sesión: AuthenticateSession cierra la sesión si cambia el usuario en la misma.
+    // Cambio de usuario invalida sesión.
     $this->flushSession();
     $this->actingAs(User::factory()->rol(User::ROL_ADMIN)->create() ?? User::factory()->rol(User::ROL_ADMIN)->create())
         ->post(route('admin.finanzas.anular', $comprobante), ['motivo' => 'Error de cobro'])->assertSessionHas('estado');

@@ -1,14 +1,7 @@
 @extends('layouts.reserva')
 
 @php
-    /*
-     | DATOS DE EJEMPLO (solo frontend).
-     | El controlador debe pasar:
-     |   $reserva -> reservas recién creada (cod, nom_ctc, cor_ctc, cnt_ptc, pre_tot, est, est_pag, cre_en)
-     |   $tour    -> Tour (nom)
-     |   $salida  -> salidas_tour (fec_sal, hra_sal)
-     |   $urlPago -> ruta de la pasarela de pago (placeholder, p. ej. route('pagos.create', $reserva))
-     */
+    /* Datos de ejemplo. */
     $reserva ??= [
         'cod' => 'PIP-2610-4F7K', 'nom_ctc' => 'Ana Quispe Mamani', 'cor_ctc' => 'ana.quispe@ejemplo.com',
         'cnt_ptc' => 2, 'pre_tot' => 310.00, 'est' => 'pendiente', 'est_pag' => 'pendiente', 'cre_en' => now(),

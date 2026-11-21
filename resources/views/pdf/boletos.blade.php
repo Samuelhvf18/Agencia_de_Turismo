@@ -1,4 +1,4 @@
-{{-- Boletos con QR (uno por página, A5). Variables: $reserva, $salida, $tour, $items = [['boleto' => Boleto, 'qr' => data URI SVG]] --}}
+{{-- Boletos QR en A5. --}}
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head>

@@ -8,13 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
-/**
- * Ficha médica y consentimiento (RF-08). En tours de alto riesgo todos los
- * participantes deben completarla y firmarla; en los demás es opcional, pero
- * si alguien firma debe aceptar ambas declaraciones.
- *
- * Los participantes, el tour y las firmas ya guardadas se leen del borrador.
- */
+/** Ficha obligatoria en alto riesgo. */
 class FichaMedicaRequest extends FormRequest
 {
     protected function prepareForValidation(): void
@@ -27,7 +21,7 @@ class FichaMedicaRequest extends FormRequest
             if (! is_array($ficha)) {
                 continue;
             }
-            // Se valida el original, sin borrar caracteres que podrían ocultar errores.
+            // Valida sin limpiar el original.
             if (array_key_exists('prefijo_eme', $ficha)) {
                 $ficha['tel_ctc_eme'] = ($ficha['telefono_eme'] ?? '') === '' ? null
                     : (string) $ficha['prefijo_eme'].(string) $ficha['telefono_eme'];

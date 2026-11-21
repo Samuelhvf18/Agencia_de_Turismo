@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Cambio de estado de un cliente en la cadena de Markov. */
+/** Transición de estado del cliente. */
 class MarkovClienteEstado extends Model
 {
     protected $table = 'markov_cliente_estado';

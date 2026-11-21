@@ -1,18 +1,7 @@
 @extends('layouts.reserva')
 
 @php
-    /*
-     | DATOS DE EJEMPLO (solo frontend).
-     | El controlador debe pasar:
-     |   $tour          -> Tour presentado (nom, cod, img, dur_txt, dif_txt, pre_bas, categoria->nom)
-     |   $salida        -> salidas_tour elegida (id, fec_sal, hra_sal) + 'gui_nom' (nombre del guía, opcional)
-     |   $reserva       -> datos de contacto (nom_ctc, cor_ctc, tel_ctc, cnt_ptc)
-     |   $participantes -> participantes_reserva (id, nom_cpl, tip_doc, num_doc, ci_cmp, eda, pais (nom), es_ctc_pri,
-     |                     ficha_ok (bool: tiene fichas_medicas firmada),
-     |                     alquileres: [ ['nom' => tipos_equipo.nom, 'tal' => items_equipo.tal, 'pre' => alquileres_equipo_reserva.pre] ])
-     |   $accionForm    -> route('reservas.confirmar')  (POST; crea la reserva con pre_tot y est = 'pendiente')
-     | Se envía: acp_ter (casilla de términos, validar 'accepted').
-     */
+    /* Datos de ejemplo. */
     $tour ??= (object) [
         'nom' => 'Valle de la Luna', 'cod' => 'TUR002', 'img' => asset('images/tours/valle-de-la-luna.jpg'),
         'img_alt' => 'Valle de la Luna', 'dur_txt' => '5', 'dif_txt' => 'Moderado', 'pre_bas' => 130.00,

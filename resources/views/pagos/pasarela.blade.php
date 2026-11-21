@@ -1,4 +1,4 @@
-{{-- Pantalla de la pasarela simulada (imita al proveedor externo). Variables: $pago, $reserva, $metodos --}}
+{{-- Pantalla de la pasarela simulada. --}}
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head>

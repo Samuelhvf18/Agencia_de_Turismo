@@ -40,7 +40,7 @@ beforeEach(function () {
 
 function imagenMejoras(string $nombre = 'foto.png'): UploadedFile
 {
-    // PNG real de 100 × 100, sin dependencia de GD en las pruebas.
+    // PNG real sin GD.
     $raw = str_repeat("\0".str_repeat("\x1f\x5f\x8b", 100), 100);
     $chunk = fn ($tipo, $datos) => pack('N', strlen($datos)).$tipo.$datos.pack('N', crc32($tipo.$datos));
     $png = "\x89PNG\r\n\x1a\n".$chunk('IHDR', pack('NNCCCCC', 100, 100, 8, 2, 0, 0, 0)).$chunk('IDAT', gzcompress($raw)).$chunk('IEND', '');

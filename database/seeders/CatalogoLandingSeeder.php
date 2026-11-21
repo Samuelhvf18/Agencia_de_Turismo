@@ -5,12 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Carga las categorías, tours y fotos que se muestran en el catálogo público
- * de la landing page. Es idempotente: se puede ejecutar varias veces.
- *
- * php artisan db:seed --class=CatalogoLandingSeeder
- */
+/** Catálogo público inicial. */
 class CatalogoLandingSeeder extends Seeder
 {
     public function run(): void

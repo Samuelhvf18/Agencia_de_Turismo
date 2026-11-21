@@ -12,9 +12,7 @@ use App\Services\Io\PanelColasBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Panel «Análisis de colas de reservas» (Módulo 07 — Teoría de colas M/M/c/K).
- */
+/** Panel de teoría de colas. */
 class AnalisisColasController extends Controller
 {
     public function __construct(private ColasService $colas) {}
@@ -37,7 +35,7 @@ class AnalisisColasController extends Controller
             ->sortBy(fn ($p) => $p->tour->nom)->values();
 
         if ($parametros->isEmpty()) {
-            // Sin parámetros cargados todavía: se muestra la maqueta para no dejar el panel vacío.
+            // Maqueta sin parámetros cargados.
             return view('admin.io.colas', array_merge(app(IoDemoData::class)->colas($datos['tour'] ?? null, $datos['c'] ?? null, $datos['k'] ?? null, $datos['lambda'] ?? null),
                 ['formAction' => route('admin.io.colas'),
                     'avisoDemo' => 'Todavía no hay parámetros de colas registrados. Cárguelos por tour en «Parámetros de colas» (RF-40); mientras tanto se muestran datos de demostración.']));
@@ -70,7 +68,7 @@ class AnalisisColasController extends Controller
             + ['demo' => false, 'formAction' => route('admin.io.colas')]);
     }
 
-    /** Parámetros de un tour; si hay llegadas registradas en los últimos 30 días se usa λ observado. */
+    /** Prioriza llegadas observadas recientes. */
     private function fila(ColaParametroTour $p, ?float $lambdaObs): array
     {
         return [

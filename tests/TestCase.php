@@ -10,10 +10,10 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Las vistas usan @vite; en las pruebas no se necesitan los assets compilados.
+        // Omite assets compilados en pruebas.
         $this->withoutVite();
 
-        // Symfony envía «Accept-Language: en-us» por defecto; las pruebas usan el idioma por defecto del sistema.
+        // Usa el idioma predeterminado.
         $this->withHeader('Accept-Language', 'es-BO,es;q=0.9');
     }
 }

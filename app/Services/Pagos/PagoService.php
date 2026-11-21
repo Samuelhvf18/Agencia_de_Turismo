@@ -14,23 +14,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Facturación y pagos (Módulo 06, RF-13, RF-14, RNF-19).
- *
- * - Cada intento de pago queda en `pagos` (pendiente → completado/fallido).
- * - Se admiten pagos parciales: la reserva pasa a est_pag = parcial hasta
- *   cubrir el total.
- * - El comprobante (comprobantes_pago) se crea con el primer intento y se
- *   marca pagado al cubrir el total; nunca se borra, solo se anula.
- */
+/** Facturación y pagos parciales. */
 class PagoService
 {
     public const METODOS = ['tarjeta' => 'Tarjeta', 'qr' => 'QR bancario', 'transferencia' => 'Transferencia'];
 
-    /** IVA incluido en el precio (Bolivia: 13 %). */
+    /** IVA incluido del 13 %. */
     public const TASA_IVA = 0.13;
 
-    /** Primer pago mínimo: 30 % del total (o el saldo, si es menor). */
+    /** Mínimo inicial sujeto al saldo. */
     public const PORCENTAJE_MINIMO = 0.30;
 
     public function __construct(
@@ -59,7 +51,7 @@ class PagoService
             || ($reserva->est === Reserva::EST_CONFIRMADA && $this->saldo($reserva) > 0);
     }
 
-    /** Registra un intento de pago pendiente y devuelve el pago creado. */
+    /** Crea un pago pendiente. */
     public function iniciar(Reserva $reserva, string $metodo, float $monto): Pago
     {
         return DB::transaction(function () use ($reserva, $metodo, $monto) {
@@ -96,8 +88,7 @@ class PagoService
     }
 
     /**
-     * Procesa la notificación (webhook) de la pasarela. Es idempotente: un
-     * pago que ya no está pendiente no se vuelve a procesar.
+     * Webhook idempotente de pasarela.
      *
      * @param  array{ref_trx: string, est: string, mto?: float}  $evento
      */
@@ -110,7 +101,7 @@ class PagoService
             if (! $referencia) {
                 return null;
             }
-            // Orden global de bloqueos: reserva → comprobante → pago.
+            // Bloqueo: reserva, comprobante, pago.
             $cmp = ComprobantePago::findOrFail($referencia->cmp_pag_id);
             $reserva = Reserva::lockForUpdate()->findOrFail($cmp->rsv_id);
             $comprobante = ComprobantePago::lockForUpdate()->findOrFail($cmp->id);
@@ -122,8 +113,8 @@ class PagoService
             $aprobado = ($evento['est'] ?? null) === Pago::EST_COMPLETADO
                 && (! isset($evento['mto']) || abs((float) $evento['mto'] - (float) $pago->mto) < 0.01);
 
-            // No contabilizar cobros tardíos ni excedentes como dinero aprobado.
-            // La pasarela simulada los rechaza; un proveedor real exige conciliación/reembolso.
+            // Rechaza cobros tardíos o excedentes.
+            // Proveedores reales requieren conciliación.
             $aprobado = $aprobado && $this->admitePago($reserva)
                 && $comprobante->est !== ComprobantePago::EST_ANULADO
                 && (float) $pago->mto <= round((float) $reserva->pre_tot - $comprobante->montoPagado(), 2);
@@ -163,7 +154,7 @@ class PagoService
         return $pago;
     }
 
-    /** Cobro en efectivo registrado por el personal: cualquier monto hasta el saldo. */
+    /** Efectivo hasta cubrir el saldo. */
     public function registrarEfectivo(Reserva $reserva, float $monto): Pago
     {
         $pago = DB::transaction(function () use ($reserva, $monto) {
@@ -188,10 +179,7 @@ class PagoService
         return $this->procesarNotificacion(['ref_trx' => $pago->ref_trx, 'est' => Pago::EST_COMPLETADO, 'mto' => (float) $pago->mto]);
     }
 
-    /**
-     * Anula el comprobante (sin borrado físico) y cancela la reserva; lo ya
-     * cobrado queda como reembolsado.
-     */
+    /** Anulación lógica y reembolso. */
     public function anularComprobante(ComprobantePago $comprobante, string $motivo): void
     {
         DB::transaction(function () use ($comprobante, $motivo) {

@@ -15,11 +15,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Operaciones y salidas (Módulo 04, RF-16 a RF-18, RF-21): programación,
- * asignación, reprogramación y cancelación con aviso a los clientes,
- * check-in por QR e inicio/fin real del recorrido.
- */
+/** Gestión operativa de salidas. */
 class SalidaService
 {
     public function __construct(
@@ -38,7 +34,7 @@ class SalidaService
         }, 3);
     }
 
-    /** Cambia capacidad y asignaciones sin mover la fecha, validando dentro del bloqueo. */
+    /** Valida cambios bajo bloqueo. */
     public function asignar(SalidaTour $salida, array $datos): SalidaTour
     {
         return DB::transaction(function () use ($salida, $datos) {
@@ -75,7 +71,7 @@ class SalidaService
         }, 3);
     }
 
-    /** La salida y todas sus reservas se cancelan en la misma transacción. */
+    /** Cancelación conjunta y transaccional. */
     public function cancelar(SalidaTour $salida, string $motivo): SalidaTour
     {
         return DB::transaction(function () use ($salida, $motivo) {
@@ -106,7 +102,7 @@ class SalidaService
         }, 3);
     }
 
-    /** Cierre y efectos sobre reservas/equipo atómicos, incluso si falla una notificación. */
+    /** Cierre atómico de la salida. */
     public function finalizar(SalidaTour $salida, ?float $km = null, ?float $combustible = null): SalidaTour
     {
         return DB::transaction(function () use ($salida, $km, $combustible) {
@@ -130,7 +126,7 @@ class SalidaService
     }
 
     /**
-     * Valida un boleto en el check-in (RF-21).
+     * Valida un boleto del check-in.
      *
      * @return array{ok: bool, mensaje: string, participante?: string, cod: string}
      */

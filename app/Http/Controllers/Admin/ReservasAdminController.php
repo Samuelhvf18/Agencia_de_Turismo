@@ -15,7 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/** Panel de reservas y pasajeros para administración y operaciones. */
+/** Gestión de reservas y pasajeros. */
 class ReservasAdminController extends Controller
 {
     public function index(Request $request): View
@@ -60,7 +60,7 @@ class ReservasAdminController extends Controller
         $reserva->load('salida.tour', 'salida.guia.usuario', 'usuario', 'participantes.pais', 'participantes.departamento',
             'participantes.boleto', 'participantes.fichaMedica', 'participantes.alquileres.item.tipo', 'comprobante.pagos');
 
-        // RNF-05: ver fichas médicas y documentos de los participantes queda auditado.
+        // Audita datos sensibles.
         foreach ($reserva->participantes as $p) {
             AuditObserver::lectura($p);
             if ($p->fichaMedica) {
@@ -84,7 +84,7 @@ class ReservasAdminController extends Controller
         $seguridad = app(SeguridadParticipantes::class);
         $aut = $participante->autorizacion_menor;
         abort_unless($aut && $participante->fecha_nacimiento && $seguridad->edad($participante->fecha_nacimiento->toDateString(), $reserva->salida) < 18, 422, 'No hay autorización de menor que verificar.');
-        // Aplicar las restricciones actuales, incluso si se reclasificó el tour.
+        // Aplica las restricciones vigentes.
         abort_unless($reserva->salida->tour->admiteMenores() && $seguridad->edad($participante->fecha_nacimiento->toDateString(), $reserva->salida) >= $reserva->salida->tour->edadMinimaEfectiva(), 422, 'Este tour no admite al menor.');
         $acompanante = $participante->acompanante;
         abort_unless($acompanante && $acompanante->rsv_id === $reserva->id && $acompanante->fecha_nacimiento && $seguridad->edad($acompanante->fecha_nacimiento->toDateString(), $reserva->salida) >= 18, 422, 'Falta un acompañante adulto válido.');

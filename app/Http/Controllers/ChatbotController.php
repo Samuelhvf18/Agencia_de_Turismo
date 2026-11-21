@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-/** Widget público del asistente turístico (RF-28). */
+/** Asistente turístico público. */
 class ChatbotController extends Controller
 {
     public function __construct(private ChatbotService $chatbot) {}
@@ -33,7 +33,7 @@ class ChatbotController extends Controller
         return response()->json($resultado + ['mensajes' => $this->chatbot->mensajesDesde($conversacion, (int) $request->input('ultimo', 0))]);
     }
 
-    /** Sondeo: mensajes nuevos (p. ej. respuestas de un asesor tras la derivación). */
+    /** Consulta mensajes nuevos. */
     public function mensajes(Request $request): JsonResponse
     {
         $conversacion = $this->conversacion($request);

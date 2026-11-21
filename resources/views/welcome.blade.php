@@ -839,7 +839,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 <button class="totop" id="totop" aria-label="Volver arriba"><i class="fa-solid fa-arrow-up"></i></button>
 
 <script>
-// header sólido al hacer scroll + botón arriba
+// Cabecera al desplazarse.
 const hdr=document.getElementById('hdr'),top_=document.getElementById('totop');
 const onScroll=()=>{const y=scrollY;hdr.classList.toggle('solid',y>40);top_.classList.toggle('show',y>700)};
 addEventListener('scroll',onScroll,{passive:true});onScroll();
@@ -859,7 +859,7 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return
   e.target.querySelectorAll('[data-count]').forEach(countUp);io.unobserve(e.target)}),{threshold:.15});
 document.querySelectorAll('.reveal,#mapbox').forEach(el=>io.observe(el));
 
-// Las categorías rápidas actualizan el componente sin recargar la página.
+// Filtra categorías sin recargar.
 document.querySelectorAll('[data-go]').forEach(t=>t.onclick=()=>{Livewire.dispatch('filtrar-categoria',{categoria:t.dataset.go});document.getElementById('catalogo').scrollIntoView({behavior:'smooth'})});
 
 // modales legales

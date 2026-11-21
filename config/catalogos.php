@@ -1,6 +1,6 @@
 <?php
 
-// Países ISO 3166 y nombres en español de CLDR (Intl).
+// Países ISO con nombres CLDR.
 return [
     'paises' => [
         'AF' => 'Afganistán',

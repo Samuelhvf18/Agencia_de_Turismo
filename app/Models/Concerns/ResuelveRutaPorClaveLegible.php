@@ -6,7 +6,7 @@ trait ResuelveRutaPorClaveLegible
 {
     public function resolveRouteBindingQuery($query, $value, $field = null)
     {
-        // Los enlaces explícitamente públicos siguen buscando por slug; los enlaces anteriores usaban el ID.
+        // Conserva enlaces por ID.
         $id = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($field === null && $id !== false) {
             $columnaId = $this->qualifyColumn($this->getKeyName());

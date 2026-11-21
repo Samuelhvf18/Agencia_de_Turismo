@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Kilometraje y costo de combustible de un vehículo en una salida. */
+/** Kilometraje y gasto por salida. */
 class BitacoraViajeVehiculo extends Model
 {
     protected $table = 'bitacora_viajes_vehiculo';

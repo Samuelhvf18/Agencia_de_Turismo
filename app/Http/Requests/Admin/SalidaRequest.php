@@ -4,11 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Programación (POST) o asignación (PUT) de una salida (RF-16, RF-39).
- * Las reglas de negocio (choques, horas, licencia, asientos) las aplica
- * AsignacionService; aquí se validan formato y existencia.
- */
+/** Formato y existencia de datos. */
 class SalidaRequest extends FormRequest
 {
     public function authorize(): bool
@@ -44,7 +40,7 @@ class SalidaRequest extends FormRequest
         ];
     }
 
-    /** Datos listos para AsignacionService (hora con segundos y recursos opcionales en null). */
+    /** Normaliza datos de asignación. */
     public function datos(): array
     {
         $datos = $this->validated();

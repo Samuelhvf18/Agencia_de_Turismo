@@ -5,7 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Support\ReglasEntrada;
 use Illuminate\Foundation\Http\FormRequest;
 
-/** Datos de un tour (RF-39): formatos de nombre, montos, duración de un día y altitudes coherentes. */
+/** Validación de datos del tour. */
 class TourRequest extends FormRequest
 {
     public function authorize(): bool

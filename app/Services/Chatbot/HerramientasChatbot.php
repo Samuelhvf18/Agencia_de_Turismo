@@ -9,11 +9,7 @@ use App\Services\Notificaciones\NotificacionService;
 use App\Support\PresentadorTour;
 use Illuminate\Support\Str;
 
-/**
- * Herramientas del chatbot (RF-28 a RF-31). Las usa el agente de n8n a
- * través de /api/n8n/chatbot/* y también el respaldo local cuando n8n no
- * responde. Solo leen datos, salvo la derivación a una persona.
- */
+/** Herramientas compartidas del chatbot. */
 class HerramientasChatbot
 {
     /** Preguntas frecuentes: clave => [es, en] */
@@ -45,7 +41,7 @@ class HerramientasChatbot
     ];
 
     /**
-     * Tours activos que cumplen tiempo, condición física y presupuesto.
+     * Filtra tours por preferencias.
      *
      * @return array<int, array>
      */
@@ -67,7 +63,7 @@ class HerramientasChatbot
             ->all();
     }
 
-    /** Tarjetas siempre reconstruidas con el catálogo; nunca aceptar HTML o URL de la IA. */
+    /** Reconstruye tarjetas desde catálogo. */
     public function tarjetas(array $ids, int $limite = 3): array
     {
         $ids = array_slice(array_values(array_unique(array_filter($ids, fn ($id) => is_int($id) && $id > 0))), 0, max(1, min(100, $limite)));
@@ -105,7 +101,7 @@ class HerramientasChatbot
         ];
     }
 
-    /** Estado de una reserva en solo lectura (requiere código y correo del contacto). */
+    /** Consulta por código y correo. */
     public function consultarReserva(string $codigo, string $correo): ?array
     {
         $r = Reserva::with('salida.tour')
@@ -134,7 +130,7 @@ class HerramientasChatbot
         return $tema ? array_intersect_key($lista, [$tema => true]) : $lista;
     }
 
-    /** Deriva la conversación a una persona y avisa al equipo de operaciones (RF-31). */
+    /** Deriva y avisa a operaciones. */
     public function derivar(ConversacionChatbot $conversacion, string $motivo = ''): void
     {
         if ($conversacion->der_hum) {

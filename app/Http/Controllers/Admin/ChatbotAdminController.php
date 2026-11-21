@@ -8,7 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/** Atención humana de las conversaciones derivadas por el chatbot (RF-31). */
+/** Atención humana del chatbot. */
 class ChatbotAdminController extends Controller
 {
     public function index(Request $request): View
@@ -39,7 +39,7 @@ class ChatbotAdminController extends Controller
         return back()->with('estado', 'Respuesta enviada al cliente.');
     }
 
-    /** Cierra la atención humana: el chatbot vuelve a responder automáticamente. */
+    /** Devuelve control al chatbot. */
     public function cerrar(ConversacionChatbot $conversacion): RedirectResponse
     {
         $conversacion->update(['der_hum' => false]);

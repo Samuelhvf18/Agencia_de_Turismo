@@ -3,11 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Esquema físico v5 (Documentacion actualizada/03_Base_de_Datos/schema_postgresql_v5.sql):
- * restricciones CHECK de dominio, índices de apoyo y las 7 vistas que usan
- * los modelos de IO II y los dashboards.
- */
+/** Restricciones, índices y vistas. */
 return new class extends Migration
 {
     /** tabla => [nombre => expresión] */
@@ -148,7 +144,7 @@ return new class extends Migration
     ];
 
     private const VISTAS = [
-        // Horas acumuladas por guía y semana (asignación de guías, RF-22)
+        // Carga semanal de cada guía.
         'vista_carga_horaria_guia' => <<<'SQL'
             SELECT pg.id                                   AS prf_gui_id,
                    u.nom                                   AS guia,
@@ -165,7 +161,7 @@ return new class extends Migration
             GROUP BY pg.id, u.nom, pg.ani_exp, pg.lim_hrs_sem, date_trunc('week', st.fec_sal)
             SQL,
 
-        // Ocupación de asientos y costo de combustible por salida (asignación de vehículos, RF-23)
+        // Ocupación y combustible por salida.
         'vista_ocupacion_transporte' => <<<'SQL'
             SELECT st.id                                     AS sal_tur_id,
                    st.fec_sal,
@@ -184,7 +180,7 @@ return new class extends Migration
             GROUP BY st.id, st.fec_sal, v.id, v.pla, v.cap_asi
             SQL,
 
-        // Rutas más solicitadas por temporada (dashboard, RF-33)
+        // Demanda de rutas por temporada.
         'vista_demanda_por_tour_mes' => <<<'SQL'
             SELECT t.id AS tur_id, t.nom AS tour,
                    EXTRACT(YEAR  FROM st.fec_sal)::smallint AS anio,
@@ -197,7 +193,7 @@ return new class extends Migration
             GROUP BY t.id, t.nom, EXTRACT(YEAR FROM st.fec_sal), EXTRACT(MONTH FROM st.fec_sal)
             SQL,
 
-        // Nacionalidad de los turistas (dashboard, RF-34)
+        // Nacionalidad de turistas.
         'vista_turistas_por_nacionalidad' => <<<'SQL'
             SELECT COALESCE(p.nom, 'Sin dato') AS pais,
                    p.cod_iso,
@@ -218,7 +214,7 @@ return new class extends Migration
             GROUP BY t.id, t.nom
             SQL,
 
-        // Demanda anual por tipo de equipo (parámetro D del modelo EOQ, RF-26)
+        // Demanda anual para EOQ.
         'vista_demanda_equipo_anual' => <<<'SQL'
             SELECT te.id AS tip_eqp_id, te.nom AS tipo_equipo, te.eqp_cri,
                    te.cos_ord, te.cos_mnt_anu,
@@ -233,7 +229,7 @@ return new class extends Migration
             GROUP BY te.id, te.nom, te.eqp_cri, te.cos_ord, te.cos_mnt_anu, EXTRACT(YEAR FROM st.fec_sal)
             SQL,
 
-        // Llegadas observadas por tour y día (insumo de λ observado, RF-41)
+        // Llegadas diarias por tour.
         'vista_llegadas_diarias_tour' => <<<'SQL'
             SELECT e.tur_id,
                    t.nom                                       AS tour,

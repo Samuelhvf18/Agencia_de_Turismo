@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Equipo que se ofrece en alquiler para un tour (precio especial opcional). */
+/** Equipo alquilable por tour. */
 class EquipoPorTour extends Model
 {
     protected $table = 'equipo_por_tour';
@@ -27,7 +27,7 @@ class EquipoPorTour extends Model
         return $this->belongsTo(TipoEquipo::class, 'tip_eqp_id');
     }
 
-    /** Precio de alquiler efectivo: el especial del tour o el base del tipo. */
+    /** Prioriza el precio especial. */
     public function precio(): float
     {
         return (float) ($this->pre_alq_esp ?? $this->tipo->pre_alq_bas);

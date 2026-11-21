@@ -82,7 +82,7 @@ test('el comando proyecta la demanda por tour desde vista_demanda_por_tour_mes y
     $p = ProyeccionDemanda::where('tur_id', $tour->id)->orderBy('ani_per')->orderBy('mes_per')->get();
     expect($p)->toHaveCount(3)
         ->and($p->first()->ver_mdl)->toBe(ProyeccionDemandaService::MODELO_REGRESION)
-        ->and($p->first()->rsv_pry)->toBe(7); // serie 1..6 → siguiente mes = 7
+        ->and($p->first()->rsv_pry)->toBe(7); // Proyección siguiente: siete.
 });
 
 test('el dashboard y la analítica muestran datos de las vistas SQL', function () {

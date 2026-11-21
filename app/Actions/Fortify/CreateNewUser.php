@@ -18,10 +18,7 @@ class CreateNewUser implements CreatesNewUsers
     use PasswordValidationRules;
 
     /**
-     * Validar y crear un turista nuevo.
-     *
-     * El formulario pide nombre y apellidos por separado; en `users.nom` se
-     * guarda el nombre completo (diccionario de datos v4).
+     * Alta de turistas.
      *
      * @param  array<string, string>  $input
      */
@@ -88,7 +85,7 @@ class CreateNewUser implements CreatesNewUsers
             'clv' => $input['password'],
         ]);
 
-        // IO II · Markov: todo turista nuevo entra a la cadena como prospecto.
+        // Estado inicial: prospecto.
         if (MarkovEstadoCliente::where('cod', 'prospecto')->exists()) {
             app(MarkovService::class)->registrarCambio($usuario->id, 'prospecto', 'Registro de cuenta');
         }

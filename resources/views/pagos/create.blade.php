@@ -1,6 +1,6 @@
 @extends('layouts.reserva')
 
-{{-- Pago de una reserva. Variables: $reserva, $tour, $salida, $metodos, $saldo, $pagado, $minimo, $historial --}}
+{{-- Pago de la reserva. --}}
 
 @section('titulo', 'Pagar reserva ' . $reserva->cod)
 

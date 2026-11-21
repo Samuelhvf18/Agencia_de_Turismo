@@ -32,7 +32,7 @@ class CodigoCorreo
         }
     }
 
-    /** Se consume dentro de la transacción del cambio protegido. Los fallos no revierten el contador. */
+    /** Consumo transaccional, intentos persistentes. */
     public function comprobar(string $correo, string $proposito, string $codigo, callable $accion): bool
     {
         return DB::transaction(function () use ($correo, $proposito, $codigo, $accion) {

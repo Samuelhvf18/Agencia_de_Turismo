@@ -1,7 +1,7 @@
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './bootstrap';
 
-// Drop field data before logging out on shared devices.
+// Limpia datos al cerrar sesión.
 document.addEventListener('submit', async (event) => {
     const form = event.target;
     if (!(form instanceof HTMLFormElement) || !['/cerrar-sesion', '/logout'].includes(new URL(form.action).pathname) || form.dataset.offlinePurged) return;

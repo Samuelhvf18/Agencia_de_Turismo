@@ -1,6 +1,6 @@
 <?php
 
-// Mensajes de validación en español (RNF-14, RF-39).
+// Mensajes de validación en español.
 return [
     'accepted' => 'Debes aceptar :attribute.',
     'active_url' => ':Attribute no es una URL válida.',

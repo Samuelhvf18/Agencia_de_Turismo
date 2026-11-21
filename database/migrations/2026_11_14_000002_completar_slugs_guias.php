@@ -17,6 +17,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Se preservan las URL ya publicadas.
+        // Conserva las URL publicadas.
     }
 };

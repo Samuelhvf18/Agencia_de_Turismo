@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-/** Participante de una reserva (CI con complemento y departamento, o pasaporte). */
+/** Identificación del participante. */
 class ParticipanteReserva extends Model
 {
     protected $table = 'participantes_reserva';

@@ -1,4 +1,4 @@
-{{-- Comprobante de pago (A4). Variables: $comprobante, $reserva, $tour, $salida, $metodos --}}
+{{-- Comprobante en formato A4. --}}
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head>

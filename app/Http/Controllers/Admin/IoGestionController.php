@@ -18,13 +18,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-/**
- * Pantallas de gestión de IO II: parámetros de colas (RF-40), propuestas de
- * asignación de guías y vehículos (RF-22 a RF-24) y EOQ (RF-25 a RF-27).
- */
+/** Panel de investigación operativa. */
 class IoGestionController extends Controller
 {
-    // ---- RF-40: parámetros M/M/c/K -------------------------------------------------------
+    // Parámetros de colas.
 
     public function parametros(ColasService $colas): View
     {
@@ -58,7 +55,7 @@ class IoGestionController extends Controller
             'k_cap.gte' => 'La capacidad del modelo debe ser igual o mayor que el número de guías.',
         ]);
 
-        // Un solo juego activo por tour: el anterior queda como historial.
+        // Versiona parámetros por tour.
         DB::transaction(function () use ($tour, $datos) {
             Tour::whereKey($tour->id)->lockForUpdate()->firstOrFail();
             ColaParametroTour::where('tur_id', $tour->id)->where('act', true)->update(['act' => false]);
@@ -68,7 +65,7 @@ class IoGestionController extends Controller
         return back()->with('estado', "Configuración de {$tour->nom} guardada. El análisis usará estos valores; las asignaciones y los cupos de las salidas no cambiaron.");
     }
 
-    // ---- RF-22 a RF-24: propuestas de asignación ----------------------------------------------
+    // Propuestas de asignación.
 
     public function propuestas(Request $request): View
     {

@@ -8,7 +8,7 @@ use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Validation\ValidationException;
 
-// Run only against a disposable, migrated and seeded PostgreSQL QA database.
+// Usar PostgreSQL de pruebas desechable.
 require __DIR__.'/../vendor/autoload.php';
 $app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();

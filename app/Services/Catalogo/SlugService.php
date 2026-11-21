@@ -5,7 +5,7 @@ namespace App\Services\Catalogo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/** Ruta amigable (rta_amg) única con sufijo numérico si ya existe (RF-37). */
+/** Slug único con sufijo. */
 class SlugService
 {
     public static function unico(string $texto, string $tabla, ?int $ignorarId = null, int $largo = 170): string

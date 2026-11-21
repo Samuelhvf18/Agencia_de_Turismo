@@ -1,4 +1,4 @@
-{{-- RF-40: parámetros del modelo M/M/c/K por tour. Variables: $tours (tour, par, mu_sugerido, lambda_obs), $historial --}}
+{{-- Parámetros de colas por tour. --}}
 @extends('layouts.admin-io')
 
 @section('titulo', 'Ajustes del análisis')

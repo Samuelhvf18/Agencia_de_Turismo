@@ -8,7 +8,7 @@ return [
         'Instagram' => env('SOCIAL_INSTAGRAM_URL'),
         'TikTok' => env('SOCIAL_TIKTOK_URL'),
     ], fn ($url) => is_string($url) && filter_var($url, FILTER_VALIDATE_URL) && parse_url($url, PHP_URL_SCHEME) === 'https'),
-    // Prefijos internacionales de libphonenumber, nombres de territorios CLDR.
+    // Prefijos telefónicos y territorios CLDR.
     'prefijos' => [
         '+591' => 'Bolivia (+591)',
         '+93' => 'Afganistán (+93)',

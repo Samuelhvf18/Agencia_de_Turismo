@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Llegada (solicitud de reserva) al sistema de colas: admitido, rechazado o cancelado. */
+/** Solicitudes de reserva en cola. */
 class ColaEventoLlegada extends Model
 {
     protected $table = 'cola_eventos_llegada';

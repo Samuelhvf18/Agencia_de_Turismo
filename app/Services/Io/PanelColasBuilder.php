@@ -2,17 +2,14 @@
 
 namespace App\Services\Io;
 
-/**
- * Arma las variables de la vista admin/io/colas a partir de los tours y del tour seleccionado.
- * Lo usan el controlador (datos reales) y la vista previa (datos de maqueta).
- */
+/** Variables del panel de colas. */
 class PanelColasBuilder
 {
     /**
-     * @param  array  $tours  tours con id, nom, lambda, mu, c, k, rho, wq_hrs, p_rec, estado
-     * @param  array  $sel  tour seleccionado con id, nom, dur_hrs, lambda, mu, c, k, cos_esp, cos_srv, origen_lambda
-     * @param  int|null  $c,  $k   escenario a simular (null = sin simulación)
-     * @param  array  $historial  métricas diarias: fec, lmb_obs, rho, wq_hrs, p_rec
+     * @param  array  $tours  Métricas por tour.
+     * @param  array  $sel  Tour seleccionado con sus parámetros.
+     * @param  int|null  $c,  $k   Escenario opcional de simulación.
+     * @param  array  $historial  Historial de métricas diarias.
      */
     public static function armar(ColasService $svc, array $tours, array $sel, ?int $c, ?int $k, array $historial): array
     {

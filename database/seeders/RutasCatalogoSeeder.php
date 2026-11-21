@@ -6,13 +6,10 @@ use App\Models\PuntoRuta;
 use App\Models\Tour;
 use Illuminate\Database\Seeder;
 
-/**
- * Puntos de interés y trazado (GeoJSON en tours.trz_geo) de los tours del
- * catálogo. Coordenadas aproximadas de cada recorrido. Idempotente.
- */
+/** Puntos de interés y GeoJSON. */
 class RutasCatalogoSeeder extends Seeder
 {
-    /** slug => [[nom, lat, lon, alt_m, tip_pun], ...] en orden de recorrido */
+    /** Puntos en orden de recorrido. */
     private const RUTAS = [
         'descenso-camino-de-la-muerte' => [
             ['La Cumbre', -16.3540, -68.0420, 4700, 'inicio'],
@@ -68,7 +65,7 @@ class RutasCatalogoSeeder extends Seeder
                 );
             }
 
-            // Trazado GeoJSON con altitud ([lon, lat, alt]) interpolado entre los puntos.
+            // Interpola coordenadas con altitud.
             if (empty($tour->trz_geo)) {
                 $tour->update(['trz_geo' => [
                     'type' => 'LineString',

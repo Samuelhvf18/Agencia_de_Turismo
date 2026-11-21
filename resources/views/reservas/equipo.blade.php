@@ -1,20 +1,7 @@
 @extends('layouts.reserva')
 
 @php
-    /*
-     | DATOS DE EJEMPLO (solo frontend).
-     | El controlador debe pasar:
-     |   $tour          -> Tour presentado (nom, cod, img, dur_txt, dif_txt, pre_bas, categoria->nom)
-     |   $salida        -> salidas_tour elegida (id, fec_sal, hra_sal)
-     |   $participantes -> participantes_reserva ya registrados (id, nom_cpl)
-     |   $equipos       -> tipos_equipo habilitados para el tour (equipo_por_tour.act = true) con:
-     |                     tip_eqp_id, nom, des, eqp_cri, ico (opcional, clase Font Awesome),
-     |                     pre = equipo_por_tour.pre_alq_esp ?? tipos_equipo.pre_alq_bas,
-     |                     items = items_equipo del tipo: id (itm_eqp_id), tal, cnt_dis
-     |   $seleccion     -> alquileres ya elegidos: [ptc_rsv_id => [tip_eqp_id => itm_eqp_id]]
-     |   $accionForm    -> route('reservas.equipo.store')
-     | Se envía: alquileres[ptc_rsv_id][tip_eqp_id] = itm_eqp_id (vacío = no alquila). El precio (pre) lo fija el controlador.
-     */
+    /* Datos de ejemplo. */
     $tour ??= (object) [
         'nom' => 'Valle de la Luna', 'cod' => 'TUR002', 'img' => asset('images/tours/valle-de-la-luna.jpg'),
         'img_alt' => 'Valle de la Luna', 'dur_txt' => '5', 'dif_txt' => 'Moderado', 'pre_bas' => 130.00,
@@ -39,14 +26,14 @@
     $accionForm ??= url('/reservas/preview/ficha'); // controlador: route('reservas.equipo.store')
     $urlAnterior ??= url('/reservas/preview/participantes'); // controlador: route('reservas.participantes')
 
-    // Estado inicial para Alpine: "ptc-tipo" => itm_eqp_id
+    // Selecciones iniciales para Alpine.
     $sel = [];
     foreach ($participantes as $p) {
         foreach ($equipos as $e) {
             $sel[$p['id'] . '-' . $e['tip_eqp_id']] = (string) old("alquileres.{$p['id']}.{$e['tip_eqp_id']}", $seleccion[$p['id']][$e['tip_eqp_id']] ?? '');
         }
     }
-    // Catálogo de ítems para calcular precio y stock en vivo: itm_eqp_id => [pre, cnt_dis]
+    // Precio y stock por ítem.
     $items = [];
     foreach ($equipos as $e) {
         foreach ($e['items'] as $it) {
@@ -147,7 +134,7 @@
 
 @push('scripts')
 <script>
-    // Alquiler de equipo: precio y stock en vivo (el stock real lo valida el controlador)
+    // Precio y stock interactivos.
     function equipoForm(sel, items) {
         return {
             sel: sel,

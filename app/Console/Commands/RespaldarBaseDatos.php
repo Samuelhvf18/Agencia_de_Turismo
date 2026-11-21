@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 use Symfony\Component\Process\Process;
 use ZipArchive;
 
-/** Respaldo privado de BD, adjuntos y manifiesto SHA-256. Ver DOCUMENTACION/Tecnica/OPERACION.md. */
+/** Respaldo privado con verificación. */
 class RespaldarBaseDatos extends Command
 {
     protected $signature = 'respaldo:bd {--dias=30 : Días de respaldos a conservar} {--pg-dump= : Ruta de pg_dump} {--sin-archivos : Excluir adjuntos privados explícitamente}';
@@ -60,7 +60,7 @@ class RespaldarBaseDatos extends Command
                         throw new \RuntimeException('No se pudo añadir un adjunto.');
                     }
                 }
-                // ZipArchive no crea un ZIP vacío sin una entrada.
+                // ZIP requiere una entrada.
                 $archive->addFromString('RESPALDO.txt', 'Adjuntos privados. Verifique sus hashes con el manifiesto JSON.');
                 if (! $archive->close()) {
                     throw new \RuntimeException('No se pudo cerrar el archivo de adjuntos.');

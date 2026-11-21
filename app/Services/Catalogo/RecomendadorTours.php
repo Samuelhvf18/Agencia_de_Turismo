@@ -10,7 +10,7 @@ use App\Services\Io\MarkovService;
 use App\Support\PresentadorTour;
 use Illuminate\Http\Request;
 
-/** Las preferencias eligen el tour; Markov ajusta la estrategia de recomendación. */
+/** Markov ajusta recomendaciones. */
 class RecomendadorTours
 {
     public function para(Request $request): array
@@ -37,7 +37,7 @@ class RecomendadorTours
         $estado ??= $completadas >= 2 ? 'fidelizado' : ($completadas ? 'completado' : ($reservas->isNotEmpty() ? 'reservado' : 'prospecto'));
         $markov = app(MarkovService::class);
         $matriz = $markov->matrizVigente()['P'];
-        // Una matriz no válida no altera el catálogo ni genera porcentajes engañosos.
+        // Ignora matrices inválidas.
         $valida = $markov->esEstocastica($matriz) && collect($matriz)->flatten()->every(fn ($p) => is_finite($p) && $p >= 0 && $p <= 1);
         $riesgo = $valida ? ($matriz[$estado]['perdido'] ?? 0) : 0;
         $recuperar = $estado === 'perdido' || $riesgo >= 0.30;

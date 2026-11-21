@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** Comprobante de una reserva: pendiente, pagado o anulado (sin borrado físico). */
+/** Comprobante con anulación lógica. */
 class ComprobantePago extends Model
 {
     public const EST_PENDIENTE = 'pendiente';
@@ -17,7 +17,7 @@ class ComprobantePago extends Model
     public $timestamps = false;
     protected $fillable = ['cod', 'rsv_id', 'fec_emi', 'sub', 'imp', 'mto_tot', 'est'];
 
-    /** En las URL públicas se usa el código, no el id. */
+    /** URL pública por código. */
     public function getRouteKeyName(): string
     {
         return 'cod';

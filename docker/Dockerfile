@@ -1,5 +1,5 @@
-# Imagen de producción: PHP-FPM 8.4 con las extensiones que usa el sistema.
-# Etapa 1: compila los assets (Vite + Tailwind).
+# Imagen PHP de producción.
+# Compila los recursos del frontend.
 FROM node:22-alpine AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -8,7 +8,7 @@ COPY resources ./resources
 COPY vite.config.js tailwind.config.js postcss.config.js ./
 RUN npm run build
 
-# Etapa 2: dependencias de Composer sin las de desarrollo.
+# Composer para producción.
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
@@ -48,7 +48,7 @@ USER www-data
 EXPOSE 9000
 CMD ["php-fpm"]
 
-# Nginx recibe los estáticos del mismo build; no quedan ocultos bajo un volumen antiguo.
+# Nginx sirve el build compilado.
 FROM nginx:1.27-alpine AS web
 COPY --from=app /var/www/html/public /var/www/html/public
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf

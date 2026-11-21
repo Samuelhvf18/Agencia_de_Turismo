@@ -8,14 +8,10 @@ use App\Models\Reserva;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Punto único para avisar a clientes y personal (RF-38). Cada aviso queda en
- * registros_notificacion y lo despacha NotificacionJob: al webhook de n8n si
- * está configurado o, si no, por correo directo.
- */
+/** Registro y despacho de avisos. */
 class NotificacionService
 {
-    /** Tipos de aviso y su asunto por defecto. */
+    /** Tipos y asuntos de avisos. */
     public const TIPOS = [
         'reserva_creada' => 'Recibimos tu reserva',
         'reserva_confirmada' => 'Tu reserva está confirmada',
@@ -41,7 +37,7 @@ class NotificacionService
         ]);
     }
 
-    /** Aviso al personal (admin/operaciones) por panel y correo. */
+    /** Avisos por panel y correo. */
     public function aPersonal(string $tipo, array $datos, array $roles = [User::ROL_ADMIN, User::ROL_OPERACIONES]): void
     {
         $destinos = User::whereHas('rol', fn ($q) => $q->whereIn('nom', $roles))->where('act', true)->get();
@@ -69,8 +65,8 @@ class NotificacionService
         $registro = ! empty($atributos['clave_evento'])
             ? RegistroNotificacion::firstOrCreate(['clave_evento' => $atributos['clave_evento']], $atributos + ['est' => 'pendiente'])
             : RegistroNotificacion::create($atributos + ['est' => 'pendiente']);
-        // The event is saved with the business transaction. Recovery can dispatch
-        // it even if this callback never runs or the queue is unavailable.
+        // Evento persistente en la transacción.
+        // Recuperación independiente de la cola.
         DB::afterCommit(function () use ($registro) {
             try {
                 NotificacionJob::dispatch($registro->id);

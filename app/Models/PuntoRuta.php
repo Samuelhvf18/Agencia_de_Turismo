@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Punto del trazado de un tour: inicio, checkpoint, mirador o fin. */
+/** Punto del trazado turístico. */
 class PuntoRuta extends Model
 {
     protected $table = 'puntos_ruta';

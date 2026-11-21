@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 
-/** Finanzas: cobros por método, saldos, comprobantes, anulación y pagos en efectivo. */
+/** Gestión de cobros y comprobantes. */
 class FinanzasController extends Controller
 {
     public function index(Request $request): View
@@ -60,7 +60,7 @@ class FinanzasController extends Controller
         return back()->with('estado', "Comprobante {$comprobante->cod} anulado y reserva cancelada.");
     }
 
-    /** Cobro en efectivo en oficina: se registra como pago completado. */
+    /** Registra un cobro en efectivo. */
     public function efectivo(Request $request, Reserva $reserva, PagoService $pagos): RedirectResponse
     {
         $datos = $request->validate(['mto' => ['required', 'numeric', 'min:0.01', 'regex:/^\d+(\.\d{1,2})?$/']]);

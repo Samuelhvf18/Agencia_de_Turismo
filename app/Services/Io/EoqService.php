@@ -7,28 +7,17 @@ use App\Models\TipoEquipo;
 use App\Services\Notificaciones\NotificacionService;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Inventario del equipo crítico de alquiler (Módulo 07, RF-25 a RF-27).
- *
- *   Q* = √(2·D·S / H)        cantidad económica de pedido
- *   R  = d·L + SS            punto de reorden, con d = D / 365
- *   SS = z·σ_d·√L            stock de seguridad (z = 1,65 → 95 % de servicio)
- *   CT = (D/Q)·S + (Q/2)·H   costo total anual de inventario
- *
- * D sale de vista_demanda_equipo_anual (unidades alquiladas en reservas
- * confirmadas o completadas en los año calendario actual); S = tipos_equipo.cos_ord
- * y H = tipos_equipo.cos_mnt_anu.
- */
+/** Inventario crítico con EOQ. */
 class EoqService
 {
     public const Z_SERVICIO = 1.65;
 
     public const LEAD_TIME_DIAS = 7;
 
-    /** Meses con alquileres necesarios para considerar suficiente el historial. */
+    /** Historial mensual mínimo. */
     public const MESES_MINIMOS = 3;
 
-    /** Fórmulas puras (también las usan las pruebas). */
+    /** Fórmulas sin efectos secundarios. */
     public function calcular(float $demandaAnual, float $costoPedido, float $costoMantener, float $sigmaDiaria = 0.0, int $leadTime = self::LEAD_TIME_DIAS): array
     {
         if ($demandaAnual <= 0 || $costoPedido <= 0 || $costoMantener <= 0) {
@@ -53,7 +42,7 @@ class EoqService
         ];
     }
 
-    /** Análisis de cada tipo de equipo con su stock y el aviso de historial insuficiente. */
+    /** Analiza stock e historial. */
     public function analizar(): array
     {
         $resultado = [];
@@ -91,8 +80,7 @@ class EoqService
     }
 
     /**
-     * Revisa el equipo crítico y registra una alerta de reposición (una por
-     * tipo y día) cuando el stock disponible cae al punto de reorden (RF-27).
+     * Alerta diaria de reposición.
      *
      * @return int alertas nuevas
      */
@@ -126,7 +114,7 @@ class EoqService
         return $nuevas;
     }
 
-    /** Unidades alquiladas por mes en los año calendario actual: ['2026-01' => n, ...]. */
+    /** Alquiler mensual del año actual. */
     public function demandaMensual(int $tipEqpId): array
     {
         $meses = [];
@@ -134,7 +122,7 @@ class EoqService
             $meses[now()->startOfYear()->addMonths(11 - $i)->format('Y-m')] = 0;
         }
 
-        // Mismo período y estados que la vista anual.
+        // Coincide con la vista anual.
         $filas = DB::table('alquileres_equipo_reserva as a')
             ->join('items_equipo as ie', 'ie.id', '=', 'a.itm_eqp_id')
             ->join('participantes_reserva as pr', 'pr.id', '=', 'a.ptc_rsv_id')
@@ -156,7 +144,7 @@ class EoqService
         return $meses;
     }
 
-    /** Serie diaria del año calendario, incluidos días sin alquileres. */
+    /** Incluye días sin alquiler. */
     public function demandaDiaria(int $tipEqpId): array
     {
         $dias = [];
@@ -178,7 +166,7 @@ class EoqService
         return $dias;
     }
 
-    /** Demanda anual (D) según vista_demanda_equipo_anual para el año indicado. */
+    /** Demanda anual de equipo. */
     public function demandaAnualVista(int $tipEqpId, int $anio): int
     {
         return (int) DB::table('vista_demanda_equipo_anual')->where('tip_eqp_id', $tipEqpId)->where('anio', $anio)->value('unidades_alquiladas');

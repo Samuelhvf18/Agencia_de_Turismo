@@ -4,7 +4,7 @@ use App\Services\Io\EoqService;
 use App\Services\Io\MetodoHungaro;
 
 test('el método húngaro encuentra la asignación de costo mínimo', function () {
-    // La asignación óptima es (0→1, 1→0, 2→2) con costo 1 + 2 + 2 = 5.
+    // Asignación óptima cuesta cinco.
     $c = [
         [4, 1, 3],
         [2, 0, 5],
@@ -25,7 +25,7 @@ test('resuelve matrices rectangulares (más salidas que guías)', function () {
     ];
     $a = (new MetodoHungaro)->resolver($c);
 
-    // Dos guías para tres salidas: se cubren las dos asignaciones más baratas (3 + 2).
+    // Dos asignaciones de menor costo.
     expect($a)->toBe([0 => 1, 1 => 0]);
 });
 
@@ -45,7 +45,7 @@ test('EOQ: Q* = √(2DS/H) y punto de reorden R = d·L + SS', function () {
     expect(round($eoq['q'], 4))->toEqual(200.0)
         ->and(round($eoq['r'], 2))->toEqual(round(1200 / 365 * 7, 2))
         ->and($eoq['q_redondeado'])->toBe(200)
-        ->and(round($eoq['costo_total'], 2))->toEqual(1200.0); // (D/Q)·S + (Q/2)·H = 600 + 600
+        ->and(round($eoq['costo_total'], 2))->toEqual(1200.0); // Costos de pedido y almacenamiento.
 });
 
 test('EOQ: el stock de seguridad usa z·σ·√L', function () {

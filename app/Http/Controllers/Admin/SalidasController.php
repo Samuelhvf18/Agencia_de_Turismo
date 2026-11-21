@@ -15,7 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/** Programación de salidas y asignación manual de guía, chofer y vehículo (M04). */
+/** Programación y asignación de salidas. */
 class SalidasController extends Controller
 {
     public function __construct(private SalidaService $salidas) {}

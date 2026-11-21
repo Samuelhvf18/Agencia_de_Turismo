@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Instalaciones restauradas desde el SQL anterior pueden carecer de idioma.
+        // Admite esquemas anteriores sin idioma.
         if (! Schema::hasColumn('reservas', 'idioma')) {
             Schema::table('reservas', fn (Blueprint $t) => $t->string('idioma', 2)->default('es'));
         }
@@ -18,7 +18,7 @@ return new class extends Migration
             $t->boolean('admite_menores')->default(true);
         });
         Schema::table('participantes_reserva', function (Blueprint $t) {
-            // Los históricos conservan su edad declarada; no inventar su nacimiento.
+            // Conserva la edad declarada.
             $t->date('fecha_nacimiento')->nullable();
             $t->foreignId('acompanante_id')->nullable()->constrained('participantes_reserva')->restrictOnDelete();
             $t->json('autorizacion_menor')->nullable();

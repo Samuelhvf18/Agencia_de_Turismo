@@ -10,11 +10,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 
-/**
- * Datos de contacto y participantes (RF-06, RF-39). Regla de documentos:
- * CI boliviano con complemento opcional y departamento de expedición
- * obligatorio; pasaporte o documento extranjero sin complemento ni departamento.
- */
+/** Documentos según tipo de participante. */
 class ParticipantesRequest extends FormRequest
 {
     public const NOMBRE = SeguridadParticipantes::NOMBRE;

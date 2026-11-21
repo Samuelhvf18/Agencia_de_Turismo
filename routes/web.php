@@ -38,7 +38,7 @@ use Laravel\Fortify\Http\Controllers\RegisteredUserController;
 |--------------------------------------------------------------------------
 */
 
-// La ruta nombrada genera la URL nueva. La anterior conserva el método y sus permisos.
+// Conserva permisos en rutas anteriores.
 $rutaLegible = static function (array $metodos, string $ruta, string $anterior, mixed $accion, array $middleware = []) {
     $nombreAnterior = 'legacy.'.str_replace('/', '.', trim($anterior, '/')).'.'.strtolower($metodos[0]);
     Route::match($metodos, $anterior, $accion)->middleware($middleware)->name($nombreAnterior);
@@ -46,7 +46,7 @@ $rutaLegible = static function (array $metodos, string $ruta, string $anterior, 
     return Route::match($metodos, $ruta, $accion)->middleware($middleware);
 };
 
-// Compatibilidad con los formularios de acceso anteriores a las rutas de Fortify en español.
+// Compatibilidad con formularios anteriores.
 $guardiaFortify = config('fortify.guard');
 $invitadoFortify = 'guest:'.$guardiaFortify;
 if (config('fortify.views', true)) {
@@ -81,11 +81,7 @@ Route::get('/categorias/{categoria:rta_amg}', [CatalogoController::class, 'categ
 Route::get('/guias/perfil/{guia:rta_amg}', [CatalogoController::class, 'guia'])->name('guias.perfil');
 Route::get('/tours/{tour:rta_amg}', [CatalogoController::class, 'show'])->name('tours.show');
 
-/*
-|--------------------------------------------------------------------------
-| Motor de reservas (Módulo 05) y pagos (Módulo 06): públicos, admiten invitados
-|--------------------------------------------------------------------------
-*/
+/* Reservas y pagos públicos. */
 
 Route::get('/tours/{tour:rta_amg}/reservar', [ReservaController::class, 'salida'])->name('reservas.salida');
 Route::post('/tours/{tour:rta_amg}/reservar', [ReservaController::class, 'guardarSalida'])->name('reservas.salida.store');
@@ -116,28 +112,24 @@ Route::get('/boletos/{boleto}.pdf', [ConsultaReservaController::class, 'boletoPd
 Route::get('/reservas/{reserva}/pagar', [PagoController::class, 'create'])->name('pagos.create');
 Route::post('/reservas/{reserva}/pagar', [PagoController::class, 'store'])->middleware('throttle:20,1')->name('pagos.store');
 
-// Pasarela simulada (imita al proveedor externo) y su webhook firmado con HMAC.
+// Pasarela simulada con firma HMAC.
 Route::get('/pasarela/{ref}', [PagoController::class, 'pasarela'])->name('pasarela.show');
 Route::post('/pasarela/{ref}', [PagoController::class, 'resolver'])->name('pasarela.resolver');
 Route::post('/webhooks/pasarela', [PagoController::class, 'webhook'])->name('webhooks.pasarela');
 
-// Asistente turístico: público (turistas e invitados, RF-28); IA en n8n con respaldo local.
+// Asistente público con respaldo local.
 $rutaLegible(['GET', 'HEAD'], '/asistente-turistico', '/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
 $rutaLegible(['POST'], '/asistente-turistico/mensajes', '/chatbot/mensajes', [ChatbotController::class, 'enviar'], ['throttle:20,1'])->name('chatbot.enviar');
 $rutaLegible(['GET', 'HEAD'], '/asistente-turistico/mensajes', '/chatbot/mensajes', [ChatbotController::class, 'mensajes'], ['throttle:60,1'])->name('chatbot.mensajes');
 
-/*
-|--------------------------------------------------------------------------
-| Rutas autenticadas, protegidas por rol (middleware `rol:`)
-|--------------------------------------------------------------------------
-*/
+/* Rutas protegidas por rol. */
 
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () use ($rutaLegible) {
-    // Inicio genérico: cada rol va a su propia pantalla.
+    // Inicio según rol.
     Route::get('/mis-reservas', [ConsultaReservaController::class, 'historial'])->name('reservas.historial');
     Route::middleware('rol:'.User::ROL_TURISTA)->group(function () {
         Route::get('/mi-cuenta', [CuentaTuristaController::class, 'show'])->name('turista.cuenta');
@@ -145,7 +137,7 @@ Route::middleware([
     });
     $rutaLegible(['GET', 'HEAD'], '/mi-panel', '/dashboard', fn (Request $request) => redirect($request->user()->rutaInicio()))->name('dashboard');
 
-    // Panel administrativo: administrador y personal de operaciones.
+    // Panel de administración y operaciones.
     Route::prefix('admin')->name('admin.')->middleware('rol:'.User::ROL_ADMIN.','.User::ROL_OPERACIONES)->group(function () use ($rutaLegible) {
         Route::get('/mis-reservas', [ConsultaReservaController::class, 'historial'])->name('reservas.historial');
         $rutaLegible(['GET', 'HEAD'], '/panel', '/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
@@ -166,7 +158,7 @@ Route::middleware([
         Route::get('/transporte', [FlotaController::class, 'index'])->name('transporte');
         Route::post('/transporte', [FlotaController::class, 'store'])->middleware('rol:'.User::ROL_ADMIN)->name('transporte.store');
         Route::put('/transporte/{vehiculo}', [FlotaController::class, 'update'])->name('transporte.update');
-        // Catálogo (M02): tours, categorías, galería y trazado
+        // Catálogo, galería y trazado.
         Route::get('/tours', [CatalogoAdminController::class, 'index'])->name('tours');
         Route::get('/catalogo/tours/nuevo', [CatalogoAdminController::class, 'create'])->name('catalogo.create');
         Route::post('/catalogo/tours', [CatalogoAdminController::class, 'store'])->name('catalogo.store');
@@ -192,7 +184,7 @@ Route::middleware([
 
         Route::get('/finanzas', [FinanzasController::class, 'index'])->middleware('rol:'.User::ROL_ADMIN)->name('finanzas');
 
-        // Chatbot: atención humana de conversaciones derivadas (RF-31)
+        // Conversaciones derivadas a asesores.
         $rutaLegible(['GET', 'HEAD'], '/asistente-turistico', '/chatbot', [ChatbotAdminController::class, 'index'])->name('chatbot');
         $rutaLegible(['GET', 'HEAD'], '/asistente-turistico/conversaciones/{conversacion}', '/chatbot/{conversacion}', [ChatbotAdminController::class, 'show'])->name('chatbot.show');
         $rutaLegible(['POST'], '/asistente-turistico/conversaciones/{conversacion}/responder', '/chatbot/{conversacion}/responder', [ChatbotAdminController::class, 'responder'])->name('chatbot.responder');
@@ -203,7 +195,7 @@ Route::middleware([
             ->middleware('rol:'.User::ROL_ADMIN)->name('finanzas.anular');
         Route::get('/analitica', [DashboardController::class, 'analitica'])->middleware('rol:'.User::ROL_ADMIN)->name('analitica');
 
-        // Módulo 07 — Investigación Operativa II: paneles de teoría de colas y cadenas de Markov
+        // Paneles de Investigación Operativa II.
         Route::view('/io', 'admin.io.index')->name('legacy.io.index');
         Route::view('/investigacion-operativa', 'admin.io.index')->name('io.index');
         $rutaLegible(['GET', 'HEAD'], '/investigacion-operativa/colas', '/io/colas', [AnalisisColasController::class, 'index'])->name('io.colas');
@@ -228,7 +220,7 @@ Route::middleware([
         });
     });
 
-    // Operación en campo: guías y choferes (y supervisión de operaciones/admin).
+    // Operación en campo.
     Route::middleware('rol:'.User::ROL_GUIA.','.User::ROL_CHOFER.','.User::ROL_OPERACIONES.','.User::ROL_ADMIN)->group(function () use ($rutaLegible) {
         $rutaLegible(['GET', 'HEAD'], '/guias/sin-conexion', '/guias/offline', fn () => response()->file(public_path('checkin-offline.html')))->name('guias.offline');
         $rutaLegible(['GET', 'HEAD'], '/guias/sin-conexion/sesion', '/guias/offline/sesion', [CheckinController::class, 'sesionOffline'])->name('guias.offline.sesion');
@@ -242,23 +234,17 @@ Route::middleware([
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Maquetas de frontend (solo en entorno local)
-|--------------------------------------------------------------------------
-| Vistas con datos de ejemplo para revisar el diseño mientras se construye el
-| backend. No se registran fuera de APP_ENV=local.
-*/
+/* Maquetas para desarrollo local. */
 
 if (app()->environment('local')) {
-    // Motor de Reservas (Módulo 05). Aceptan GET y POST para recorrer el flujo sin backend.
+    // Vista previa del flujo.
     Route::prefix('reservas/preview')->name('reservas.preview.')->group(function () {
         foreach (['salida', 'participantes', 'equipo', 'ficha', 'resumen', 'confirmada', 'consultar', 'estado'] as $vista) {
             Route::match(['get', 'post'], $vista, fn () => view("reservas.$vista"))->name($vista);
         }
     });
 
-    // Paneles de IO II (Módulo 07) con datos de maqueta, sin iniciar sesión.
+    // Vistas previas de planificación.
     Route::prefix('admin/io/preview')->name('admin.io.preview.')->group(function () {
         Route::get('colas', fn (Request $r) => view('admin.io.colas', app(IoDemoData::class)->colas(
             $r->integer('tour') ?: null, $r->filled('c') ? $r->integer('c') : null, $r->filled('k') ? $r->integer('k') : null,

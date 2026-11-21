@@ -4,17 +4,7 @@ namespace App\Services\Reservas;
 
 use Illuminate\Contracts\Session\Session;
 
-/**
- * Borrador del wizard de reserva guardado en la sesión. Nada se escribe en la
- * base hasta confirmar; así un abandono no bloquea cupos ni equipo.
- *
- * Estructura:
- *   tur_id, sal_tur_id, cnt_ptc,
- *   contacto: [nom_ctc, cor_ctc, tel_ctc],
- *   participantes: [i => [nom_cpl, tip_doc, num_doc, ci_cmp, ci_dep_id, eda, pai_id, es_ctc_pri]],
- *   alquileres: [i => [tip_eqp_id => itm_eqp_id]],
- *   fichas: [i => [con_med, nom_ctc_eme, tel_ctc_eme, rta_fir, fir_en, dir_ip]]
- */
+/** Borrador en sesión sin bloqueos. */
 class BorradorReserva
 {
     private const CLAVE = 'reserva.borrador';
@@ -40,7 +30,7 @@ class BorradorReserva
             'tur_id' => $turId,
             'sal_tur_id' => $salTurId,
             'cnt_ptc' => $cntPtc,
-            // Si cambia solo la salida se conservan los datos ya cargados.
+            // Conserva datos al cambiar salida.
             'contacto' => $mismoTour ? ($previo['contacto'] ?? null) : null,
             'participantes' => $mismoTour ? ($previo['participantes'] ?? []) : [],
             'alquileres' => $mismoTour ? ($previo['alquileres'] ?? []) : [],
@@ -55,7 +45,7 @@ class BorradorReserva
         $this->session->put(self::CLAVE, $datos);
     }
 
-    /** ¿Están completos los pasos previos al indicado? */
+    /** Verifica los pasos previos. */
     public function tienePaso(string $paso): bool
     {
         $d = $this->datos();

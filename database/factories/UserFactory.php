@@ -12,13 +12,11 @@ use Illuminate\Support\Facades\Hash;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
+    /** Contraseña reutilizada por la fábrica. */
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
+     * Estado inicial del usuario.
      *
      * @return array<string, mixed>
      */
@@ -35,7 +33,7 @@ class UserFactory extends Factory
         ];
     }
 
-    /** Usuario con el rol indicado (turista, guia, chofer, operaciones, admin). */
+    /** Usuario con rol asignado. */
     public function rol(string $nombre): static
     {
         return $this->state(fn () => [
@@ -43,9 +41,7 @@ class UserFactory extends Factory
         ]);
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
+    /** Correo pendiente de verificar. */
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -53,7 +49,7 @@ class UserFactory extends Factory
         ]);
     }
 
-    /** Jetstream sin equipos: se mantiene por compatibilidad con sus tests. */
+    /** Compatibilidad de Jetstream sin equipos. */
     public function withPersonalTeam(?callable $callback = null): static
     {
         return $this->state([]);

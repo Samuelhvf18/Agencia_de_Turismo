@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Elemento P[i,j] de la matriz de transición. */
+/** Probabilidad de transición. */
 class MarkovTransicion extends Model
 {
     protected $table = 'markov_transiciones';

@@ -18,7 +18,7 @@ test('RNF-14: la interfaz pública está en español y cambia a inglés con ?lan
     $this->get('/')->assertOk()->assertSee('<html lang="es">', false)->assertSee('Catálogo oficial');
     $this->get(route('tours.show', $tour).'?lang=en')->assertOk()->assertSee('<html lang="en">', false)->assertSee('Book this tour');
 
-    // La elección queda en la sesión.
+    // Conserva el idioma en sesión.
     $this->get('/')->assertSee('Official catalogue');
     $this->get('/?lang=es')->assertSee('Catálogo oficial');
 });

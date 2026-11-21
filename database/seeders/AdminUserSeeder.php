@@ -6,11 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-/**
- * Crea (o actualiza) la cuenta del administrador con las credenciales de
- * PIPOCAS_ADMIN_EMAIL y PIPOCAS_ADMIN_PASSWORD. En producción son
- * obligatorias; en local se usan valores de desarrollo si faltan.
- */
+/** Inicializa la cuenta administrativa. */
 class AdminUserSeeder extends Seeder
 {
     public function run(): void

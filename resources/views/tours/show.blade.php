@@ -189,7 +189,6 @@ a{color:inherit;text-decoration:none}
       <li><i class="fa-solid fa-van-shuttle"></i> {{ __('Transporte desde La Paz') }}</li>
       <li><i class="fa-solid fa-qrcode"></i> {{ __('Ticket con código QR') }}</li>
     </ul>
-    {{-- Original: <a class="btn" href="{{ Route::has('login') ? route('login') : '#' }}"> --}}
     <p>Edad mínima: {{ $tour->edadMinimaEfectiva() }} años. {{ $tour->admiteMenores() ? 'Menores con adulto y autorización verificada.' : 'Solo adultos; sin excepciones en alto riesgo.' }}</p>
     <a class="btn" href="{{ route('reservas.salida', $tour) }}"><i class="fa-solid fa-calendar-check"></i> {{ __('Reservar este tour') }}</a>
   </aside>
@@ -202,7 +201,7 @@ a{color:inherit;text-decoration:none}
 <script type="text/plain" data-consent="external">
 document.getElementById("map-consent").hidden=true;
 const css=document.createElement("link");css.rel="stylesheet";css.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css";document.head.append(css);
-// Trazado: GeoJSON de tours.trz_geo si existe; si no, la polilínea de puntos_ruta.
+// GeoJSON o polilínea de puntos.
 const puntos = @json($puntos);
 const trazado = @json($tour->trz_geo);
 const avisoMapa = texto => { const aviso=document.getElementById('map-notice'); aviso.hidden=false; aviso.textContent=texto; };
@@ -222,7 +221,7 @@ if (typeof L === 'undefined') {
   if(limites.isValid())map.fitBounds(limites.pad(.2));else {map.setView([-16.5,-68.15],9);avisoMapa(@json(__('Todavía no hay coordenadas válidas para este recorrido.')));}
 } catch(e){avisoMapa(@json(__('El trazado no pudo mostrarse. Consulta los puntos del recorrido.')));}
 
-// Perfil de elevación (RF-02): distancia acumulada (haversine) contra altitud.
+// Elevación según distancia acumulada.
 const lineas = [];
 const recoger = g => {
   if (!g) return;

@@ -16,11 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/**
- * Seguridad y auditoría (M10, objetivo 7, RNF-02 a RNF-06): bitácora con
- * filtros y detalle antes/después, registro de notificaciones con reintento
- * y gestión de usuarios y roles. Solo administrador.
- */
+/** Panel de seguridad y auditoría. */
 class AuditoriaController extends Controller
 {
     public function index(Request $request): View

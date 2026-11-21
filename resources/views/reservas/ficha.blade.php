@@ -1,19 +1,7 @@
 @extends('layouts.reserva')
 
 @php
-    /*
-     | DATOS DE EJEMPLO (solo frontend).
-     | El controlador debe pasar:
-     |   $tour          -> Tour presentado (nom, req_fis, alt_max_m)
-     |   $participantes -> participantes_reserva de la reserva (id, nom_cpl, eda)
-     |   $fichas        -> fichas_medicas existentes indexadas por ptc_rsv_id (con_med, nom_ctc_eme, tel_ctc_eme)
-     |   $accionForm    -> route('reservas.ficha.store')
-     | Se envía por participante: fichas[ptc_rsv_id][con_med|nom_ctc_eme|tel_ctc_eme],
-     |   fichas[ptc_rsv_id][acp_ver] y fichas[ptc_rsv_id][acp_rie] (casillas, solo para validar 'accepted'),
-     |   fichas[ptc_rsv_id][fir_b64] = firma en PNG base64 (data:image/png;base64,...).
-     | El controlador guarda la imagen en storage y pone su ruta en fichas_medicas.rta_fir,
-     | además de fir_en = now() y dir_ip = $request->ip().
-     */
+    /* Datos de ejemplo. */
     $tour ??= (object) [
         'nom' => 'Valle de la Luna', 'alt_max_m' => 3500,
         'req_fis' => 'Condición física moderada. Caminata de 2 a 3 horas con ascensos cortos a más de 3.000 m s. n. m.',
@@ -162,7 +150,7 @@
 
 @push('scripts')
 <script>
-    // Firma digital en <canvas> sin librerías: mouse, lápiz y táctil (Pointer Events)
+    // Firma digital con Pointer Events.
     function firmaPad(inicial) {
         return {
             valor: inicial || '',
@@ -199,7 +187,7 @@
                 c.addEventListener('pointerup', fin);
                 c.addEventListener('pointercancel', fin);
             },
-            // Ajusta el lienzo al ancho real (y a pantallas retina) conservando la firma
+            // Redimensiona conservando la firma.
             ajustar() {
                 const c = this.$refs.lienzo, r = window.devicePixelRatio || 1;
                 const previa = this.valor;

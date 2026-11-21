@@ -28,7 +28,7 @@
     const save = (analytics, external) => {
         const revoke = (allowed('external') && !external) || (allowed('analytics') && !analytics);
         current = {version:1, at:Date.now(), analytics, external};
-        try { localStorage.setItem(KEY, JSON.stringify(current)); } catch { /* La decisión sigue vigente en esta página. */ }
+        try { localStorage.setItem(KEY, JSON.stringify(current)); } catch { /* La decisión sigue vigente. */ }
         banner.hidden = true;
         dialog.close();
         if (revoke) { location.reload(); return; }

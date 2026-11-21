@@ -8,10 +8,7 @@ use App\Services\Chatbot\HerramientasChatbot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * Herramientas que usa el agente de IA de n8n (flujo DOCUMENTACION/Tecnica/n8n/chatbot.json).
- * Todas son de solo lectura salvo la derivación a una persona.
- */
+/** Herramientas de n8n. */
 class N8nChatbotController extends Controller
 {
     public function __construct(private HerramientasChatbot $herramientas) {}

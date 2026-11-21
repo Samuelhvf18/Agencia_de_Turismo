@@ -102,7 +102,7 @@ test('RNF-04: tres intentos fallidos, cuenta nueva y cambio de contraseña alert
 
     $alertas = RegistroNotificacion::where('tip', 'alerta_seguridad')->where('usr_id', $this->admin->id)->get();
     expect($alertas->pluck('cnd.evento')->all())->toContain('Intentos fallidos de inicio de sesión', 'Cuenta nueva')
-        // Las alertas son solo para administradores.
+        // Alerta solo a administradores.
         ->and(RegistroNotificacion::where('tip', 'alerta_seguridad')->where('usr_id', User::where('cor', 'operaciones@pipocas.test')->value('id'))->exists())->toBeFalse();
 });
 

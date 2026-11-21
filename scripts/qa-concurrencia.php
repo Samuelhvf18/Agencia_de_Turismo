@@ -64,7 +64,7 @@ if ($action === 'setup') {
 } elseif ($action === 'verify') {
     $f = json_decode(file_get_contents($argv[2]), true, flags: JSON_THROW_ON_ERROR);
     $cap = Reserva::where('sal_tur_id', $f['cap'])->where('id', '<>', $f['rsv'])->count();
-    // La reserva de pago/cancelación se excluye de la prueba de cupos y se cancela antes de ella.
+    // Excluye la reserva de pago.
     $eqp = Reserva::where('sal_tur_id', $f['eqp'])->count();
     $stock = ItemEquipo::findOrFail($f['item'])->cnt_dis;
     $asignadas = SalidaTour::whereIn('id', $f['salidas'])->where('prf_gui_id', $f['guia'])->count();

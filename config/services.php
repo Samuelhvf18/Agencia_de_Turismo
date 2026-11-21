@@ -11,17 +11,7 @@ return [
         'token' => env('NOTIFICACIONES_TOKEN'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
+    /* Integraciones externas. */
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
@@ -44,13 +34,13 @@ return [
         ],
     ],
 
-    // Pasarela de pago simulada (Módulo 06). El webhook valida la firma HMAC con este secreto.
+    // Firma HMAC de la pasarela.
     'pasarela' => [
         'secreto' => env('PASARELA_SECRETO'),
         'webhook_http' => (bool) env('PASARELA_WEBHOOK_HTTP', false),
     ],
 
-    // n8n: webhooks de notificaciones y chatbot; el token protege los endpoints que n8n llama.
+    // Webhooks y token de n8n.
     'n8n' => [
         'webhook_notificaciones' => env('N8N_WEBHOOK_NOTIFICACIONES'),
         'webhook_chatbot' => env('N8N_WEBHOOK_CHATBOT'),

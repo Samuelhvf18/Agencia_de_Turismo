@@ -6,10 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * RNF-01: en producción (o con FORCE_HTTPS=true) toda petición HTTP se
- * redirige a HTTPS y las respuestas llevan HSTS y cabeceras de seguridad.
- */
+/** HTTPS y cabeceras de seguridad. */
 class ForzarHttps
 {
     public function handle(Request $request, Closure $next): Response

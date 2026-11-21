@@ -1,12 +1,7 @@
 @extends('layouts.reserva')
 
 @php
-    /*
-     | Página pública para consultar una reserva.
-     | El controlador debe pasar:
-     |   $accionForm -> route('reservas.consultar.buscar')  (POST con cod y cor_ctc; buscar en reservas por cod + cor_ctc)
-     | Si no hay coincidencia, volver con ->withErrors(['cod' => 'No encontramos una reserva con esos datos.'])->withInput()
-     */
+    /* Consulta pública de reservas. */
     $accionForm ??= url('/reservas/preview/estado'); // controlador: route('reservas.consultar.buscar')
 @endphp
 

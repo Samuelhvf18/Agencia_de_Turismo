@@ -3,7 +3,7 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-// Función de respaldo para copiar al portapapeles (para navegadores sin soporte de clipboard API)
+// Respaldo para copiar al portapapeles.
 window.copyToClipboardFallback = function(text) {
     const textarea = document.createElement('textarea');
     textarea.value = text;

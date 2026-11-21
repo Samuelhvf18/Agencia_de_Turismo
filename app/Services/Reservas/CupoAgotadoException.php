@@ -4,7 +4,7 @@ namespace App\Services\Reservas;
 
 use RuntimeException;
 
-/** La salida no tiene cupos suficientes: la solicitud se registra como llegada rechazada. */
+/** Cupo insuficiente, solicitud rechazada. */
 class CupoAgotadoException extends RuntimeException
 {
     public function __construct(public readonly int $disponibles)

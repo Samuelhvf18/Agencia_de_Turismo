@@ -271,7 +271,7 @@
                 icon.classList.add('fa-eye');
             }
         }
-        // Animación mientras se procesa el login
+        // Animación durante el acceso.
         function loginLoading() {
             const button = document.getElementById('loginButton');
             const icon = document.getElementById('loginIcon');

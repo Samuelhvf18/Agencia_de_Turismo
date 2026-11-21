@@ -6,11 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * Control de acceso basado en roles (RNF-02, RNF-03).
- *
- * Uso en rutas: ->middleware('rol:admin,operaciones')
- */
+/** Control de acceso por roles. */
 class VerificarRol
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response

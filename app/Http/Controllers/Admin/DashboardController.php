@@ -17,10 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-/**
- * Dashboard general y analítica (M09, objetivo 8, RF-33 a RF-35): todos los
- * gráficos se alimentan de las vistas SQL del esquema v5.
- */
+/** Panel de analítica. */
 class DashboardController extends Controller
 {
     public function dashboard(Request $request, EoqService $eoq): View
@@ -77,7 +74,7 @@ class DashboardController extends Controller
         $desde = Carbon::parse($f['desde'] ?? today()->subMonths(11)->startOfMonth())->startOfMonth();
         $hasta = Carbon::parse($f['hasta'] ?? today()->addMonths(3)->endOfMonth())->endOfMonth();
 
-        // RF-33: demanda por tour y mes (vista_demanda_por_tour_mes) con filtro de fechas.
+        // Demanda mensual por tour.
         $demanda = DB::table('vista_demanda_por_tour_mes')->when($tourId, fn ($q) => $q->where('tur_id', $tourId))
             ->whereRaw('make_date(anio, mes, 1) BETWEEN ? AND ?', [$desde->toDateString(), $hasta->toDateString()])
             ->orderBy('anio')->orderBy('mes')->get();
@@ -89,7 +86,7 @@ class DashboardController extends Controller
             fn ($mes) => (int) ($filas->first(fn ($x) => sprintf('%04d-%02d', $x->anio, $x->mes) === $mes)->reservas ?? 0), $meses
         ));
 
-        // RF-35: proyección de demanda (proyecciones_demanda) frente a lo real.
+        // Demanda proyectada y observada.
         $proyecciones = DB::table('proyecciones_demanda as p')->join('tours as t', 't.id', '=', 'p.tur_id')->when($tourId, fn ($q) => $q->where('p.tur_id', $tourId))
             ->whereRaw('make_date(p.ani_per, p.mes_per, 1) BETWEEN ? AND ?', [$desde->toDateString(), $hasta->toDateString()])
             ->select('p.ani_per', 'p.mes_per', DB::raw('SUM(p.rsv_pry) AS reservas'), DB::raw('MAX(p.ver_mdl) AS modelo'), DB::raw('MAX(p.gen_en) AS generado'))
@@ -110,7 +107,7 @@ class DashboardController extends Controller
                 ->get(['t.nom', 'p.ani_per', 'p.mes_per', 'p.rsv_pry', 'p.ver_mdl', 'p.gen_en']),
             'modeloProyeccion' => $proyecciones->pluck('modelo')->filter()->unique()->implode(', ') ?: null,
             'proyeccionGenerada' => $proyecciones->max('generado'),
-            // RF-34: nacionalidad (la vista ya excluye reservas canceladas).
+            // Nacionalidad sin reservas canceladas.
             'nacionalidades' => DB::table('vista_turistas_por_nacionalidad')->orderByDesc('turistas')->limit(10)->get(),
             'calificaciones' => DB::table('vista_calificacion_promedio_tour')->orderByDesc('calificacion_promedio')->get(),
             'ocupacion' => DB::table('vista_ocupacion_transporte')->whereBetween('fec_sal', [$desde->toDateString(), $hasta->toDateString()])

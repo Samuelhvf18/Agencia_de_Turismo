@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Propuesta de asignación de IO II (RF-24): se revisa y se aplica a mano. */
+/** Propuesta revisada manualmente. */
 class PropuestaAsignacion extends Model
 {
     public const EST_PENDIENTE = 'pendiente';

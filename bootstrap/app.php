@@ -19,14 +19,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // El webhook de la pasarela se autentica con firma HMAC, no con token CSRF.
+        // Webhook autenticado con HMAC.
         $middleware->validateCsrfTokens(except: ['webhooks/*']);
 
-        // RNF-01: HTTPS obligatorio en producción y cabeceras de seguridad.
+        // HTTPS obligatorio en producción.
         $middleware->prepend(ForzarHttps::class);
         $middleware->trustProxies(at: '*');
 
-        // RNF-14: idioma de la interfaz (español / inglés).
+        // Idioma de la interfaz.
         $middleware->web(append: [NormalizarCorreos::class, EstablecerIdioma::class, ContextoAuditoria::class, RecordarPaginaPublica::class]);
 
         $middleware->alias([

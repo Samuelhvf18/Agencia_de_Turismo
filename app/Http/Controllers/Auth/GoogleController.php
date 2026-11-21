@@ -27,7 +27,7 @@ class GoogleController extends Controller
     public function callback(Request $request)
     {
         try {
-            // La sesión y state de Socialite protegen el callback OAuth.
+            // Socialite valida el estado OAuth.
             $google = Socialite::driver('google')->user();
         } catch (\Throwable $e) {
             return redirect()->route('login')->withErrors(['cor' => 'No se pudo verificar Google. Intenta de nuevo.']);

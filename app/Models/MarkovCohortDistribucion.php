@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Clientes de una cohorte por estado y mes relativo. */
+/** Cohorte por estado y mes. */
 class MarkovCohortDistribucion extends Model
 {
     protected $table = 'markov_cohort_distribucion';

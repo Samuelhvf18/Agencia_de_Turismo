@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # -----------------------------------------------------------------------------
-# Script de instalación para el entorno remoto (sandbox Linux).
-# Instala PHP, Composer, Node y PostgreSQL, configura .env, migra y compila.
+# Instalación en entorno remoto.
+# Dependencias, migración y compilación.
 #
 # Uso:  bash scripts/setup.sh
 # -----------------------------------------------------------------------------
 set -euo pipefail
 
-# Ubicarse en la raíz del repositorio, sin importar desde dónde se invoque.
+# Entra a la raíz.
 cd "$(dirname "$0")/.."
 RAIZ="$(pwd)"
 task_entorno_nuevo=1
@@ -26,7 +26,7 @@ DB_USUARIO="pipocas"
 DB_CLAVE="pipocas"
 
 # ---------------------------------------------------------------------------
-# 0. Privilegios (funciona como root o con sudo)
+# Privilegios con root o sudo.
 # ---------------------------------------------------------------------------
 if [ "$(id -u)" -eq 0 ]; then
     SUDO=""
@@ -47,7 +47,7 @@ if command -v apt-get >/dev/null 2>&1; then
     echo "==> Instalando utilidades base..."
     $SUDO apt-get install -y git unzip curl ca-certificates
 
-    # PHP 8.4 para la aplicación y Pest 4.
+    # PHP 8.4 para Pest.
     PHP_OK=0
     if command -v php >/dev/null 2>&1; then
         if [ "$(php -r 'echo PHP_VERSION_ID;')" -ge 80400 ]; then PHP_OK=1; fi
@@ -75,7 +75,7 @@ if command -v apt-get >/dev/null 2>&1; then
         rm -f /tmp/composer-setup.php
     fi
 
-    # Node.js (18+ para Vite 6)
+    # Node.js para Vite.
     if ! command -v node >/dev/null 2>&1 || [ "$(node -v | sed 's/v\([0-9]*\).*/\1/')" -lt 22 ]; then
         echo "==> Instalando Node.js 20..."
         if [ -n "$SUDO" ]; then
@@ -96,7 +96,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 2. PostgreSQL: arrancar y crear la base de datos
+# Inicialización de PostgreSQL.
 # ---------------------------------------------------------------------------
 echo "==> Iniciando PostgreSQL..."
 if [ -n "$SUDO" ] || [ "$(id -u)" -eq 0 ]; then
@@ -106,7 +106,7 @@ if [ -n "$SUDO" ] || [ "$(id -u)" -eq 0 ]; then
         || true
 fi
 
-# Esperar a que acepte conexiones (máx. ~30 s).
+# Espera conexiones hasta 30s.
 for _ in $(seq 1 30); do
     if $PG_RUN psql -tAc 'SELECT 1' >/dev/null 2>&1; then break; fi
     sleep 1
@@ -165,7 +165,7 @@ file_put_contents($f, $s);
 '
 fi
 
-# Generar APP_KEY solo si está vacío (no invalidar sesiones en reinicios).
+# Conserva la clave existente.
 if ! php -r 'require "vendor/autoload.php"; $v = Dotenv\Dotenv::parse(file_get_contents(".env")); exit(empty($v["APP_KEY"]) ? 1 : 0);'; then
     php artisan key:generate --force
 fi

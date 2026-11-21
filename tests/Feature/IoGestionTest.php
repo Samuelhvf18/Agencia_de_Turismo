@@ -93,7 +93,7 @@ test('RF-22: el húngaro prefiere al guía con el idioma de los pasajeros y resp
         // Nunca se aplica sola.
         ->and($salida->fresh()->prf_gui_id)->toBeNull();
 
-    // Un mismo día, un guía no recibe dos salidas a la vez.
+    // Evita dobles asignaciones diarias.
     $porDia = PropuestaAsignacion::where('tip', 'guia')->get()->groupBy(fn ($p) => $p->det['dia']);
     foreach ($porDia as $lista) {
         expect($lista->pluck('rec_pro_id')->duplicates())->toBeEmpty();
@@ -120,7 +120,7 @@ test('RF-24: confirmar aplica con validaciones, ajustar cambia el recurso y rech
 test('RF-24: un ajuste que viola las reglas no se aplica', function () {
     $this->actingAs($this->admin);
     SalidaTour::query()->update(['prf_gui_id' => null]);
-    $limitado = nuevoGuia('Guía Limitado', ['es'], 5, 1); // 1 h/semana: ningún tour cabe
+    $limitado = nuevoGuia('Guía Limitado', ['es'], 5, 1); // Límite semanal insuficiente.
     app(OptimizadorService::class)->proponerGuias(today(), today()->addDays(10));
     $p = PropuestaAsignacion::where('est', 'pendiente')->first();
 
@@ -164,7 +164,7 @@ test('RF-25 a RF-27: EOQ avisa historial insuficiente y alerta la reposición de
     $this->post(route('admin.io.eoq.alertas'))->assertSessionHasNoErrors();
     expect(RegistroNotificacion::where('tip', 'alerta_reposicion')->where('cnd->tip_eqp_id', $tipo->id)->exists())->toBeTrue();
 
-    // No se duplica la alerta mientras sigue pendiente.
+    // Evita duplicar alertas pendientes.
     $antes = RegistroNotificacion::where('tip', 'alerta_reposicion')->count();
     $this->artisan('io:alertas-eoq')->assertSuccessful();
     expect(RegistroNotificacion::where('tip', 'alerta_reposicion')->count())->toBe($antes);
@@ -208,7 +208,7 @@ test('la simulación compara con la demanda actual y no cambia la configuración
         ->assertSee('Situación actual')->assertSee('Tu escenario');
     expect($par->fresh()->getAttributes())->toEqual($par->getAttributes());
 
-    // Cambiar solo la demanda también debe producir una comparación.
+    // Compara cambios solo de demanda.
     $this->get(route('admin.io.colas', ['tour' => $par->tur_id, 'lambda' => 20]))->assertOk()
         ->assertViewHas('sim', fn ($m) => $m !== null);
     $this->get(route('admin.io.colas', ['tour' => $par->tur_id, 'c' => 5, 'k' => 2]))
@@ -245,7 +245,7 @@ test('la demanda diaria EOQ incluye ceros y coincide con la fuente anual sin mez
         ->and(array_sum($diaria))->toBe(3)->and(array_sum($service->demandaMensual($item->tip_eqp_id)))->toBe(3)
         ->and($service->demandaAnualVista($item->tip_eqp_id, 2026))->toBe(3);
     $fila = collect($service->analizar())->firstWhere('tipo.id', $item->tip_eqp_id);
-    // Muestra de 365 días: tres días con un uso y 362 días sin usos.
+    // Tres usos en 365 días.
     $sigma = sqrt((3 * (1 - 3 / 365) ** 2 + 362 * (3 / 365) ** 2) / 364);
     expect($fila['eoq']['ss'])->toEqualWithDelta(1.65 * $sigma * sqrt(7), 1e-9);
     $this->travelBack();
@@ -270,7 +270,7 @@ test('Markov recalibra solo meses completos y las cohortes conservan sus integra
         $u = User::factory()->rol(User::ROL_TURISTA)->create();
         $svc->registrarCambio($u->id, 'prospecto', fecha: Carbon::parse('2026-03-01'));
         $svc->registrarCambio($u->id, ['reservado', 'completado', 'perdido'][$i % 3], fecha: Carbon::parse('2026-04-01'));
-        // Julio aún no terminó; esta fidelización no debe contaminar la matriz mensual.
+        // Excluye el mes incompleto.
         if ($i % 3 === 1) {
             $svc->registrarCambio($u->id, 'fidelizado', fecha: now());
         }

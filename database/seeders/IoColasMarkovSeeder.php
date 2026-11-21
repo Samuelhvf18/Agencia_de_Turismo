@@ -6,13 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-/**
- * Semilla inicial del Módulo 07 — Investigación Operativa II.
- *
- * - Catálogo de estados Markov del ciclo de vida del cliente.
- * - Matriz de transición inicial de referencia (valores razonables; se recalibran con datos reales).
- * - Parámetros iniciales M/M/c/K para los tours ya cargados por CatalogoLandingSeeder.
- */
+/** Colas y Markov iniciales. */
 class IoColasMarkovSeeder extends Seeder
 {
     public function run(): void
@@ -39,8 +33,8 @@ class IoColasMarkovSeeder extends Seeder
 
     private function sembrarMatrizTransicionInicial(): void
     {
-        // Matriz P (período mensual). Las filas deben sumar 1.
-        // Valores iniciales de referencia — se recalibran mes a mes con datos reales.
+        // Filas de P suman uno.
+        // Valores iniciales recalibrables.
         $hoy = Carbon::today();
         $ids = DB::table('markov_estados_cliente')->pluck('id', 'cod');
 
@@ -74,7 +68,7 @@ class IoColasMarkovSeeder extends Seeder
 
     private function sembrarParametrosColasPorTour(): void
     {
-        // Si no hay tours cargados aún, no sembramos parámetros (opcional en entornos limpios).
+        // Omite parámetros si faltan tours.
         $tours = DB::table('tours')->select('id', 'cap_max', 'dur_hrs')->get();
         if ($tours->isEmpty()) {
             return;
@@ -83,18 +77,18 @@ class IoColasMarkovSeeder extends Seeder
         $hoy = Carbon::today();
 
         foreach ($tours as $tur) {
-            // μ se expresa en 1/día: si un tour dura dur_hrs, μ = 24 / dur_hrs.
+            // Tasa diaria según duración.
             $mu = $tur->dur_hrs > 0 ? round(24 / (float) $tur->dur_hrs, 4) : 1.0;
 
             DB::table('cola_parametros_tour')->updateOrInsert(
                 ['tur_id' => $tur->id, 'act' => true],
                 [
-                    'lmb'     => 2.0,                    // ≈ 2 reservas/día estimadas por defecto
+                    'lmb'     => 2.0,                    // Dos reservas diarias estimadas.
                     'mu'      => $mu,
-                    'c_srv'   => 1,                      // 1 guía por salida por defecto
+                    'c_srv'   => 1,                      // Un guía por salida.
                     'k_cap'   => $tur->cap_max,
                     'cos_esp' => 15.00,                  // Bs/hora de espera estimados
-                    'cos_srv' => 25.00,                  // Bs/hora de guía ocioso estimados
+                    'cos_srv' => 25.00,                  // Costo horario de guía ocioso.
                     'fec_cal' => $hoy,
                     'obs'     => 'Parámetros iniciales de referencia. Recalibrar con datos reales.',
                     'cre_en'  => now(),

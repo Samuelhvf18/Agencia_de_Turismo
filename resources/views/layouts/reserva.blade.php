@@ -1,12 +1,4 @@
-{{--
-    Layout del Motor de Reservas (Módulo 05).
-    Uso en las vistas:
-        @extends('layouts.reserva')
-        @section('titulo', 'Elige tu salida')
-        @section('stepper') <x-reserva.stepper :actual="1" /> @endsection   (opcional)
-        @section('contenido') ... @endsection
-        @push('scripts') <script>...</script> @endpush                      (opcional)
---}}
+{{-- Plantilla del motor de reservas. --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -71,7 +63,7 @@
         </div>
     </header>
 
-    {{-- Stepper (solo en los pasos del flujo) --}}
+    {{-- Pasos del flujo. --}}
     @hasSection('stepper')
         <div class="border-b border-gray-200/70 bg-white/60">
             <div class="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
@@ -95,7 +87,7 @@
         </div>
     </footer>
 
-    {{-- Los scripts de las vistas van antes de Livewire/Alpine para que sus funciones x-data existan al iniciar Alpine --}}
+    {{-- Scripts antes de iniciar Alpine. --}}
     @stack('scripts')
     @livewireScripts
 @include('partials.consentimiento-cookies')

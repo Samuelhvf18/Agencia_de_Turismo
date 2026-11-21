@@ -7,11 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-/**
- * Una cuenta de prueba por rol (guía, chofer, operaciones y turista) para
- * probar los accesos en desarrollo. No se ejecuta en producción.
- * Contraseña de todas: Pipocas2026
- */
+/** Cuentas de prueba por rol. */
 class UsuariosDemoSeeder extends Seeder
 {
     public function run(): void

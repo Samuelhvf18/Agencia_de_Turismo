@@ -6,7 +6,7 @@ use App\Services\Io\ColasService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-/** Cálculo diario de las métricas M/M/c/K por tour (lo dispara el scheduler o n8n). */
+/** Métricas diarias de colas. */
 class CalcularMetricasColas extends Command
 {
     protected $signature = 'io:metricas-colas {--fecha= : Fecha a calcular (AAAA-MM-DD); por defecto, hoy} {--dias=1 : Cantidad de días hacia atrás a recalcular}';

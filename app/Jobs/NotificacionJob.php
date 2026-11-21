@@ -14,13 +14,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
-/**
- * Despacha un registro de notificación (RF-38, M10):
- * - Con N8N_WEBHOOK_NOTIFICACIONES configurado, envía el evento a n8n, que
- *   arma el mensaje y lo manda por correo/WhatsApp.
- * - Sin n8n, envía un correo sencillo desde Laravel.
- * El resultado (enviado/fallido) queda en el mismo registro.
- */
+/** Despacho de avisos por canal. */
 class NotificacionJob implements ShouldQueue
 {
     use Queueable;

@@ -15,11 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/**
- * Check-in desde el celular del guía o chofer (RF-18, RF-21, RNF-15):
- * escaneo de QR con la cámara, inicio y fin real del recorrido, y
- * sincronización de los escaneos hechos sin conexión.
- */
+/** Check-in móvil y sincronización. */
 class CheckinController extends Controller
 {
     public function __construct(private SalidaService $salidas) {}
@@ -68,7 +64,7 @@ class CheckinController extends Controller
         ]);
     }
 
-    /** Manifiesto en JSON (lo guarda la página en IndexedDB para trabajar sin conexión). */
+    /** Manifiesto para acceso sin conexión. */
     public function manifiestoJson(Request $request, SalidaTour $salida): JsonResponse
     {
         $this->autorizar($request, $salida);
@@ -86,7 +82,7 @@ class CheckinController extends Controller
         return response()->json($resultado, $resultado['ok'] ? 200 : 422);
     }
 
-    /** Escaneos hechos sin conexión: [{cod, vld_en}] */
+    /** Sincroniza escaneos sin conexión. */
     public function sincronizar(Request $request, SalidaTour $salida): JsonResponse
     {
         $this->autorizar($request, $salida);
@@ -125,7 +121,7 @@ class CheckinController extends Controller
 
     private function manifiesto(SalidaTour $salida, User $usuario): array
     {
-        // RNF-05: el guía ve condiciones médicas; esa lectura queda en la bitácora.
+        // Audita la lectura médica.
         $sensible = ! $usuario->tieneRol(User::ROL_CHOFER);
         if ($sensible) {
             ParticipanteReserva::whereHas('reserva', fn ($q) => $q->where('sal_tur_id', $salida->id)->where('est', Reserva::EST_CONFIRMADA))
@@ -155,7 +151,7 @@ class CheckinController extends Controller
             ->all();
     }
 
-    /** Guía o chofer asignados a la salida; operaciones y admin pueden ver todas. */
+    /** Restringe según rol y asignación. */
     private function autorizar(Request $request, SalidaTour $salida): void
     {
         $u = $request->user();

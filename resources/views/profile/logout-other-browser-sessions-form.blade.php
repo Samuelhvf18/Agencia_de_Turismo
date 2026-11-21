@@ -61,7 +61,7 @@
             </x-action-message>
         </div>
 
-        <!-- Log Out Other Devices Confirmation Modal -->
+        <!-- Confirmación de cierre remoto. -->
         <x-dialog-modal wire:model.live="confirmingLogout">
             <x-slot name="title">
                 {{ __('Log Out Other Browser Sessions') }}

@@ -1,4 +1,4 @@
-{{-- Layout móvil para guías y choferes (check-in en campo). --}}
+{{-- Plantilla móvil para personal. --}}
 <!DOCTYPE html>
 <html lang="es">
 <head>

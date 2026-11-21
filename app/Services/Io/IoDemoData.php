@@ -2,11 +2,7 @@
 
 namespace App\Services\Io;
 
-/**
- * Datos de maqueta para las vistas previas de los paneles de IO II
- * (rutas /admin/io/preview/...). No consulta la base de datos: usa tours de ejemplo
- * con los parámetros iniciales del seeder y aplica las mismas fórmulas que los controladores.
- */
+/** Datos de prueba sin BD. */
 class IoDemoData
 {
     public const TOURS = [
@@ -34,7 +30,7 @@ class IoDemoData
             $sel['lambda_simulada'] = $lambda;
         }
 
-        // Historial de 14 días con variación determinista alrededor de λ
+        // Historial simulado de catorce días.
         $historial = [];
         for ($d = 13; $d >= 0; $d--) {
             $l = max(0.5, $sel['lambda'] * (1 + 0.25 * sin($d * 0.9)));

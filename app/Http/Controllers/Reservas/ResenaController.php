@@ -9,10 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-/**
- * Reseñas verificadas (RF-32): solo quien tiene acceso a una reserva
- * completada puede calificar el tour, una vez por reserva.
- */
+/** Una reseña por reserva completada. */
 class ResenaController extends Controller
 {
     public function store(Request $request, Reserva $reserva): RedirectResponse

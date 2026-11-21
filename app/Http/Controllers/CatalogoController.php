@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class CatalogoController extends Controller
 {
-    // Landing: solo se publican tours activos que tengan al menos una foto disponible
+    // Tours activos con foto.
     public function index()
     {
         $filtros = request()->validate([
@@ -45,7 +45,7 @@ class CatalogoController extends Controller
             'idiomas' => $guia->idiomas()->pluck('nom')]);
     }
 
-    // Detalle del tour con ruta amigable: /tours/{rta_amg}
+    // Detalle por URL amigable.
     public function show(Tour $tour)
     {
         abort_unless($tour->act && is_null($tour->eli_en), 404);
@@ -62,7 +62,7 @@ class CatalogoController extends Controller
             ->orderBy('ord_sec')
             ->get(['nom', 'lat', 'lon', 'alt_m', 'tip_pun']);
 
-        // Reseñas verificadas y promedio desde vista_calificacion_promedio_tour (RF-32).
+        // Reseñas verificadas y promedio.
         $calificacion = DB::table('vista_calificacion_promedio_tour')->where('tur_id', $tour->id)->first();
         $resenas = $tour->resenas()->whereNotNull('rsv_id')->orderByDesc('cre_en')->limit(6)->get();
 

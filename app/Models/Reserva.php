@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-/** Reserva de una salida. usr_id es nulo en las reservas de invitado. */
+/** Admite reservas de invitados. */
 class Reserva extends Model
 {
     public const EST_PENDIENTE = 'pendiente';
@@ -38,7 +38,7 @@ class Reserva extends Model
         'cnt_ptc', 'est', 'pre_tot', 'est_pag', 'idioma',
     ];
 
-    /** En las URL públicas se usa el código, no el id. */
+    /** URL pública por código. */
     public function getRouteKeyName(): string
     {
         return 'cod';

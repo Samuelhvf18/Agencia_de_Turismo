@@ -12,7 +12,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-/** Confirmación de la reserva con los boletos QR y el comprobante en PDF. */
+/** Confirmación con boletos y comprobante. */
 class BoletosReservaMail extends Mailable
 {
     use Queueable, SerializesModels;

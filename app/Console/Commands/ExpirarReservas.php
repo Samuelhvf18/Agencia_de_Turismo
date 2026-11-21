@@ -6,7 +6,7 @@ use App\Models\Reserva;
 use App\Services\Reservas\ReservaService;
 use Illuminate\Console\Command;
 
-/** Cancela las reservas pendientes sin ningún pago tras el plazo (libera cupos y equipo). */
+/** Expira reservas pendientes impagas. */
 class ExpirarReservas extends Command
 {
     protected $signature = 'reservas:expirar {--horas=24 : Horas que se esperan antes de liberar la reserva}';

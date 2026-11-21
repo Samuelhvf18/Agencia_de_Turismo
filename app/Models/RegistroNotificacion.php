@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Notificación enviada (o pendiente) por whatsapp, email, sms o panel. */
+/** Notificación y su canal. */
 class RegistroNotificacion extends Model
 {
     protected $table = 'registros_notificacion';

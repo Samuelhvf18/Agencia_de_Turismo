@@ -673,7 +673,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 <button class="totop" id="totop" aria-label="Volver arriba"><i class="fa-solid fa-arrow-up"></i></button>
 
 <script>
-// header sólido al hacer scroll + botón arriba
+// Cabecera al desplazarse.
 const hdr=document.getElementById('hdr'),top_=document.getElementById('totop');
 const onScroll=()=>{const y=scrollY;hdr.classList.toggle('solid',y>40);top_.classList.toggle('show',y>700)};
 addEventListener('scroll',onScroll,{passive:true});onScroll();

@@ -5,15 +5,7 @@ namespace App\Services\Pagos;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Pasarela de pago simulada (decisión del equipo: sin proveedor real).
- *
- * Imita a un proveedor externo: el cliente "paga" en la pantalla de la
- * pasarela y esta notifica el resultado a nuestro webhook
- * (POST /webhooks/pasarela) con una firma HMAC-SHA256 del cuerpo en la
- * cabecera X-Pasarela-Firma. El webhook es el único que cambia el estado
- * del pago, igual que con una pasarela real.
- */
+/** Pasarela simulada con webhook firmado. */
 class PasarelaSimulada
 {
     public const CABECERA_FIRMA = 'X-Pasarela-Firma';
@@ -33,13 +25,7 @@ class PasarelaSimulada
         return $firma !== null && hash_equals(self::firmar($cuerpo), $firma);
     }
 
-    /**
-     * Envía la notificación al webhook. Con PASARELA_WEBHOOK_HTTP=true lo hace
-     * por HTTP (servidor con varios workers: Nginx/PHP-FPM). En desarrollo con
-     * `php artisan serve` (un solo proceso) una petición HTTP a sí mismo se
-     * bloquearía, así que se entrega en el mismo proceso pasando por la misma
-     * verificación de firma que usa el controlador del webhook.
-     */
+    /** Despacha por HTTP o localmente. */
     public function notificar(array $evento): void
     {
         $cuerpo = json_encode($evento, JSON_UNESCAPED_UNICODE);

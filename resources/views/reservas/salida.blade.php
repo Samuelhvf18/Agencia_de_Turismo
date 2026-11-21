@@ -1,16 +1,7 @@
 @extends('layouts.reserva')
 
 @php
-    /*
-     | DATOS DE EJEMPLO (solo frontend).
-     | El controlador debe pasar:
-     |   $tour    -> Tour "presentado" como en CatalogoController::presentar() (nom, cod, rta_amg, img, img_alt,
-     |               dur_txt, dif_txt, pre_bas, cap_max, categoria->nom)
-     |   $salidas -> salidas_tour del tour con est = 'programada' y fec_sal >= hoy, ordenadas por fec_sal, hra_sal.
-     |               Cada una con: id, fec_sal, hra_sal, cap_max, est y 'cup_ocu' (suma de reservas.cnt_ptc
-     |               de reservas no canceladas de esa salida, calculado en el controlador).
-     |   $accionForm -> route('reservas.salida.store', $tour)  (POST con sal_tur_id y cnt_ptc)
-     */
+    /* Datos de ejemplo. */
     $tour ??= (object) [
         'nom' => 'Valle de la Luna', 'cod' => 'TUR002', 'rta_amg' => 'valle-de-la-luna',
         'img' => asset('images/tours/valle-de-la-luna.jpg'), 'img_alt' => 'Valle de la Luna, La Paz',
@@ -25,9 +16,9 @@
         ['id' => 15, 'fec_sal' => now()->addDays(9)->toDateString(),  'hra_sal' => '08:00:00', 'cap_max' => 12, 'est' => 'programada', 'cup_ocu' => 0],
         ['id' => 16, 'fec_sal' => now()->addDays(12)->toDateString(), 'hra_sal' => '07:30:00', 'cap_max' => 12, 'est' => 'programada', 'cup_ocu' => 7],
     ];
-    $accionForm ??= url('/reservas/preview/participantes'); // controlador: route('reservas.salida.store', $tour)
+    $accionForm ??= url('/reservas/preview/participantes'); // Ruta de guardado.
 
-    // Salidas agrupadas por fecha para la vista
+    // Agrupa salidas por fecha.
     $porFecha = collect($salidas)->groupBy(fn ($s) => $s['fec_sal']);
     $maxCupo = (int) collect($salidas)->map(fn ($s) => $s['cap_max'] - $s['cup_ocu'])->max();
 @endphp
@@ -161,7 +152,7 @@
         </section>
     </div>
 
-    {{-- Resumen: abajo en móvil, columna sticky en escritorio --}}
+    {{-- Resumen adaptable al dispositivo. --}}
     <aside class="lg:sticky lg:top-6">
         <x-reserva.resumen-tour :tour="$tour" cnt-expr="cnt">
             <button type="submit" class="rsv-btn w-full" :disabled="!sal">

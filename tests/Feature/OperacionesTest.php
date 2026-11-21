@@ -33,7 +33,7 @@ beforeEach(function () {
     $this->tour = Tour::where('rta_amg', 'valle-de-la-luna-y-telefericos')->first(); // 4 h
 });
 
-/** Reserva pagada en una salida, creada directamente (sin el wizard). */
+/** Crea una reserva pagada. */
 function reservaPagada(SalidaTour $salida, int $pax = 2): Reserva
 {
     $reserva = Reserva::create([
@@ -112,11 +112,11 @@ test('separar las fechas pasadas conserva las salidas en curso visibles', functi
 test('rechaza el choque de horario del guía, del chofer y del vehículo', function () {
     $this->actingAs($this->operaciones)->post(route('admin.salidas.store'), datosSalida());
 
-    // Mismo día, 2 h después: el tour de 4 h aún no terminó.
+    // Los horarios se solapan.
     $this->post(route('admin.salidas.store'), datosSalida(['hra_sal' => '11:00']))
         ->assertSessionHasErrors(['prf_gui_id', 'prf_cho_id', 'veh_id']);
 
-    // Al terminar el primero ya no hay choque.
+    // Horarios consecutivos sin choque.
     $this->post(route('admin.salidas.store'), datosSalida(['hra_sal' => '13:30']))->assertSessionHasNoErrors();
 });
 
@@ -220,7 +220,7 @@ test('el guía hace el check-in por QR, inicia y finaliza el recorrido', functio
     $this->postJson(route('guias.validar', $salida), ['cod' => $boletos[0]])->assertOk()->assertJson(['repetido' => true]);
     $this->postJson(route('guias.validar', $salida), ['cod' => $otra->boletos()->first()->cod])->assertStatus(422)->assertJson(['ok' => false]);
 
-    // Escaneo hecho sin conexión y sincronizado después.
+    // Sincroniza un escaneo sin conexión.
     $this->postJson(route('guias.sincronizar', $salida), ['escaneos' => [['cod' => $boletos[1], 'vld_en' => now()->subMinutes(5)->toIso8601String()]]])
         ->assertOk()->assertJsonPath('resultados.0.ok', true);
     expect(Boleto::whereIn('cod', $boletos)->where('est', Boleto::EST_VALIDADO)->count())->toBe(2)

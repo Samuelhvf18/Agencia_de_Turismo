@@ -24,6 +24,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('mensajes_chatbot', fn (Blueprint $table) => $table->dropColumn('tours_ids'));
-        // Los catálogos se conservan: ya pueden estar referenciados por usuarios y guías.
+        // Conserva catálogos referenciados.
     }
 };

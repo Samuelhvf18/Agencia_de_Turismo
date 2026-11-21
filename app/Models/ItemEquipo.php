@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/** Existencias de un tipo de equipo por talla (cnt_tot / cnt_dis). */
+/** Existencias por talla. */
 class ItemEquipo extends Model
 {
     protected $table = 'items_equipo';

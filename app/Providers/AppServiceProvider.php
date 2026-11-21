@@ -24,8 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Las escrituras se auditan con triggers PostgreSQL, incluidas operaciones masivas.
-        // RNF-04: alertas de seguridad al administrador.
+        // Triggers auditan escrituras masivas.
+        // Alertas de seguridad para administradores.
         Event::listen(Registered::class, [AlertasSeguridad::class, 'registrada']);
         Event::listen(Failed::class, [AlertasSeguridad::class, 'fallido']);
         Event::listen(PasswordReset::class, [AlertasSeguridad::class, 'contrasenaRestablecida']);

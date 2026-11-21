@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Services\Io\OptimizadorService;
 use Illuminate\Console\Command;
 
-/** Corre el modelo de asignación (guías o vehículos) y deja las propuestas pendientes de revisión. */
+/** Genera propuestas para revisión. */
 class GenerarPropuestas extends Command
 {
     protected $signature = 'io:propuestas {--tipo=guia : guia | vehiculo} {--dias=14 : Horizonte en días desde hoy} {--todas : Reoptimizar también las salidas ya asignadas}';

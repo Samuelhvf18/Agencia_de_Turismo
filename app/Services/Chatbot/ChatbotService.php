@@ -9,12 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-/**
- * Chatbot turístico (Módulo 08, RF-28 a RF-31, RNF-20). Cada mensaje se
- * guarda en conversaciones_chatbot / mensajes_chatbot y se envía al agente
- * de IA orquestado en n8n (N8N_WEBHOOK_CHATBOT). Si n8n no está configurado,
- * tarda demasiado o falla, responde el AsistenteLocal (fallo controlado).
- */
+/** Orquestación del chatbot turístico. */
 class ChatbotService
 {
     public const TIMEOUT_SEGUNDOS = 20;
@@ -43,7 +38,7 @@ class ChatbotService
         $idioma = AsistenteLocal::idioma($texto);
         $conversacion->mensajes()->create(['rem' => 'usuario', 'txt_msj' => $texto]);
 
-        // Con la conversación derivada, responde una persona desde el panel.
+        // El asesor asume la conversación.
         if ($conversacion->der_hum) {
             return ['respuesta' => '', 'intencion' => 'derivada', 'derivado' => true, 'modo' => 'humano', 'idioma' => $idioma];
         }
@@ -73,7 +68,7 @@ class ChatbotService
         ];
     }
 
-    /** Mensajes nuevos de la conversación (para el sondeo del widget). */
+    /** Sondeo de mensajes nuevos. */
     public function mensajesDesde(ConversacionChatbot $conversacion, int $ultimoId): array
     {
         $mensajes = $conversacion->mensajes()->where('id', '>', max(0, $ultimoId))->orderByDesc('id')->limit(100)->get()->reverse()->values();

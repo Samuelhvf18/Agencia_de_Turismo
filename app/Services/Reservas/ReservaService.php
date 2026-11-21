@@ -19,12 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Ciclo de vida de una reserva (Módulo 05): confirmación con control
- * transaccional de cupo y stock, cancelación y cierre. Cada evento alimenta
- * los modelos de IO II: llegadas a la cola M/M/c/K (admitida, rechazada o
- * cancelada) y cambios de estado del cliente en la cadena de Markov.
- */
+/** Ciclo transaccional de la reserva. */
 class ReservaService
 {
     public function __construct(
@@ -32,7 +27,7 @@ class ReservaService
         private MarkovService $markov,
     ) {}
 
-    /** Cupos ocupados por reservas no canceladas de una salida. */
+    /** Cupos de reservas vigentes. */
     public function cuposOcupados(int $salTurId): int
     {
         return (int) Reserva::where('sal_tur_id', $salTurId)
@@ -40,7 +35,7 @@ class ReservaService
             ->sum('cnt_ptc');
     }
 
-    /** Precio unitario de cada tipo de equipo habilitado en el tour: [tip_eqp_id => precio]. */
+    /** Precio unitario de equipo habilitado. */
     public function preciosEquipo(int $turId): array
     {
         return EquipoPorTour::with('tipo')
@@ -51,7 +46,7 @@ class ReservaService
             ->all();
     }
 
-    /** Total del borrador: precio base × participantes + equipo alquilado. */
+    /** Total con participantes y equipo. */
     public function calcularTotal(SalidaTour $salida, array $borrador): array
     {
         $precios = $this->preciosEquipo($salida->tur_id);
@@ -69,12 +64,10 @@ class ReservaService
     }
 
     /**
-     * Crea la reserva (pendiente de pago) a partir del borrador del wizard.
-     * Bloquea la salida y los ítems de equipo (SELECT … FOR UPDATE) para que
-     * dos reservas simultáneas no sobrevendan cupos ni tallas.
+     * Bloquea cupos y stock simultáneamente.
      *
-     * @throws CupoAgotadoException si no quedan cupos (la llegada se registra como rechazada)
-     * @throws ValidationException si falta la ficha en un tour de alto riesgo o no hay stock
+     * @throws CupoAgotadoException Cupo insuficiente.
+     * @throws ValidationException Falta ficha o stock.
      */
     public function confirmar(array $borrador, ?User $usuario): Reserva
     {
@@ -175,7 +168,7 @@ class ReservaService
                     }
                 }
 
-                // IO II · colas: llegada admitida al sistema M/M/c/K.
+                // Llegada admitida al modelo.
                 $this->colas->registrarLlegada($salida->tur_id, $salida->id, $reserva->id, $cantidad, 'admitido');
 
                 app(NotificacionService::class)->aReserva($reserva, 'reserva_creada', [
@@ -185,7 +178,7 @@ class ReservaService
                 return $reserva;
             });
         } catch (CupoAgotadoException $e) {
-            // IO II · colas: el sistema estaba lleno (K alcanzado) → llegada rechazada.
+            // Rechazo por capacidad alcanzada.
             $salida = SalidaTour::find($borrador['sal_tur_id']);
             if ($salida) {
                 $this->colas->registrarLlegada($salida->tur_id, $salida->id, null, max(1, $cantidad), 'rechazado');
@@ -196,16 +189,13 @@ class ReservaService
         return $reserva;
     }
 
-    /** Registra una solicitud rechazada en el primer paso (cupos insuficientes al elegir la salida). */
+    /** Registra rechazo por cupo insuficiente. */
     public function registrarRechazo(SalidaTour $salida, int $cupos): void
     {
         $this->colas->registrarLlegada($salida->tur_id, $salida->id, null, max(1, $cupos), 'rechazado');
     }
 
-    /**
-     * Cancela la reserva: libera cupos y equipo, cancela boletos, anula el
-     * comprobante pendiente y marca como reembolsado lo que ya se pagó.
-     */
+    /** Cancela y libera recursos. */
     public function cancelar(Reserva $reserva, string $motivo = 'Cancelada'): Reserva
     {
         DB::transaction(function () use ($reserva) {
@@ -233,7 +223,7 @@ class ReservaService
             ]);
 
             $salida = $reserva->salida;
-            // IO II · colas: abandono del sistema.
+            // Registra abandono de la cola.
             $this->colas->registrarLlegada($salida->tur_id, $salida->id, $reserva->id, $reserva->cnt_ptc, 'cancelado');
         });
 
@@ -242,7 +232,7 @@ class ReservaService
         return $reserva->refresh();
     }
 
-    /** El pago quedó completo: confirma la reserva y actualiza el estado Markov del cliente. */
+    /** Confirma tras completar el pago. */
     public function marcarConfirmada(Reserva $reserva): void
     {
         if ($reserva->est === Reserva::EST_PENDIENTE) {
@@ -250,15 +240,12 @@ class ReservaService
         }
 
         if ($reserva->usr_id) {
-            // IO II · Markov: prospecto/completado → reservado.
+            // Markov: transición a reservado.
             $this->markov->registrarCambio($reserva->usr_id, 'reservado', "Reserva {$reserva->cod} pagada");
         }
     }
 
-    /**
-     * Cierra la reserva cuando la salida termina: devuelve el equipo al
-     * inventario y pasa al cliente a completado (o fidelizado desde el 2.º tour).
-     */
+    /** Cierra reserva y devuelve equipo. */
     public function completar(Reserva $reserva): void
     {
         DB::transaction(function () use ($reserva) {
@@ -293,9 +280,9 @@ class ReservaService
     }
 
     /**
-     * Descuenta del inventario los ítems elegidos (con bloqueo de fila).
+     * Descuenta inventario bajo bloqueo.
      *
-     * @return array<int, ItemEquipo> ítems bloqueados indexados por id
+     * @return array<int, ItemEquipo> Ítems bloqueados por ID.
      */
     private function reservarEquipo(array $alquileres, array $precios): array
     {

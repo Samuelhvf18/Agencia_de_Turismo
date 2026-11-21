@@ -14,12 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/**
- * Pago de una reserva con la pasarela simulada (Módulo 06):
- * 1) el cliente elige método y monto (se admite pago parcial),
- * 2) "paga" en la pantalla de la pasarela,
- * 3) la pasarela notifica al webhook firmado, que confirma o rechaza el pago.
- */
+/** Controlador de pagos simulados. */
 class PagoController extends Controller
 {
     public function __construct(private PagoService $pagos) {}
@@ -82,7 +77,7 @@ class PagoController extends Controller
         AccesoReserva::exigir($request, $reserva);
         $aprobar = $request->validate(['resultado' => ['required', 'in:aprobar,rechazar']])['resultado'] === 'aprobar';
 
-        // La pasarela "externa" notifica el resultado al webhook firmado.
+        // Notifica mediante webhook firmado.
         $pasarela->notificar([
             'ref_trx' => $pago->ref_trx,
             'est' => $aprobar ? Pago::EST_COMPLETADO : Pago::EST_FALLIDO,

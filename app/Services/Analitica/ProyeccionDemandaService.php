@@ -7,14 +7,7 @@ use App\Models\Tour;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Proyección de demanda por tour y mes (RF-35, objetivo 8).
- *
- * Con 4 o más meses de historial (vista_demanda_por_tour_mes, últimos 12
- * meses) ajusta una regresión lineal por mínimos cuadrados y = a + b·t; con
- * menos usa el promedio móvil de los meses disponibles. Cada fila guarda la
- * versión del modelo en ver_mdl.
- */
+/** Proyección mensual por tour. */
 class ProyeccionDemandaService
 {
     public const MODELO_REGRESION = 'regresion-lineal-v1';
@@ -47,12 +40,12 @@ class ProyeccionDemandaService
     }
 
     /**
-     * @param  array<int, int>  $serie  reservas por mes, del más antiguo al más reciente
+     * @param  array<int, int>  $serie  Reservas en orden cronológico.
      * @return array{0: array<int, float>, 1: string}
      */
     public function proyectar(array $serie, int $meses): array
     {
-        // Los meses previos a la primera reserva no son demanda cero: el tour aún no se vendía.
+        // Excluye meses anteriores a ventas.
         $serie = array_values($serie);
         while ($serie && $serie[0] === 0) {
             array_shift($serie);
@@ -61,7 +54,7 @@ class ProyeccionDemandaService
         $conDatos = count(array_filter($serie, fn ($v) => $v > 0));
 
         if ($n >= 4 && $conDatos >= 4) {
-            // Mínimos cuadrados con t = 1..n.
+            // Ajuste por mínimos cuadrados.
             $sumT = $n * ($n + 1) / 2;
             $sumT2 = $n * ($n + 1) * (2 * $n + 1) / 6;
             $sumY = array_sum($serie);
@@ -81,7 +74,7 @@ class ProyeccionDemandaService
         return [array_fill(0, $meses, $promedio), self::MODELO_PROMEDIO];
     }
 
-    /** Reservas (no canceladas) por mes de salida en los 12 meses previos a la referencia. */
+    /** Doce meses de reservas vigentes. */
     public function serieMensual(int $turId, Carbon $referencia): array
     {
         $serie = [];

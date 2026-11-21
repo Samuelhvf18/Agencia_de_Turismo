@@ -13,11 +13,7 @@ use App\Models\Vehiculo;
 use App\Services\Operaciones\AsignacionService;
 use Illuminate\Database\Seeder;
 
-/**
- * Datos operativos de ejemplo para recorrer el flujo de venta: flota,
- * equipo de alquiler con tallas, equipo por tour y salidas programadas
- * para los próximos 30 días. Es idempotente y no se ejecuta en producción.
- */
+/** Datos operativos de ejemplo. */
 class OperacionDemoSeeder extends Seeder
 {
     public function run(): void
@@ -53,7 +49,7 @@ class OperacionDemoSeeder extends Seeder
             $ids[$nom] = $tipo->id;
         }
 
-        // Equipo que se ofrece según la categoría del tour.
+        // Equipo según categoría.
         $porCategoria = [
             'biking' => ['Casco de seguridad', 'Bicicleta doble suspensión', 'Chaqueta impermeable'],
             'climbing' => ['Casco de seguridad', 'Crampones y piolet', 'Chaqueta impermeable'],
@@ -73,8 +69,8 @@ class OperacionDemoSeeder extends Seeder
                 EquipoPorTour::firstOrCreate(['tur_id' => $tour->id, 'tip_eqp_id' => $ids[$nom]], ['act' => true]);
             }
 
-            // Una salida cada 3 días durante el próximo mes, desfasada por tour. Guía, chofer
-            // y vehículo solo se asignan si no chocan con otra salida (mismas reglas que el panel).
+            // Salidas desfasadas cada tres días.
+            // Asigna solo recursos disponibles.
             for ($d = 1 + ($n % 3); $d <= 30; $d += 3) {
                 $fecha = today()->addDays($d)->toDateString();
                 if (SalidaTour::where(['tur_id' => $tour->id, 'fec_sal' => $fecha, 'hra_sal' => '08:00:00'])->exists()) {

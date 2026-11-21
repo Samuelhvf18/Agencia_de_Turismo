@@ -6,10 +6,7 @@ use App\Models\Reserva;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-/**
- * Quién puede ver una reserva: quien la creó o la buscó con código + correo
- * en esta sesión, su titular con cuenta, y el personal (admin/operaciones).
- */
+/** Acceso autorizado a reservas. */
 class AccesoReserva
 {
     private const CLAVE = 'reservas.acceso';

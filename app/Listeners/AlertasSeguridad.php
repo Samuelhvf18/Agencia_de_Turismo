@@ -10,10 +10,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Request;
 
-/**
- * Alertas de seguridad al administrador (RNF-04): cuenta nueva, tres
- * intentos fallidos de inicio de sesión y cambio de contraseña.
- */
+/** Alertas de acceso y contraseña. */
 class AlertasSeguridad
 {
     public const INTENTOS = 3;
@@ -48,7 +45,7 @@ class AlertasSeguridad
         $this->alertar('Contraseña restablecida', "Se restableció la contraseña de {$evento->user->cor}.", $evento->user);
     }
 
-    /** Lo llama UpdateUserPassword (cambio desde el perfil). */
+    /** Cambio de contraseña del perfil. */
     public function contrasenaCambiada(User $usuario): void
     {
         $this->alertar('Contraseña cambiada', "{$usuario->cor} cambió su contraseña desde su perfil.", $usuario);

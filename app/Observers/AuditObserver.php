@@ -8,14 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 
-/**
- * Bitácora de auditoría (objetivo 7, RNF-06): registra cada creación,
- * modificación o eliminación con usuario, fecha, IP, agente y los valores
- * anterior y nuevo. Se registra en AppServiceProvider::boot().
- */
+/** Registro de cambios del sistema. */
 class AuditObserver
 {
-    /** Columnas que nunca se copian a la bitácora. */
+    /** Excluye columnas sensibles. */
     private const OCULTOS = ['clv', 'password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'token'];
 
     public function created(Model $model): void
@@ -39,7 +35,7 @@ class AuditObserver
         $this->registrar('DELETE', $model, $model->getAttributes(), null);
     }
 
-    /** Lectura de datos sensibles (RNF-05), p. ej. participantes y fichas médicas. */
+    /** Audita lecturas sensibles. */
     public static function lectura(Model $model): void
     {
         (new self)->registrar('READ', $model, null, null);
@@ -48,14 +44,13 @@ class AuditObserver
     protected function registrar(string $accion, Model $model, ?array $anterior, ?array $nuevo): void
     {
         $usuarioId = Auth::id();
-        // Un usuario que borra su propia cuenta ya no existe: la FK exige dejarlo en nulo.
+        // Usuario eliminado sin referencia.
         if ($accion === 'DELETE' && $model->getTable() === 'users' && $usuarioId === $model->getKey()) {
             $usuarioId = null;
         }
 
         try {
-            // Transacción anidada (SAVEPOINT): si la inserción falla no aborta la
-            // transacción de negocio en curso en PostgreSQL.
+            // SAVEPOINT aísla errores de auditoría.
             DB::transaction(fn () => DB::table('bitacora_auditoria')->insert([
                 'usr_id' => $usuarioId,
                 'nom_tbl' => $model->getTable(),
@@ -68,7 +63,7 @@ class AuditObserver
                 'cre_en' => now(),
             ]));
         } catch (\Throwable $e) {
-            // Las lecturas sensibles también fallan si no pueden auditarse.
+            // Lecturas requieren auditoría exitosa.
             Log::error('No se pudo registrar la auditoría', [
                 'tabla' => $model->getTable(),
                 'id' => $model->getKey(),
