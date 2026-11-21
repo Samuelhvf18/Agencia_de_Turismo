@@ -13,6 +13,7 @@ Esta carpeta reúne la documentación más completa y actual del proyecto.
 | `02_Scrum\` | Historias de Usuario, Product Backlog y Sprint Backlog: 52 historias, 113 puntos, 10 sprints (Excel editables + PDF). |
 | `03_Base_de_Datos\` | Diccionario de Datos v5 y esquema PostgreSQL v6 (41 tablas y 7 vistas). Se conservan v4/v5 como historial. |
 | `04_Diagramas\` | PDF consolidado de 59 páginas con todos los diagramas, PNG individuales y modelo editable de StarUML v3. |
+| `05_Evaluacion_Procesual\` | Documento unificado para la evaluación procesual: perfil del proyecto + análisis y diseño (98 págs.), versión solo de análisis y diseño (79 págs.) y guía de entrega. |
 | `Investigacion_Operativa\` | Informe del Segundo Avance de IO II (colas M/M/c/K y cadenas de Markov). |
 | `Entrega hito 3\` | Entregables del hito: `Procesual\` y `Continua\` (casos de uso, secuencias, modelos de BD, diccionario y evaluaciones). |
 | `LEEME.md` | Este índice. |
