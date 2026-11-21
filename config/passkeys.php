@@ -9,5 +9,5 @@ return [
     'middleware' => ['web'],
     'management_middleware' => ['password.confirm', 'verified'],
     'throttle' => 'throttle:6,1',
-    'redirect' => '/dashboard',
+    'redirect' => '/mi-panel',
 ];

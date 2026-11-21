@@ -49,7 +49,7 @@ class NotificacionJob implements ShouldQueue
             }
             if ($registro->can === 'email' && config('services.notificaciones.url') && ! empty($registro->cnd['destino'])) {
                 app(CorreoTransaccional::class)->enviar(
-                    $registro->cnd['destino'], NotificacionService::TIPOS[$registro->tip] ?? 'Aviso de Pipocas',
+                    $registro->cnd['destino'], NotificacionService::TIPOS[$registro->tip] ?? 'Aviso de Andinist Bolivia',
                     $this->texto($registro),
                     $registro->clave_evento ?? 'notificacion:'.$registro->id
                 );
@@ -72,7 +72,7 @@ class NotificacionJob implements ShouldQueue
 
     private function texto(RegistroNotificacion $registro): string
     {
-        $texto = $registro->cnd['mensaje'] ?? $registro->cnd['evento'] ?? (NotificacionService::TIPOS[$registro->tip] ?? 'Tienes una notificación de Pipocas.');
+        $texto = $registro->cnd['mensaje'] ?? $registro->cnd['evento'] ?? (NotificacionService::TIPOS[$registro->tip] ?? 'Tienes una notificación de Andinist Bolivia.');
         if ($reserva = $registro->reserva) {
             $texto .= "\nReserva: {$reserva->cod}\nTour: {$reserva->salida->tour->nom}\nSalida: ".$reserva->salida->fec_sal->format('d/m/Y').' '.substr($reserva->salida->hra_sal, 0, 5);
             $texto .= "\nConsulta tu reserva: ".route('reservas.consultar', ['cod' => $reserva->cod]);

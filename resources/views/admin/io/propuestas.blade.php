@@ -49,7 +49,7 @@
         <nav class="flex gap-1 rounded-xl border border-slate-200 bg-white p-1" aria-label="Filtrar propuestas">
             @foreach (['' => 'Todas', 'guia' => 'Guías', 'vehiculo' => 'Vehículos'] as $valor => $label)
                 <a href="{{ route('admin.io.propuestas', $valor ? ['tip' => $valor] : []) }}"
-                    class="rounded-lg px-3 py-2 text-xs font-semibold {{ ($tip ?? '') === $valor ? 'bg-pipocas-principal text-white' : 'text-slate-500' }}">{{ $label }}</a>
+                    class="rounded-lg px-3 py-2 text-xs font-semibold {{ ($tip ?? '') === $valor ? 'bg-andinist-principal text-white' : 'text-slate-500' }}">{{ $label }}</a>
             @endforeach
         </nav>
     </div>
@@ -70,7 +70,7 @@
                     </div>
                     <div class="rounded-xl border border-blue-100 bg-blue-50/40 p-4">
                         <p class="admin-metric-note">Recurso propuesto</p>
-                        <p class="mt-2 text-sm font-bold text-pipocas-principal">{{ $p->recursoPropuesto() }}</p>
+                        <p class="mt-2 text-sm font-bold text-andinist-principal">{{ $p->recursoPropuesto() }}</p>
                     </div>
                     <div class="rounded-xl border border-slate-100 p-4">
                         <p class="admin-metric-note">Qué se tomó en cuenta</p>
@@ -89,7 +89,7 @@
                 </div>
                 <div class="mt-5 flex flex-wrap items-end justify-between gap-4 border-t border-slate-100 pt-5">
                     <details class="text-xs text-slate-500">
-                        <summary class="cursor-pointer font-semibold text-pipocas-principal">Ver criterios de la propuesta
+                        <summary class="cursor-pointer font-semibold text-andinist-principal">Ver criterios de la propuesta
                         </summary>
                         <div class="mt-3 max-w-lg space-y-2">
                             <p>Puntaje del modelo: <strong>{{ $fmt($p->cos, 2) }}</strong>. Menor es preferible entre

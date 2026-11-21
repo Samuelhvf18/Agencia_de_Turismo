@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pipocas -Agencia de Viajes y Turismo | Sagárnaga, La Paz</title>
+<title>Andinist Bolivia · {{ __('Agencia de Viajes y Turismo') }}</title>
 <meta name="description" content="Tours de aventura georreferenciados en La Paz, Bolivia: Biking, Hiking, Trekking, Climbing y City Tours. Reserva en línea y paga con QR.">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -383,14 +383,14 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="wrap nav">
     <a href="{{ url('/') }}" class="brand">
       <span class="logo"><i class="fa-solid fa-mountain-sun"></i></span>
-      <span><b>{{ __('Agencia de Turismo') }}<i>.</i></b><small>{{ __('Demostración: pagos simulados') }}</small></span>
+      <span><b>Andinist Bolivia<i>.</i></b><small>{{ __('Agencia de Viajes y Turismo') }}</small></span>
     </a>
     <nav class="links">
       <a href="#categorias">{{ __('Experiencias') }}</a>
       <a href="#catalogo">{{ __('Tours') }}</a>
       <a href="#como">{{ __('Cómo reservar') }}</a>
       <a href="{{ route('reservas.consultar') }}">{{ __('Mi reserva') }}</a>
-      <a href="{{ url('/chatbot') }}"><i class="fa-solid fa-robot"></i> {{ __('Guía digital') }}</a>
+      <a href="{{ route('chatbot') }}"><i class="fa-solid fa-robot"></i> {{ __('Guía digital') }}</a>
     </nav>
     <div class="nav-cta">
       <span class="lang-switch" style="display:inline-flex;gap:6px;font-weight:700;font-size:13px">
@@ -399,7 +399,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <a href="{{ request()->fullUrlWithQuery(['lang' => 'en']) }}" @if (app()->getLocale() === 'en') style="text-decoration:underline" @endif>EN</a>
       </span>
       @auth
-        <a href="{{ auth()->user()->tieneRol('turista') ? route('reservas.historial') : url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ auth()->user()->tieneRol('turista') ? __('Mis reservas') : __('Panel') }}</a>
+        <a href="{{ auth()->user()->tieneRol('turista') ? route('reservas.historial') : route('dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ auth()->user()->tieneRol('turista') ? __('Mis reservas') : __('Panel') }}</a>
       @else
         @if (Route::has('login'))
           <a href="{{ route('login') }}" class="login">{{ __('Iniciar sesión') }}</a>
@@ -415,7 +415,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 
 <div class="mobile-menu" id="menu">
   <div class="mm-top">
-    <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Pipocas<i>.</i></b></span></a>
+    <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Andinist Bolivia<i>.</i></b></span></a>
     <button id="closeMenu" aria-label="Cerrar menú"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <nav>
@@ -423,11 +423,11 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <a href="#catalogo">{{ __('Tours') }}<i class="fa-solid fa-arrow-right"></i></a>
     <a href="#como">{{ __('Cómo reservar') }} <i class="fa-solid fa-arrow-right"></i></a>
     <a href="{{ route('reservas.consultar') }}">{{ __('Mi reserva') }} <i class="fa-solid fa-arrow-right"></i></a>
-    <a href="{{ url('/chatbot') }}">{{ __('Guía digital') }} <i class="fa-solid fa-robot"></i></a>
+    <a href="{{ route('chatbot') }}">{{ __('Guía digital') }} <i class="fa-solid fa-robot"></i></a>
   </nav>
   <div class="mm-btns">
     @auth
-      <a href="{{ auth()->user()->tieneRol('turista') ? route('reservas.historial') : url('/dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ auth()->user()->tieneRol('turista') ? __('Mis reservas') : __('Ir a mi panel') }}</a>
+      <a href="{{ auth()->user()->tieneRol('turista') ? route('reservas.historial') : route('dashboard') }}" class="btn btn-gold"><i class="fa-solid fa-gauge"></i> {{ auth()->user()->tieneRol('turista') ? __('Mis reservas') : __('Ir a mi panel') }}</a>
     @else
       @if (Route::has('login'))
         <a href="{{ route('login') }}" class="btn btn-glass">{{ __('Iniciar sesión') }}</a>
@@ -445,7 +445,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="wrap hero-grid">
     <div>
       <span class="pill reveal"><span class="live"></span>{{ __('Salidas diarias desde La Paz, Bolivia') }}</span>
-      <h1 class="reveal d1">{{ __('Conecta') }}<br>{{ __('con la aventura') }}<em>{{ __('en el corazón de Bolivia') }}</em></h1>
+      <h1 class="reveal d1">{{ __('Conecta') }}<br>{{ __('con la aventura') }} <em>{{ __('en el corazón de Bolivia') }}</em></h1>
       <p class="lead reveal d2">Rutas georreferenciadas de Biking, Hiking, Trekking y Climbing. Reserva en línea, paga con QR y sal con equipo certificado y guías expertos.</p>
       <div class="hero-ctas reveal d3">
         <a href="#catalogo" class="btn btn-gold"><i class="fa-solid fa-compass"></i> {{ __('Explorar tours') }} <i class="fa-solid fa-arrow-right arrow"></i></a>
@@ -630,7 +630,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="wrap">
     <div class="fgrid">
       <div class="fbrand">
-        <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Pipocas<i>.</i></b></span></a>
+        <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Andinist Bolivia<i>.</i></b></span></a>
         <p>Agencia de viajes y turismo de aventura en el corazón de La Paz, Bolivia.</p>
         <div class="soc">@foreach (config('turismo.redes') as $red => $url)<a href="{{ $url }}" aria-label="{{ $red }}" target="_blank" rel="noopener noreferrer"><i class="fa-brands {{ ['WhatsApp'=>'fa-whatsapp','Facebook'=>'fa-facebook-f','Instagram'=>'fa-instagram','TikTok'=>'fa-tiktok'][$red] }}"></i></a>@endforeach</div>
       </div>
@@ -652,7 +652,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     </div>
     <div class="fbottom">
       <span>Calle Sagárnaga #234, Zona Central · La Paz, Bolivia</span>
-      <span>© {{ date('Y') }} Pipocas. Todos los derechos reservados.</span>
+      <span>© {{ date('Y') }} Andinist Bolivia. Todos los derechos reservados.</span>
     </div>
   </div>
 </footer>
@@ -666,7 +666,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="lm-body">
-    <p>Estos términos regulan la contratación de tours y servicios de <b>Pipocas, Agencia de Viajes y Turismo</b>, con oficina en Calle Sagárnaga #234, Zona Central, La Paz, Bolivia. Al confirmar una reserva declaras haberlos leído y aceptado.</p>
+    <p>Estos términos regulan la contratación de tours y servicios de <b>Andinist Bolivia, Agencia de Viajes y Turismo</b>, con oficina en Calle Sagárnaga #234, Zona Central, La Paz, Bolivia. Al confirmar una reserva declaras haberlos leído y aceptado.</p>
     <h5>1. Reservas y cupos</h5>
     <ul>
       <li>{{ __('La reserva se confirma al completar el pago total. El anticipo mantiene un saldo pendiente y todavía no emite boletos.') }}</li>
@@ -690,7 +690,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
       <li>El equipo alquilado debe devolverse en el estado en que se entregó. Los daños por mal uso o la pérdida se cobran según la tarifa vigente.</li>
     </ul>
     <h5>5. Responsabilidades</h5>
-    <p>Pipocas responde por la correcta prestación de los servicios contratados, con guías y vehículos habilitados. No respondemos por pérdidas de objetos personales no confiados a la agencia ni por daños derivados de no seguir las indicaciones del guía. Cualquier reclamo puede presentarse en nuestra oficina o ante las instancias de defensa del consumidor previstas por la Ley N.º 453.</p>
+    <p>Andinist Bolivia responde por la correcta prestación de los servicios contratados, con guías y vehículos habilitados. No respondemos por pérdidas de objetos personales no confiados a la agencia ni por daños derivados de no seguir las indicaciones del guía. Cualquier reclamo puede presentarse en nuestra oficina o ante las instancias de defensa del consumidor previstas por la Ley N.º 453.</p>
   </div>
   <div class="lm-foot"><button class="lm-ok" data-close>Entendido</button></div>
 </dialog>
@@ -702,7 +702,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="lm-body">
-    <p>En Pipocas aplicamos el principio de <b>mínimo dato</b>: solo pedimos lo necesario para organizar tu tour de forma segura y cumplir nuestras obligaciones legales.</p>
+    <p>En Andinist Bolivia aplicamos el principio de <b>mínimo dato</b>: solo pedimos lo necesario para organizar tu tour de forma segura y cumplir nuestras obligaciones legales.</p>
     <h5>Qué datos recogemos</h5>
     <ul>
       <li><b>Identificación:</b> nombre, documento de identidad o pasaporte, nacionalidad y fecha de nacimiento.</li>
@@ -770,7 +770,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
         <tr><td>Menos de 24 horas o no presentación</td><td>Sin devolución</td></tr>
       </tbody>
     </table>
-    <h5>Cancelación por parte de Pipocas</h5>
+    <h5>Cancelación por parte de Andinist Bolivia</h5>
     <p>Si suspendemos la salida por clima, seguridad, bloqueos o por no alcanzar el mínimo de participantes, eliges entre <b>reprogramar sin costo</b> o recibir la <b>devolución del 100 %</b>.</p>
     <h5>Cambios de fecha</h5>
     <p>Puedes cambiar la fecha una vez sin costo si avisas con al menos 48 horas, sujeto a cupo disponible.</p>
@@ -819,7 +819,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     <button class="lm-x" data-close aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="lm-body">
-    <p>Pipocas opera como agencia de viajes y turismo en La Paz, Bolivia, y ajusta sus servicios a la legislación nacional y municipal vigente:</p>
+    <p>Andinist Bolivia opera como agencia de viajes y turismo en La Paz, Bolivia, y ajusta sus servicios a la legislación nacional y municipal vigente:</p>
     <ul class="lm-laws">
       <li><b>Ley N.º 292, Ley General de Turismo “Bolivia te espera”.</b> Regula a los prestadores de servicios turísticos. Estamos inscritos en el registro de prestadores del Viceministerio de Turismo y trabajamos con guías habilitados.</li>
       <li><b>Ley N.º 453, de los Derechos de las Usuarias y los Usuarios y de las Consumidoras y los Consumidores.</b> Garantiza información veraz sobre precios y condiciones, trato digno y el derecho a reclamar.</li>

@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CategoriaTour extends Model
 {
+    use Concerns\ResuelveRutaPorClaveLegible;
+
+    public function getRouteKeyName(): string
+    {
+        return 'rta_amg';
+    }
+
     protected $table = 'categorias_tour';
     public $timestamps = false;
     protected $fillable = ['nom', 'rta_amg', 'des', 'ico'];

@@ -30,7 +30,7 @@
             <div class="sub">{{ __('Fecha de emisión') }} {{ $comprobante->fec_emi->format('d/m/Y') }}</div>
             <div style="margin-top:6px"><span class="estado {{ $comprobante->est }}">{{ mb_strtoupper(__($comprobante->est)) }}</span></div>
         </div>
-        <div class="marca">Pipocas</div>
+        <div class="marca">Andinist Bolivia</div>
         <div class="sub">{{ __('Agencia de Viajes y Turismo · La Paz, Bolivia') }}</div>
     </div>
 
@@ -88,6 +88,6 @@
         </tbody>
     </table>
 
-    <p class="sub" style="margin-top:24px">{{ __('Documento generado automáticamente por el sistema de Pipocas. Los pagos se procesan mediante una pasarela simulada con fines académicos.') }}</p>
+    <p class="sub" style="margin-top:24px">{{ __('Documento generado automáticamente por el sistema de Andinist Bolivia. Los pagos se procesan mediante una pasarela simulada con fines académicos.') }}</p>
 </body>
 </html>

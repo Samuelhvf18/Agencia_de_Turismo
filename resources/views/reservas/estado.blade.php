@@ -41,19 +41,19 @@
 
     // Colores y textos de los estados (reservas.est y reservas.est_pag)
     $estados = [
-        'pendiente'  => ['Pendiente de pago', 'bg-pipocas-acento/30 text-pipocas-calido', 'fa-regular fa-clock'],
+        'pendiente'  => ['Pendiente de pago', 'bg-andinist-acento/30 text-andinist-calido', 'fa-regular fa-clock'],
         'confirmada' => ['Confirmada', 'bg-emerald-100 text-emerald-800', 'fa-solid fa-circle-check'],
         'cancelada'  => ['Cancelada', 'bg-red-100 text-red-700', 'fa-solid fa-ban'],
-        'completada' => ['Completada', 'bg-pipocas-principal/15 text-pipocas-principal', 'fa-solid fa-flag-checkered'],
+        'completada' => ['Completada', 'bg-andinist-principal/15 text-andinist-principal', 'fa-solid fa-flag-checkered'],
     ];
     $pagos = [
-        'pendiente'   => ['Pago pendiente', 'text-pipocas-calido'],
+        'pendiente'   => ['Pago pendiente', 'text-andinist-calido'],
         'pagado'      => ['Pagado', 'text-emerald-700'],
-        'parcial'     => ['Pago parcial', 'text-pipocas-calido'],
-        'reembolsado' => ['Reembolsado', 'text-pipocas-texto-2'],
+        'parcial'     => ['Pago parcial', 'text-andinist-calido'],
+        'reembolsado' => ['Reembolsado', 'text-andinist-texto-2'],
     ];
     [$estTxt, $estCls, $estIco] = $estados[$reserva['est']] ?? [ucfirst($reserva['est']), 'bg-gray-100 text-gray-700', 'fa-solid fa-circle-info'];
-    [$pagTxt, $pagCls] = $pagos[$reserva['est_pag']] ?? [ucfirst($reserva['est_pag']), 'text-pipocas-texto'];
+    [$pagTxt, $pagCls] = $pagos[$reserva['est_pag']] ?? [ucfirst($reserva['est_pag']), 'text-andinist-texto'];
     $f = \Carbon\Carbon::parse($salida['fec_sal'])->locale(app()->getLocale());
 @endphp
 
@@ -66,16 +66,16 @@
     @endif
 
     <a href="{{ $urlConsultar }}"
-       class="inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
+       class="inline-flex items-center gap-2 text-sm font-semibold text-andinist-principal hover:text-andinist-hover">
         <i class="fa-solid fa-arrow-left"></i>{{ __('Consultar otra reserva') }}</a>
 
     {{-- Cabecera --}}
     <section class="rsv-tarjeta">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <p class="text-xs font-bold uppercase tracking-[0.2em] text-pipocas-texto-2">{{ __('Reserva') }}</p>
-                <h1 class="break-all font-mono text-2xl font-bold tracking-wider text-pipocas-principal sm:text-3xl">{{ $reserva['cod'] }}</h1>
-                <p class="mt-1 text-sm text-pipocas-texto-2">{{ __('Registrada el :fecha', ['fecha' => \Carbon\Carbon::parse($reserva['cre_en'])->locale(app()->getLocale())->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'j \d\e F \d\e Y')]) }}</p>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-andinist-texto-2">{{ __('Reserva') }}</p>
+                <h1 class="break-all font-mono text-2xl font-bold tracking-wider text-andinist-principal sm:text-3xl">{{ $reserva['cod'] }}</h1>
+                <p class="mt-1 text-sm text-andinist-texto-2">{{ __('Registrada el :fecha', ['fecha' => \Carbon\Carbon::parse($reserva['cre_en'])->locale(app()->getLocale())->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'j \d\e F \d\e Y')]) }}</p>
             </div>
             <span class="inline-flex items-center gap-2 self-start rounded-full px-4 py-2 text-sm font-bold sm:self-auto {{ $estCls }}">
                 <i class="{{ $estIco }}"></i> {{ __($estTxt) }}
@@ -83,8 +83,8 @@
         </div>
 
         @if ($reserva['est'] === 'pendiente' && $urlPago)
-            <div class="mt-5 flex flex-col gap-3 rounded-2xl bg-pipocas-acento/15 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p class="text-sm text-pipocas-calido"><i class="fa-solid fa-circle-info mr-1"></i>
+            <div class="mt-5 flex flex-col gap-3 rounded-2xl bg-andinist-acento/15 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm text-andinist-calido"><i class="fa-solid fa-circle-info mr-1"></i>
                     @if ($reserva['est_pag'] === 'parcial')
                         {{ __('Tienes un saldo de Bs. :saldo. Complétalo para recibir los tickets con código QR.', ['saldo' => number_format($saldo, 2, ',', '.')]) }}
                     @else
@@ -101,19 +101,19 @@
     <div class="grid gap-6 md:grid-cols-[1fr_300px]">
         {{-- Salida --}}
         <section class="rsv-tarjeta overflow-hidden p-0 sm:p-0">
-            <div class="relative h-32 bg-gradient-to-br from-pipocas-principal to-pipocas-complementario">
+            <div class="relative h-32 bg-gradient-to-br from-andinist-principal to-andinist-complementario">
                 @if (! empty($tour->img))<img src="{{ $tour->img }}" alt="{{ $tour->img_alt ?? $tour->nom }}" class="h-full w-full object-cover">@endif
                 <div class="absolute inset-0 bg-gradient-to-t from-[#123a5a]/85 to-transparent"></div>
                 <div class="absolute inset-x-0 bottom-0 p-4 text-white">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-pipocas-acento">{{ $tour->categoria->nom ?? 'Tour' }} · {{ $tour->cod }}</span>
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-andinist-acento">{{ $tour->categoria->nom ?? 'Tour' }} · {{ $tour->cod }}</span>
                     <h2 class="font-titulo text-xl font-semibold">{{ $tour->nom }}</h2>
                 </div>
             </div>
             <dl class="grid gap-4 p-5 text-sm sm:grid-cols-2 sm:p-7">
-                <div><dt class="text-pipocas-texto-2">{{ __('Fecha') }}</dt><dd class="font-semibold">{{ ucfirst($f->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'l j \d\e F')) }}</dd></div>
-                <div><dt class="text-pipocas-texto-2">{{ __('Hora de salida') }}</dt><dd class="font-semibold">{{ substr($salida['hra_sal'], 0, 5) }}</dd></div>
-                <div><dt class="text-pipocas-texto-2">{{ __('Punto de encuentro') }}</dt><dd class="font-semibold">{{ $salida['pun_enc'] ?? __('Se enviará por correo') }}</dd></div>
-                <div><dt class="text-pipocas-texto-2">{{ __('Guía') }}</dt><dd class="font-semibold">{{ $salida['gui_nom'] ?? __('Por asignar') }}</dd></div>
+                <div><dt class="text-andinist-texto-2">{{ __('Fecha') }}</dt><dd class="font-semibold">{{ ucfirst($f->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'l j \d\e F')) }}</dd></div>
+                <div><dt class="text-andinist-texto-2">{{ __('Hora de salida') }}</dt><dd class="font-semibold">{{ substr($salida['hra_sal'], 0, 5) }}</dd></div>
+                <div><dt class="text-andinist-texto-2">{{ __('Punto de encuentro') }}</dt><dd class="font-semibold">{{ $salida['pun_enc'] ?? __('Se enviará por correo') }}</dd></div>
+                <div><dt class="text-andinist-texto-2">{{ __('Guía') }}</dt><dd class="font-semibold">{{ $salida['gui_nom'] ?? __('Por asignar') }}</dd></div>
             </dl>
         </section>
 
@@ -121,22 +121,22 @@
         <section class="rsv-tarjeta">
             <h2 class="rsv-titulo mb-4">{{ __('Pago') }}</h2>
             <dl class="space-y-3 text-sm">
-                <div class="flex justify-between"><dt class="text-pipocas-texto-2">{{ __('Participantes') }}</dt><dd class="font-semibold">{{ $reserva['cnt_ptc'] }}</dd></div>
-                <div class="flex justify-between"><dt class="text-pipocas-texto-2">{{ __('Estado') }}</dt><dd class="font-bold {{ $pagCls }}">{{ __($pagTxt) }}</dd></div>
+                <div class="flex justify-between"><dt class="text-andinist-texto-2">{{ __('Participantes') }}</dt><dd class="font-semibold">{{ $reserva['cnt_ptc'] }}</dd></div>
+                <div class="flex justify-between"><dt class="text-andinist-texto-2">{{ __('Estado') }}</dt><dd class="font-bold {{ $pagCls }}">{{ __($pagTxt) }}</dd></div>
                 <div class="flex items-baseline justify-between border-t border-dashed border-gray-200 pt-3">
                     <dt class="font-bold">{{ __('Total') }}</dt>
-                    <dd class="font-titulo text-2xl font-semibold text-pipocas-principal">Bs. {{ number_format($reserva['pre_tot'], 2, ',', '.') }}</dd>
+                    <dd class="font-titulo text-2xl font-semibold text-andinist-principal">Bs. {{ number_format($reserva['pre_tot'], 2, ',', '.') }}</dd>
                 </div>
             </dl>
             @if ($historialPagos->isNotEmpty())
                 <div class="mt-5 border-t border-gray-100 pt-4 text-sm">
-                    <p class="mb-2 text-pipocas-texto-2">{{ __('Historial de pagos') }}</p>
+                    <p class="mb-2 text-andinist-texto-2">{{ __('Historial de pagos') }}</p>
                     <ul class="space-y-2">
                         @foreach ($historialPagos as $pago)
                             <li class="flex items-center justify-between gap-2">
                                 <span>
                                     <span class="font-semibold">{{ __($metodos[$pago->mtd] ?? $pago->mtd) }}</span>
-                                    <span class="block text-xs text-pipocas-texto-2">{{ $pago->pag_en->format('d/m/Y H:i') }} · {{ ucfirst(__($pago->est)) }}</span>
+                                    <span class="block text-xs text-andinist-texto-2">{{ $pago->pag_en->format('d/m/Y H:i') }} · {{ ucfirst(__($pago->est)) }}</span>
                                 </span>
                                 <span @class(['font-semibold', 'text-emerald-700' => $pago->est === 'completado', 'text-red-600 line-through' => $pago->est === 'fallido'])>Bs. {{ number_format($pago->mto, 2, ',', '.') }}</span>
                             </li>
@@ -145,12 +145,12 @@
                 </div>
             @endif
             @if ($urlComprobante)
-                <a href="{{ $urlComprobante }}" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover"><i class="fa-solid fa-file-invoice"></i> {{ __('Descargar comprobante') }}</a>
+                <a href="{{ $urlComprobante }}" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-andinist-complementario hover:text-andinist-hover"><i class="fa-solid fa-file-invoice"></i> {{ __('Descargar comprobante') }}</a>
             @endif
             <div class="mt-5 border-t border-gray-100 pt-4 text-sm">
-                <p class="text-pipocas-texto-2">{{ __('Contacto') }}</p>
+                <p class="text-andinist-texto-2">{{ __('Contacto') }}</p>
                 <p class="font-semibold">{{ $reserva['nom_ctc'] }}</p>
-                <p class="break-all text-pipocas-texto-2">{{ $reserva['cor_ctc'] }}</p>
+                <p class="break-all text-andinist-texto-2">{{ $reserva['cor_ctc'] }}</p>
             </div>
         </section>
     </div>
@@ -163,7 +163,7 @@
                 <a href="{{ $urlBoletos }}" class="rsv-btn-sec px-4 py-2 text-sm"><i class="fa-solid fa-download"></i> {{ __('Descargar todos (PDF)') }}</a>
             @endif
         </div>
-        <p class="mb-5 text-sm text-pipocas-texto-2">{{ __('Cada participante presenta su código QR al guía antes de abordar.') }}</p>
+        <p class="mb-5 text-sm text-andinist-texto-2">{{ __('Cada participante presenta su código QR al guía antes de abordar.') }}</p>
 
         <ul class="grid gap-4 sm:grid-cols-2">
             @foreach ($participantes as $p)
@@ -171,7 +171,7 @@
                     {{-- Espacio para el QR (el backend generará la imagen a partir de boletos.cod) --}}
                     <div @class([
                         'grid h-24 w-24 shrink-0 place-items-center rounded-xl text-center',
-                        'border-2 border-pipocas-principal/20 bg-pipocas-fondo text-pipocas-principal' => $p['boleto'],
+                        'border-2 border-andinist-principal/20 bg-andinist-fondo text-andinist-principal' => $p['boleto'],
                         'border-2 border-dashed border-gray-300 text-gray-400' => ! $p['boleto'],
                     ])>
                         @if ($p['boleto'] && ! empty($p['boleto']['qr']))
@@ -190,14 +190,14 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="font-semibold">{{ $p['nom_cpl'] }}</p>
-                        <p class="text-xs text-pipocas-texto-2">{{ $p['tip_doc'] }} {{ $p['num_doc'] }}</p>
+                        <p class="text-xs text-andinist-texto-2">{{ $p['tip_doc'] }} {{ $p['num_doc'] }}</p>
                         @if (! empty($p['es_ctc_pri']))
-                            <span class="mt-1 inline-block rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario">{{ __('Principal') }}</span>
+                            <span class="mt-1 inline-block rounded-full bg-andinist-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-andinist-secundario">{{ __('Principal') }}</span>
                         @endif
                         @if ($p['boleto'])
-                            <p class="mt-2 break-all font-mono text-xs text-pipocas-texto-2">{{ $p['boleto']['cod'] }}</p>
+                            <p class="mt-2 break-all font-mono text-xs text-andinist-texto-2">{{ $p['boleto']['cod'] }}</p>
                             <a href="{{ $p['boleto']['url'] ?? '#' }}"
-                               class="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover">
+                               class="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-andinist-complementario hover:text-andinist-hover">
                                 <i class="fa-solid fa-download"></i>{{ __('Descargar ticket') }}</a>
                         @endif
                     </div>
@@ -210,18 +210,18 @@
     @if ($resena)
         <section class="rsv-tarjeta">
             <h2 class="rsv-titulo mb-2">{{ __('Tu reseña') }}</h2>
-            <p class="text-lg text-pipocas-acento">@for ($i = 1; $i <= 5; $i++)<i class="fa-{{ $i <= $resena->cal ? 'solid' : 'regular' }} fa-star"></i>@endfor</p>
-            @if ($resena->com)<p class="mt-2 text-sm text-pipocas-texto-2">«{{ $resena->com }}»</p>@endif
+            <p class="text-lg text-andinist-acento">@for ($i = 1; $i <= 5; $i++)<i class="fa-{{ $i <= $resena->cal ? 'solid' : 'regular' }} fa-star"></i>@endfor</p>
+            @if ($resena->com)<p class="mt-2 text-sm text-andinist-texto-2">«{{ $resena->com }}»</p>@endif
         </section>
     @elseif ($urlResena)
         <section class="rsv-tarjeta" x-data="{ cal: {{ (int) old('cal', 0) }} }">
             <h2 class="rsv-titulo mb-1">{{ __('¿Qué tal estuvo el tour?') }}</h2>
-            <p class="mb-4 text-sm text-pipocas-texto-2">{{ __('Tu reseña aparecerá como verificada en la página del tour.') }}</p>
+            <p class="mb-4 text-sm text-andinist-texto-2">{{ __('Tu reseña aparecerá como verificada en la página del tour.') }}</p>
             <form method="POST" action="{{ $urlResena }}" class="space-y-3">
                 @csrf
                 <div class="flex gap-1 text-3xl" role="radiogroup" aria-label="{{ __('Calificación') }}">
                     @for ($i = 1; $i <= 5; $i++)
-                        <label class="cursor-pointer text-pipocas-acento">
+                        <label class="cursor-pointer text-andinist-acento">
                             <input type="radio" name="cal" value="{{ $i }}" class="sr-only" x-model.number="cal">
                             <i class="fa-star" :class="cal >= {{ $i }} ? 'fa-solid' : 'fa-regular'" aria-label="{{ $i }} estrella(s)"></i>
                         </label>
@@ -239,7 +239,7 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="rsv-titulo">{{ __('¿No podrás asistir?') }}</h2>
-                    <p class="text-sm text-pipocas-texto-2">{{ __('Puedes cancelar hasta el día anterior a la salida. Lo pagado se registra como reembolso.') }}</p>
+                    <p class="text-sm text-andinist-texto-2">{{ __('Puedes cancelar hasta el día anterior a la salida. Lo pagado se registra como reembolso.') }}</p>
                 </div>
                 <button type="button" class="rsv-btn-sec shrink-0 text-red-600" @click="abierto = true"><i class="fa-solid fa-ban"></i> {{ __('Cancelar reserva') }}</button>
             </div>

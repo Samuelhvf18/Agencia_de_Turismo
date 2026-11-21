@@ -69,10 +69,10 @@
 
     <div class="space-y-6">
         <div>
-            <span class="inline-flex items-center gap-1.5 rounded-full bg-pipocas-complementario/10 px-3 py-1 text-xs font-bold text-pipocas-complementario">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-andinist-complementario/10 px-3 py-1 text-xs font-bold text-andinist-complementario">
                 <i class="fa-solid fa-circle-info"></i>{{ __('Paso opcional') }}</span>
             <h1 class="mt-3 font-titulo text-3xl font-semibold leading-tight sm:text-4xl">{{ __('¿Necesitan equipo?') }}</h1>
-            <p class="mt-2 text-pipocas-texto-2">{{ __('Alquila lo que te falte y lo recibes al iniciar el tour. Si ya tienes tu equipo, continúa sin elegir nada.') }}</p>
+            <p class="mt-2 text-andinist-texto-2">{{ __('Alquila lo que te falte y lo recibes al iniciar el tour. Si ya tienes tu equipo, continúa sin elegir nada.') }}</p>
         </div>
 
         @error('alquileres') <p class="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{{ $message }}</p> @enderror
@@ -81,10 +81,10 @@
             <section class="rsv-tarjeta">
                 <header class="mb-4 flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
-                        <span class="grid h-9 w-9 place-items-center rounded-full bg-pipocas-principal font-bold text-white">{{ $n + 1 }}</span>
+                        <span class="grid h-9 w-9 place-items-center rounded-full bg-andinist-principal font-bold text-white">{{ $n + 1 }}</span>
                         <h2 class="font-bold">{{ $p['nom_cpl'] }}</h2>
                     </div>
-                    <span class="text-sm font-semibold text-pipocas-principal" x-text="'Bs. ' + fmt(subtotalDe({{ $p['id'] }}))"></span>
+                    <span class="text-sm font-semibold text-andinist-principal" x-text="'Bs. ' + fmt(subtotalDe({{ $p['id'] }}))"></span>
                 </header>
 
                 <ul class="divide-y divide-gray-100">
@@ -95,17 +95,17 @@
                             $sinStock = collect($e['items'])->sum('cnt_dis') === 0;
                         @endphp
                         <li class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-3 py-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
-                            <span class="grid h-11 w-11 place-items-center rounded-xl bg-pipocas-fondo text-pipocas-secundario">
+                            <span class="grid h-11 w-11 place-items-center rounded-xl bg-andinist-fondo text-andinist-secundario">
                                 <i class="{{ $e['ico'] ?? 'fa-solid fa-toolbox' }}"></i>
                             </span>
                             <div class="min-w-0">
                                 <p class="flex flex-wrap items-center gap-2 font-semibold">
                                     {{ $e['nom'] }}
                                     @if ($e['eqp_cri'])
-                                        <span class="rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario" title="{{ __('Equipo de seguridad recomendado') }}">{{ __('Recomendado') }}</span>
+                                        <span class="rounded-full bg-andinist-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-andinist-secundario" title="{{ __('Equipo de seguridad recomendado') }}">{{ __('Recomendado') }}</span>
                                     @endif
                                 </p>
-                                <p class="text-sm text-pipocas-texto-2">{{ $e['des'] }} · <b class="text-pipocas-texto">Bs. {{ number_format($e['pre'], 2, ',', '.') }}</b></p>
+                                <p class="text-sm text-andinist-texto-2">{{ $e['des'] }} · <b class="text-andinist-texto">Bs. {{ number_format($e['pre'], 2, ',', '.') }}</b></p>
                             </div>
                             <div class="col-span-2 sm:col-span-1 sm:w-48">
                                 <label for="eq-{{ $clave }}" class="sr-only">{{ __('Talla de :equipo para :nombre', ['equipo' => $e['nom'], 'nombre' => $p['nom_cpl']]) }}</label>
@@ -119,7 +119,7 @@
                                     @endforeach
                                 </select>
                                 <p class="mt-1 text-xs" x-show="sel['{{ $clave }}']" x-cloak>
-                                    <span :class="libres(sel['{{ $clave }}'], '{{ $clave }}') <= 1 ? 'text-pipocas-secundario font-semibold' : 'text-pipocas-texto-2'"
+                                    <span :class="libres(sel['{{ $clave }}'], '{{ $clave }}') <= 1 ? 'text-andinist-secundario font-semibold' : 'text-andinist-texto-2'"
                                           x-text="rsvText('Quedan :cantidad en esta talla').replace(':cantidad', libres(sel['{{ $clave }}'], '{{ $clave }}') - 1)"></span>
                                 </p>
                                 @error($campo) <p class="rsv-error">{{ $message }}</p> @enderror

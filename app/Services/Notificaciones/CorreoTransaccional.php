@@ -56,7 +56,7 @@ class CorreoTransaccional
         $texto = "Tu reserva {$reserva->cod} está confirmada.\nTour: {$reserva->salida->tour->nom}\nSalida: ".
             $reserva->salida->fec_sal->format('d/m/Y').' '.substr($reserva->salida->hra_sal, 0, 5).
             "\nConsulta con tu código y correo: ".route('reservas.consultar', ['cod' => $reserva->cod]);
-        $payload = ['correo' => $reserva->cor_ctc, 'asunto' => "Reserva {$reserva->cod} · Pipocas", 'texto' => $texto, 'adjuntos' => $adjuntos];
+        $payload = ['correo' => $reserva->cor_ctc, 'asunto' => "Reserva {$reserva->cod} · Andinist Bolivia", 'texto' => $texto, 'adjuntos' => $adjuntos];
         $registro->update(['cnd' => array_replace($registro->cnd ?? [], [
             'correo_preparado' => Crypt::encryptString(json_encode($payload, JSON_THROW_ON_ERROR)),
         ])]);

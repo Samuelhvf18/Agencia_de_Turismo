@@ -22,8 +22,8 @@
             <section class="rsv-tarjeta">
                 <div class="mb-4 flex items-start justify-between gap-3">
                     <div>
-                        <h2 class="font-titulo text-xl font-semibold text-pipocas-principal">{{ $t->nom }}</h2>
-                        <p class="text-xs text-pipocas-texto-2">Duración: {{ $fmt($t->dur_hrs, 1) }} h · capacidad del tour:
+                        <h2 class="font-titulo text-xl font-semibold text-andinist-principal">{{ $t->nom }}</h2>
+                        <p class="text-xs text-andinist-texto-2">Duración: {{ $fmt($t->dur_hrs, 1) }} h · capacidad del tour:
                             {{ $t->cap_max }} personas.<br>Promedio observado: {{ $fmt($fila['lambda_obs'], 3) }}
                             solicitudes/día.</p>
                     </div>
@@ -31,7 +31,7 @@
                         <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">Activo desde
                             {{ $p->fec_cal->format('d/m/Y') }}</span>
                     @else
-                        <span class="rounded-full bg-pipocas-acento/30 px-3 py-1 text-xs font-bold text-pipocas-calido">Sin
+                        <span class="rounded-full bg-andinist-acento/30 px-3 py-1 text-xs font-bold text-andinist-calido">Sin
                             configurar</span>
                     @endif
                 </div>
@@ -84,7 +84,7 @@
         <h2 class="rsv-titulo mb-3">Historial de cambios</h2>
         <div class="overflow-x-auto">
             <table class="w-full min-w-[640px] text-left text-sm">
-                <thead class="text-xs uppercase text-pipocas-texto-2">
+                <thead class="text-xs uppercase text-andinist-texto-2">
                     <tr>
                         <th class="py-2">Fecha</th>
                         <th>Tour</th>

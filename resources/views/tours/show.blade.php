@@ -5,7 +5,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @vite(['resources/js/app.js'])
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ $tour->nom }} | Pipocas - Agencia de Viajes y Turismo</title>
+<title>{{ $tour->nom }} | Andinist Bolivia - Agencia de Viajes y Turismo</title>
 <meta name="description" content="{{ \Illuminate\Support\Str::limit($tour->des, 155) }}">
 <link rel="canonical" href="{{ route('tours.show', $tour) }}">
 <meta property="og:title" content="{{ $tour->nom }}">
@@ -93,7 +93,7 @@ a{color:inherit;text-decoration:none}
 
 <header class="top">
   <div class="wrap">
-    <a href="{{ route('home') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span> Pipocas</a>
+    <a href="{{ route('home') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span> Andinist Bolivia</a>
     <span style="display:flex;gap:18px;align-items:center"><span class="lang-switch" style="display:inline-flex;gap:6px;font-weight:700;font-size:13px">
         <a href="{{ request()->fullUrlWithQuery(['lang' => 'es']) }}" @if (app()->getLocale() === 'es') style="text-decoration:underline" @endif>ES</a>
         <span aria-hidden="true">|</span>
@@ -166,7 +166,7 @@ a{color:inherit;text-decoration:none}
           @endforeach
         </ul>
       @else
-        <p style="color:var(--texto-2);font-size:14px">{{ __('Este tour todavía no tiene reseñas. Solo pueden opinar quienes ya lo realizaron con Pipocas.') }}</p>
+        <p style="color:var(--texto-2);font-size:14px">{{ __('Este tour todavía no tiene reseñas. Solo pueden opinar quienes ya lo realizaron con Andinist Bolivia.') }}</p>
       @endif
     </div>
 

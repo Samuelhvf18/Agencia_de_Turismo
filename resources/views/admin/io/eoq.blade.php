@@ -62,7 +62,7 @@
                                     class="text-sm font-normal text-slate-400">/ {{ $f['stock_total'] }}</span></p>
                         </div>
                         <div class="mt-3 h-2 rounded-full bg-slate-200">
-                            <div class="h-full rounded-full {{ $f['reponer'] ? 'bg-amber-500' : 'bg-pipocas-principal' }}"
+                            <div class="h-full rounded-full {{ $f['reponer'] ? 'bg-amber-500' : 'bg-andinist-principal' }}"
                                 style="width: {{ min(100, max(0, ($f['stock_disponible'] * 100) / max(1, $f['stock_total']))) }}%">
                             </div>
                         </div>
@@ -94,7 +94,7 @@
                             </div>
                             <div class="rounded-xl border border-slate-100 p-3">
                                 <dt class="text-[10px] text-slate-500">Cantidad orientativa del modelo</dt>
-                                <dd class="mt-1 text-xl font-extrabold text-pipocas-principal">{{ $e['q_redondeado'] }}
+                                <dd class="mt-1 text-xl font-extrabold text-andinist-principal">{{ $e['q_redondeado'] }}
                                     <span class="text-[10px] font-normal">unidades</span></dd>
                             </div>
                         </dl>
@@ -109,7 +109,7 @@
                             @foreach ($f['historial'] as $mes => $n)
                                 <div class="flex h-full flex-1 flex-col justify-end text-center"><span
                                         class="text-[9px] text-slate-400">{{ $n }}</span>
-                                    <div class="mx-auto w-full rounded-t bg-pipocas-principal/70"
+                                    <div class="mx-auto w-full rounded-t bg-andinist-principal/70"
                                         style="height: {{ max(2, round(($n * 65) / $maximo)) }}px"
                                         title="{{ $mes }}: {{ $n }} alquileres"></div><span
                                         class="mt-1 text-[8px] text-slate-500">{{ substr($mes, 5) }}</span>
@@ -133,7 +133,7 @@
             @empty<div class="admin-empty xl:col-span-2"><i aria-hidden="true" class="fa-solid fa-box-open"></i><strong>No hay equipos
                         registrados</strong>
                     <p>Agrega tipos de equipo y sus unidades para comenzar.</p><a href="{{ route('admin.inventario') }}"
-                        class="mt-3 inline-block font-bold text-pipocas-principal">Ir al inventario →</a>
+                        class="mt-3 inline-block font-bold text-andinist-principal">Ir al inventario →</a>
                 </div>
             @endforelse
         </div>

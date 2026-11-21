@@ -125,7 +125,7 @@
                                     @php $f = $co['filas'][$r] ?? null; @endphp
                                     <td>
                                         @if ($f)
-                                            <span class="block rounded-lg p-2 text-pipocas-principal"
+                                            <span class="block rounded-lg p-2 text-andinist-principal"
                                                 style="background: rgba(31,95,139,{{ max(0.04, ($f['activos'] + $f['fidelizados']) * 0.16) }})"><strong>{{ $pct($f['activos'] + $f['fidelizados'], 0) }}</strong><small
                                                     class="block text-[9px]">{{ $pct($f['fidelizados'], 0) }}
                                                 recurrentes</small></span>@else<span class="text-slate-400"

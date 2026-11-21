@@ -13,20 +13,20 @@
 
     <div class="space-y-6">
         <div>
-            <a href="{{ route('reservas.estado', $reserva) }}" class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
+            <a href="{{ route('reservas.estado', $reserva) }}" class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-andinist-principal hover:text-andinist-hover">
                 <i class="fa-solid fa-arrow-left"></i>{{ __('Volver a la reserva') }}</a>
             <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">{{ __('Pago en línea') }}</h1>
-            <p class="mt-2 text-pipocas-texto-2">{{ __('Reserva') }} <b class="font-mono text-pipocas-texto">{{ $reserva->cod }}</b> · {{ $tour->nom }} · {{ $salida->fec_sal->format('d/m/Y') }}</p>
+            <p class="mt-2 text-andinist-texto-2">{{ __('Reserva') }} <b class="font-mono text-andinist-texto">{{ $reserva->cod }}</b> · {{ $tour->nom }} · {{ $salida->fec_sal->format('d/m/Y') }}</p>
         </div>
 
         <section class="rsv-tarjeta">
             <h2 class="rsv-titulo mb-4">{{ __('Método de pago') }}</h2>
             <div class="grid gap-3 sm:grid-cols-3">
                 @foreach (['tarjeta' => 'fa-regular fa-credit-card', 'qr' => 'fa-solid fa-qrcode', 'transferencia' => 'fa-solid fa-building-columns'] as $valor => $icono)
-                    <label class="cursor-pointer rounded-2xl border-2 border-gray-200 p-4 text-center transition hover:border-pipocas-complementario"
-                           :class="mtd === '{{ $valor }}' && '!border-pipocas-principal bg-pipocas-principal/5 ring-4 ring-pipocas-principal/10'">
+                    <label class="cursor-pointer rounded-2xl border-2 border-gray-200 p-4 text-center transition hover:border-andinist-complementario"
+                           :class="mtd === '{{ $valor }}' && '!border-andinist-principal bg-andinist-principal/5 ring-4 ring-andinist-principal/10'">
                         <input type="radio" name="mtd" value="{{ $valor }}" x-model="mtd" class="sr-only">
-                        <i class="{{ $icono }} text-2xl text-pipocas-secundario"></i>
+                        <i class="{{ $icono }} text-2xl text-andinist-secundario"></i>
                         <p class="mt-2 font-semibold">{{ __($metodos[$valor]) }}</p>
                     </label>
                 @endforeach
@@ -36,7 +36,7 @@
 
         <section class="rsv-tarjeta">
             <h2 class="rsv-titulo mb-1">{{ __('Monto a pagar') }}</h2>
-            <p class="mb-4 text-sm text-pipocas-texto-2">{{ __('Puedes pagar el total o un anticipo de al menos :minimo y completar el saldo después. Los tickets se emiten cuando el pago está completo.', ['minimo' => $bs($minimo)]) }}</p>
+            <p class="mb-4 text-sm text-andinist-texto-2">{{ __('Puedes pagar el total o un anticipo de al menos :minimo y completar el saldo después. Los tickets se emiten cuando el pago está completo.', ['minimo' => $bs($minimo)]) }}</p>
             <div class="flex flex-wrap gap-2">
                 <button type="button" class="rsv-btn-sec px-4 py-2 text-sm" @click="mto = @js(number_format($saldo, 2, '.', ''))">{{ __('Saldo completo') }} · {{ $bs($saldo) }}</button>
                 @if ($minimo < $saldo)
@@ -67,14 +67,14 @@
         <div class="rsv-tarjeta space-y-4">
             <h2 class="rsv-titulo">{{ __('Resumen') }}</h2>
             <dl class="space-y-2 text-sm">
-                <div class="flex justify-between"><dt class="text-pipocas-texto-2">{{ __('Total de la reserva') }}</dt><dd class="font-semibold">{{ $bs($reserva->pre_tot) }}</dd></div>
-                <div class="flex justify-between"><dt class="text-pipocas-texto-2">{{ __('Pagado') }}</dt><dd class="font-semibold text-emerald-700">{{ $bs($pagado) }}</dd></div>
+                <div class="flex justify-between"><dt class="text-andinist-texto-2">{{ __('Total de la reserva') }}</dt><dd class="font-semibold">{{ $bs($reserva->pre_tot) }}</dd></div>
+                <div class="flex justify-between"><dt class="text-andinist-texto-2">{{ __('Pagado') }}</dt><dd class="font-semibold text-emerald-700">{{ $bs($pagado) }}</dd></div>
                 <div class="flex items-baseline justify-between border-t border-dashed border-gray-200 pt-3">
-                    <dt class="font-bold">{{ __('Saldo') }}</dt><dd class="font-titulo text-2xl font-semibold text-pipocas-principal">{{ $bs($saldo) }}</dd>
+                    <dt class="font-bold">{{ __('Saldo') }}</dt><dd class="font-titulo text-2xl font-semibold text-andinist-principal">{{ $bs($saldo) }}</dd>
                 </div>
             </dl>
             <button type="submit" class="rsv-btn w-full text-base"><i class="fa-solid fa-lock"></i> {{ __('Continuar a la pasarela') }}</button>
-            <p class="text-center text-xs text-pipocas-texto-2"><i class="fa-solid fa-flask mr-1"></i> {{ __('Pasarela simulada: no se realizan cobros reales.') }}</p>
+            <p class="text-center text-xs text-andinist-texto-2"><i class="fa-solid fa-flask mr-1"></i> {{ __('Pasarela simulada: no se realizan cobros reales.') }}</p>
         </div>
     </aside>
 </form>

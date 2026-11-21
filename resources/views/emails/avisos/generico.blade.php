@@ -3,7 +3,7 @@
 <body style="margin:0;background:#F8F6F1;font-family:Arial,Helvetica,sans-serif;color:#343A40">
     <div style="max-width:560px;margin:0 auto;padding:24px">
         <div style="background:#1F5F8B;color:#fff;border-radius:16px 16px 0 0;padding:20px 24px">
-            <div style="font-size:20px;font-weight:bold">Pipocas</div>
+            <div style="font-size:20px;font-weight:bold">Andinist Bolivia</div>
             <div style="opacity:.85">{{ $titulo }}</div>
         </div>
         <div style="background:#fff;border-radius:0 0 16px 16px;padding:24px;font-size:14px;line-height:1.5">
@@ -31,7 +31,7 @@
                 @endif
             @endforeach
 
-            <p style="font-size:12px;color:#6B6F72;margin-top:24px">{{ __('Mensaje automático de Pipocas Agencia de Viajes y Turismo.') }}</p>
+            <p style="font-size:12px;color:#6B6F72;margin-top:24px">{{ __('Mensaje automático de Andinist Bolivia Agencia de Viajes y Turismo.') }}</p>
         </div>
     </div>
 </body>

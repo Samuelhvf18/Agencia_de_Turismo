@@ -18,7 +18,7 @@
 
         <div class="overflow-hidden rounded-3xl bg-white shadow-xl">
             <div class="bg-indigo-700 px-6 py-5 text-white">
-                <p class="text-sm opacity-80">{{ __('Pagar a Pipocas Agencia de Viajes y Turismo') }}</p>
+                <p class="text-sm opacity-80">{{ __('Pagar a Andinist Bolivia') }}</p>
                 <p class="mt-1 text-3xl font-bold">Bs. {{ number_format($pago->mto, 2, ',', '.') }}</p>
                 <p class="mt-1 text-xs opacity-80">Referencia {{ $pago->ref_trx }} · {{ __('Reserva') }} {{ $reserva->cod }}</p>
             </div>

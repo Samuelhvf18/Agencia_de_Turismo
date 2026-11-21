@@ -55,26 +55,26 @@
     <div class="space-y-6">
         <div>
             <h1 class="font-titulo text-3xl font-semibold leading-tight sm:text-4xl">{{ __('Revisa tu reserva') }}</h1>
-            <p class="mt-2 text-pipocas-texto-2">{{ __('Verifica que todo esté correcto antes de confirmar. Luego podrás pagar en línea.') }}</p>
+            <p class="mt-2 text-andinist-texto-2">{{ __('Verifica que todo esté correcto antes de confirmar. Luego podrás pagar en línea.') }}</p>
         </div>
 
         {{-- Salida --}}
         <section class="rsv-tarjeta">
             <div class="mb-4 flex items-center justify-between">
                 <h2 class="rsv-titulo">{{ __('Salida') }}</h2>
-                <a href="{{ $editar['salida'] }}" class="text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover"><i class="fa-regular fa-pen-to-square"></i> {{ __('Cambiar') }}</a>
+                <a href="{{ $editar['salida'] }}" class="text-sm font-semibold text-andinist-complementario hover:text-andinist-hover"><i class="fa-regular fa-pen-to-square"></i> {{ __('Cambiar') }}</a>
             </div>
             <dl class="grid gap-4 text-sm sm:grid-cols-3">
                 <div>
-                    <dt class="text-pipocas-texto-2">Tour</dt>
-                    <dd class="font-semibold">{{ $tour->nom }} <span class="font-normal text-pipocas-texto-2">({{ $tour->cod }})</span></dd>
+                    <dt class="text-andinist-texto-2">Tour</dt>
+                    <dd class="font-semibold">{{ $tour->nom }} <span class="font-normal text-andinist-texto-2">({{ $tour->cod }})</span></dd>
                 </div>
                 <div>
-                    <dt class="text-pipocas-texto-2">{{ __('Fecha y hora') }}</dt>
+                    <dt class="text-andinist-texto-2">{{ __('Fecha y hora') }}</dt>
                     <dd class="font-semibold">{{ ucfirst($f->translatedFormat('D j M Y')) }} · {{ substr($salida['hra_sal'], 0, 5) }}</dd>
                 </div>
                 <div>
-                    <dt class="text-pipocas-texto-2">{{ __('Guía') }}</dt>
+                    <dt class="text-andinist-texto-2">{{ __('Guía') }}</dt>
                     <dd class="font-semibold">{{ $salida['gui_nom'] ?? __('Por asignar') }}</dd>
                 </div>
             </dl>
@@ -84,20 +84,20 @@
         <section class="rsv-tarjeta">
             <div class="mb-4 flex items-center justify-between">
                 <h2 class="rsv-titulo">{{ __('Contacto') }}</h2>
-                <a href="{{ $editar['participantes'] }}" class="text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover"><i class="fa-regular fa-pen-to-square"></i> {{ __('Editar') }}</a>
+                <a href="{{ $editar['participantes'] }}" class="text-sm font-semibold text-andinist-complementario hover:text-andinist-hover"><i class="fa-regular fa-pen-to-square"></i> {{ __('Editar') }}</a>
             </div>
             <dl class="grid gap-4 text-sm sm:grid-cols-3">
-                <div><dt class="text-pipocas-texto-2">{{ __('Nombre') }}</dt><dd class="font-semibold">{{ $reserva['nom_ctc'] }}</dd></div>
-                <div class="min-w-0"><dt class="text-pipocas-texto-2">{{ __('Correo') }}</dt><dd class="break-words font-semibold">{{ $reserva['cor_ctc'] }}</dd></div>
-                <div><dt class="text-pipocas-texto-2">{{ __('Teléfono') }}</dt><dd class="font-semibold">{{ $reserva['tel_ctc'] }}</dd></div>
+                <div><dt class="text-andinist-texto-2">{{ __('Nombre') }}</dt><dd class="font-semibold">{{ $reserva['nom_ctc'] }}</dd></div>
+                <div class="min-w-0"><dt class="text-andinist-texto-2">{{ __('Correo') }}</dt><dd class="break-words font-semibold">{{ $reserva['cor_ctc'] }}</dd></div>
+                <div><dt class="text-andinist-texto-2">{{ __('Teléfono') }}</dt><dd class="font-semibold">{{ $reserva['tel_ctc'] }}</dd></div>
             </dl>
         </section>
 
         {{-- Participantes y equipo --}}
         <section class="rsv-tarjeta">
             <div class="mb-2 flex items-center justify-between">
-                <h2 class="rsv-titulo">{{ __('Participantes') }} <span class="text-base text-pipocas-texto-2">({{ count($participantes) }})</span></h2>
-                <a href="{{ $editar['equipo'] }}" class="text-sm font-semibold text-pipocas-complementario hover:text-pipocas-hover"><i class="fa-regular fa-pen-to-square"></i> {{ __('Equipo') }}</a>
+                <h2 class="rsv-titulo">{{ __('Participantes') }} <span class="text-base text-andinist-texto-2">({{ count($participantes) }})</span></h2>
+                <a href="{{ $editar['equipo'] }}" class="text-sm font-semibold text-andinist-complementario hover:text-andinist-hover"><i class="fa-regular fa-pen-to-square"></i> {{ __('Equipo') }}</a>
             </div>
             <ul class="divide-y divide-gray-100">
                 @foreach ($participantes as $n => $p)
@@ -105,15 +105,15 @@
                     <li class="py-4">
                         <div class="flex flex-wrap items-start justify-between gap-2">
                             <div class="flex items-start gap-3">
-                                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-pipocas-principal text-sm font-bold text-white">{{ $n + 1 }}</span>
+                                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-andinist-principal text-sm font-bold text-white">{{ $n + 1 }}</span>
                                 <div>
                                     <p class="font-semibold">
                                         {{ $p['nom_cpl'] }}
                                         @if (! empty($p['es_ctc_pri']))
-                                            <span class="ml-1 rounded-full bg-pipocas-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-pipocas-secundario">{{ __('Principal') }}</span>
+                                            <span class="ml-1 rounded-full bg-andinist-secundario/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-andinist-secundario">{{ __('Principal') }}</span>
                                         @endif
                                     </p>
-                                    <p class="text-xs text-pipocas-texto-2">
+                                    <p class="text-xs text-andinist-texto-2">
                                         {{ $p['tip_doc'] }} {{ $p['num_doc'] }}{{ $p['ci_cmp'] ? '-' . $p['ci_cmp'] : '' }} · {{ $p['eda'] }} años · {{ $p['pais'] }}
                                     </p>
                                 </div>
@@ -127,11 +127,11 @@
                                 <a href="{{ $editar['ficha'] }}" class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700"><i class="fa-solid fa-triangle-exclamation"></i> {{ __('Falta firmar la ficha') }}</a>
                             @endif
                             @forelse ($p['alquileres'] ?? [] as $a)
-                                <span class="inline-flex items-center gap-1 rounded-full bg-pipocas-fondo px-2.5 py-1 text-xs text-pipocas-texto">
-                                    <i class="fa-solid fa-toolbox text-pipocas-secundario"></i> {{ $a['nom'] }} ({{ $a['tal'] }}) · {{ $bs($a['pre']) }}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-andinist-fondo px-2.5 py-1 text-xs text-andinist-texto">
+                                    <i class="fa-solid fa-toolbox text-andinist-secundario"></i> {{ $a['nom'] }} ({{ $a['tal'] }}) · {{ $bs($a['pre']) }}
                                 </span>
                             @empty
-                                <span class="rounded-full bg-pipocas-fondo px-2.5 py-1 text-xs text-pipocas-texto-2">{{ __('Sin equipo alquilado') }}</span>
+                                <span class="rounded-full bg-andinist-fondo px-2.5 py-1 text-xs text-andinist-texto-2">{{ __('Sin equipo alquilado') }}</span>
                             @endforelse
                         </div>
                     </li>
@@ -146,30 +146,30 @@
             <h2 class="rsv-titulo">{{ __('Total a pagar') }}</h2>
             <dl class="space-y-2 text-sm">
                 <div class="flex justify-between">
-                    <dt class="text-pipocas-texto-2">Tour · {{ $bs($tour->pre_bas) }} × {{ count($participantes) }}</dt>
+                    <dt class="text-andinist-texto-2">Tour · {{ $bs($tour->pre_bas) }} × {{ count($participantes) }}</dt>
                     <dd class="font-semibold">{{ $bs($subtotalTour) }}</dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt class="text-pipocas-texto-2">{{ __('Alquiler de equipo') }}</dt>
+                    <dt class="text-andinist-texto-2">{{ __('Alquiler de equipo') }}</dt>
                     <dd class="font-semibold">{{ $bs($subtotalEquipo) }}</dd>
                 </div>
                 <div class="flex items-baseline justify-between border-t border-dashed border-gray-200 pt-3">
                     <dt class="font-bold">{{ __('Total') }}</dt>
-                    <dd class="font-titulo text-3xl font-semibold text-pipocas-principal">{{ $bs($total) }}</dd>
+                    <dd class="font-titulo text-3xl font-semibold text-andinist-principal">{{ $bs($total) }}</dd>
                 </div>
             </dl>
 
             <div>
                 <label class="flex cursor-pointer items-start gap-3 text-sm">
                     <input type="checkbox" name="acp_ter" value="1" required class="rsv-check mt-0.5" @checked(old('acp_ter'))>
-                    <span>{{ __('Acepto los') }} <a href="{{ Route::has('terms.show') ? route('terms.show') : '#' }}" target="_blank" class="font-semibold text-pipocas-principal underline underline-offset-2 hover:text-pipocas-hover">{{ __('términos y condiciones') }}</a> {{ __('y la política de cancelación de Pipocas.') }}</span>
+                    <span>{{ __('Acepto los') }} <a href="{{ Route::has('terms.show') ? route('terms.show') : '#' }}" target="_blank" class="font-semibold text-andinist-principal underline underline-offset-2 hover:text-andinist-hover">{{ __('términos y condiciones') }}</a> {{ __('y la política de cancelación de Andinist Bolivia.') }}</span>
                 </label>
                 @error('acp_ter') <p class="rsv-error pl-8">{{ $message }}</p> @enderror
             </div>
 
             <button type="submit" class="rsv-btn w-full text-base">
                 <i class="fa-solid fa-lock"></i>{{ __('Confirmar reserva') }}</button>
-            <p class="text-center text-xs text-pipocas-texto-2">{{ __('Tu cupo queda reservado como') }} <b>{{ __('pendiente de pago') }}</b>.</p>
+            <p class="text-center text-xs text-andinist-texto-2">{{ __('Tu cupo queda reservado como') }} <b>{{ __('pendiente de pago') }}</b>.</p>
         </div>
     </aside>
 </form>

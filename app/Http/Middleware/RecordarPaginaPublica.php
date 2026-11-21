@@ -11,12 +11,12 @@ class RecordarPaginaPublica
     private const PAGINAS = ['home', 'categorias.show', 'guias.perfil', 'tours.show',
         'reservas.salida', 'reservas.participantes', 'reservas.equipo', 'reservas.ficha',
         'reservas.resumen', 'reservas.confirmada', 'reservas.estado', 'reservas.consultar',
-        'pagos.create', 'chatbot'];
+        'pagos.create', 'chatbot', 'legacy.chatbot.get'];
 
     public function handle(Request $request, Closure $next)
     {
         if (! $request->user() && $request->isMethod('GET') && ! $request->expectsJson()) {
-            if (in_array($request->route()?->getName(), ['login', 'register', 'google.redirect'], true)
+            if (in_array($request->route()?->getName(), ['login', 'legacy.login', 'register', 'legacy.register', 'google.redirect'], true)
                 && ! $request->session()->has('url.intended') && $request->session()->has('auth.pagina_anterior')) {
                 $request->session()->put('url.intended', $request->session()->get('auth.pagina_anterior'));
             }

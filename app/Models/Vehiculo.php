@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /** Vehículo de la flota. Estados: activo, mantenimiento o inactivo. */
 class Vehiculo extends Model
 {
+    use Concerns\ResuelveRutaPorClaveLegible;
+
+    public function getRouteKeyName(): string
+    {
+        return 'pla';
+    }
+
     public const EST_ACTIVO = 'activo';
     public const EST_MANTENIMIENTO = 'mantenimiento';
     public const EST_INACTIVO = 'inactivo';

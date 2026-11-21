@@ -15,15 +15,15 @@
 @section('contenido')
 <div class="mx-auto grid max-w-5xl items-center gap-8 lg:grid-cols-2 lg:gap-12">
     <div class="text-center lg:text-left">
-        <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-pipocas-acento text-2xl text-pipocas-calido lg:mx-0">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-andinist-acento text-2xl text-andinist-calido lg:mx-0">
             <i class="fa-solid fa-ticket"></i>
         </span>
         <h1 class="mt-5 font-titulo text-3xl font-semibold leading-tight sm:text-5xl">{{ __('Consulta tu reserva') }}</h1>
-        <p class="mt-3 text-pipocas-texto-2 sm:text-lg">{{ __('Revisa el estado del pago, la fecha de salida y descarga los tickets con código QR de tus participantes.') }}</p>
+        <p class="mt-3 text-andinist-texto-2 sm:text-lg">{{ __('Revisa el estado del pago, la fecha de salida y descarga los tickets con código QR de tus participantes.') }}</p>
         <ul class="mt-6 hidden space-y-3 text-sm lg:block">
-            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-pipocas-complementario"></i> {{ __('No necesitas una cuenta') }}</li>
-            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-pipocas-complementario"></i> {{ __('El código está en el correo de confirmación') }}</li>
-            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-pipocas-complementario"></i> {{ __('Usa el mismo correo con el que reservaste') }}</li>
+            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-andinist-complementario"></i> {{ __('No necesitas una cuenta') }}</li>
+            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-andinist-complementario"></i> {{ __('El código está en el correo de confirmación') }}</li>
+            <li class="flex items-center gap-3"><i class="fa-solid fa-circle-check text-andinist-complementario"></i> {{ __('Usa el mismo correo con el que reservaste') }}</li>
         </ul>
     </div>
 
@@ -40,7 +40,7 @@
         <div>
             <label for="cod" class="rsv-etiqueta">{{ __('Código de reserva') }}</label>
             <div class="relative">
-                <i class="fa-solid fa-hashtag pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-pipocas-texto-2"></i>
+                <i class="fa-solid fa-hashtag pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-andinist-texto-2"></i>
                 <input id="cod" name="cod" type="text" maxlength="20" required autocomplete="off" autocapitalize="characters"
                        value="{{ old('cod', request('cod')) }}" placeholder="PIP-2610-4F7K"
                        class="rsv-campo py-3 pl-10 font-mono uppercase tracking-wider">
@@ -51,7 +51,7 @@
         <div>
             <label for="cor_ctc" class="rsv-etiqueta">{{ __('Correo del contacto') }}</label>
             <div class="relative">
-                <i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-pipocas-texto-2"></i>
+                <i class="fa-regular fa-envelope pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-andinist-texto-2"></i>
                 <input id="cor_ctc" name="cor_ctc" type="email" maxlength="150" required autocomplete="email"
                        value="{{ old('cor_ctc') }}" placeholder="you@example.com" class="rsv-campo py-3 pl-10">
             </div>
@@ -60,9 +60,9 @@
 
         <button type="submit" class="rsv-btn w-full text-base"><i class="fa-solid fa-magnifying-glass"></i> {{ __('Buscar reserva') }}</button>
 
-        <p class="text-center text-sm text-pipocas-texto-2">
+        <p class="text-center text-sm text-andinist-texto-2">
             ¿Perdiste tu código? Escríbenos a nuestro chatbot
-            <a href="{{ url('/chatbot') }}" class="font-semibold text-pipocas-principal hover:text-pipocas-hover">{{ __('aquí') }}</a>.
+            <a href="{{ route('chatbot') }}" class="font-semibold text-andinist-principal hover:text-andinist-hover">{{ __('aquí') }}</a>.
         </p>
     </form>
 </div>

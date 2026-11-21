@@ -66,11 +66,11 @@
                             <p>Accesos directos para coordinar el día.</p>
                         </div>
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-2"><a href="{{ route('admin.operaciones') }}" class="io-tool"><i aria-hidden="true" class="fa-solid fa-calendar-check text-2xl text-pipocas-principal"></i>
+                    <div class="grid gap-4 sm:grid-cols-2"><a href="{{ route('admin.operaciones') }}" class="io-tool"><i aria-hidden="true" class="fa-solid fa-calendar-check text-2xl text-andinist-principal"></i>
                             <h2>Salidas y recursos</h2>
                             <p>Revisa horarios y confirma que cada salida tenga equipo y personal.</p><span
                                 class="tool-link">Ir a operaciones <i aria-hidden="true" class="fa-solid fa-arrow-right"></i></span>
-                        </a><a href="{{ route('admin.reservas') }}" class="io-tool"><i aria-hidden="true" class="fa-solid fa-ticket text-2xl text-pipocas-secundario"></i>
+                        </a><a href="{{ route('admin.reservas') }}" class="io-tool"><i aria-hidden="true" class="fa-solid fa-ticket text-2xl text-andinist-secundario"></i>
                             <h2>Reservas y pasajeros</h2>
                             <p>Consulta participantes, pendientes de pago y detalles de cada reserva.</p><span
                                 class="tool-link">Ver reservas <i aria-hidden="true" class="fa-solid fa-arrow-right"></i></span>
@@ -108,7 +108,7 @@
                 <div>
                     <h2>Salidas de hoy</h2>
                     <p>Tu agenda operativa y sus responsables</p>
-                </div><a href="{{ route('admin.operaciones') }}" class="text-xs font-bold text-pipocas-principal">Ver todas
+                </div><a href="{{ route('admin.operaciones') }}" class="text-xs font-bold text-andinist-principal">Ver todas
                     <i aria-hidden="true" class="fa-solid fa-arrow-right ml-1"></i></a>
             </div>
             <div class="overflow-x-auto">
@@ -134,7 +134,7 @@
                                         {{ $s->cap_max }}</span></td>
                                 <td><span class="admin-pill">{{ ucfirst(str_replace('_', ' ', $s->est)) }}</span></td>
                                 <td><a href="{{ route('admin.salidas.edit', $s) }}"
-                                        class="admin-icon-button text-pipocas-principal"
+                                        class="admin-icon-button text-andinist-principal"
                                         aria-label="Revisar salida de {{ $s->tour->nom }}"><i aria-hidden="true" class="fa-solid fa-arrow-up-right-from-square"></i></a></td>
                         </tr>@empty<tr>
                                 <td colspan="6">
@@ -142,7 +142,7 @@
                                             hoy</strong>
                                         <p class="mt-1">Revisa las próximas fechas o programa una nueva experiencia.</p>
                                         <a href="{{ route('admin.operaciones') }}"
-                                            class="mt-3 inline-block font-bold text-pipocas-principal">Ver calendario de
+                                            class="mt-3 inline-block font-bold text-andinist-principal">Ver calendario de
                                             salidas →</a>
                                     </div>
                                 </td>

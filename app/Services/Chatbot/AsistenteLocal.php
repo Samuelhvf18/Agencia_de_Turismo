@@ -92,8 +92,8 @@ class AsistenteLocal
         }
 
         return ['intencion' => 'saludo', 'derivar' => false, 'respuesta' => $en
-            ? "Hi! I'm Pipocas' travel assistant. I can recommend tours by time, fitness and budget, answer questions (altitude, what to bring, payments, cancellations) and check your booking with its code and email. You can also ask to talk to a person."
-            : '¡Hola! Soy el asistente de Pipocas. Puedo recomendarte tours según tu tiempo, condición física y presupuesto, responder dudas (altura, qué llevar, pagos, cancelaciones) y consultar tu reserva con su código y correo. También puedes pedir hablar con una persona.'];
+            ? "Hi! I'm the Andinist Bolivia travel assistant. I can recommend tours by time, fitness and budget, answer questions (altitude, what to bring, payments, cancellations) and check your booking with its code and email. You can also ask to talk to a person."
+            : '¡Hola! Soy el asistente de Andinist Bolivia. Puedo recomendarte tours según tu tiempo, condición física y presupuesto, responder dudas (altura, qué llevar, pagos, cancelaciones) y consultar tu reserva con su código y correo. También puedes pedir hablar con una persona.'];
     }
 
     /** @return array{0: ?float, 1: ?string, 2: ?float} horas máximas, dificultad máxima y presupuesto */

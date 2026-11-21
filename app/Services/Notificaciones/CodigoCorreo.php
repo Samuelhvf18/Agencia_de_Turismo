@@ -23,7 +23,7 @@ class CodigoCorreo
 
         $accion = $proposito === 'verificar' ? 'verificar tu cuenta' : 'restablecer tu contraseña';
         try {
-            app(CorreoTransaccional::class)->enviar($correo, 'Pipocas · Código de seguridad',
+            app(CorreoTransaccional::class)->enviar($correo, 'Andinist Bolivia · Código de seguridad',
                 "Tu código para {$accion} es: {$codigo}\n\nVence en 10 minutos y solo se puede usar una vez. Ingresa el código en la página donde lo solicitaste. No lo compartas. Si no lo solicitaste, ignora este correo.");
         } catch (\Throwable $e) {
             DB::table('codigos_correo')->where('correo', $correo)->where('proposito', $proposito)->delete();

@@ -26,7 +26,7 @@
     @php($b = $item['boleto'])
     @php($p = $b->participante)
     <div class="boleto">
-        <div class="marca">Pipocas</div>
+        <div class="marca">Andinist Bolivia</div>
         <div class="sub">{{ __('Agencia de Viajes y Turismo · La Paz, Bolivia') }}</div>
 
         <div class="tour">{{ $tour->nom }}</div>

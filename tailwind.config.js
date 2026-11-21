@@ -15,12 +15,12 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                // Tipografía de Pipocas (igual que tours/show.blade.php)
+                // Tipografía de Andinist Bolivia (igual que tours/show.blade.php)
                 titulo: ['Fraunces', 'Georgia', ...defaultTheme.fontFamily.serif],
                 cuerpo: ['"Plus Jakarta Sans"', 'system-ui', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                pipocas: {
+                andinist: {
                     principal: '#1F5F8B',
                     secundario: '#C96F4A',
                     acento: '#F4C95D',

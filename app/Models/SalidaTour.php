@@ -33,6 +33,27 @@ class SalidaTour extends Model
         ];
     }
 
+    public function getRouteKey(): string
+    {
+        return $this->fec_sal->toDateString().'-'.$this->getKey();
+    }
+
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        if ($field !== null) {
+            return parent::resolveRouteBindingQuery($query, $value, $field);
+        }
+
+        // El ID mantiene válido el enlace aunque cambie la fecha de la salida.
+        if (preg_match('/^\d{4}-\d{2}-\d{2}-([0-9]+)$/D', (string) $value, $partes)) {
+            $value = $partes[1];
+        }
+
+        $id = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        return $id === false ? $query->whereRaw('1 = 0') : parent::resolveRouteBindingQuery($query, $id);
+    }
+
     public function tour(): BelongsTo
     {
         return $this->belongsTo(Tour::class, 'tur_id');

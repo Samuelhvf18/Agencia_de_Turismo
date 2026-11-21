@@ -32,7 +32,7 @@ class AdminUserSeeder extends Seeder
             ['cor' => strtolower($correo)],
             [
                 'rol_id' => $rolAdmin->id,
-                'nom' => 'Administrador Pipocas',
+                'nom' => 'Administrador Andinist Bolivia',
                 'clv' => $password,
                 'ci_cmp' => '',
                 'act' => true,

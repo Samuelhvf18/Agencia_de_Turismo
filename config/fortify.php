@@ -73,7 +73,13 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    'home' => '/mi-panel',
+
+    'paths' => [
+        'login' => '/iniciar-sesion',
+        'register' => '/crear-cuenta',
+        'logout' => '/cerrar-sesion',
+    ],
 
     /*
     |--------------------------------------------------------------------------

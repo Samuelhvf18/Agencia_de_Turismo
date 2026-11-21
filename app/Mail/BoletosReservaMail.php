@@ -21,7 +21,7 @@ class BoletosReservaMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: __('Tu reserva :codigo está confirmada', ['codigo' => $this->reserva->cod]).' · Pipocas');
+        return new Envelope(subject: __('Tu reserva :codigo está confirmada', ['codigo' => $this->reserva->cod]).' · Andinist Bolivia');
     }
 
     public function content(): Content

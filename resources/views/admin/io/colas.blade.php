@@ -104,7 +104,7 @@
                         <tr>
                             <td>Guías / capacidad</td>
                             <td>{{ $sel['c'] }} / {{ $sel['k'] }}</td>
-                            <td class="font-bold text-pipocas-principal">{{ $simC }} / {{ $simK }}</td>
+                            <td class="font-bold text-andinist-principal">{{ $simC }} / {{ $simK }}</td>
                         </tr>
                         <tr>
                             <td>Solicitudes por día</td>
@@ -131,7 +131,7 @@
                     </tbody>
                 </table>
             </div>
-            <p class="mt-4 text-xs text-slate-500"><i aria-hidden="true" class="fa-solid fa-circle-info mr-1 text-pipocas-principal"></i> Estos
+            <p class="mt-4 text-xs text-slate-500"><i aria-hidden="true" class="fa-solid fa-circle-info mr-1 text-andinist-principal"></i> Estos
                 cambios son hipotéticos. Para organizar salidas reales, revisa las propuestas de asignación y la
                 disponibilidad de personal.</p>
         @else<p class="mt-4 text-xs text-slate-500">Empieza con una pregunta sencilla: si llega más gente, ¿mantener los
@@ -220,7 +220,7 @@
                     @foreach ($tours as $t)
                         <tr>
                             <td><a href="{{ $formAction }}?tour={{ $t['id'] }}"
-                                    class="font-bold text-pipocas-principal">{{ $t['nom'] }} <i aria-hidden="true" class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px]"></i></a></td>
+                                    class="font-bold text-andinist-principal">{{ $t['nom'] }} <i aria-hidden="true" class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px]"></i></a></td>
                             <td>{{ $t['c'] }} / {{ $t['k'] }}</td>
                             <td>{{ $fmt($t['lambda']) }}</td>
                             <td>{{ $tiempo($t['wq_hrs']) }}</td>

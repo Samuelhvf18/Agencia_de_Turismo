@@ -14,7 +14,7 @@
                     <i class="fa-solid fa-mountain-sun text-3xl text-[#F4C95D]"></i>
                 </div>
                 <h1 class="text-4xl font-bold tracking-tight text-[#343A40]">
-                    <span class="text-[#1F5F8B]">Pipocas</span>
+                    <span class="text-[#1F5F8B]">Andinist Bolivia</span>
                 </h1>
                 <p class="mt-2 text-sm font-medium text-[#6B4F3A]">
                     Agencia de Viajes y Turismo
@@ -250,7 +250,7 @@
                     </span>
                 </div>
                 <p class="mt-2 text-xs text-[#9A9A9A]">
-                    © {{ date('Y') }} Pipocas
+                    © {{ date('Y') }} Andinist Bolivia
                 </p>
             </div>
         </div>

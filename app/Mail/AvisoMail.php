@@ -19,7 +19,7 @@ class AvisoMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: __(NotificacionService::TIPOS[$this->registro->tip] ?? 'Aviso').' · Pipocas');
+        return new Envelope(subject: __(NotificacionService::TIPOS[$this->registro->tip] ?? 'Aviso').' · Andinist Bolivia');
     }
 
     public function content(): Content

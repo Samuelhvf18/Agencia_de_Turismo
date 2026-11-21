@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#0f172a">
-    <title>@yield('titulo', 'Check-in') | Pipocas</title>
+    <title>@yield('titulo', 'Check-in') | Andinist Bolivia</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <meta name="offline-account" content="{{ auth()->id() }}">

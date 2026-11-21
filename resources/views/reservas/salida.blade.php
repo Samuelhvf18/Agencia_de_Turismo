@@ -47,10 +47,10 @@
     <div class="space-y-6">
         <div>
             <a href="{{ Route::has('tours.show') && isset($tour->id) ? route('tours.show', $tour) : url('/') }}"
-               class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-pipocas-principal hover:text-pipocas-hover">
+               class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-andinist-principal hover:text-andinist-hover">
                 <i class="fa-solid fa-arrow-left"></i>{{ __('Volver al tour') }}</a>
-            <h1 class="font-titulo text-3xl font-semibold leading-tight text-pipocas-texto sm:text-4xl">{{ __('¿Cuándo quieres ir?') }}</h1>
-            <p class="mt-2 text-pipocas-texto-2">{{ __('Elige una de las salidas programadas para') }} <b class="text-pipocas-texto">{{ $tour->nom }}</b>{{ __('. Los cupos se actualizan en tiempo real.') }}</p>
+            <h1 class="font-titulo text-3xl font-semibold leading-tight text-andinist-texto sm:text-4xl">{{ __('¿Cuándo quieres ir?') }}</h1>
+            <p class="mt-2 text-andinist-texto-2">{{ __('Elige una de las salidas programadas para') }} <b class="text-andinist-texto">{{ $tour->nom }}</b>{{ __('. Los cupos se actualizan en tiempo real.') }}</p>
         </div>
 
         @error('sal_tur_id')
@@ -61,13 +61,13 @@
             @php $f = \Carbon\Carbon::parse($fecha)->locale(app()->getLocale()); @endphp
             <section class="rsv-tarjeta">
                 <header class="mb-4 flex items-center gap-4">
-                    <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-pipocas-principal/10 text-center leading-none text-pipocas-principal">
+                    <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-andinist-principal/10 text-center leading-none text-andinist-principal">
                         <span class="text-[11px] font-bold uppercase">{{ $f->translatedFormat('M') }}</span>
                         <span class="font-titulo text-2xl font-semibold">{{ $f->format('j') }}</span>
                     </div>
                     <div>
                         <h2 class="font-bold">{{ ucfirst($f->translatedFormat(app()->isLocale('en') ? 'F j, Y' : 'l j \d\e F')) }}</h2>
-                        <p class="text-sm text-pipocas-texto-2">{{ $f->diffForHumans(['parts' => 1, 'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW]) }} · {{ $lista->count() }} {{ $lista->count() == 1 ? __('horario') : __('horarios') }}</p>
+                        <p class="text-sm text-andinist-texto-2">{{ $f->diffForHumans(['parts' => 1, 'syntax' => \Carbon\CarbonInterface::DIFF_RELATIVE_TO_NOW]) }} · {{ $lista->count() }} {{ $lista->count() == 1 ? __('horario') : __('horarios') }}</p>
                     </div>
                 </header>
 
@@ -82,10 +82,10 @@
                         <label @class([
                             'relative block rounded-2xl border-2 p-4 transition',
                             'cursor-not-allowed border-gray-200 bg-gray-50 opacity-70' => $agotada,
-                            'cursor-pointer border-gray-200 hover:border-pipocas-complementario' => ! $agotada,
+                            'cursor-pointer border-gray-200 hover:border-andinist-complementario' => ! $agotada,
                         ])
                             @unless ($agotada)
-                                :class="sal === {{ $s['id'] }} && '!border-pipocas-principal bg-pipocas-principal/5 ring-4 ring-pipocas-principal/10'"
+                                :class="sal === {{ $s['id'] }} && '!border-andinist-principal bg-andinist-principal/5 ring-4 ring-andinist-principal/10'"
                             @endunless>
                             <input type="radio" name="sal_tur_id" value="{{ $s['id'] }}" class="sr-only"
                                    x-model.number="sal" @change="disp = {{ $libres }}; cnt = Math.min(cnt, {{ $libres }})"
@@ -93,16 +93,16 @@
 
                             <div class="flex items-start justify-between gap-3">
                                 <div>
-                                    <p class="font-titulo text-2xl font-semibold text-pipocas-texto">{{ substr($s['hra_sal'], 0, 5) }}</p>
-                                    <p class="text-xs text-pipocas-texto-2">{{ __('Salida desde La Paz') }}</p>
+                                    <p class="font-titulo text-2xl font-semibold text-andinist-texto">{{ substr($s['hra_sal'], 0, 5) }}</p>
+                                    <p class="text-xs text-andinist-texto-2">{{ __('Salida desde La Paz') }}</p>
                                 </div>
                                 @if ($agotada)
                                     <span class="rounded-full bg-gray-200 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-gray-600">{{ __('Agotado') }}</span>
                                 @elseif ($pocos)
-                                    <span class="rounded-full bg-pipocas-acento/30 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-pipocas-calido">{{ __('¡Últimos :cantidad!', ['cantidad' => $libres]) }}</span>
+                                    <span class="rounded-full bg-andinist-acento/30 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide text-andinist-calido">{{ __('¡Últimos :cantidad!', ['cantidad' => $libres]) }}</span>
                                 @else
                                     <span class="grid h-6 w-6 place-items-center rounded-full border-2 border-gray-300 text-[10px] text-white"
-                                          :class="sal === {{ $s['id'] }} && '!border-pipocas-principal bg-pipocas-principal'">
+                                          :class="sal === {{ $s['id'] }} && '!border-andinist-principal bg-andinist-principal'">
                                         <i class="fa-solid fa-check" x-show="sal === {{ $s['id'] }}" x-cloak></i>
                                     </span>
                                 @endif
@@ -110,17 +110,17 @@
 
                             <div class="mt-4">
                                 <div class="mb-1.5 flex justify-between text-xs">
-                                    <span class="font-semibold {{ $agotada ? 'text-gray-500' : 'text-pipocas-texto' }}">
+                                    <span class="font-semibold {{ $agotada ? 'text-gray-500' : 'text-andinist-texto' }}">
                                         {{ $agotada ? 'Sin cupos' : $libres . ' ' . ($libres == 1 ? 'cupo disponible' : 'cupos disponibles') }}
                                     </span>
-                                    <span class="text-pipocas-texto-2">{{ $s['cup_ocu'] }}/{{ $s['cap_max'] }}</span>
+                                    <span class="text-andinist-texto-2">{{ $s['cup_ocu'] }}/{{ $s['cap_max'] }}</span>
                                 </div>
                                 <div class="h-2 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-valuenow="{{ $pct }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('Ocupación') }}">
                                     <div @class([
                                         'h-full rounded-full',
                                         'bg-gray-400' => $agotada,
-                                        'bg-pipocas-secundario' => $pocos,
-                                        'bg-pipocas-complementario' => ! $agotada && ! $pocos,
+                                        'bg-andinist-secundario' => $pocos,
+                                        'bg-andinist-complementario' => ! $agotada && ! $pocos,
                                     ]) style="width: {{ $pct }}%"></div>
                                 </div>
                             </div>
@@ -130,9 +130,9 @@
             </section>
         @empty
             <div class="rsv-tarjeta text-center">
-                <i class="fa-regular fa-calendar-xmark text-4xl text-pipocas-secundario"></i>
+                <i class="fa-regular fa-calendar-xmark text-4xl text-andinist-secundario"></i>
                 <h2 class="rsv-titulo mt-3">{{ __('No hay salidas programadas') }}</h2>
-                <p class="mt-1 text-pipocas-texto-2">{{ __('Vuelve pronto o escríbenos para armar una salida privada.') }}</p>
+                <p class="mt-1 text-andinist-texto-2">{{ __('Vuelve pronto o escríbenos para armar una salida privada.') }}</p>
             </div>
         @endforelse
 
@@ -141,17 +141,17 @@
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="rsv-titulo">{{ __('¿Cuántas personas?') }}</h2>
-                    <p class="text-sm text-pipocas-texto-2" x-show="!sal">{{ __('Primero elige un horario.') }}</p>
-                    <p class="text-sm text-pipocas-texto-2" x-show="sal" x-cloak>{{ __('Máximo') }} <span x-text="disp"></span> {{ __('en esta salida.') }}</p>
+                    <p class="text-sm text-andinist-texto-2" x-show="!sal">{{ __('Primero elige un horario.') }}</p>
+                    <p class="text-sm text-andinist-texto-2" x-show="sal" x-cloak>{{ __('Máximo') }} <span x-text="disp"></span> {{ __('en esta salida.') }}</p>
                 </div>
                 <div class="flex items-center gap-3 self-start sm:self-auto">
-                    <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-pipocas-principal transition hover:bg-pipocas-fondo disabled:opacity-40"
+                    <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-andinist-principal transition hover:bg-andinist-fondo disabled:opacity-40"
                             @click="cnt = Math.max(1, cnt - 1)" :disabled="cnt <= 1" aria-label="{{ __('Quitar una persona') }}">
                         <i class="fa-solid fa-minus"></i>
                     </button>
                     <input type="number" name="cnt_ptc" min="1" max="{{ $maxCupo }}" x-model.number="cnt" :max="disp || {{ $maxCupo }}"
                            class="rsv-campo w-16 text-center text-lg font-bold" aria-label="{{ __('Cantidad de participantes') }}">
-                    <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-pipocas-principal transition hover:bg-pipocas-fondo disabled:opacity-40"
+                    <button type="button" class="grid h-11 w-11 place-items-center rounded-xl border border-gray-300 bg-white text-andinist-principal transition hover:bg-andinist-fondo disabled:opacity-40"
                             @click="cnt = Math.min(disp || {{ $maxCupo }}, cnt + 1)" :disabled="sal && cnt >= disp" aria-label="{{ __('Agregar una persona') }}">
                         <i class="fa-solid fa-plus"></i>
                     </button>
@@ -167,7 +167,7 @@
             <button type="submit" class="rsv-btn w-full" :disabled="!sal">
                 Continuar con los participantes <i class="fa-solid fa-arrow-right"></i>
             </button>
-            <p class="text-center text-xs text-pipocas-texto-2"><i class="fa-solid fa-shield-halved mr-1 text-pipocas-complementario"></i> {{ __('Aún no se cobra nada') }}</p>
+            <p class="text-center text-xs text-andinist-texto-2"><i class="fa-solid fa-shield-halved mr-1 text-andinist-complementario"></i> {{ __('Aún no se cobra nada') }}</p>
         </x-reserva.resumen-tour>
     </aside>
 </form>

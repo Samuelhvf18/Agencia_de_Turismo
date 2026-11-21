@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tour extends Model
 {
+    use Concerns\ResuelveRutaPorClaveLegible;
+
+    public function getRouteKeyName(): string
+    {
+        return 'rta_amg';
+    }
+
     protected $table = 'tours';
 
     const CREATED_AT = 'cre_en';

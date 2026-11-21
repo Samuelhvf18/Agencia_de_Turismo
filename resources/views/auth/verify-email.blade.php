@@ -1,6 +1,6 @@
 <x-guest-layout>
 <div class="mx-auto my-12 max-w-lg rounded-2xl bg-white p-6 shadow">
-    <a href="{{ route('home') }}" class="text-xl font-bold text-[#1F5F8B]">Pipocas · Agencia de Viajes y Turismo</a>
+    <a href="{{ route('home') }}" class="text-xl font-bold text-[#1F5F8B]">Andinist Bolivia · Agencia de Viajes y Turismo</a>
     <h1 class="mt-5 text-2xl font-bold">Verifica tu correo</h1>
     <p class="my-4">Enviamos un código de 6 dígitos a <strong>{{ auth()->user()->cor }}</strong>. Léelo desde tu celular o computadora y escríbelo aquí. Vence en 10 minutos.</p>
     @if (session('status'))<p class="my-3 text-green-700" role="status">Enviamos un nuevo código. Revisa también spam.</p>@endif

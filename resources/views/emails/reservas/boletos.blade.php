@@ -3,7 +3,7 @@
 <body style="margin:0;background:#F8F6F1;font-family:Arial,Helvetica,sans-serif;color:#343A40">
     <div style="max-width:560px;margin:0 auto;padding:24px">
         <div style="background:#1F5F8B;color:#fff;border-radius:16px 16px 0 0;padding:24px">
-            <div style="font-size:22px;font-weight:bold">Pipocas</div>
+            <div style="font-size:22px;font-weight:bold">Andinist Bolivia</div>
             <div style="opacity:.85">{{ __('¡Tu reserva está confirmada!') }}</div>
         </div>
         <div style="background:#fff;border-radius:0 0 16px 16px;padding:24px">

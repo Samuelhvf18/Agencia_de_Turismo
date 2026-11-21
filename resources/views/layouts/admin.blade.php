@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('header-title', 'Administración') · Pipocas</title>
+    <title>@yield('header-title', 'Administración') · Andinist Bolivia</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -59,7 +59,7 @@
     <aside class="admin-sidebar" :class="{ 'is-open': menu }" :inert="!menu && movil" aria-label="Navegación principal">
         <a href="{{ route('admin.dashboard') }}" class="admin-brand">
             <span class="admin-brand-icon"><i aria-hidden="true" class="fa-solid fa-mountain-sun"></i></span>
-            <span><strong>Pipocas<span class="text-[#F4C95D]">.</span></strong><small>GESTIÓN DE TU
+            <span><strong>Andinist Bolivia<span class="text-[#F4C95D]">.</span></strong><small>GESTIÓN DE TU
                     AGENCIA</small></span>
         </a>
         <div class="admin-workspace"><span class="admin-online"></span> Espacio de administración <button type="button"
@@ -111,15 +111,15 @@
         <main id="contenido-admin" class="admin-main" tabindex="-1">
             <div class="admin-page-heading">
                 <div>
-                    <p class="admin-eyebrow">PIPOCAS /
-                        {{ request()->routeIs('admin.io.*') ? 'PLANIFICACIÓN' : 'ADMINISTRACIÓN' }}</p>
+                    <p class="admin-eyebrow">ANDINIST BOLIVIA /
+                        {{ request()->routeIs('admin.io.*', 'admin.legacy.io.*') ? 'PLANIFICACIÓN' : 'ADMINISTRACIÓN' }}</p>
                     <h1>@yield('header-title', 'Vista general')</h1>
                     <p class="admin-page-description">@yield('page-description', 'Toda la información de tu agencia, en un solo lugar.')</p>
                 </div>
                 <div class="admin-page-actions">@yield('page-actions')</div>
             </div>
             @yield('content')
-            <footer class="admin-footer"><span>Pipocas · Agencia de turismo</span><span>Planifica mejor. Viaja más
+            <footer class="admin-footer"><span>Andinist Bolivia · Agencia de turismo</span><span>Planifica mejor. Viaja más
                     lejos.</span></footer>
         </main>
     </div>

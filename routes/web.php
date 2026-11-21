@@ -28,12 +28,41 @@ use App\Models\User;
 use App\Services\Io\IoDemoData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Features;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\RegisteredUserController;
 
 /*
 |--------------------------------------------------------------------------
 | Rutas públicas
 |--------------------------------------------------------------------------
 */
+
+// La ruta nombrada genera la URL nueva. La anterior conserva el método y sus permisos.
+$rutaLegible = static function (array $metodos, string $ruta, string $anterior, mixed $accion, array $middleware = []) {
+    $nombreAnterior = 'legacy.'.str_replace('/', '.', trim($anterior, '/')).'.'.strtolower($metodos[0]);
+    Route::match($metodos, $anterior, $accion)->middleware($middleware)->name($nombreAnterior);
+
+    return Route::match($metodos, $ruta, $accion)->middleware($middleware);
+};
+
+// Compatibilidad con los formularios de acceso anteriores a las rutas de Fortify en español.
+$guardiaFortify = config('fortify.guard');
+$invitadoFortify = 'guest:'.$guardiaFortify;
+if (config('fortify.views', true)) {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->middleware($invitadoFortify)->name('legacy.login');
+}
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware(array_filter([
+    $invitadoFortify, config('fortify.limiters.login') ? 'throttle:'.config('fortify.limiters.login') : null,
+]));
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->middleware(config('fortify.auth_middleware', 'auth').':'.$guardiaFortify);
+if (Features::enabled(Features::registration())) {
+    if (config('fortify.views', true)) {
+        Route::get('/register', [RegisteredUserController::class, 'create'])->middleware($invitadoFortify)->name('legacy.register');
+    }
+    Route::post('/register', [RegisteredUserController::class, 'store'])->middleware($invitadoFortify);
+}
 
 Route::view('/recuperar-contrasena', 'auth.recuperar-codigo')->middleware('guest')->name('codigo.recuperar');
 Route::post('/recuperar-contrasena/codigo', [CodigoCorreoController::class, 'solicitar'])->middleware(['guest', 'throttle:5,1'])->name('codigo.solicitar');
@@ -93,9 +122,9 @@ Route::post('/pasarela/{ref}', [PagoController::class, 'resolver'])->name('pasar
 Route::post('/webhooks/pasarela', [PagoController::class, 'webhook'])->name('webhooks.pasarela');
 
 // Asistente turístico: público (turistas e invitados, RF-28); IA en n8n con respaldo local.
-Route::get('/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
-Route::post('/chatbot/mensajes', [ChatbotController::class, 'enviar'])->middleware('throttle:20,1')->name('chatbot.enviar');
-Route::get('/chatbot/mensajes', [ChatbotController::class, 'mensajes'])->middleware('throttle:60,1')->name('chatbot.mensajes');
+$rutaLegible(['GET', 'HEAD'], '/asistente-turistico', '/chatbot', [ChatbotController::class, 'index'])->name('chatbot');
+$rutaLegible(['POST'], '/asistente-turistico/mensajes', '/chatbot/mensajes', [ChatbotController::class, 'enviar'], ['throttle:20,1'])->name('chatbot.enviar');
+$rutaLegible(['GET', 'HEAD'], '/asistente-turistico/mensajes', '/chatbot/mensajes', [ChatbotController::class, 'mensajes'], ['throttle:60,1'])->name('chatbot.mensajes');
 
 /*
 |--------------------------------------------------------------------------
@@ -107,24 +136,24 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-])->group(function () {
+])->group(function () use ($rutaLegible) {
     // Inicio genérico: cada rol va a su propia pantalla.
     Route::get('/mis-reservas', [ConsultaReservaController::class, 'historial'])->name('reservas.historial');
     Route::middleware('rol:'.User::ROL_TURISTA)->group(function () {
         Route::get('/mi-cuenta', [CuentaTuristaController::class, 'show'])->name('turista.cuenta');
         Route::put('/mi-cuenta', [CuentaTuristaController::class, 'update'])->name('turista.cuenta.update');
     });
-    Route::get('/dashboard', fn (Request $request) => redirect($request->user()->rutaInicio()))->name('dashboard');
+    $rutaLegible(['GET', 'HEAD'], '/mi-panel', '/dashboard', fn (Request $request) => redirect($request->user()->rutaInicio()))->name('dashboard');
 
     // Panel administrativo: administrador y personal de operaciones.
-    Route::prefix('admin')->name('admin.')->middleware('rol:'.User::ROL_ADMIN.','.User::ROL_OPERACIONES)->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('rol:'.User::ROL_ADMIN.','.User::ROL_OPERACIONES)->group(function () use ($rutaLegible) {
         Route::get('/mis-reservas', [ConsultaReservaController::class, 'historial'])->name('reservas.historial');
-        Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+        $rutaLegible(['GET', 'HEAD'], '/panel', '/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 
         // Operaciones y salidas (M04)
         Route::get('/operaciones', [SalidasController::class, 'index'])->name('operaciones');
         Route::post('/salidas', [SalidasController::class, 'store'])->name('salidas.store');
-        Route::get('/salidas/{salida}', [SalidasController::class, 'edit'])->name('salidas.edit');
+        $rutaLegible(['GET', 'HEAD'], '/salidas/{salida}/editar', '/salidas/{salida}', [SalidasController::class, 'edit'])->name('salidas.edit');
         Route::put('/salidas/{salida}', [SalidasController::class, 'update'])->name('salidas.update');
         Route::post('/salidas/{salida}/reprogramar', [SalidasController::class, 'reprogramar'])->name('salidas.reprogramar');
         Route::post('/salidas/{salida}/cancelar', [SalidasController::class, 'cancelar'])->name('salidas.cancelar');
@@ -141,7 +170,7 @@ Route::middleware([
         Route::get('/tours', [CatalogoAdminController::class, 'index'])->name('tours');
         Route::get('/catalogo/tours/nuevo', [CatalogoAdminController::class, 'create'])->name('catalogo.create');
         Route::post('/catalogo/tours', [CatalogoAdminController::class, 'store'])->name('catalogo.store');
-        Route::get('/catalogo/tours/{tour}', [CatalogoAdminController::class, 'edit'])->name('catalogo.edit');
+        $rutaLegible(['GET', 'HEAD'], '/catalogo/tours/{tour}/editar', '/catalogo/tours/{tour}', [CatalogoAdminController::class, 'edit'])->name('catalogo.edit');
         Route::put('/catalogo/tours/{tour}', [CatalogoAdminController::class, 'update'])->name('catalogo.update');
         Route::delete('/catalogo/tours/{tour}', [CatalogoAdminController::class, 'destroy'])->name('catalogo.destroy');
         Route::post('/catalogo/tours/{tour}/fotos', [CatalogoAdminController::class, 'subirFotos'])->name('catalogo.fotos');
@@ -152,7 +181,8 @@ Route::middleware([
         Route::delete('/catalogo/categorias/{categoria}', [CatalogoAdminController::class, 'eliminarCategoria'])->name('catalogo.categoria.eliminar');
         Route::get('/personal', [PersonalController::class, 'index'])->name('personal');
         Route::post('/personal/{tipo}', [PersonalController::class, 'store'])->middleware('rol:'.User::ROL_ADMIN)->whereIn('tipo', ['guia', 'chofer'])->name('personal.store');
-        Route::get('/personal/{tipo}/{id}', [PersonalController::class, 'edit'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.edit');
+        Route::get('/personal/{tipo}/{id}', [PersonalController::class, 'edit'])->whereIn('tipo', ['guia', 'chofer'])->name('legacy.personal.edit');
+        Route::get('/personal/{tipo}/{id}/editar', [PersonalController::class, 'edit'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.edit');
         Route::put('/personal/{tipo}/{id}', [PersonalController::class, 'update'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.update');
         Route::post('/personal/{tipo}/{id}/estado', [PersonalController::class, 'estado'])->whereIn('tipo', ['guia', 'chofer'])->name('personal.estado');
         Route::get('/reservas', [ReservasAdminController::class, 'index'])->name('reservas');
@@ -163,10 +193,10 @@ Route::middleware([
         Route::get('/finanzas', [FinanzasController::class, 'index'])->middleware('rol:'.User::ROL_ADMIN)->name('finanzas');
 
         // Chatbot: atención humana de conversaciones derivadas (RF-31)
-        Route::get('/chatbot', [ChatbotAdminController::class, 'index'])->name('chatbot');
-        Route::get('/chatbot/{conversacion}', [ChatbotAdminController::class, 'show'])->name('chatbot.show');
-        Route::post('/chatbot/{conversacion}/responder', [ChatbotAdminController::class, 'responder'])->name('chatbot.responder');
-        Route::post('/chatbot/{conversacion}/cerrar', [ChatbotAdminController::class, 'cerrar'])->name('chatbot.cerrar');
+        $rutaLegible(['GET', 'HEAD'], '/asistente-turistico', '/chatbot', [ChatbotAdminController::class, 'index'])->name('chatbot');
+        $rutaLegible(['GET', 'HEAD'], '/asistente-turistico/conversaciones/{conversacion}', '/chatbot/{conversacion}', [ChatbotAdminController::class, 'show'])->name('chatbot.show');
+        $rutaLegible(['POST'], '/asistente-turistico/conversaciones/{conversacion}/responder', '/chatbot/{conversacion}/responder', [ChatbotAdminController::class, 'responder'])->name('chatbot.responder');
+        $rutaLegible(['POST'], '/asistente-turistico/conversaciones/{conversacion}/cerrar', '/chatbot/{conversacion}/cerrar', [ChatbotAdminController::class, 'cerrar'])->name('chatbot.cerrar');
         Route::post('/finanzas/reservas/{reserva}/efectivo', [FinanzasController::class, 'efectivo'])->name('finanzas.efectivo');
         Route::get('/finanzas/comprobantes/{comprobante}.pdf', [FinanzasController::class, 'comprobantePdf'])->name('finanzas.comprobante');
         Route::post('/finanzas/comprobantes/{comprobante}/anular', [FinanzasController::class, 'anular'])
@@ -174,17 +204,18 @@ Route::middleware([
         Route::get('/analitica', [DashboardController::class, 'analitica'])->middleware('rol:'.User::ROL_ADMIN)->name('analitica');
 
         // Módulo 07 — Investigación Operativa II: paneles de teoría de colas y cadenas de Markov
-        Route::view('/io', 'admin.io.index')->name('io.index');
-        Route::get('/io/colas', [AnalisisColasController::class, 'index'])->name('io.colas');
-        Route::get('/io/ciclo-vida', [CicloVidaClienteController::class, 'index'])->name('io.ciclo-vida');
-        Route::get('/io/parametros', [IoGestionController::class, 'parametros'])->name('io.parametros');
-        Route::post('/io/parametros/{tour}', [IoGestionController::class, 'guardarParametros'])->name('io.parametros.store');
-        Route::get('/io/propuestas', [IoGestionController::class, 'propuestas'])->name('io.propuestas');
-        Route::post('/io/propuestas', [IoGestionController::class, 'generarPropuestas'])->name('io.propuestas.generar');
-        Route::post('/io/propuestas/{propuesta}/aplicar', [IoGestionController::class, 'aplicarPropuesta'])->name('io.propuestas.aplicar');
-        Route::post('/io/propuestas/{propuesta}/rechazar', [IoGestionController::class, 'rechazarPropuesta'])->name('io.propuestas.rechazar');
-        Route::get('/io/eoq', [IoGestionController::class, 'eoq'])->name('io.eoq');
-        Route::post('/io/eoq/alertas', [IoGestionController::class, 'alertasEoq'])->name('io.eoq.alertas');
+        Route::view('/io', 'admin.io.index')->name('legacy.io.index');
+        Route::view('/investigacion-operativa', 'admin.io.index')->name('io.index');
+        $rutaLegible(['GET', 'HEAD'], '/investigacion-operativa/colas', '/io/colas', [AnalisisColasController::class, 'index'])->name('io.colas');
+        $rutaLegible(['GET', 'HEAD'], '/investigacion-operativa/ciclo-vida', '/io/ciclo-vida', [CicloVidaClienteController::class, 'index'])->name('io.ciclo-vida');
+        $rutaLegible(['GET', 'HEAD'], '/investigacion-operativa/parametros', '/io/parametros', [IoGestionController::class, 'parametros'])->name('io.parametros');
+        $rutaLegible(['POST'], '/investigacion-operativa/parametros/{tour}', '/io/parametros/{tour}', [IoGestionController::class, 'guardarParametros'])->name('io.parametros.store');
+        $rutaLegible(['GET', 'HEAD'], '/investigacion-operativa/propuestas', '/io/propuestas', [IoGestionController::class, 'propuestas'])->name('io.propuestas');
+        $rutaLegible(['POST'], '/investigacion-operativa/propuestas', '/io/propuestas', [IoGestionController::class, 'generarPropuestas'])->name('io.propuestas.generar');
+        $rutaLegible(['POST'], '/investigacion-operativa/propuestas/{propuesta}/aplicar', '/io/propuestas/{propuesta}/aplicar', [IoGestionController::class, 'aplicarPropuesta'])->name('io.propuestas.aplicar');
+        $rutaLegible(['POST'], '/investigacion-operativa/propuestas/{propuesta}/rechazar', '/io/propuestas/{propuesta}/rechazar', [IoGestionController::class, 'rechazarPropuesta'])->name('io.propuestas.rechazar');
+        $rutaLegible(['GET', 'HEAD'], '/investigacion-operativa/eoq', '/io/eoq', [IoGestionController::class, 'eoq'])->name('io.eoq');
+        $rutaLegible(['POST'], '/investigacion-operativa/eoq/alertas', '/io/eoq/alertas', [IoGestionController::class, 'alertasEoq'])->name('io.eoq.alertas');
 
         // Bitácora de auditoría: solo administrador.
         Route::middleware('rol:'.User::ROL_ADMIN)->group(function () {
@@ -198,10 +229,10 @@ Route::middleware([
     });
 
     // Operación en campo: guías y choferes (y supervisión de operaciones/admin).
-    Route::middleware('rol:'.User::ROL_GUIA.','.User::ROL_CHOFER.','.User::ROL_OPERACIONES.','.User::ROL_ADMIN)->group(function () {
-        Route::get('/guias/offline', fn () => response()->file(public_path('checkin-offline.html')))->name('guias.offline');
-        Route::get('/guias/offline/sesion', [CheckinController::class, 'sesionOffline'])->name('guias.offline.sesion');
-        Route::get('/guias/checkin', [CheckinController::class, 'index'])->name('guias.checkin');
+    Route::middleware('rol:'.User::ROL_GUIA.','.User::ROL_CHOFER.','.User::ROL_OPERACIONES.','.User::ROL_ADMIN)->group(function () use ($rutaLegible) {
+        $rutaLegible(['GET', 'HEAD'], '/guias/sin-conexion', '/guias/offline', fn () => response()->file(public_path('checkin-offline.html')))->name('guias.offline');
+        $rutaLegible(['GET', 'HEAD'], '/guias/sin-conexion/sesion', '/guias/offline/sesion', [CheckinController::class, 'sesionOffline'])->name('guias.offline.sesion');
+        $rutaLegible(['GET', 'HEAD'], '/guias/mis-salidas', '/guias/checkin', [CheckinController::class, 'index'])->name('guias.checkin');
         Route::get('/guias/salidas/{salida}', [CheckinController::class, 'show'])->name('guias.salida');
         Route::get('/guias/salidas/{salida}/manifiesto', [CheckinController::class, 'manifiestoJson'])->name('guias.manifiesto');
         Route::post('/guias/salidas/{salida}/validar', [CheckinController::class, 'validar'])->middleware('throttle:120,1')->name('guias.validar');

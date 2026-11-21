@@ -4,7 +4,7 @@ import './bootstrap';
 // Drop field data before logging out on shared devices.
 document.addEventListener('submit', async (event) => {
     const form = event.target;
-    if (!(form instanceof HTMLFormElement) || new URL(form.action).pathname !== '/logout' || form.dataset.offlinePurged) return;
+    if (!(form instanceof HTMLFormElement) || !['/cerrar-sesion', '/logout'].includes(new URL(form.action).pathname) || form.dataset.offlinePurged) return;
     event.preventDefault();
     try {
     localStorage.removeItem('pipocas-offline-activo');
@@ -50,7 +50,7 @@ document.addEventListener('click', async event => {
             location.reload();
         } else {
             const result = await Passkeys.verify();
-            location.assign(result.redirect || '/dashboard');
+            location.assign(result.redirect || '/mi-panel');
         }
     } catch (error) { status.textContent = 'No se completó la operación. Si necesitas confirmar tu contraseña, hazlo desde el enlace del perfil. También puedes usar tu contraseña habitual.'; }
     finally { button.disabled=false; }

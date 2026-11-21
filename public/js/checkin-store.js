@@ -28,7 +28,7 @@ export async function unlock(password,context=null){
  } catch(e) {close();throw e;}
 }
 export function vigentes(data){return Object.values(data.salidas).filter(s=>s.vence>Date.now())}
-export async function sesion(){const r=await fetch('/guias/offline/sesion',{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('Inicia sesión de nuevo para sincronizar.');return r.json()}
+export async function sesion(){const r=await fetch('/guias/sin-conexion/sesion',{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('Inicia sesión de nuevo para sincronizar.');return r.json()}
 export async function sync(vault,salida){
  const current=await sesion();if(current.usuario!==vault.data.usuario||current.id!==active()?.id){await clear();throw new Error('La cuenta cambió. Los datos locales se eliminaron.')}
  if(salida.vence<=Date.now())throw new Error('El manifiesto venció. Actualízalo con conexión.');if(!salida.cola.length)return [];

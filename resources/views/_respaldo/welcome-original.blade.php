@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pipocas -Agencia de Viajes y Turismo | Sagárnaga, La Paz</title>
+<title>Andinist Bolivia -Agencia de Viajes y Turismo | Sagárnaga, La Paz</title>
 <meta name="description" content="Tours de aventura georreferenciados en La Paz, Bolivia: Biking, Hiking, Trekking, Climbing y City Tours. Reserva en línea y paga con QR.">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -372,7 +372,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
 
 <div class="mobile-menu" id="menu">
   <div class="mm-top">
-    <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Pipocas<i>.</i></b></span></a>
+    <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Andinist Bolivia<i>.</i></b></span></a>
     <button id="closeMenu" aria-label="Cerrar menú"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <nav>
@@ -645,7 +645,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
   <div class="wrap">
     <div class="fgrid">
       <div class="fbrand">
-        <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Pipocas<i>.</i></b></span></a>
+        <a href="{{ url('/') }}" class="brand"><span class="logo"><i class="fa-solid fa-mountain-sun"></i></span><span><b>Andinist Bolivia<i>.</i></b></span></a>
         <p>Agencia de viajes y turismo de aventura en el corazón de La Paz, Bolivia.</p>
         <div class="soc"><a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a><a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a><a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a><a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a></div>
       </div>
@@ -659,7 +659,7 @@ footer .fl a:hover{color:#fff;transform:translateX(4px)}
     </div>
     <div class="fbottom">
       <span>Calle Sagárnaga #234, Zona Central · La Paz, Bolivia</span>
-      <span>© {{ date('Y') }} Pipocas. Todos los derechos reservados.</span>
+      <span>© {{ date('Y') }} Andinist Bolivia. Todos los derechos reservados.</span>
     </div>
   </div>
 </footer>

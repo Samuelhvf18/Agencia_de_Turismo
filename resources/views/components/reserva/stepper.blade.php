@@ -21,7 +21,7 @@
     {{-- Móvil: texto + barra de progreso --}}
     <div class="sm:hidden">
         <div class="flex items-baseline justify-between text-sm">
-            <span class="font-bold text-pipocas-principal">
+            <span class="font-bold text-andinist-principal">
                 @if ($actual > $total)
                     {{ __('Reserva completada') }}
                 @else
@@ -29,15 +29,15 @@
                 @endif
             </span>
             @if ($actual < $total)
-                <span class="text-xs text-pipocas-texto-2">{{ __('Sigue:') }} {{ $pasos[$actual] }}</span>
+                <span class="text-xs text-andinist-texto-2">{{ __('Sigue:') }} {{ $pasos[$actual] }}</span>
             @endif
         </div>
         <div class="mt-2 flex gap-1.5" aria-hidden="true">
             @foreach ($pasos as $i => $paso)
                 <span @class([
                     'h-1.5 flex-1 rounded-full',
-                    'bg-pipocas-principal' => $i + 1 < $actual,
-                    'bg-pipocas-secundario' => $i + 1 === $actual,
+                    'bg-andinist-principal' => $i + 1 < $actual,
+                    'bg-andinist-secundario' => $i + 1 === $actual,
                     'bg-gray-200' => $i + 1 > $actual,
                 ])></span>
             @endforeach
@@ -61,10 +61,10 @@
                 @endif
                     <span @class([
                         'grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-bold transition',
-                        'bg-pipocas-principal text-white' => $hecho,
-                        'bg-pipocas-secundario text-white ring-4 ring-pipocas-secundario/20' => $esActual,
-                        'border-2 border-gray-300 bg-white text-pipocas-texto-2' => ! $hecho && ! $esActual,
-                        'group-hover:bg-pipocas-hover' => $href,
+                        'bg-andinist-principal text-white' => $hecho,
+                        'bg-andinist-secundario text-white ring-4 ring-andinist-secundario/20' => $esActual,
+                        'border-2 border-gray-300 bg-white text-andinist-texto-2' => ! $hecho && ! $esActual,
+                        'group-hover:bg-andinist-hover' => $href,
                     ])>
                         @if ($hecho)
                             <i class="fa-solid fa-check text-xs"></i>
@@ -74,9 +74,9 @@
                     </span>
                     <span @class([
                         'whitespace-nowrap text-sm',
-                        'font-bold text-pipocas-texto' => $esActual,
-                        'font-semibold text-pipocas-principal' => $hecho,
-                        'text-pipocas-texto-2' => ! $hecho && ! $esActual,
+                        'font-bold text-andinist-texto' => $esActual,
+                        'font-semibold text-andinist-principal' => $hecho,
+                        'text-andinist-texto-2' => ! $hecho && ! $esActual,
                         'hidden lg:inline' => ! $esActual,
                     ])>{{ __($paso) }}</span>
                 @if ($href) </a> @else </span> @endif
@@ -84,7 +84,7 @@
                 @if ($n < $total)
                     <span @class([
                         'mx-3 h-0.5 flex-1 rounded-full',
-                        'bg-pipocas-principal' => $hecho,
+                        'bg-andinist-principal' => $hecho,
                         'bg-gray-200' => ! $hecho,
                     ])></span>
                 @endif

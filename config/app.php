@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME') === 'Pipocas' ? 'Andinist Bolivia' : env('APP_NAME', 'Andinist Bolivia'),
 
     /*
     |--------------------------------------------------------------------------

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Asistente turístico | Pipocas La Paz</title>
+    <title>Asistente turístico | Andinist Bolivia La Paz</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @livewireStyles
@@ -18,7 +18,7 @@
             </a>
             <div>
                 <h1 class="text-lg font-bold text-slate-900">Asistente turístico</h1>
-                <p class="text-xs text-slate-500">Pipocas · Sagárnaga, La Paz · Español / English</p>
+                <p class="text-xs text-slate-500">Andinist Bolivia · Sagárnaga, La Paz · Español / English</p>
             </div>
         </div>
     </header>

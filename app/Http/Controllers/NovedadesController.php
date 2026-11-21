@@ -26,7 +26,7 @@ class NovedadesController extends Controller
                 $subs = DB::table('suscripciones_novedades')->where('correo', $direccion)->first();
                 $url = URL::temporarySignedRoute('novedades.confirmar', now()->addDay(), ['id' => $subs->id, 'version' => $subs->consentimiento_en]);
                 try {
-                    $correo->enviar($direccion, 'Confirma tu suscripción a Pipocas', "Solicitaste recibir novedades. Confirma aquí:\n{$url}\n\nVence en 24 horas. Si no fuiste tú, ignora este mensaje: no te suscribiremos.");
+                    $correo->enviar($direccion, 'Confirma tu suscripción a Andinist Bolivia', "Solicitaste recibir novedades. Confirma aquí:\n{$url}\n\nVence en 24 horas. Si no fuiste tú, ignora este mensaje: no te suscribiremos.");
                 } catch (\Throwable $e) {
                     report($e);
 

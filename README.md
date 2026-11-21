@@ -1,4 +1,4 @@
-# Pipocas · Sistema web de control logístico y venta de tours georreferenciados
+# Andinist Bolivia · Sistema web de control logístico y venta de tours georreferenciados
 
 Sistema para agencias de viajes y turismo de La Paz (Bolivia): catálogo georreferenciado, motor de reservas con pagos simulados y boletos QR, logística de salidas, guías, choferes, vehículos y equipo, modelos de Investigación Operativa II, chatbot con IA y tableros de decisión.
 
