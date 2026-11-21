@@ -17,7 +17,6 @@ $colores = ['activo' => 'bg-emerald-100 text-emerald-800', 'mantenimiento' => 'b
                         <td class="p-4">{{ $v->mar }} {{ $v->mdl }}<br><span class="text-xs text-[#6B6F72]">{{ ucfirst($v->tip) }}</span></td>
                         <td class="p-4">{{ $v->cap_asi }}</td>
                         <td class="p-4">{{ ucfirst($v->tip_cmb ?? '—') }}</td>
-                        <td class="p-4 text-xs">{{ number_format((float) $v->km, 1, ',', '.') }} km<br>Bs. {{ number_format((float) $v->combustible, 2, ',', '.') }}</td>
                         <td class="p-4">{{ $v->futuras }}</td>
                         <td class="p-4"><span class="px-2.5 py-1 rounded-lg text-xs font-medium {{ $colores[$v->est] ?? '' }}">{{ ucfirst($v->est) }}</span></td>
                         <td class="p-4 text-right"><button class="text-xs font-bold text-[#1F5F8B]" @click="editar = editar === {{ $v->id }} ? null : {{ $v->id }}">Editar</button></td>

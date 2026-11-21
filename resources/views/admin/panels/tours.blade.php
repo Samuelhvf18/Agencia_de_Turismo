@@ -44,37 +44,6 @@
         </table>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-        <h3 class="font-bold text-[#343A40] mb-3">Categorías</h3>
-        <div class="grid gap-3 md:grid-cols-2">
-            @foreach ($categorias as $c)
-                <div class="rounded-xl border border-gray-100 p-3">
-                    <div class="flex items-center justify-between gap-2">
-                        <p class="font-semibold text-sm"><i class="{{ $c->ico ?: 'fa-solid fa-route' }} text-[#C96F4A]"></i> {{ $c->nom }} <span class="text-xs text-[#6B6F72]">· {{ $c->tours_count }} tour(s)</span></p>
-                        <div class="flex gap-2 text-xs font-bold">
-                            <button class="text-[#1F5F8B]" @click="cat = cat === {{ $c->id }} ? null : {{ $c->id }}">Editar</button>
-                            @if (! $c->tours_count)
-                                <form method="POST" action="{{ route('admin.catalogo.categoria.eliminar', $c) }}">@csrf @method('DELETE')<button class="text-red-600">Eliminar</button></form>
-                            @endif
-                        </div>
-                    </div>
-                    <form method="POST" action="{{ route('admin.catalogo.categoria', $c) }}" x-show="cat === {{ $c->id }}" x-cloak class="mt-3 grid gap-2">
-                        @csrf
-                        <input name="nom" data-letras value="{{ $c->nom }}" required class="{{ $campo }}">
-                        <input name="ico" value="{{ $c->ico }}" placeholder="fa-solid fa-person-hiking" class="{{ $campo }}">
-                        <input name="des" value="{{ $c->des }}" placeholder="Descripción" class="{{ $campo }}">
-                        <button class="rounded-xl bg-[#1F5F8B] px-3 py-2 text-xs font-semibold text-white">Guardar</button>
-                    </form>
-                </div>
-            @endforeach
-        </div>
-        <form method="POST" action="{{ route('admin.catalogo.categoria') }}" class="mt-4 flex flex-wrap gap-2">
-            @csrf
-            <input name="nom" data-letras required placeholder="Nueva categoría" class="{{ $campo }}">
-            <input name="ico" placeholder="fa-solid fa-route" class="{{ $campo }}">
-            <input name="des" placeholder="Descripción" class="flex-1 {{ $campo }}">
-            <button class="rounded-xl bg-[#C96F4A] px-4 py-2 text-xs font-semibold text-white">Agregar categoría</button>
-        </form>
-    </div>
+    
 </div>
 @endsection

@@ -80,7 +80,6 @@
             @endforeach
         </nav>
         <div class="admin-sidebar-bottom">
-            <a href="{{ route('home') }}" target="_blank" rel="noopener" class="admin-nav-link"><i aria-hidden="true" class="fa-solid fa-arrow-up-right-from-square"></i> Ver sitio público</a>
             <div class="admin-user"><span class="admin-avatar">{{ mb_substr($nombre, 0, 1) }}</span>
                 <div class="min-w-0 flex-1"><strong
                         class="block truncate">{{ $nombre }}</strong><small>{{ $administrador ? 'Administrador' : (auth()->check() ? 'Operaciones' : 'Demostración') }}</small>

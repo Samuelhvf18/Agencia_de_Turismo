@@ -81,32 +81,5 @@
             <p class="text-sm text-[#6B6F72]">No hay tipos de equipo.</p>
         @endforelse
     </div>
-
-    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-        <h3 class="font-bold text-[#343A40] mb-1">Equipo ofrecido por tour</h3>
-        <p class="text-xs text-[#6B6F72] mb-4">Marca qué equipo se alquila en cada tour y, si quieres, un precio especial.</p>
-        <div class="space-y-4">
-            @foreach ($tours as $tour)
-                <div class="rounded-xl border border-gray-100 p-3">
-                    <p class="font-semibold text-sm mb-2">{{ $tour->nom }}</p>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach ($tipos as $t)
-                            @php $pivot = $tour->equipos->firstWhere('id', $t->id)?->pivot; $activo = $pivot && $pivot->act; @endphp
-                            <form method="POST" action="{{ route('admin.inventario.tour', $tour) }}" class="flex items-center gap-1 rounded-lg border {{ $activo ? 'border-[#1F5F8B] bg-[#1F5F8B]/5' : 'border-gray-200' }} px-2 py-1 text-xs">
-                                @csrf
-                                <input type="hidden" name="tip_eqp_id" value="{{ $t->id }}">
-                                <input type="hidden" name="act" value="{{ $activo ? 0 : 1 }}">
-                                <span>{{ $t->nom }}</span>
-                                @if ($activo)
-                                    <span class="text-[#6B6F72]">· Bs. {{ number_format($pivot->pre_alq_esp ?? $t->pre_alq_bas, 2, ',', '.') }}</span>
-                                @endif
-                                <button class="ml-1 font-bold {{ $activo ? 'text-red-600' : 'text-[#1F5F8B]' }}">{{ $activo ? 'Quitar' : 'Ofrecer' }}</button>
-                            </form>
-                        @endforeach
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
 </div>
 @endsection

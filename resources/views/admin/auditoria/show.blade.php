@@ -16,14 +16,6 @@
             <div><dt class="text-xs text-[#6B6F72]">Fecha y hora</dt><dd>{{ $r->cre_en->format('d/m/Y H:i:s') }}</dd></div>
             <div><dt class="text-xs text-[#6B6F72]">Quién</dt><dd>{{ $r->usuario?->nom ?? 'Sin usuario identificado' }}<br><span class="break-all text-xs text-[#6B6F72]">{{ $r->usuario?->cor }}</span></dd></div>
         </dl>
-        <details>
-            <summary class="cursor-pointer text-sm font-semibold text-[#1F5F8B]">Datos técnicos</summary>
-            <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-2">
-                <div><dt class="text-xs text-[#6B6F72]">Dirección IP</dt><dd class="font-mono">{{ $r->dir_ip ?? 'Sin datos' }}</dd></div>
-                <div><dt class="text-xs text-[#6B6F72]">Tabla y registro</dt><dd class="font-mono">{{ $r->nom_tbl }} #{{ $r->id_reg }}</dd></div>
-                <div class="sm:col-span-2"><dt class="text-xs text-[#6B6F72]">Navegador o sistema</dt><dd class="break-all text-xs">{{ $r->age_usr ?? 'Sin datos' }}</dd></div>
-            </dl>
-        </details>
     </section>
 
     @php

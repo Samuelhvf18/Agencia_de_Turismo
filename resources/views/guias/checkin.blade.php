@@ -16,18 +16,6 @@
         'urlManifiesto' => route('guias.manifiesto', $salida),
     ]))" class="space-y-6">
 
-    {{-- Estado de conexión --}}
-    <div class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold"
-         :class="online ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'">
-        <span><i class="fa-solid" :class="online ? 'fa-signal' : 'fa-plane'"></i>
-            <span x-text="online ? 'Conectado' : 'Sin conexión: los escaneos se guardan en el teléfono'"></span></span>
-        <span x-show="cola.length" x-cloak>
-            <span x-text="cola.length"></span> por sincronizar
-            <button class="ml-2 underline" @click="sincronizar()" x-show="online">Sincronizar</button>
-        </span>
-    </div>
-
-    {{-- Salida --}}
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
         <span class="text-xs font-bold text-amber-600 uppercase tracking-wider block mb-1">{{ $salida->fec_sal->locale('es')->translatedFormat('l j \d\e F') }} · {{ substr($salida->hra_sal, 0, 5) }}</span>
         <h2 class="text-xl font-extrabold text-slate-900 mb-4">{{ $salida->tour->nom }}</h2>
@@ -65,20 +53,9 @@
                     <button class="w-full py-3 px-4 rounded-xl bg-rose-600 text-white font-bold hover:bg-rose-700 transition shadow"><i class="fa-solid fa-stop"></i> Registrar fin del recorrido</button>
                 </form>
             @endif
-            <button type="button" @click="escaneando ? detener() : escanear()" class="py-3 px-6 rounded-xl bg-slate-900 text-white font-semibold hover:bg-amber-600 transition shadow">
-                <i class="fa-solid fa-qrcode"></i> <span x-text="escaneando ? 'Detener cámara' : 'Escanear QR'"></span>
-            </button>
         </div>
     </div>
 
-    <section class="rounded-2xl border border-blue-200 bg-white p-5 space-y-3">
-        <h3 class="font-bold">Preparar acceso sin conexión</h3>
-        <p class="text-sm text-slate-500">Guarda un manifiesto cifrado por 12 horas. La clave local debe tener al menos 12 caracteres. No se guardan documentos ni condiciones médicas. Sin la clave no se puede recuperar la copia.</p>
-        <label class="block text-sm">Clave local del dispositivo<input type="password" minlength="12" x-model="offlineClave" autocomplete="off" class="mt-1 w-full rounded-xl border-slate-300"></label>
-        <button type="button" @click="prepararOffline()" :disabled="preparando" class="rounded-xl bg-blue-700 px-4 py-3 font-bold text-white">Preparar y guardar</button>
-        <a href="/guias/offline" class="ml-2 text-sm underline">Abrir pantalla sin conexión</a>
-        <p x-show="preparado" class="text-sm text-emerald-700">Copia preparada. Revisa la fecha de vencimiento al abrirla.</p>
-    </section>
 
     {{-- Lector QR --}}
     <div x-show="escaneando" x-cloak class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
