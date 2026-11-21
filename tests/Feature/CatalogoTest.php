@@ -143,6 +143,37 @@ test('las pantallas de administración del catálogo cargan', function () {
     $this->get(route('admin.catalogo.edit', Tour::first()))->assertOk()->assertSee('mapa-editor', false);
 });
 
+test('el panel permite crear, editar y eliminar categorías sin tours', function () {
+    $panel = route('admin.tours');
+    $creacion = route('admin.catalogo.categoria');
+    $ocupada = CategoriaTour::whereHas('tours')->firstOrFail();
+
+    $this->get($panel)->assertOk()
+        ->assertSee('Gestionar categorías')
+        ->assertSee('action="'.$creacion.'"', false)
+        ->assertSee('Editar categoría '.$ocupada->nom)
+        ->assertDontSee('Eliminar categoría '.$ocupada->nom);
+
+    $this->from($panel)->post($creacion, ['nom' => 'Miradores', 'ico' => 'fa-solid fa-binoculars'])
+        ->assertRedirect($panel)->assertSessionHasNoErrors();
+    $categoria = CategoriaTour::where('rta_amg', 'miradores')->firstOrFail();
+    $edicion = route('admin.catalogo.categoria', $categoria);
+    $eliminacion = route('admin.catalogo.categoria.eliminar', $categoria);
+
+    $this->get($panel)->assertOk()
+        ->assertSee('action="'.$edicion.'"', false)
+        ->assertSee('Editar categoría Miradores')
+        ->assertSee('Eliminar categoría Miradores');
+
+    $this->from($panel)->post($edicion, ['nom' => 'Miradores Urbanos', 'des' => 'Recorridos por la ciudad.'])
+        ->assertRedirect($panel)->assertSessionHasNoErrors();
+    expect($categoria->fresh()->nom)->toBe('Miradores Urbanos');
+
+    $this->from($panel)->post($eliminacion, ['_method' => 'DELETE'])
+        ->assertRedirect($panel)->assertSessionHasNoErrors();
+    $this->assertModelMissing($categoria);
+});
+
 test('categorías y guías tienen rutas públicas sin documentos ni correo privado', function () {
     $categoria = CategoriaTour::firstOrFail();
     $this->get(route('categorias.show', $categoria))->assertOk()->assertSee($categoria->nom);
