@@ -13,15 +13,28 @@ use Illuminate\Http\Request;
 /** Markov ajusta recomendaciones. */
 class RecomendadorTours
 {
+    public function registrarConsulta(Request $request, Tour $tour): void
+    {
+        $usuario = $request->user();
+        if (! $usuario?->tieneRol(User::ROL_TURISTA)) {
+            return;
+        }
+
+        $clave = "catalogo.consultas.{$usuario->id}";
+        $vistos = array_values(array_diff($request->session()->get($clave, []), [$tour->id]));
+        $vistos[] = $tour->id;
+        $request->session()->put($clave, array_slice($vistos, -20));
+    }
+
     public function para(Request $request): array
     {
         $usuario = $request->user();
-        if ($usuario && ! $usuario->tieneRol(User::ROL_TURISTA)) {
+        if (! $usuario?->tieneRol(User::ROL_TURISTA)) {
             return ['tours' => collect(), 'mensaje' => ''];
         }
-        $reservas = $usuario ? $usuario->reservas()->with('salida.tour')
-            ->where('est', '<>', Reserva::EST_CANCELADA)->get() : collect();
-        $vistos = Tour::whereIn('id', array_slice((array) $request->session()->get('catalogo.vistos', []), -20))->get();
+        $reservas = $usuario->reservas()->with('salida.tour')
+            ->where('est', '<>', Reserva::EST_CANCELADA)->get();
+        $vistos = Tour::whereIn('id', $request->session()->get("catalogo.consultas.{$usuario->id}", []))->get();
         $categorias = [];
         foreach ($vistos as $tour) {
             $categorias[$tour->cat_id] = ($categorias[$tour->cat_id] ?? 0) + 1;
@@ -31,8 +44,12 @@ class RecomendadorTours
             $categorias[$cat] = ($categorias[$cat] ?? 0) + ($reserva->est === Reserva::EST_COMPLETADA ? 5 : 3);
         }
 
-        $estado = $usuario ? MarkovClienteEstado::with('estado')->where('usr_id', $usuario->id)
-            ->whereDate('fec_cmb', '<=', today())->orderByDesc('fec_cmb')->orderByDesc('id')->first()?->estado?->cod : null;
+        if ($categorias === []) {
+            return ['tours' => collect(), 'mensaje' => ''];
+        }
+
+        $estado = MarkovClienteEstado::with('estado')->where('usr_id', $usuario->id)
+            ->whereDate('fec_cmb', '<=', today())->orderByDesc('fec_cmb')->orderByDesc('id')->first()?->estado?->cod;
         $completadas = $reservas->where('est', Reserva::EST_COMPLETADA)->count();
         $estado ??= $completadas >= 2 ? 'fidelizado' : ($completadas ? 'completado' : ($reservas->isNotEmpty() ? 'reservado' : 'prospecto'));
         $markov = app(MarkovService::class);
@@ -64,6 +81,6 @@ class RecomendadorTours
         });
 
         return ['tours' => $tours, 'mensaje' => $recuperar ? 'Retoma tus planes con estas experiencias.'
-            : ($categorias ? 'Ideas basadas en tus consultas y reservas.' : 'Empieza a explorar. Tus recomendaciones se adaptarán a los tours que consultes.')];
+            : 'Ideas basadas en tus consultas y reservas.'];
     }
 }

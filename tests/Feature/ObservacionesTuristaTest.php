@@ -124,11 +124,35 @@ test('el turista ve sus datos y solo actualiza su propio teléfono', function ()
     $this->put(route('turista.cuenta.update'), ['prefijo' => '+591', 'telefono' => '7abc!'])->assertSessionHasErrors('telefono');
 });
 
+test('las recomendaciones requieren una sesión iniciada y consultas de la propia cuenta', function () {
+    $turista = User::factory()->create();
+    $tour = Tour::firstOrFail();
+
+    $this->get(route('home'))->assertOk()->assertDontSee('Para tu interés');
+    $this->get(route('tours.show', $tour))->assertOk()->assertSessionMissing('catalogo.consultas');
+    $this->get(route('home'))->assertOk()->assertDontSee('Para tu interés');
+
+    $this->withSession(['catalogo.vistos' => [$tour->id]])
+        ->post('/login', ['login' => $turista->cor, 'password' => 'password'])->assertRedirect();
+    $this->assertAuthenticatedAs($turista);
+    $this->get(route('home'))->assertOk()->assertDontSee('Para tu interés');
+    $this->get('/mis-reservas')->assertOk()->assertDontSee('Para tu interés');
+
+    $this->get(route('tours.show', $tour))->assertOk();
+    $this->get(route('home'))->assertOk()->assertSee('Para tu interés');
+    $this->get('/mis-reservas')->assertOk()->assertSee('Para tu interés');
+
+    $this->actingAs(User::factory()->create())->get(route('home'))->assertOk()->assertDontSee('Para tu interés');
+    $this->actingAs($turista)->post(route('logout'))->assertRedirect();
+    $this->get(route('home'))->assertOk()->assertDontSee('Para tu interés');
+});
+
 test('recomendaciones usan visitas y reservas y excluyen salidas ya reservadas', function () {
     $u = User::factory()->create();
     $r = reservaObservaciones($u);
     $visitado = Tour::where('cat_id', '<>', $r->salida->tour->cat_id)->firstOrFail();
-    $this->actingAs($u)->get(route('tours.show', $visitado))->assertOk();
+    $this->actingAs($u)->get(route('home'))->assertOk()->assertSee('Para tu interés');
+    $this->get(route('tours.show', $visitado))->assertOk();
     $this->get('/')->assertOk()->assertViewHas('recomendaciones', function ($recs) use ($r) {
         return $recs['tours']->isNotEmpty() && ! $recs['tours']->contains('id', $r->salida->tur_id);
     })->assertSee('Para tu interés');
@@ -152,5 +176,7 @@ test('la matriz vigente cambia la estrategia sin publicar probabilidades individ
     MarkovTransicion::where('est_ori_id', $origen)->where('act', true)->update(['prb' => 0]);
     MarkovTransicion::where('est_ori_id', $origen)->where('est_des_id', $origen)->where('act', true)->update(['prb' => 0.2]);
     MarkovTransicion::where('est_ori_id', $origen)->where('est_des_id', $perdido)->where('act', true)->update(['prb' => 0.8]);
-    $this->actingAs($u)->get('/')->assertOk()->assertViewHas('recomendaciones', fn ($r) => $r['mensaje'] === 'Retoma tus planes con estas experiencias.');
+    $this->actingAs($u)->get(route('home'))->assertOk()->assertDontSee('Para tu interés');
+    $this->get(route('tours.show', Tour::firstOrFail()))->assertOk();
+    $this->get(route('home'))->assertOk()->assertViewHas('recomendaciones', fn ($r) => $r['mensaje'] === 'Retoma tus planes con estas experiencias.');
 });

@@ -8,6 +8,7 @@ use App\Models\Tour;
 use App\Services\Catalogo\ConsultaCatalogo;
 use App\Services\Catalogo\RecomendadorTours;
 use App\Support\PresentadorTour;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CatalogoController extends Controller
@@ -46,13 +47,11 @@ class CatalogoController extends Controller
     }
 
     // Detalle por URL amigable.
-    public function show(Tour $tour)
+    public function show(Request $request, Tour $tour, RecomendadorTours $recomendador)
     {
         abort_unless($tour->act && is_null($tour->eli_en), 404);
 
-        $vistos = array_values(array_diff((array) session('catalogo.vistos', []), [$tour->id]));
-        $vistos[] = $tour->id;
-        session(['catalogo.vistos' => array_slice($vistos, -20)]);
+        $recomendador->registrarConsulta($request, $tour);
 
         $tour->load(['categoria', 'fotos' => fn ($q) => $q->orderBy('ord_vis')]);
         PresentadorTour::presentar($tour);
